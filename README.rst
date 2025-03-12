@@ -1,145 +1,126 @@
-frontend-template-application
-#############################
+frontend-app-enterprise-checkout
+##########################
+
+.. note::
+
+  This README is a template.  As a maintainer, please review its contents and
+  update all relevant sections. Instructions to you are marked with  "[TODO]". Update or remove those sections, and remove this
+  note when you are done.
 
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
+.. |license-badge| image:: https://img.shields.io/github/license/edx/frontend-app-enterprise-checkout.svg
+    :target: https://github.com/openedx/frontend-app-enterprise-checkout/blob/main/LICENSE
+    :alt: License
+
+.. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
+
+.. |ci-badge| image:: https://github.com/openedx/frontend-app-enterprise-checkout/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/openedx/frontend-app-enterprise-checkout/actions/workflows/ci.yml
+    :alt: Continuous Integration
+
+.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-app-enterprise-checkout/coverage.svg?branch=main
+    :target: https://codecov.io/github/openedx/frontend-appenterprise-checkout?branch=main
+    :alt: Codecov
 
 Purpose
-*******
+=======
 
-This repository is a template for Open edX micro-frontend applications. It is
-flagged as a Template Repository, meaning it can be used as a basis for new
-GitHub repositories by clicking the green "Use this template" button above.
-The rest of this document describes how to work with your new micro-frontend
-**after you've created a new repository from the template.**
+.. note::
+
+   [TODO]
+
+   What is this MFE?  Add a 2-3 sentence description of what it is and what it
+   does.
+
+This micro-frontend (MFE) supports a self-service B2B checkout experience to onboard and provision new enterprise customers via Stripe. It intends
+to be a top-of-funnel entrypoint, bridging the gap between a B2B marketing website and the authenticated Enterprise Admin/Learner experience. In addition
+to the Stripe integration, the MFE collects minimal information required to provision the enterprise customer, as well as handles user logistration (i.e.,
+account registration and login support).
 
 Getting Started
-***************
+===============
 
-After copying the template repository, you'll want to do a find-and-replace to
-replace all instances of ``frontend-template-application`` with the name of
-your new repository.  Also edit index.html to replace "Application Template"
-with a friendly name for this application that users will see in their browser
-tab.
+Devstack Installation
+---------------------
 
-Prerequisites
-=============
+This MFE requires a devstack installation to run. Follow these steps to provision and run an
+instance of the Open edX platform powering this MFE via `devstack`_.
 
-The `devstack`_ is currently recommended as a development environment for your
-new MFE.  If you start it with ``make dev.up.lms`` that should give you
-everything you need as a companion to this frontend.
+.. _devstack: https://github.com/openedx/devstack#getting-started
 
-Note that it is also possible to use `Tutor`_ to develop an MFE.  You can refer
-to the `relevant tutor-mfe documentation`_ to get started using it.
+In addition to the core services within devstack, you will need to setup the following enterprise Django IDAs:
+* `enterprise-access`_
 
-.. _Devstack: https://github.com/openedx/devstack
+.. _enterprise-access: https://github.com/openedx/enterprise-access
 
-.. _Tutor: https://github.com/overhangio/tutor
+Once you have a devstack installation in addition to the required enterprise Django IDAs, you may run this MFE directly from
+your local machine. 
 
-.. _relevant tutor-mfe documentation: https://github.com/overhangio/tutor-mfe#mfe-development
+#. Start the devstack with:
 
-Cloning and Startup
-===================
+   .. code-block::
 
-In the following steps, replace "[PLACEHOLDER]" with the name of the repo you
-created when copying this template above.
+      cd devstack
+      make dev.pull
+      make dev.provision
+      make dev.up
 
-1. Clone your new repo:
+#. Start the required enterprise Django IDAs, per their respective READMEs.
 
-  ``git clone https://github.com/openedx/frontend-app-[PLACEHOLDER].git``
+#. Start this MFE with:
 
-2. Use node v18.x.
+   .. code-block::
 
-   The current version of the micro-frontend build scripts support node 18.
-   Using other major versions of node *may* work, but this is unsupported.  For
-   convenience, this repository includes an .nvmrc file to help in setting the
-   correct node version via `nvm <https://github.com/nvm-sh/nvm>`_.
+      cd frontend-app-enterprise-checkout
+      nvm use
+      npm ci
+      npm start
 
-3. Install npm dependencies:
+#. Finally, open the MFE in a browser
 
-  ``cd frontend-app-[PLACEHOLDER] && npm install``
+   Navigate to `http://localhost:1993 <http://localhost:1993>`_ to open the MFE.
 
-4. Update the application port to use for local development:
+Configuration
+-------------
 
-   Default port is 8080. If this does not work for you, update the line
-   `PORT=8080` to your port in all .env.* files
+.. note::
 
-5. Start the dev server:
+   [TODO]
 
-  ``npm start``
+   Explicitly list anything that this MFE requires to function correctly.  This includes:
 
-The dev server is running at `http://localhost:8080 <http://localhost:8080>`_
-or whatever port you setup.
+   * A list of both required and optional .env variables, and how they each
+     affect the functioning of the MFE
 
-Making Your New Project's README File
-=====================================
+   * A list of edx-platform `feature and waffle flags`_ that are either required
+     to enable use of this MFE, or affect the behavior of the MFE in some other
+     way
 
-Move ``README-template-frontend-app.rst`` to your project's ``README.rst``
-file. Please fill out all the sections - this helps out all developers
-understand your MFE, how to install it, and how to use it.
+   * A list of IDAs or other MFEs that this MFE depends on to function correctly
 
-Developing
-**********
+.. _feature and waffle flags: https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0017-bp-feature-toggles.html
 
-This section concerns development of ``frontend-template-application`` itself,
-not the templated copy.
+Plugins
+=======
 
-It should be noted that one of the goals of this repository is for it to
-function correctly as an MFE (as in ``npm install && npm start``) even if no
-modifications are made.  This ensures that developers get a *practical* working
-example, not just a theoretical one.
+This MFE can be customized using `Frontend Plugin Framework <https://github.com/openedx/frontend-plugin-framework>`_.
 
-This also means, of course, that any committed code should be tested and
-subject to both CI and branch protection rules.
-
-Project Structure
-=================
-
-The source for this project is organized into nested submodules according to
-the `Feature-based Application Organization ADR`_.
-
-.. _Feature-based Application Organization ADR: https://github.com/openedx/frontend-template-application/blob/master/docs/decisions/0002-feature-based-application-organization.rst
-
-Build Process Notes
-===================
-
-**Production Build**
-
-The production build is created with ``npm run build``.
-
-Internationalization
-====================
-
-Please see refer to the `frontend-platform i18n howto`_ for documentation on
-internationalization.
-
-.. _frontend-platform i18n howto: https://github.com/openedx/frontend-platform/blob/master/docs/how_tos/i18n.rst
+The parts of this MFE that can be customized in that manner are documented `here </src/plugin-slots>`_.
 
 Getting Help
-************
+============
 
-If you're having trouble, we have discussion forums at
-https://discuss.openedx.org where you can connect with others in the community.
+While this MFE is available for you to use, we are unable to provide support and do not guarantee
+reviewing and/or merging open-source contributions.
 
-Our real-time conversations are on Slack. You can request a `Slack
-invitation`_, then join our `community Slack workspace`_.  Because this is a
-frontend repository, the best place to discuss it would be in the `#wg-frontend
-channel`_.
-
-For anything non-trivial, the best path is to open an issue in this repository
+If you have a question or need help, the best path is to open an issue in this repository
 with as many details about the issue you are facing as you can provide.
 
-https://github.com/openedx/frontend-template-application/issues
-
-For more information about these options, see the `Getting Help`_ page.
-
-.. _Slack invitation: https://openedx.org/slack
-.. _community Slack workspace: https://openedx.slack.com/
-.. _#wg-frontend channel: https://openedx.slack.com/archives/C04BM6YC7A6
-.. _Getting Help: https://openedx.org/getting-help
+https://github.com/openedx/frontend-app-enterprise-checkout/issues
 
 License
-*******
+=======
 
 The code in this repository is licensed under the AGPLv3 unless otherwise
 noted.
@@ -147,50 +128,11 @@ noted.
 Please see `LICENSE <LICENSE>`_ for details.
 
 Contributing
-************
+============
 
-Contributions are very welcome.  Please read `How To Contribute`_ for details.
-
-.. _How To Contribute: https://openedx.org/r/how-to-contribute
-
-This project is currently accepting all types of contributions, bug fixes,
-security fixes, maintenance work, or new features.  However, please make sure
-to have a discussion about your new feature idea with the maintainers prior to
-beginning development to maximize the chances of your change being accepted.
-You can start a conversation by creating a new issue on this repo summarizing
-your idea.
-
-The Open edX Code of Conduct
-****************************
-
-All community members are expected to follow the `Open edX Code of Conduct`_.
-
-.. _Open edX Code of Conduct: https://openedx.org/code-of-conduct/
-
-People
-******
-
-The assigned maintainers for this component and other project details may be
-found in `Backstage`_. Backstage pulls this data from the ``catalog-info.yaml``
-file in this repo.
-
-.. _Backstage: https://open-edx-backstage.herokuapp.com/catalog/default/component/frontend-template-application
+This repository is not currently accepting open-source contributions.
 
 Reporting Security Issues
-*************************
+=========================
 
-Please do not report security issues in public, and email security@openedx.org instead.
-
-.. |license-badge| image:: https://img.shields.io/github/license/openedx/frontend-template-application.svg
-    :target: https://github.com/openedx/frontend-template-application/blob/main/LICENSE
-    :alt: License
-
-.. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
-
-.. |ci-badge| image:: https://github.com/openedx/frontend-template-application/actions/workflows/ci.yml/badge.svg
-    :target: https://github.com/openedx/frontend-template-application/actions/workflows/ci.yml
-    :alt: Continuous Integration
-
-.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-template-application/coverage.svg?branch=main
-    :target: https://codecov.io/github/openedx/frontend-template-application?branch=main
-    :alt: Codecov
+Please do not report security issues in public.  Email security@edx.org instead.
