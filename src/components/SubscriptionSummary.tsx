@@ -3,11 +3,15 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { useCheckoutFormStore } from '@/hooks';
 import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  trailingZeroDisplay: 'stripIfInteger',
-});
+function formatCurrency(value: number) {
+  const currencyFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+  return currencyFormatter
+    .format(value)
+    .replace(/\.00$/, ''); // Strips `.00` if present;
+}
 
 function calculateSubscriptionCost(numUsers?: number) {
   if (!numUsers) {
@@ -37,7 +41,7 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right">
-                    {currencyFormatter.format(SUBSCRIPTION_ANNUAL_PRICE_PER_USER)}
+                    {formatCurrency(SUBSCRIPTION_ANNUAL_PRICE_PER_USER)}
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
@@ -61,7 +65,7 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right">
-                    {totalSubscriptionCost ? currencyFormatter.format(totalSubscriptionCost) : '-'}
+                    {totalSubscriptionCost ? formatCurrency(totalSubscriptionCost) : '-'}
                   </div>
                 </Stack>
               </Stack>
@@ -90,7 +94,7 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right font-weight-bold">
-                    {totalSubscriptionCost ? currencyFormatter.format(totalSubscriptionCost) : '-'}
+                    {totalSubscriptionCost ? formatCurrency(totalSubscriptionCost) : '-'}
                   </div>
                 </Stack>
                 {planType === 'quarterly' && (
@@ -103,7 +107,7 @@ const SubscriptionSummary: React.FC = () => {
                       />
                     </div>
                     <div className="text-right">
-                      {totalSubscriptionCost ? currencyFormatter.format(totalSubscriptionCost / 4) : '-'}
+                      {totalSubscriptionCost ? formatCurrency(totalSubscriptionCost / 4) : '-'}
                     </div>
                   </Stack>
                 )}
@@ -128,7 +132,7 @@ const SubscriptionSummary: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-align-right">
-                  {totalSubscriptionCost ? currencyFormatter.format(0) : '-'}
+                  {totalSubscriptionCost ? formatCurrency(0) : '-'}
                 </div>
               </Stack>
             </Card.Status>
