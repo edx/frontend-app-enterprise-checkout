@@ -20,13 +20,6 @@ frontend-app-enterprise-checkout
 Purpose
 =======
 
-.. note::
-
-   [TODO]
-
-   What is this MFE?  Add a 2-3 sentence description of what it is and what it
-   does.
-
 This micro-frontend (MFE) supports a self-service B2B checkout experience to onboard and provision new enterprise customers via Stripe. It intends
 to be a top-of-funnel entrypoint, bridging the gap between a B2B marketing website and the authenticated Enterprise Admin/Learner experience. In addition
 to the Stripe integration, the MFE collects minimal information required to provision the enterprise customer, as well as handles user logistration (i.e.,
