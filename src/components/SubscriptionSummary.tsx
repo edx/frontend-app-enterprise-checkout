@@ -1,5 +1,7 @@
 import { Card, Stack } from '@openedx/paragon';
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { useCheckoutFormStore } from '@/hooks';
+import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -7,8 +9,17 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   trailingZeroDisplay: 'stripIfInteger',
 });
 
+function calculateSubscriptionCost(numUsers?: number) {
+  if (!numUsers) {
+    return null;
+  }
+  return numUsers * SUBSCRIPTION_ANNUAL_PRICE_PER_USER;
+}
+
 const SubscriptionSummary: React.FC = () => {
   const numUsers = useCheckoutFormStore((state) => state.formData.plan?.numUsers);
+  const planType = useCheckoutFormStore((state) => state.formData.plan?.planType);
+  const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
   return (
     <Card variant="muted">
       <Card.Header title="Subscription Summary" subtitle="Review your selected subscription." size="sm" />
@@ -18,40 +29,106 @@ const SubscriptionSummary: React.FC = () => {
             <Card.Section className="small">
               <Stack gap={2}>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
-                  <div>Team plan (price per user)</div>
-                  <div className="text-right">$399/yr</div>
+                  <div>
+                    <FormattedMessage
+                      id="checkout.subscriptionSummary.price.annual"
+                      defaultMessage="Price per user per year"
+                      description="Label for the team plan (annual)"
+                    />
+                  </div>
+                  <div className="text-right">
+                    {currencyFormatter.format(SUBSCRIPTION_ANNUAL_PRICE_PER_USER)}
+                  </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
-                  <div>Number of users</div>
+                  <div>
+                    <FormattedMessage
+                      id="checkout.subscriptionSummary.users"
+                      defaultMessage="Number of users"
+                      description="Label for the number of users"
+                    />
+                  </div>
                   <div className="text-right">
                     {numUsers && numUsers > 0 ? `x ${numUsers}` : '-'}
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
-                  <div>Total</div>
+                  <div>
+                    <FormattedMessage
+                      id="checkout.subscriptionSummary.total"
+                      defaultMessage="Total"
+                      description="Label for the total cost"
+                    />
+                  </div>
                   <div className="text-right">
-                    {numUsers && numUsers > 0 ? currencyFormatter.format(numUsers * 399) : '-'}
+                    {totalSubscriptionCost ? currencyFormatter.format(totalSubscriptionCost) : '-'}
                   </div>
                 </Stack>
               </Stack>
-              <Stack direction="horizontal" gap={2} className="justify-content-between align-items-end border-top border-muted mt-3 pt-3">
-                <div>
-                  <div className="font-weight-bold">Annual Payment</div>
-                  <div>Annual total</div>
-                </div>
-                <div className="text-right font-weight-bold">
-                  {numUsers && numUsers > 0 ? currencyFormatter.format(numUsers * 399) : '-'}
-                </div>
+              <div className="border-top border-muted mt-3 pt-3 font-weight-bold">
+                {planType === 'annual' ? (
+                  <FormattedMessage
+                    id="checkout.subscriptionSummary.annualPayment"
+                    defaultMessage="Annual Payment"
+                    description="Label for the annual payment"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="checkout.subscriptionSummary.quarterlyPayments"
+                    defaultMessage="Quarterly Payments"
+                    description="Label for the quarterly payments"
+                  />
+                )}
+              </div>
+              <Stack gap={2}>
+                <Stack direction="horizontal" gap={2} className="justify-content-between align-items-end">
+                  <div>
+                    <FormattedMessage
+                      id="checkout.subscriptionSummary.annualTotal"
+                      defaultMessage="Annual total"
+                      description="Label for the annual total"
+                    />
+                  </div>
+                  <div className="text-right font-weight-bold">
+                    {totalSubscriptionCost ? currencyFormatter.format(totalSubscriptionCost) : '-'}
+                  </div>
+                </Stack>
+                {planType === 'quarterly' && (
+                  <Stack direction="horizontal" gap={2} className="justify-content-between align-items-end">
+                    <div>
+                      <FormattedMessage
+                        id="checkout.subscriptionSummary.quarterlyTotal"
+                        defaultMessage="4x quarterly payments"
+                        description="Label for the quarterly total"
+                      />
+                    </div>
+                    <div className="text-right">
+                      {totalSubscriptionCost ? currencyFormatter.format(totalSubscriptionCost / 4) : '-'}
+                    </div>
+                  </Stack>
+                )}
               </Stack>
             </Card.Section>
             <Card.Status variant="info">
               <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
                 <div>
-                  <div className="font-weight-bold">Today&apos;s Payment</div>
-                  <div>14-day refund guarantee</div>
+                  <div className="font-weight-bold">
+                    <FormattedMessage
+                      id="checkout.subscriptionSummary.todayPayment"
+                      defaultMessage="Today's Payment"
+                      description="Label for the today's payment"
+                    />
+                  </div>
+                  <div>
+                    <FormattedMessage
+                      id="checkout.subscriptionSummary.freeTrial"
+                      defaultMessage="With 14-day free trial"
+                      description="Label for the free trial"
+                    />
+                  </div>
                 </div>
                 <div className="text-align-right">
-                  {numUsers && numUsers > 0 ? currencyFormatter.format(numUsers * 399) : '-'}
+                  {totalSubscriptionCost ? currencyFormatter.format(0) : '-'}
                 </div>
               </Stack>
             </Card.Status>

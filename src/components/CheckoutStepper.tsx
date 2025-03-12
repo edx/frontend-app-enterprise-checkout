@@ -1,8 +1,7 @@
 import { Container, Stepper } from '@openedx/paragon';
 
 import PlanDetails from '@/components/PlanDetails';
-import OrganizationDetails from '@/components/OrganizationDetails';
-import BillingDetails from '@/components/BillingDetails';
+import AccountDetails from '@/components/AccountDetails';
 import { useCheckoutFormStore } from '@/hooks';
 
 const CheckoutStepper: React.FC = () => {
@@ -12,8 +11,7 @@ const CheckoutStepper: React.FC = () => {
       <Stepper.Header />
       <Container size="lg" className="py-4.5">
         <PlanDetails />
-        <OrganizationDetails />
-        <BillingDetails />
+        <AccountDetails />
       </Container>
     </Stepper>
   );

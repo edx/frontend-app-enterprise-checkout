@@ -1,8 +1,15 @@
 import { z } from 'zod';
 
-import { Step1Schema, Step2Schema, steps } from './src/constants';
+import {
+  Step1Schema,
+  Step2Schema,
+  steps,
+  planTypes,
+} from '@/constants';
 
 declare global {
+  type PlanType = typeof planTypes[number];
+
   type Step = typeof steps[number];
 
   type Step1Data = z.infer<typeof Step1Schema>;
