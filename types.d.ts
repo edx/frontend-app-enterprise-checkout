@@ -12,7 +12,7 @@ declare global {
     plan: Partial<Step1Data>;
     organization: Partial<Step2Data>;
     billing: Record<string, unknown>;
-  }
+  };
 
   type FormStore = {
     formData: Partial<FormData>;
@@ -21,5 +21,5 @@ declare global {
     setCurrentStep: (step: Step) => void;
     handleNext: () => void;
     handlePrevious: () => void;
-  }
+  };
 }

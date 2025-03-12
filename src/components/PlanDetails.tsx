@@ -39,7 +39,7 @@ const PlanDetails: React.FC = () => {
               <Form.Control
                 {...register('numUsers', {
                   onChange: (e) => {
-                    const value = e.target.value;
+                    const { value } = e.target;
                     setFormData('plan', {
                       ...initialFormData.plan,
                       numUsers: value ? parseInt(value, 10) : undefined,

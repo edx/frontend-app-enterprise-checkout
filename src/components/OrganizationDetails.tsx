@@ -16,7 +16,7 @@ const OrganizationDetails: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid }
+    formState: { errors, isValid },
   } = useForm<Step2Data>({
     mode: 'onTouched',
     resolver: zodResolver(Step2Schema),

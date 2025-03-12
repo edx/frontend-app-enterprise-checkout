@@ -60,6 +60,6 @@ const SubscriptionSummary: React.FC = () => {
       </Card.Section>
     </Card>
   );
-}
+};
 
 export default SubscriptionSummary;
