@@ -18,7 +18,8 @@
     "start": "fedx-scripts webpack-dev-server --progress",
     "test": "fedx-scripts jest --coverage --passWithNoTests",
     "test:watch": "npm run test -- --watch",
-    "snapshot": "npm run test -- -- -u"
+    "snapshot": "npm run test -- -- -u",
+    "serve": "fedx-scripts serve"
   },
   "author": "edX",
   "license": "AGPL-3.0",

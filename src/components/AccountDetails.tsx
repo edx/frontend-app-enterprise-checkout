@@ -219,7 +219,9 @@ const AccountDetails: React.FC = () => {
                       readOnly={!isEditingSlug}
                       size="sm"
                     />
-                    <Form.Text>{orgSlug.length}/30</Form.Text>
+                    {orgSlug && (
+                      <Form.Text>{orgSlug.length}/30</Form.Text>
+                    )}
                     {errors.orgSlug?.message && (
                       <Form.Control.Feedback>
                         {errors.orgSlug.message}
