@@ -4,17 +4,17 @@ frontend-app-enterprise-checkout
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
 .. |license-badge| image:: https://img.shields.io/github/license/edx/frontend-app-enterprise-checkout.svg
-    :target: https://github.com/openedx/frontend-app-enterprise-checkout/blob/main/LICENSE
+    :target: https://github.com/edx/frontend-app-enterprise-checkout/blob/main/LICENSE
     :alt: License
 
 .. |status-badge| image:: https://img.shields.io/badge/Status-Maintained-brightgreen
 
-.. |ci-badge| image:: https://github.com/openedx/frontend-app-enterprise-checkout/actions/workflows/ci.yml/badge.svg
-    :target: https://github.com/openedx/frontend-app-enterprise-checkout/actions/workflows/ci.yml
+.. |ci-badge| image:: https://github.com/edx/frontend-app-enterprise-checkout/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/edx/frontend-app-enterprise-checkout/actions/workflows/ci.yml
     :alt: Continuous Integration
 
-.. |codecov-badge| image:: https://codecov.io/github/openedx/frontend-app-enterprise-checkout/coverage.svg?branch=main
-    :target: https://codecov.io/github/openedx/frontend-appenterprise-checkout?branch=main
+.. |codecov-badge| image:: https://codecov.io/github/edx/frontend-app-enterprise-checkout/coverage.svg?branch=main
+    :target: https://codecov.io/github/edx/frontend-appenterprise-checkout?branch=main
     :alt: Codecov
 
 Purpose
@@ -111,7 +111,7 @@ reviewing and/or merging open-source contributions.
 If you have a question or need help, the best path is to open an issue in this repository
 with as many details about the issue you are facing as you can provide.
 
-https://github.com/openedx/frontend-app-enterprise-checkout/issues
+https://github.com/edx/frontend-app-enterprise-checkout/issues
 
 License
 =======
