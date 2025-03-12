@@ -1,14 +1,14 @@
 import { Card, Stack } from '@openedx/paragon';
-import { useFormStore } from './CheckoutProvider';
+import { useCheckoutFormStore } from '@/hooks';
 
-const formatter = new Intl.NumberFormat('en-US', {
+const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   trailingZeroDisplay: 'stripIfInteger',
 });
 
 const SubscriptionSummary: React.FC = () => {
-  const numUsers = useFormStore((state) => state.formData.plan?.numUsers);
+  const numUsers = useCheckoutFormStore((state) => state.formData.plan?.numUsers);
   return (
     <Card variant="muted">
       <Card.Header title="Subscription Summary" subtitle="Review your selected subscription." size="sm" />
@@ -30,7 +30,7 @@ const SubscriptionSummary: React.FC = () => {
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
                   <div>Total</div>
                   <div className="text-right">
-                    {numUsers && numUsers > 0 ? formatter.format(numUsers * 399) : '-'}
+                    {numUsers && numUsers > 0 ? currencyFormatter.format(numUsers * 399) : '-'}
                   </div>
                 </Stack>
               </Stack>
@@ -40,7 +40,7 @@ const SubscriptionSummary: React.FC = () => {
                   <div>Annual total</div>
                 </div>
                 <div className="text-right font-weight-bold">
-                  {numUsers && numUsers > 0 ? formatter.format(numUsers * 399) : '-'}
+                  {numUsers && numUsers > 0 ? currencyFormatter.format(numUsers * 399) : '-'}
                 </div>
               </Stack>
             </Card.Section>
@@ -51,7 +51,7 @@ const SubscriptionSummary: React.FC = () => {
                   <div>14-day refund guarantee</div>
                 </div>
                 <div className="text-align-right">
-                  {numUsers && numUsers > 0 ? formatter.format(numUsers * 399) : '-'}
+                  {numUsers && numUsers > 0 ? currencyFormatter.format(numUsers * 399) : '-'}
                 </div>
               </Stack>
             </Card.Status>

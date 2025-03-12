@@ -1,17 +1,17 @@
-import { useState } from 'react';
 import {
   Button, Form, SelectableBox, Stack, Stepper,
 } from '@openedx/paragon';
-import { Step1Data, Step1Schema, steps, useFormStore } from './CheckoutProvider';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCheckoutFormStore } from '@/hooks';
+import { Step1Schema, steps } from '@/constants';
 
 const PlanDetails: React.FC = () => {
   const {
     formData: initialFormData,
     handleNext,
     setFormData,
-  } = useFormStore();
+  } = useCheckoutFormStore();
   const {
     control,
     register,

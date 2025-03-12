@@ -1,12 +1,12 @@
 import { Container, Stepper } from '@openedx/paragon';
 
-import { useFormStore } from './CheckoutProvider';
-import PlanDetails from './PlanDetails';
-import OrganizationDetails from './OrganizationDetails';
-import BillingDetails from './BillingDetails';
+import PlanDetails from '@/components/PlanDetails';
+import OrganizationDetails from '@/components/OrganizationDetails';
+import BillingDetails from '@/components/BillingDetails';
+import { useCheckoutFormStore } from '@/hooks';
 
 const CheckoutStepper: React.FC = () => {
-  const { currentStep } = useFormStore();
+  const { currentStep } = useCheckoutFormStore();
   return (
     <Stepper activeKey={currentStep}>
       <Stepper.Header />

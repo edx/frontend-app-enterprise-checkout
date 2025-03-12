@@ -2,9 +2,15 @@
   "extends": "@edx/typescript-config",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@/components/*": ["./src/components/*"],
+      "@/hooks": ["./src/hooks"],
+      "@/constants": ["./src/constants"]
+    }
   },
   "include": [
+    "types.d.ts",
     "src/**/*",
     "config/**/*",
     "*.config.*",

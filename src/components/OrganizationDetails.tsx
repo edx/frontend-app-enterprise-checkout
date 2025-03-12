@@ -3,8 +3,8 @@ import {
 } from '@openedx/paragon';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-import { Step2Data, Step2Schema, steps, useFormStore } from './CheckoutProvider';
+import { useCheckoutFormStore } from '@/hooks';
+import { Step2Schema, steps } from '@/constants';
 
 const OrganizationDetails: React.FC = () => {
   const {
@@ -12,7 +12,7 @@ const OrganizationDetails: React.FC = () => {
     handlePrevious,
     handleNext,
     setFormData,
-  } = useFormStore();
+  } = useCheckoutFormStore();
   const {
     register,
     handleSubmit,

@@ -2,10 +2,11 @@ import {
   Button, Card, Form, Icon, OverlayTrigger, Stack, Stepper, Tooltip,
 } from '@openedx/paragon';
 import { Check, Remove } from '@openedx/paragon/icons';
-import { steps, useFormStore } from './CheckoutProvider';
+import { useCheckoutFormStore } from '@/hooks';
+import { steps } from '@/constants';
 
 const BillingDetails: React.FC = () => {
-  const { handlePrevious, handleNext } = useFormStore();
+  const { handlePrevious, handleNext } = useCheckoutFormStore();
   const eventKey = steps[2];
   return (
     <Stack gap={4}>
@@ -62,7 +63,6 @@ const BillingDetails: React.FC = () => {
                     />
                   </OverlayTrigger>
                 </Form.Group>
-                {/* <Button size="sm">Register</Button> */}
               </Stack>
             </Form>
           </div>

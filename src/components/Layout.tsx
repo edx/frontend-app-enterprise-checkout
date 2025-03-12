@@ -1,7 +1,7 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom';
 import FooterSlot from '@openedx/frontend-slot-footer';
 
-import Header from './Header';
+import Header from '@/components/Header';
 
 const Layout: React.FC = () => (
   <div id="layout">

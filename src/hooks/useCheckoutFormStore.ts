@@ -1,44 +1,7 @@
-import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { create } from 'zustand';
-import { persist, StateStorage, createJSONStorage } from 'zustand/middleware'
-import { z } from 'zod';
+import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
 
-export const steps = [
-  'plan',
-  'organization',
-  'billing',
-] as const;
-type Step = typeof steps[number];
-
-export const Step1Schema = z.object({
-  numUsers: z.coerce.number().min(5).max(500),
-  planType: z.enum(['annual', 'quarterly']),
-});
-export const Step2Schema = z.object({
-  fullName: z.string().nonempty().max(255),
-  orgEmail: z.string().email().min(3).max(254),
-  orgName: z.string().nonempty().max(255),
-  country: z.string().nonempty(),
-});
-
-export type Step1Data = z.infer<typeof Step1Schema>;
-export type Step2Data = z.infer<typeof Step2Schema>;
-
-type FormData = {
-  plan: Partial<Step1Data>;
-  organization: Partial<Step2Data>;
-  billing: Record<string, unknown>;
-}
-
-type FormStore = {
-  formData: Partial<FormData>;
-  setFormData: (step: Step, data: Partial<Step1Data & Step2Data>) => void;
-  currentStep: Step;
-  setCurrentStep: (step: Step) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
-};
+import { steps } from '@/constants';
 
 const getUrlSearch = () => {
   return window.location.search.slice(1)
@@ -57,7 +20,6 @@ const persistentStorage: StateStorage = {
     }
   },
   setItem: (key, newValue): void => {
-    console.log(`Setting ${key} to ${newValue}`);
     const searchParams = new URLSearchParams(getUrlSearch())
     searchParams.set(key, JSON.stringify(newValue))
     window.history.replaceState(null, '', `?${searchParams.toString()}`)
@@ -76,7 +38,7 @@ const storageOptions = {
   storage: createJSONStorage<FormStore>(() => persistentStorage),
 }
 
-export const useFormStore = create(
+const useCheckoutFormStore = create(
   persist<FormStore>(
     (set) => ({
       formData: {
@@ -102,12 +64,4 @@ export const useFormStore = create(
   ),
 );
 
-interface CheckoutProviderProps {
-  children: React.ReactNode;
-}
-
-const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) => {
-  return children;
-};
-
-export default CheckoutProvider;
+export default useCheckoutFormStore;

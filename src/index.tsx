@@ -11,10 +11,11 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import messages from './i18n';
 
+import Layout from './components/Layout';
+import CheckoutPage from './components/CheckoutPage';
+import ConfirmationPage from './components/ConfirmationPage';
+
 import './index.scss';
-import Layout from './Layout';
-import CheckoutPage from './example/CheckoutPage';
-import ConfirmationPage from './example/ConfirmationPage';
 
 const router = createBrowserRouter([
   {
