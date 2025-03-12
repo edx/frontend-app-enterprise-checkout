@@ -1,12 +1,6 @@
 frontend-app-enterprise-checkout
 ##########################
 
-.. note::
-
-  This README is a template.  As a maintainer, please review its contents and
-  update all relevant sections. Instructions to you are marked with  "[TODO]". Update or remove those sections, and remove this
-  note when you are done.
-
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
 
 .. |license-badge| image:: https://img.shields.io/github/license/edx/frontend-app-enterprise-checkout.svg
@@ -55,7 +49,7 @@ In addition to the core services within devstack, you will need to setup the fol
 .. _enterprise-access: https://github.com/openedx/enterprise-access
 
 Once you have a devstack installation in addition to the required enterprise Django IDAs, you may run this MFE directly from
-your local machine. 
+your local machine.
 
 #. Start the devstack with:
 
