@@ -44,7 +44,8 @@ instance of the Open edX platform powering this MFE via `devstack`_.
 .. _devstack: https://github.com/openedx/devstack#getting-started
 
 In addition to the core services within devstack, you will need to setup the following enterprise Django IDAs:
-* `enterprise-access`_
+
+- `enterprise-access`_
 
 .. _enterprise-access: https://github.com/openedx/enterprise-access
 
