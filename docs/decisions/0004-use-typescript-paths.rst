@@ -1,4 +1,4 @@
-3. Simplifying imports with TypeScript paths
+4. Simplifying imports with TypeScript paths
 --------------------------------------------
 
 Status
@@ -18,19 +18,21 @@ We will configure TypeScript to use path aliases for imports. This will be accom
 
 Example `tsconfig.json` configuration:
 
-```json
-{
-  "extends": "@edx/typescript-config",
-  "compilerOptions": {
+.. code-block:: json
+
+  {
+    "extends": "@edx/typescript-config",
+    "compilerOptions": {
+      ...
+      "paths": {
+        "@/components/*": ["./src/components/*"],
+        "@/hooks/*": ["./src/hooks/*"],
+        "@/constants/*": ["./src/constants/*"]
+      }
+    },
     ...
-    "paths": {
-      "@/components/*": ["./src/components/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/constants/*": ["./src/constants/*"]
-    }
-  },
-  ...
-}
+  }
+
 
 Consequences
 ------------
