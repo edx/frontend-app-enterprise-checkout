@@ -37,15 +37,17 @@ Example `tsconfig.json` configuration:
 Consequences
 ------------
 
-- **Benefits:**
-  - **Simplified Imports:** By using path aliases, import statements become more concise and easier to read, avoiding the clutter of relative paths.
-  - **Scalability:** This approach scales well as the project grows. It prevents issues with deeply nested relative paths and makes it easier to reorganize the file structure without affecting import statements.
-  - **Consistency:** With path aliases defined globally, the codebase maintains consistent and easily adjustable import paths, reducing the likelihood of human error in writing or updating imports.
-  - **Easier Refactoring:** Refactoring the directory structure is simpler because the alias paths remain unaffected, while with relative imports, changes in folder hierarchy require updating multiple import paths.
+* **Benefits:**
 
-- **Downsides:**
-  - **Initial Setup Complexity:** Setting up the aliasing in ``tsconfig.json``, as well as configuring Webpack and ESLint to support the aliases, requires additional effort upfront. As of this writing, by default, ``@openedx/frontend-build`` does not parse the ``tsconfig.json`` file to extract the paths, so we will need to extend the base Webpack configuration to utilize ``tsconfig-paths-webpack-plugin`` in addition to extending the base ESLint config's settings for the ``import/resolver``.
-  - **Learning Curve:** Developers who are unfamiliar with path aliases may face a learning curve, and there could be initial confusion when transitioning from traditional relative imports in other projects to this system.
+  * **Simplified Imports:** By using path aliases, import statements become more concise and easier to read, avoiding the clutter of relative paths.
+  * **Scalability:** This approach scales well as the project grows. It prevents issues with deeply nested relative paths and makes it easier to reorganize the file structure without affecting import statements.
+  * **Consistency:** With path aliases defined globally, the codebase maintains consistent and easily adjustable import paths, reducing the likelihood of human error in writing or updating imports.
+  * **Easier Refactoring:** Refactoring the directory structure is simpler because the alias paths remain unaffected, while with relative imports, changes in folder hierarchy require updating multiple import paths.
+
+* **Downsides:**
+
+  * **Initial Setup Complexity:** Setting up the aliasing in ``tsconfig.json``, as well as configuring Webpack and ESLint to support the aliases, requires additional effort upfront. As of this writing, by default, ``@openedx/frontend-build`` does not parse the ``tsconfig.json`` file to extract the paths, so we will need to extend the base Webpack configuration to utilize ``tsconfig-paths-webpack-plugin`` in addition to extending the base ESLint config's settings for the ``import/resolver``.
+  * **Learning Curve:** Developers who are unfamiliar with path aliases may face a learning curve, and there could be initial confusion when transitioning from traditional relative imports in other projects to this system.
 
 By adopting this approach early on, the project will benefit from a more maintainable, scalable, and readable codebase as it grows, while minimizing the risk of common import-related issues.
 
