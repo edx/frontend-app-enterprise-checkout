@@ -44,6 +44,7 @@ Example implementation:
   import { useForm } from "react-hook-form";
   import { zodResolver } from "@hookform/resolvers/zod";
   import { z } from "zod";
+  import { Form, Button } from "@openedx/paragon";
 
   // Define the schema
   const schema = z.object({
@@ -59,16 +60,29 @@ Example implementation:
     const onSubmit = data => console.log(data);
 
     return (
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input {...register("name")} placeholder="Name" />
-        {errors.name && <p>{errors.name.message}</p>}
-        <input {...register("email")} placeholder="Email" />
-        {errors.email && <p>{errors.email.message}</p>}
-        <button type="submit">Submit</button>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Form.Group isInvalid={!!errors.name}>
+          <Form.Label>Name</Form.Label>
+          <Form.Control {...register("name")} />
+          {errors.name && <Form.Control.Feedback type="invalid">{errors.name.message}</Form.Control.Feedback>}
+        </Form.Group>
+
+        <Form.Group isInvalid={!!errors.email}>
+          <Form.Label>Email</Form.Label>
+          <Form.Control {...register("email")} />
+          {errors.email && <Form.Control.Feedback type="invalid">{errors.email.message}</Form.Control.Feedback>}
+        </Form.Group>
+
+        <Button type="submit" variant="primary">Submit</Button>
       </form>
     );
   };
 
 Consequences
 ------------
+
+* The adoption of ``react-hook-form`` and ``zod`` simplifies form management, reducing boilerplate and improving maintainability.
+* Using a schema-based validation approach ensures consistency in validation logic across the application.
+* The integration with ``@openedx/paragon`` ensures forms maintain a consistent UI and adhere to accessibility standards.
+* Developers should follow best practices for using ``react-hook-form`` and ``zod``, which may require some initial onboarding.
 
