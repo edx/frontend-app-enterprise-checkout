@@ -14,24 +14,27 @@ As the project scales, we need a robust and scalable way to handle form implemen
 The team needs a solution that simplifies form management, reduces boilerplate, and ensures maintainable and consistent validation. Given that React is the framework of choice for the front-end, a library that integrates well with React, is lightweight, and reduces the need for repetitive validation code would be ideal.
 
 **Key Requirements:**
-- **Simplicity**: The solution should reduce the amount of boilerplate code for form management.
-- **Declarative Validation**: Validation should be easy to define and maintain, ensuring consistency across forms.
-- **Type Safety**: With TypeScript usage, the solution should offer strong typing to ensure safety across form fields and validation logic.
-- **Performance**: The solution should not introduce unnecessary re-renders or performance overhead.
+
+* **Simplicity**: The solution should reduce the amount of boilerplate code for form management.
+* **Declarative Validation**: Validation should be easy to define and maintain, ensuring consistency across forms.
+* **Type Safety**: With TypeScript usage, the solution should offer strong typing to ensure safety across form fields and validation logic.
+* **Performance**: The solution should not introduce unnecessary re-renders or performance overhead.
+* **Design and Accessibility Compliance**: The solution should integrate seamlessly with ``@openedx/paragon`` to ensure forms maintain a consistent look and feel across the application while adhering to accessibility standards, including WCAG compliance.
+
 
 Decision
 --------
 
-Adopt `react-hook-form` for form management and `zod` for form validation.
+Adopt ``react-hook-form`` for form management and ``zod`` for form validation.
 
-- **`react-hook-form`** will be used to handle form state, form submission, and field-level validation. It is lightweight, minimizes re-renders, and integrates easily with React's native forms, providing a simple API for managing form state.
+* **react-hook-form** will be used to handle form state, form submission, and field-level validation. It is lightweight, minimizes re-renders, and integrates easily with React's native forms, providing a simple API for managing form state.
 
-- **`zod`** will be used to handle schema-based validation. `zod` integrates well with `react-hook-form`, provides a clean and type-safe way to validate form data, and enforces strong typing through TypeScript.
+* **zod** will be used to handle schema-based validation. ``zod`` integrates well with ``react-hook-form``, provides a clean and type-safe way to validate form data, and enforces strong typing through TypeScript.
 
 **Implementation Plan:**
-- Forms will be implemented using `useForm` from `react-hook-form` to manage field values and submission.
-- Validation schemas will be created using `zod` to define the structure of form data and validate input.
-- Form submissions will rely on the built-in `onSubmit` handler from `react-hook-form`, using the schema validation from `zod`.
+- Forms will be implemented using ``useForm`` from ``react-hook-form`` to manage field values and submission.
+- Validation schemas will be created using ``zod`` to define the structure of form data and validate input.
+- Form submissions will rely on the built-in ``onSubmit`` handler from ``react-hook-form``, using the schema validation from ``zod``.
 
 Example implementation:
 
@@ -65,3 +68,7 @@ Example implementation:
       </form>
     );
   };
+
+Consequences
+------------
+
