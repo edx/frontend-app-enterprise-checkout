@@ -1,17 +1,18 @@
+import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  ActionRow, Button, Card, Form, Icon, Stack, StatefulButton, Stepper,
-} from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
-import { CheckCircle, Edit, Lock } from '@openedx/paragon/icons';
+import {
+  ActionRow, Button, Card, Form, Stack, StatefulButton, Stepper,
+} from '@openedx/paragon';
+import { Edit, Lock } from '@openedx/paragon/icons';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import slugify from 'slugify';
 
 import { useCheckoutFormStore } from '@/hooks';
 import { Step2Schema, steps } from '@/constants';
-import { useCallback, useEffect, useState } from 'react';
+import Field from '@/components/Field';
 
 interface StatefulPurchaseButtonProps {
   isFormValid: boolean;
@@ -63,50 +64,77 @@ StatefulPurchaseButton.propTypes = {
   isFormValid: PropTypes.bool.isRequired,
 };
 
+interface OrganizatonEmailHelpTextProps {
+  isInvalid: boolean;
+}
+
+const OrganizatonEmailHelpText: React.FC<OrganizatonEmailHelpTextProps> = ({ isInvalid }) => {
+  if (isInvalid) {
+    return null;
+  }
+  return (
+    <Form.Text>
+      <FormattedMessage
+        id="checkout.accountDetails.emailInfo"
+        defaultMessage="Use your official organization email address."
+        description="Info text for the email field"
+      />
+    </Form.Text>
+  );
+};
+
+OrganizatonEmailHelpText.propTypes = {
+  isInvalid: PropTypes.bool.isRequired,
+};
+
 const AccountDetails: React.FC = () => {
   const intl = useIntl();
-  const organizationFormData = useCheckoutFormStore(useCallback((state) => state.formData.organization, []));
+  const currentStep = useCheckoutFormStore((state) => state.currentStep);
+  const accountFormData = useCheckoutFormStore(useCallback((state) => state.formData.account, []));
   const handlePrevious = useCheckoutFormStore((state) => state.handlePrevious);
   const handleNext = useCheckoutFormStore((state) => state.handleNext);
   const setFormData = useCheckoutFormStore(useCallback((state) => state.setFormData, []));
+  const form = useForm<Step2Data>({
+    mode: 'onTouched',
+    resolver: zodResolver(Step2Schema),
+    defaultValues: accountFormData,
+  });
   const {
-    register,
     handleSubmit,
-    formState: { errors, isValid },
     watch,
     setValue,
-  } = useForm<Step2Data>({
-    resolver: zodResolver(Step2Schema),
-    defaultValues: organizationFormData,
-  });
+    formState: { errors, isValid },
+  } = form;
   const [isEditingSlug, setIsEditingSlug] = useState(false);
 
-  const eventKey = steps[1];
-
   const onSubmit = (data: Step2Data) => {
-    setFormData('organization', data);
+    setFormData('account', data);
     handleNext();
   };
 
-  const fullName = watch('fullName');
-  const orgEmail = watch('orgEmail');
   const orgName = watch('orgName');
   const orgSlug = watch('orgSlug');
-  const country = watch('country');
 
   useEffect(() => {
     if (orgName) {
       setValue(
         'orgSlug',
         slugify(orgName, { lower: true, strict: true, trim: true }),
-        { shouldValidate: true },
+        {
+          shouldValidate: true,
+          shouldTouch: true,
+        },
       );
     }
   }, [orgName, setValue]);
 
+  const eventKey = steps[1];
+
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title="Account Details" />
+      {currentStep === eventKey && (
+        <Helmet title="Account Details" />
+      )}
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
           <h1 className="h2 mb-4.5">
@@ -116,166 +144,161 @@ const AccountDetails: React.FC = () => {
               description="Title for the account details step"
             />
           </h1>
-          <Stack gap={3}>
-            <Form.Group isInvalid={!!errors.fullName}>
-              <Form.Control
-                {...register('fullName')}
-                type="text"
-                defaultValue={organizationFormData?.fullName}
-                floatingLabel={intl.formatMessage({
-                  id: 'checkout.accountDetails.fullName',
-                  defaultMessage: 'Full name',
-                  description: 'Label for the full name field',
-                })}
-                placeholder="John Doe"
-                className="mr-0"
-                trailingElement={(fullName && !errors.fullName) && <Icon className="text-success" src={CheckCircle} />}
-                autoFocus
-              />
-              {errors.fullName?.message && (
-                <Form.Control.Feedback>
-                  {errors.fullName.message}
-                </Form.Control.Feedback>
-              )}
-            </Form.Group>
-            <Form.Group isInvalid={!!errors.orgEmail}>
-              <Form.Control
-                {...register('orgEmail')}
-                type="email"
-                defaultValue={organizationFormData?.orgEmail}
-                floatingLabel={intl.formatMessage({
-                  id: 'checkout.accountDetails.orgEmail',
-                  defaultMessage: 'Organization email',
-                  description: 'Label for the organization email field',
-                })}
-                placeholder="john.doe@organization.com"
-                className="mr-0"
-                trailingElement={(orgEmail && !errors.orgEmail) && <Icon className="text-success" src={CheckCircle} />}
-              />
-              {errors.orgEmail?.message && (
-                <Form.Control.Feedback>
-                  {errors.orgEmail.message}
-                </Form.Control.Feedback>
-              )}
-              <Form.Text>
-                <FormattedMessage
-                  id="checkout.accountDetails.emailInfo"
-                  defaultMessage="Use your official organization email address."
-                  description="Info text for the email field"
-                />
-              </Form.Text>
-            </Form.Group>
-            <Form.Group isInvalid={!!errors.orgName}>
-              <Form.Control
-                {...register('orgName')}
-                type="text"
-                defaultValue={organizationFormData?.orgName}
-                floatingLabel="Organization name"
-                placeholder="Organization"
-                className="mr-0"
-                trailingElement={(orgName && !errors.orgName) && <Icon className="text-success" src={CheckCircle} />}
-              />
-              {errors.orgName?.message && (
-                <Form.Control.Feedback>
-                  {errors.orgName.message}
-                </Form.Control.Feedback>
-              )}
-            </Form.Group>
-            {orgName && !errors.orgName && (
-              <Form.Group isInvalid={!!errors.orgSlug}>
-                <Card variant="muted">
-                  <Card.Section>
-                    <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center mb-1">
-                      <h2 className="h4 mb-0">
-                        <FormattedMessage
-                          id="checkout.accountDetails.confirmAccessLink"
-                          defaultMessage="Confirm your access link"
-                          description="Heading for card previewing/editing the access link field"
-                        />
-                      </h2>
-                      {!isEditingSlug && (
-                        <Button
-                          variant="link"
-                          iconAfter={Edit}
-                          size="sm"
-                          onClick={() => setIsEditingSlug(true)}
-                          className="p-0"
-                        >
-                          Edit
-                        </Button>
-                      )}
-                    </Stack>
-                    <p id="organization-access-link-description" className="small">
-                      This is how users will access your organization on edX. It may not be changed later.
-                    </p>
-                    <Form.Control
-                      {...register('orgSlug')}
-                      type="text"
-                      defaultValue={organizationFormData?.orgSlug}
-                      aria-describedby="organization-access-link-description"
-                      placeholder="slug"
-                      className="mr-0"
-                      trailingElement={(orgSlug && !errors.orgSlug) && <Icon className="text-success" src={CheckCircle} />}
-                      readOnly={!isEditingSlug}
-                      size="sm"
-                    />
-                    {orgSlug && (
-                      <Form.Text>{orgSlug.length}/30</Form.Text>
-                    )}
-                    {errors.orgSlug?.message && (
-                      <Form.Control.Feedback>
-                        {errors.orgSlug.message}
-                      </Form.Control.Feedback>
-                    )}
-                    {isEditingSlug && (
-                      <ActionRow className="mt-2.5">
-                        <Button
-                          variant="teriary"
-                          onClick={() => setIsEditingSlug(false)}
+          <Stack gap={4}>
+            <Field
+              form={form}
+              name="fullName"
+              type="text"
+              defaultValue={accountFormData?.fullName}
+              floatingLabel={intl.formatMessage({
+                id: 'checkout.accountDetails.fullName',
+                defaultMessage: 'Full name',
+                description: 'Label for the full name field',
+              })}
+              placeholder="John Doe"
+              className="mr-0"
+              autoFocus
+            />
+            <Field
+              form={form}
+              name="orgEmail"
+              type="email"
+              defaultValue={accountFormData?.orgEmail}
+              floatingLabel={intl.formatMessage({
+                id: 'checkout.accountDetails.orgEmail',
+                defaultMessage: 'Organization email',
+                description: 'Label for the organization email field',
+              })}
+              placeholder="john.doe@organization.com"
+              className="mr-0"
+              controlFooterNode={OrganizatonEmailHelpText}
+            />
+            <Field
+              form={form}
+              name="orgName"
+              type="text"
+              defaultValue={accountFormData?.orgName}
+              floatingLabel="Organization name"
+              placeholder="Organization"
+              className="mr-0"
+            >
+              {({
+                defaultControl,
+                defaultErrorFeedback,
+                isValid: isOrgNameValid,
+              }) => (
+                <>
+                  {defaultControl}
+                  {defaultErrorFeedback}
+                  {isOrgNameValid && (
+                    <Card variant="muted" className="mt-4">
+                      <Card.Section>
+                        <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center mb-1">
+                          <h2 className="h4 mb-0">
+                            <FormattedMessage
+                              id="checkout.accountDetails.confirmAccessLink"
+                              defaultMessage="Confirm your access link"
+                              description="Heading for card previewing/editing the access link field"
+                            />
+                          </h2>
+                          {!isEditingSlug && (
+                            <Button
+                              variant="link"
+                              iconAfter={Edit}
+                              size="sm"
+                              onClick={() => setIsEditingSlug(true)}
+                              className="p-0"
+                            >
+                              <FormattedMessage
+                                id="checkout.accountDetails.edit"
+                                defaultMessage="Edit"
+                                description="Button to edit the access link"
+                              />
+                            </Button>
+                          )}
+                        </Stack>
+                        <Field
+                          form={form}
+                          name="orgSlug"
+                          type="text"
+                          defaultValue={accountFormData?.orgSlug}
+                          validationOptions={{ shouldTouch: false }}
+                          aria-describedby="organization-access-link-description"
+                          placeholder="slug"
+                          readOnly={!isEditingSlug}
                           size="sm"
                         >
-                          <FormattedMessage
-                            id="checkout.accountDetails.cancel"
-                            defaultMessage="Cancel"
-                            description="Button to cancel editing"
-                          />
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => setIsEditingSlug(false)}
-                          disabled={!!errors.orgSlug}
-                        >
-                          <FormattedMessage
-                            id="checkout.accountDetails.saveChanges"
-                            defaultMessage="Save changes"
-                            description="Button to save changes"
-                          />
-                        </Button>
-                      </ActionRow>
-                    )}
-                  </Card.Section>
-                </Card>
-              </Form.Group>
-            )}
-            <Form.Group isInvalid={!!errors.country}>
-              <Form.Control
-                {...register('country')}
-                as="select"
-                defaultValue={organizationFormData?.country}
-                floatingLabel="Country/Region"
-                className="mr-0"
-                trailingElement={(country && !errors.country) && <Icon className="text-success" src={CheckCircle} />}
-              >
-                <option value="">Select a country/region</option>
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-              </Form.Control>
-              {errors.country?.message && (
-                <Form.Control.Feedback>
-                  {errors.country.message}
-                </Form.Control.Feedback>
+                          {({
+                            defaultControl: defaultSlugControl,
+                            defaultErrorFeedback: defaultSlugErrorFeedback,
+                          }) => (
+                            <>
+                              <p id="organization-access-link-description" className="small">
+                                <FormattedMessage
+                                  id="checkout.accountDetails.accessLinkDescription"
+                                  defaultMessage="This is how users will access your organization on edX. It may not be changed later."
+                                  description="Description for the access link field"
+                                />
+                              </p>
+                              {defaultSlugControl}
+                              <Form.Text className="align-items-right">
+                                {orgSlug?.length || 0}/30
+                              </Form.Text>
+                              {defaultSlugErrorFeedback}
+                            </>
+                          )}
+                        </Field>
+                        {isEditingSlug && (
+                          <ActionRow className="mt-2.5">
+                            <Button
+                              variant="teriary"
+                              onClick={() => setIsEditingSlug(false)}
+                              size="sm"
+                            >
+                              <FormattedMessage
+                                id="checkout.accountDetails.cancel"
+                                defaultMessage="Cancel"
+                                description="Button to cancel editing"
+                              />
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => setIsEditingSlug(false)}
+                              disabled={!!errors.orgSlug}
+                            >
+                              <FormattedMessage
+                                id="checkout.accountDetails.saveChanges"
+                                defaultMessage="Save changes"
+                                description="Button to save changes"
+                              />
+                            </Button>
+                          </ActionRow>
+                        )}
+                      </Card.Section>
+                    </Card>
+                  )}
+                </>
               )}
-            </Form.Group>
+            </Field>
+            <Field
+              form={form}
+              name="country"
+              type="select"
+              options={[
+                {
+                  value: 'US',
+                  label: 'United States',
+                },
+                {
+                  value: 'CA',
+                  label: 'Canada',
+                },
+              ]}
+              defaultValue={accountFormData?.country}
+              floatingLabel="Country/Region"
+              placeholder="Select a country/region"
+              className="mr-0"
+            />
           </Stack>
         </Stepper.Step>
         <Stepper.ActionRow eventKey={eventKey} className="flex-row-reverse align-items-start">

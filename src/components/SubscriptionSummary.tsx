@@ -1,4 +1,4 @@
-import { Card, Stack } from '@openedx/paragon';
+import { Button, Card, Stack } from '@openedx/paragon';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { useCheckoutFormStore } from '@/hooks';
 import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
@@ -21,6 +21,8 @@ function calculateSubscriptionCost(numUsers?: number) {
 }
 
 const SubscriptionSummary: React.FC = () => {
+  const setCurrentStep = useCheckoutFormStore((state) => state.setCurrentStep);
+  const currentStep = useCheckoutFormStore((state) => state.currentStep);
   const numUsers = useCheckoutFormStore((state) => state.formData.plan?.numUsers);
   const planType = useCheckoutFormStore((state) => state.formData.plan?.planType);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
@@ -44,16 +46,30 @@ const SubscriptionSummary: React.FC = () => {
                     {formatCurrency(SUBSCRIPTION_ANNUAL_PRICE_PER_USER)}
                   </div>
                 </Stack>
-                <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
+                <Stack direction="horizontal" gap={2} className="justify-content-between align-items-start">
                   <div>
                     <FormattedMessage
                       id="checkout.subscriptionSummary.users"
                       defaultMessage="Number of users"
                       description="Label for the number of users"
                     />
+                    {currentStep !== 'plan' && (
+                      <Button
+                        variant="link"
+                        size="inline"
+                        className="ml-1"
+                        onClick={() => setCurrentStep('plan')}
+                      >
+                        <FormattedMessage
+                          id="checkout.subscriptionSummary.editNumUsers"
+                          defaultMessage="Edit"
+                          description="Label for the edit number of users button"
+                        />
+                      </Button>
+                    )}
                   </div>
                   <div className="text-right">
-                    {numUsers && numUsers > 0 ? `x ${numUsers}` : '-'}
+                    {numUsers ? `x ${numUsers}` : '-'}
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">

@@ -1,5 +1,5 @@
 import {
-  Button, Form, Icon, SelectableBox, Stack, Stepper,
+  Button, Form, SelectableBox, Stack, Stepper,
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { Controller, useForm } from 'react-hook-form';
@@ -7,32 +7,39 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { useCheckoutFormStore } from '@/hooks';
 import { Step1Schema, steps } from '@/constants';
-import { CheckCircle } from '@openedx/paragon/icons';
+import Field, { useIsFieldInvalid, useIsFieldValid } from './Field';
 
 const PlanDetails: React.FC = () => {
+  const currentStep = useCheckoutFormStore((state) => state.currentStep);
   const planFormData = useCheckoutFormStore((state) => state.formData.plan);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const handleNext = useCheckoutFormStore((state) => state.handleNext);
-  const {
-    control,
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<Step1Data>({
+
+  const form = useForm<Step1Data>({
     mode: 'onTouched',
     resolver: zodResolver(Step1Schema),
-    defaultValues: planFormData,
+    // defaultValues: planFormData,
   });
+  const {
+    handleSubmit,
+    control,
+    formState: { isValid },
+  } = form;
 
   const onSubmit = (data: Step1Data) => {
     setFormData('plan', data);
     handleNext();
   };
 
+  const isFieldValid = useIsFieldValid(form);
+  const isFieldInvalid = useIsFieldInvalid(form);
+
   const eventKey = steps[0];
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title="Plan Details" />
+      {currentStep === eventKey && (
+        <Helmet title="Plan Details" />
+      )}
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Plan Details">
           <h1 className="h2 mb-4.5">
@@ -42,35 +49,33 @@ const PlanDetails: React.FC = () => {
             />
           </h1>
           <Stack gap={3}>
-            <Form.Group isInvalid={!!errors.numUsers}>
-              <Form.Control
-                {...register('numUsers', {
-                  onChange(event) {
-                    const { value } = event.target;
-                    setFormData('plan', {
-                      ...planFormData,
-                      numUsers: value ? parseInt(value, 10) : undefined,
-                    });
-                  },
-                })}
-                type="number"
-                floatingLabel="How many users?"
-                placeholder="eg. 10"
-                trailingElement={(planFormData?.numUsers && !errors.numUsers) && <Icon className="text-success" src={CheckCircle} />}
-                autoFocus
-              />
-              {errors.numUsers?.message && (
-                <Form.Control.Feedback>
-                  {errors.numUsers.message}
-                </Form.Control.Feedback>
-              )}
-            </Form.Group>
+            <Field
+              form={form}
+              name="numUsers"
+              fieldOptions={{
+                onChange(event) {
+                  const { value } = event.target;
+                  setFormData('plan', {
+                    ...planFormData,
+                    numUsers: value ? parseInt(value, 10) : 0,
+                  });
+                },
+              }}
+              type="number"
+              floatingLabel="How many users?"
+              placeholder="eg. 10"
+              min="0"
+              autoFocus
+            />
             <Controller
               name="planType"
               control={control}
               defaultValue="annual"
               render={({ field: { value, onChange } }) => (
-                <Form.Group>
+                <Form.Group
+                  isValid={isFieldValid('planType')}
+                  isInvalid={isFieldInvalid('planType')}
+                >
                   <Form.Label className="mb-2.5">
                     <FormattedMessage
                       id="checkout.planDetails.planType"

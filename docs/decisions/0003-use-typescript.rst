@@ -4,7 +4,7 @@
 Status
 ------
 
-Accepted
+Accepted (March 2025)
 
 Context
 -------

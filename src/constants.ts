@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const steps = [
   'plan',
-  'organization',
+  'account',
 ] as const;
 
 export const planTypes = [

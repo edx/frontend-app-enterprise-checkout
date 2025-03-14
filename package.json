@@ -13,6 +13,7 @@
     "build": "fedx-scripts webpack",
     "i18n_extract": "fedx-scripts formatjs extract",
     "check-types": "tsc --noEmit",
+    "check-types:watch": "npm run check-types -- --watch",
     "lint": "fedx-scripts eslint --ext .js --ext .jsx --ext .ts --ext .tsx .",
     "lint:fix": "npm run lint -- --fix",
     "start": "fedx-scripts webpack-dev-server --progress",
