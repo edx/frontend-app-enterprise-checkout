@@ -1,17 +1,10 @@
+import { Link, useParams } from 'react-router-dom';
 import { Button, Card, Stack } from '@openedx/paragon';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { useCheckoutFormStore } from '@/hooks';
-import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
 
-function formatCurrency(value: number) {
-  const currencyFormatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  });
-  return currencyFormatter
-    .format(value)
-    .replace(/\.00$/, ''); // Strips `.00` if present;
-}
+import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
+import Currency from '@/components/Currency';
+import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 function calculateSubscriptionCost(numUsers?: number) {
   if (!numUsers) {
@@ -21,8 +14,7 @@ function calculateSubscriptionCost(numUsers?: number) {
 }
 
 const SubscriptionSummary: React.FC = () => {
-  const setCurrentStep = useCheckoutFormStore((state) => state.setCurrentStep);
-  const currentStep = useCheckoutFormStore((state) => state.currentStep);
+  const { step } = useParams<{ step: Step }>();
   const numUsers = useCheckoutFormStore((state) => state.formData.plan?.numUsers);
   const planType = useCheckoutFormStore((state) => state.formData.plan?.planType);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
@@ -31,7 +23,7 @@ const SubscriptionSummary: React.FC = () => {
       <Card.Header title="Subscription Summary" subtitle="Review your selected subscription." size="sm" />
       <Card.Section>
         <Stack gap={3}>
-          <Card className="shadow-none border border-light">
+          <Card className="shadow-none border border-light" aria-live="polite">
             <Card.Section className="small">
               <Stack gap={2}>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
@@ -43,7 +35,7 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right">
-                    {formatCurrency(SUBSCRIPTION_ANNUAL_PRICE_PER_USER)}
+                    <Currency value={SUBSCRIPTION_ANNUAL_PRICE_PER_USER} />
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-start">
@@ -53,12 +45,13 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of users"
                       description="Label for the number of users"
                     />
-                    {currentStep !== 'plan' && (
+                    {step !== 'plan' && (
                       <Button
+                        as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        onClick={() => setCurrentStep('plan')}
+                        to="/checkout/plan"
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editNumUsers"
@@ -81,7 +74,9 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right">
-                    {totalSubscriptionCost ? formatCurrency(totalSubscriptionCost) : '-'}
+                    {totalSubscriptionCost
+                      ? <Currency value={totalSubscriptionCost} />
+                      : '-'}
                   </div>
                 </Stack>
               </Stack>
@@ -110,7 +105,9 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right font-weight-bold">
-                    {totalSubscriptionCost ? formatCurrency(totalSubscriptionCost) : '-'}
+                    {totalSubscriptionCost
+                      ? <Currency value={totalSubscriptionCost} />
+                      : '-'}
                   </div>
                 </Stack>
                 {planType === 'quarterly' && (
@@ -123,7 +120,9 @@ const SubscriptionSummary: React.FC = () => {
                       />
                     </div>
                     <div className="text-right">
-                      {totalSubscriptionCost ? formatCurrency(totalSubscriptionCost / 4) : '-'}
+                      {totalSubscriptionCost
+                        ? <Currency value={totalSubscriptionCost / 4} />
+                        : '-'}
                     </div>
                   </Stack>
                 )}
@@ -148,7 +147,9 @@ const SubscriptionSummary: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-align-right">
-                  {totalSubscriptionCost ? formatCurrency(0) : '-'}
+                  {totalSubscriptionCost
+                    ? <Currency value={0} />
+                    : '-'}
                 </div>
               </Stack>
             </Card.Status>

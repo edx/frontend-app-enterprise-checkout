@@ -3,8 +3,6 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const config = getBaseConfig('webpack-dev');
 
-console.log(config.module.rules[1]);
-
 // Silence sass deprecation about legacy-js-api
 config.module.rules[1].oneOf.forEach((rule, index) => {
   const sassLoaderConfig = rule.use[4];

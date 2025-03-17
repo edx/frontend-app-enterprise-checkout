@@ -1,10 +1,14 @@
-import { useCallback } from 'react';
+import {
+  forwardRef, useCallback, useImperativeHandle, useRef,
+} from 'react';
 import { Form } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import type {
   FieldValues, Path, RegisterOptions, UseFormReturn,
 } from 'react-hook-form';
 import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
+import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+import useCurrentStep from '@/hooks/useCurrentStep';
 
 interface FieldChildrenProps {
   isValid: boolean;
@@ -25,10 +29,13 @@ type FieldType = 'text' | 'number' | 'email' | 'select' | 'textarea';
 interface FieldProps<T extends FieldValues> {
   name: Path<T>;
   form: UseFormReturn<T>;
-  fieldOptions?: RegisterOptions<T, Path<T>>;
+  registerOptions?: RegisterOptions<T, Path<T>>;
   controlFooterNode?: React.ReactNode | ((props: ControlFooterNodeProps) => React.ReactNode);
   children?: React.ReactNode | ((props: FieldChildrenProps) => React.ReactNode);
   type?: FieldType;
+  defaultValue?: string | number;
+  className?: string;
+  controlClassName?: string;
   options?: { value: string; label: string }[]; // New: For select fields
   // Allow any additional props to be passed to the Form.Control component
   [key: string]: any;
@@ -70,23 +77,60 @@ export const getTrailingElement = ({ isValid, isInvalid }: TrailingElementProps)
   return null;
 };
 
-interface DefaultFormControlProps<T extends FieldValues> extends FieldProps<T> {}
-
-const DefaultFormControl = <T extends FieldValues>({
-  form,
-  name,
-  fieldOptions,
-  type,
-  options,
-  ...rest
-}: DefaultFormControlProps<T>) => {
+const DefaultFormControlBase = <T extends FieldValues>(
+  {
+    form,
+    name,
+    registerOptions = {},
+    type,
+    options,
+    defaultValue,
+    ...rest
+  }: FieldProps<T>,
+  ref: React.Ref<FormControlElement | null>,
+) => {
   const intl = useIntl();
-  const commonProps = { ...form.register(name, fieldOptions), ...rest };
+  const controlRef = useRef<FormControlElement | null>(null);
+  const currentStep = useCurrentStep()!;
+  const formData = useCheckoutFormStore((state) => state.formData[currentStep]);
+  const currentValue = formData?.[name as Step];
+  const setFormData = useCheckoutFormStore((state) => state.setFormData);
+  const { register } = form;
+  const { onChange } = registerOptions;
+
+  // Forward the controlRef to the parent component via ref
+  useImperativeHandle(ref, () => controlRef.current);
+
+  const { ref: registerRef, ...registerFieldOptions } = register(name, {
+    ...registerOptions,
+    onChange: (event: React.ChangeEvent<FormControlElement>) => {
+      setFormData(currentStep, {
+        ...formData,
+        [name]: event.target.value,
+      });
+      if (onChange) {
+        onChange(event);
+      }
+    },
+  });
+
+  const commonProps = {
+    ...registerFieldOptions,
+    value: currentValue,
+    ...rest,
+  };
 
   switch (type) {
     case 'select':
       return (
-        <Form.Control as="select" {...commonProps}>
+        <Form.Control
+          as="select"
+          {...commonProps}
+          ref={(e) => {
+            registerRef(e);
+            controlRef.current = e;
+          }}
+        >
           <option value="">
             {intl.formatMessage({
               id: 'common.select.placeholder',
@@ -102,11 +146,31 @@ const DefaultFormControl = <T extends FieldValues>({
         </Form.Control>
       );
     case 'textarea':
-      return <Form.Control as="textarea" {...commonProps} />;
+      return (
+        <Form.Control
+          as="textarea"
+          {...commonProps}
+          ref={(e) => {
+            registerRef(e);
+            controlRef.current = e;
+          }}
+        />
+      );
     default:
-      return <Form.Control type={type} {...commonProps} />;
+      return (
+        <Form.Control
+          type={type}
+          {...commonProps}
+          ref={(e) => {
+            registerRef(e);
+            controlRef.current = e;
+          }}
+        />
+      );
   }
 };
+
+const DefaultFormControl = forwardRef(DefaultFormControlBase);
 
 interface DefaultErrorFeedbackProps {
   isInvalid: boolean;
@@ -124,20 +188,39 @@ const DefaultErrorFeedback = ({ isInvalid, errorMessage }: DefaultErrorFeedbackP
   );
 };
 
-const Field = <T extends FieldValues>({
-  name,
-  form,
-  fieldOptions = {},
-  controlFooterNode,
-  type = 'text',
-  options,
-  children,
-  ...rest
-}: FieldProps<T>) => {
+const FieldBase = <T extends FieldValues>(
+  {
+    name,
+    form,
+    registerOptions = {},
+    controlFooterNode,
+    type = 'text',
+    options,
+    children,
+    className,
+    controlClassName,
+    ...rest
+  }: FieldProps<T>,
+  ref: React.Ref<FormControlElement>,
+) => {
   const isValid = useIsFieldValid(form)(name);
   const isInvalid = useIsFieldInvalid(form)(name);
   const trailingElement = getTrailingElement({ isValid, isInvalid });
   const errorMessage = form.formState.errors[name]?.message as string | undefined;
+
+  const renderDefaultControl = () => (
+    <DefaultFormControl
+      ref={ref}
+      name={name}
+      form={form}
+      registerOptions={registerOptions}
+      type={type}
+      options={options}
+      className={controlClassName}
+      trailingElement={trailingElement}
+      {...rest}
+    />
+  );
 
   const renderControlFooterNode = () => {
     if (typeof controlFooterNode === 'function') {
@@ -152,15 +235,7 @@ const Field = <T extends FieldValues>({
     }
     return (
       <>
-        <DefaultFormControl
-          name={name}
-          form={form}
-          fieldOptions={fieldOptions}
-          type={type}
-          options={options}
-          trailingElement={trailingElement}
-          {...rest}
-        />
+        {renderDefaultControl()}
         {renderControlFooterNode()}
         <DefaultErrorFeedback
           isInvalid={isInvalid}
@@ -171,19 +246,13 @@ const Field = <T extends FieldValues>({
   };
 
   return (
-    <Form.Group isValid={isValid} isInvalid={isInvalid}>
+    <Form.Group
+      isValid={isValid}
+      isInvalid={isInvalid}
+      className={className}
+    >
       {renderChildren({
-        defaultControl: (
-          <DefaultFormControl
-            name={name}
-            form={form}
-            fieldOptions={fieldOptions}
-            type={type}
-            options={options}
-            trailingElement={trailingElement}
-            {...rest}
-          />
-        ),
+        defaultControl: renderDefaultControl(),
         defaultErrorFeedback: (
           <DefaultErrorFeedback
             isInvalid={isInvalid}
@@ -198,5 +267,7 @@ const Field = <T extends FieldValues>({
     </Form.Group>
   );
 };
+
+const Field = forwardRef(FieldBase);
 
 export default Field;

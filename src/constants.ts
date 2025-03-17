@@ -10,14 +10,14 @@ export const planTypes = [
   'quarterly',
 ] as const;
 
-export const Step1Schema = z.object({
+export const PlanSchema = z.object({
   numUsers: z.coerce.number()
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users'),
   planType: z.enum(planTypes),
 });
 
-export const Step2Schema = z.object({
+export const AccountSchema = z.object({
   fullName: z.string().trim()
     .min(1, 'Full name is required')
     .max(255),
@@ -29,7 +29,8 @@ export const Step2Schema = z.object({
     .max(255, 'Maximum 255 characters'),
   orgSlug: z.string().trim()
     .min(1, 'Access link is required')
-    .max(30, 'Maximum 30 characters'),
+    .max(30, 'Maximum 30 characters')
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Only lowercase letters, numbers, and hyphens allowed'),
   country: z.string().trim()
     .min(1, 'Country is required'),
 });

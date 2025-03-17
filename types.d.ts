@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 import {
-  Step1Schema,
-  Step2Schema,
+  PlanSchema,
+  AccountSchema,
   steps,
   planTypes,
 } from '@/constants';
@@ -12,20 +12,25 @@ declare global {
 
   type Step = typeof steps[number];
 
-  type Step1Data = z.infer<typeof Step1Schema>;
-  type Step2Data = z.infer<typeof Step2Schema>;
+  type PlanData = z.infer<typeof PlanSchema>;
+  type AccountData = z.infer<typeof AccountSchema>;
+
+  type StepDataMap = {
+    plan: Partial<PlanData>;
+    account: Partial<AccountData>;
+  };
 
   type FormData = {
-    plan: Partial<Step1Data>;
-    account: Partial<Step2Data>;
+    [K in keyof StepDataMap]: StepDataMap[K];
   };
 
   type FormStore = {
     formData: Partial<FormData>;
-    setFormData: (step: Step, data: Partial<Step1Data & Step2Data>) => void;
-    currentStep: Step;
-    setCurrentStep: (step: Step) => void;
-    handleNext: () => void;
-    handlePrevious: () => void;
+    setFormData<K extends keyof StepDataMap>(
+      step: K,
+      data: Partial<FormData<K>>,
+    ): void;
   };
+
+  type FormControlElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 }

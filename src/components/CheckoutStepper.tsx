@@ -1,18 +1,24 @@
-import { Container, Stepper } from '@openedx/paragon';
+import { Stepper } from '@openedx/paragon';
+import { Navigate, useParams } from 'react-router-dom';
 
 import PlanDetails from '@/components/PlanDetails';
 import AccountDetails from '@/components/AccountDetails';
-import { useCheckoutFormStore } from '@/hooks';
+
+const Steps: React.FC = () => (
+  <div className="py-4">
+    <PlanDetails />
+    <AccountDetails />
+  </div>
+);
 
 const CheckoutStepper: React.FC = () => {
-  const { currentStep } = useCheckoutFormStore();
+  const { step } = useParams<{ step: Step }>();
+  if (!step) {
+    return <Navigate to="plan" />;
+  }
   return (
-    <Stepper activeKey={currentStep}>
-      <Stepper.Header />
-      <Container size="lg" className="py-4.5">
-        <PlanDetails />
-        <AccountDetails />
-      </Container>
+    <Stepper activeKey={step}>
+      <Steps />
     </Stepper>
   );
 };

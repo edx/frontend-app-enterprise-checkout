@@ -1,18 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
 import {
   ActionRow, Button, Card, Form, Stack, StatefulButton, Stepper,
 } from '@openedx/paragon';
-import { Edit, Lock } from '@openedx/paragon/icons';
+import { Lock } from '@openedx/paragon/icons';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import slugify from 'slugify';
 
-import { useCheckoutFormStore } from '@/hooks';
-import { Step2Schema, steps } from '@/constants';
+import { AccountSchema, steps } from '@/constants';
 import Field from '@/components/Field';
+import StepCounter from '@/components/StepCounter';
+import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 interface StatefulPurchaseButtonProps {
   isFormValid: boolean;
@@ -89,15 +91,12 @@ OrganizatonEmailHelpText.propTypes = {
 
 const AccountDetails: React.FC = () => {
   const intl = useIntl();
-  const currentStep = useCheckoutFormStore((state) => state.currentStep);
-  const accountFormData = useCheckoutFormStore(useCallback((state) => state.formData.account, []));
-  const handlePrevious = useCheckoutFormStore((state) => state.handlePrevious);
-  const handleNext = useCheckoutFormStore((state) => state.handleNext);
-  const setFormData = useCheckoutFormStore(useCallback((state) => state.setFormData, []));
-  const form = useForm<Step2Data>({
+  const navigate = useNavigate();
+  const accountFormData = useCheckoutFormStore((state) => state.formData.account);
+  const setFormData = useCheckoutFormStore((state) => state.setFormData);
+  const form = useForm<AccountData>({
     mode: 'onTouched',
-    resolver: zodResolver(Step2Schema),
-    defaultValues: accountFormData,
+    resolver: zodResolver(AccountSchema),
   });
   const {
     handleSubmit,
@@ -105,11 +104,24 @@ const AccountDetails: React.FC = () => {
     setValue,
     formState: { errors, isValid },
   } = form;
-  const [isEditingSlug, setIsEditingSlug] = useState(false);
 
-  const onSubmit = (data: Step2Data) => {
+  const [isEditingSlug, setIsEditingSlug] = useState(false);
+  const orgSlugRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (orgSlugRef.current) {
+      orgSlugRef.current.focus();
+      orgSlugRef.current.select();
+    }
+  }, [isEditingSlug]);
+
+  const handlePrevious = () => {
+    navigate('/checkout/plan');
+  };
+
+  const onSubmit = (data: AccountData) => {
     setFormData('account', data);
-    handleNext();
+    navigate('/checkout/confirmation');
   };
 
   const orgName = watch('orgName');
@@ -132,12 +144,11 @@ const AccountDetails: React.FC = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      {currentStep === eventKey && (
-        <Helmet title="Account Details" />
-      )}
+      <Helmet title="Account Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
-          <h1 className="h2 mb-4.5">
+          <StepCounter />
+          <h1 className="mb-5">
             <FormattedMessage
               id="checkout.accountDetails.title"
               defaultMessage="Set up your account"
@@ -149,38 +160,45 @@ const AccountDetails: React.FC = () => {
               form={form}
               name="fullName"
               type="text"
-              defaultValue={accountFormData?.fullName}
               floatingLabel={intl.formatMessage({
                 id: 'checkout.accountDetails.fullName',
                 defaultMessage: 'Full name',
                 description: 'Label for the full name field',
               })}
               placeholder="John Doe"
-              className="mr-0"
+              defaultValue={accountFormData?.fullName}
+              controlClassName="mr-0"
               autoFocus
             />
             <Field
               form={form}
               name="orgEmail"
               type="email"
-              defaultValue={accountFormData?.orgEmail}
               floatingLabel={intl.formatMessage({
                 id: 'checkout.accountDetails.orgEmail',
                 defaultMessage: 'Organization email',
                 description: 'Label for the organization email field',
               })}
               placeholder="john.doe@organization.com"
-              className="mr-0"
+              defaultValue={accountFormData?.orgEmail}
+              controlClassName="mr-0"
               controlFooterNode={OrganizatonEmailHelpText}
             />
             <Field
               form={form}
               name="orgName"
               type="text"
-              defaultValue={accountFormData?.orgName}
               floatingLabel="Organization name"
               placeholder="Organization"
-              className="mr-0"
+              defaultValue={accountFormData?.orgName}
+              controlClassName="mr-0"
+              registerOptions={{
+                // onBlur: () => {
+                //   if (orgName && orgSlugRef.current) {
+                //     orgSlugRef.current.focus();
+                //   }
+                // },
+              }}
             >
               {({
                 defaultControl,
@@ -192,22 +210,27 @@ const AccountDetails: React.FC = () => {
                   {defaultErrorFeedback}
                   {isOrgNameValid && (
                     <Card variant="muted" className="mt-4">
-                      <Card.Section>
-                        <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center mb-1">
-                          <h2 className="h4 mb-0">
-                            <FormattedMessage
-                              id="checkout.accountDetails.confirmAccessLink"
-                              defaultMessage="Confirm your access link"
-                              description="Heading for card previewing/editing the access link field"
-                            />
-                          </h2>
-                          {!isEditingSlug && (
+                      <Card.Header
+                        id="organization-access-link-description"
+                        size="sm"
+                        title={intl.formatMessage({
+                          id: 'checkout.accountDetails.confirmAccessLink',
+                          defaultMessage: 'Confirm your access link',
+                          description: 'Heading for card previewing/editing the access link field',
+                        })}
+                        subtitle={intl.formatMessage({
+                          id: 'checkout.accountDetails.confirmAccessLinkSubtitle',
+                          defaultMessage: 'This is how users will access your organization on edX.',
+                          description: 'Subtitle for card previewing/editing the access link field',
+                        })}
+                        actions={(
+                          <ActionRow>
                             <Button
                               variant="link"
-                              iconAfter={Edit}
                               size="sm"
                               onClick={() => setIsEditingSlug(true)}
                               className="p-0"
+                              disabled={isEditingSlug}
                             >
                               <FormattedMessage
                                 id="checkout.accountDetails.edit"
@@ -215,17 +238,21 @@ const AccountDetails: React.FC = () => {
                                 description="Button to edit the access link"
                               />
                             </Button>
-                          )}
-                        </Stack>
+                          </ActionRow>
+                        )}
+                      />
+                      <Card.Section>
                         <Field
+                          ref={orgSlugRef}
                           form={form}
                           name="orgSlug"
                           type="text"
-                          defaultValue={accountFormData?.orgSlug}
-                          validationOptions={{ shouldTouch: false }}
                           aria-describedby="organization-access-link-description"
                           placeholder="slug"
                           readOnly={!isEditingSlug}
+                          defaultValue={accountFormData?.orgSlug}
+                          className="mb-0"
+                          controlClassName="mr-0"
                           size="sm"
                         >
                           {({
@@ -233,34 +260,18 @@ const AccountDetails: React.FC = () => {
                             defaultErrorFeedback: defaultSlugErrorFeedback,
                           }) => (
                             <>
-                              <p id="organization-access-link-description" className="small">
-                                <FormattedMessage
-                                  id="checkout.accountDetails.accessLinkDescription"
-                                  defaultMessage="This is how users will access your organization on edX. It may not be changed later."
-                                  description="Description for the access link field"
-                                />
-                              </p>
                               {defaultSlugControl}
-                              <Form.Text className="align-items-right">
+                              <Form.Text>
                                 {orgSlug?.length || 0}/30
                               </Form.Text>
                               {defaultSlugErrorFeedback}
                             </>
                           )}
                         </Field>
-                        {isEditingSlug && (
-                          <ActionRow className="mt-2.5">
-                            <Button
-                              variant="teriary"
-                              onClick={() => setIsEditingSlug(false)}
-                              size="sm"
-                            >
-                              <FormattedMessage
-                                id="checkout.accountDetails.cancel"
-                                defaultMessage="Cancel"
-                                description="Button to cancel editing"
-                              />
-                            </Button>
+                      </Card.Section>
+                      {isEditingSlug && (
+                        <Card.Footer>
+                          <ActionRow className="flex-row-reverse justify-content-start">
                             <Button
                               size="sm"
                               onClick={() => setIsEditingSlug(false)}
@@ -272,9 +283,20 @@ const AccountDetails: React.FC = () => {
                                 description="Button to save changes"
                               />
                             </Button>
+                            <Button
+                              variant="teriary"
+                              onClick={() => setIsEditingSlug(false)}
+                              size="sm"
+                            >
+                              <FormattedMessage
+                                id="checkout.accountDetails.cancel"
+                                defaultMessage="Cancel"
+                                description="Button to cancel editing"
+                              />
+                            </Button>
                           </ActionRow>
-                        )}
-                      </Card.Section>
+                        </Card.Footer>
+                      )}
                     </Card>
                   )}
                 </>
@@ -297,7 +319,7 @@ const AccountDetails: React.FC = () => {
               defaultValue={accountFormData?.country}
               floatingLabel="Country/Region"
               placeholder="Select a country/region"
-              className="mr-0"
+              controlClassName="mr-0"
             />
           </Stack>
         </Stepper.Step>
