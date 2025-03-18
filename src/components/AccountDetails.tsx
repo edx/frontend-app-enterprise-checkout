@@ -12,12 +12,12 @@ import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import slugify from 'slugify';
+import classNames from 'classnames';
 
 import { AccountSchema, PlanSchema, steps } from '@/constants';
 import Field from '@/components/Field';
 import StepCounter from '@/components/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import classNames from 'classnames';
 
 interface StatefulPurchaseButtonProps {
   isFormValid: boolean;
@@ -272,7 +272,7 @@ const AccountDetails: React.FC = () => {
                               }}
                             />
                           </p>
-                          <p className="font-italic">
+                          <p>
                             <FormattedMessage
                               id="checkout.accountDetails.confirmAccessLink"
                               defaultMessage="<b>Tip:</b> Choose a short, memorable name that reflects your organization."
