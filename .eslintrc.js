@@ -1,4 +1,13 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable import/no-extraneous-dependencies */
 const { createConfig } = require('@openedx/frontend-build');
 
-module.exports = createConfig('eslint');
+module.exports = createConfig('eslint', {
+  rules: {
+    'react/require-default-props': 'off',
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {},
+    },
+  },
+});
