@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
@@ -11,10 +13,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import slugify from 'slugify';
 
-import { AccountSchema, steps } from '@/constants';
+import { AccountSchema, PlanSchema, steps } from '@/constants';
 import Field from '@/components/Field';
 import StepCounter from '@/components/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+import classNames from 'classnames';
 
 interface StatefulPurchaseButtonProps {
   isFormValid: boolean;
@@ -92,7 +95,15 @@ OrganizatonEmailHelpText.propTypes = {
 const AccountDetails: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
+  const planFormData = useCheckoutFormStore((state) => state.formData.plan);
   const accountFormData = useCheckoutFormStore((state) => state.formData.account);
+
+  useEffect(() => {
+    if (!planFormData || !PlanSchema.safeParse(planFormData).success) {
+      navigate('/checkout/plan');
+    }
+  }, [planFormData, navigate]);
+
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountData>({
     mode: 'onTouched',
@@ -107,11 +118,11 @@ const AccountDetails: React.FC = () => {
 
   const [isEditingSlug, setIsEditingSlug] = useState(false);
   const orgSlugRef = useRef<HTMLInputElement | null>(null);
+  const [originalOrgSlug, setOriginalOrgSlug] = useState(orgSlugRef.current?.value || '');
 
   useEffect(() => {
     if (orgSlugRef.current) {
       orgSlugRef.current.focus();
-      orgSlugRef.current.select();
     }
   }, [isEditingSlug]);
 
@@ -139,6 +150,11 @@ const AccountDetails: React.FC = () => {
       );
     }
   }, [orgName, setValue]);
+
+  const renderBoldText = useCallback(
+    (chunks: React.ReactNode) => <span className="font-weight-bold">{chunks}</span>,
+    [],
+  );
 
   const eventKey = steps[1];
 
@@ -213,22 +229,22 @@ const AccountDetails: React.FC = () => {
                       <Card.Header
                         id="organization-access-link-description"
                         size="sm"
-                        title={intl.formatMessage({
-                          id: 'checkout.accountDetails.confirmAccessLink',
-                          defaultMessage: 'Confirm your access link',
-                          description: 'Heading for card previewing/editing the access link field',
-                        })}
-                        subtitle={intl.formatMessage({
-                          id: 'checkout.accountDetails.confirmAccessLinkSubtitle',
-                          defaultMessage: 'This is how users will access your organization on edX.',
-                          description: 'Subtitle for card previewing/editing the access link field',
-                        })}
+                        title={(
+                          <FormattedMessage
+                            id="checkout.accountDetails.confirmAccessLink"
+                            defaultMessage="Confirm your access link"
+                            description="Heading for card previewing/editing the access link field"
+                          />
+                        )}
                         actions={(
                           <ActionRow>
                             <Button
                               variant="link"
-                              size="sm"
-                              onClick={() => setIsEditingSlug(true)}
+                              size="inline"
+                              onClick={() => {
+                                setOriginalOrgSlug(orgSlugRef.current?.value || '');
+                                setIsEditingSlug(true);
+                              }}
                               className="p-0"
                               disabled={isEditingSlug}
                             >
@@ -241,17 +257,42 @@ const AccountDetails: React.FC = () => {
                           </ActionRow>
                         )}
                       />
-                      <Card.Section>
+                      <Card.Section className="small py-2">
+                        <div id="organization-access-link-description">
+                          <p>
+                            <FormattedMessage
+                              id="checkout.accountDetails.confirmAccessLinkSubtitle"
+                              defaultMessage={
+                                'This link defines how your organization will be accessed on edX (e.g., <b>*.edx.org/{slug}</b>). Once '
+                                + 'set, changes to this link may disrupt user access.'
+                              }
+                              values={{
+                                b: (chunks) => renderBoldText(chunks),
+                                slug: orgSlug,
+                              }}
+                            />
+                          </p>
+                          <p className="font-italic">
+                            <FormattedMessage
+                              id="checkout.accountDetails.confirmAccessLink"
+                              defaultMessage="<b>Tip:</b> Choose a short, memorable name that reflects your organization."
+                              values={{
+                                b: (chunks) => renderBoldText(chunks),
+                              }}
+                              description="Tip for choosing an access link"
+                            />
+                          </p>
+                        </div>
                         <Field
                           ref={orgSlugRef}
                           form={form}
                           name="orgSlug"
                           type="text"
                           aria-describedby="organization-access-link-description"
-                          placeholder="slug"
+                          placeholder="your-organization"
                           readOnly={!isEditingSlug}
                           defaultValue={accountFormData?.orgSlug}
-                          className="mb-0"
+                          className={classNames({ 'mb-0': isEditingSlug })}
                           controlClassName="mr-0"
                           size="sm"
                         >
@@ -271,7 +312,23 @@ const AccountDetails: React.FC = () => {
                       </Card.Section>
                       {isEditingSlug && (
                         <Card.Footer>
-                          <ActionRow className="flex-row-reverse justify-content-start">
+                          <ActionRow>
+                            <Button
+                              variant="teriary"
+                              onClick={() => {
+                                if (orgSlugRef.current) {
+                                  orgSlugRef.current.value = originalOrgSlug;
+                                }
+                                setIsEditingSlug(false);
+                              }}
+                              size="sm"
+                            >
+                              <FormattedMessage
+                                id="checkout.accountDetails.cancel"
+                                defaultMessage="Cancel"
+                                description="Button to cancel editing"
+                              />
+                            </Button>
                             <Button
                               size="sm"
                               onClick={() => setIsEditingSlug(false)}
@@ -281,17 +338,6 @@ const AccountDetails: React.FC = () => {
                                 id="checkout.accountDetails.saveChanges"
                                 defaultMessage="Save changes"
                                 description="Button to save changes"
-                              />
-                            </Button>
-                            <Button
-                              variant="teriary"
-                              onClick={() => setIsEditingSlug(false)}
-                              size="sm"
-                            >
-                              <FormattedMessage
-                                id="checkout.accountDetails.cancel"
-                                defaultMessage="Cancel"
-                                description="Button to cancel editing"
                               />
                             </Button>
                           </ActionRow>

@@ -20,6 +20,7 @@ const PlanDetails: React.FC = () => {
   const form = useForm<PlanData>({
     mode: 'onTouched',
     resolver: zodResolver(PlanSchema),
+    defaultValues: planFormData,
   });
   const {
     handleSubmit,

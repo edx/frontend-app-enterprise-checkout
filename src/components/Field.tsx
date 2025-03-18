@@ -116,7 +116,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
 
   const commonProps = {
     ...registerFieldOptions,
-    value: currentValue,
+    defaultValue: currentValue,
     ...rest,
   };
 

@@ -30,7 +30,10 @@ export const AccountSchema = z.object({
   orgSlug: z.string().trim()
     .min(1, 'Access link is required')
     .max(30, 'Maximum 30 characters')
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Only lowercase letters, numbers, and hyphens allowed'),
+    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
+    .refine(slug => !slug.startsWith('-') && !slug.endsWith('-'), {
+      message: 'Access link may not start or end with a hyphen',
+    }),
   country: z.string().trim()
     .min(1, 'Country is required'),
 });
