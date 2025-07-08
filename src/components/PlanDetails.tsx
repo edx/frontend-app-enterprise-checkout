@@ -58,6 +58,11 @@ const PlanDetails: React.FC = () => {
               placeholder="eg. 10"
               min="0"
               className="mr-0"
+              registerOptions={{
+                validate: () => {
+                  // Check react-hook-form docs for more info...
+                },
+              }}
               autoFocus
             />
             <Controller

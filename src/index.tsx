@@ -1,6 +1,5 @@
-import 'core-js/stable';
-
-import ReactDOM from 'react-dom';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import {
   APP_INIT_ERROR, APP_READY, subscribe, initialize,
 } from '@edx/frontend-platform';
@@ -17,7 +16,7 @@ import ConfirmationPage from './components/ConfirmationPage';
 
 import './index.scss';
 
-const router = createBrowserRouter([
+const router = createBrowserRouter([ // Data router
   {
     path: '/',
     element: <Layout />,
@@ -46,17 +45,25 @@ const router = createBrowserRouter([
   },
 ]);
 
+const container = document.getElementById('root');
+const root = createRoot(container);
+
 subscribe(APP_READY, () => {
-  ReactDOM.render(
-    <AppProvider wrapWithRouter={false}>
-      <RouterProvider router={router} />
-    </AppProvider>,
-    document.getElementById('root'),
+  root.render(
+    <StrictMode>
+      <AppProvider wrapWithRouter={false}>
+        <RouterProvider router={router} />
+      </AppProvider>,
+    </StrictMode>,
   );
 });
 
 subscribe(APP_INIT_ERROR, (error) => {
-  ReactDOM.render(<ErrorPage message={error.message} />, document.getElementById('root'));
+  root.render(
+    <StrictMode>
+      <ErrorPage message={error.message} />
+    </StrictMode>,
+  );
 });
 
 initialize({
