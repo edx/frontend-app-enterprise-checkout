@@ -106,7 +106,7 @@ const AccountDetails: React.FC = () => {
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountData>({
-    mode: 'onTouched',
+    mode: 'onBlur',
     resolver: zodResolver(AccountSchema),
   });
   const {
