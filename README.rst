@@ -67,7 +67,7 @@ your local machine.
 
 #. Finally, open the MFE in a browser
 
-   Navigate to `http://localhost:1993 <http://localhost:1993>`_ to open the MFE.
+   Navigate to `http://localhost:1989 <http://localhost:1989>`_ to open the MFE.
 
 Configuration
 -------------
