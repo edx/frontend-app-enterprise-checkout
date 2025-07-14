@@ -10,7 +10,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 
 import messages from './i18n';
 
-import Layout from './components/Layout';
+import Layout from '@/components/app/Layout';
 import CheckoutPage from './components/CheckoutPage';
 import ConfirmationPage from './components/ConfirmationPage';
 
