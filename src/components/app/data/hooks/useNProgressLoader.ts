@@ -1,4 +1,4 @@
-import { useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { useFetchers, useNavigation } from 'react-router-dom';
 import nprogress from 'accessible-nprogress';
 import { useIsFetching } from '@tanstack/react-query';
@@ -19,7 +19,6 @@ function useNProgressLoader({
   shouldCompleteBeforeUnmount = true,
   handleQueryFetching = false,
 }: UseNProgressLoaderOptions = {}) {
-  const isAuthenticatedUserHydrated = !!authenticatedUser?.extendedProfile;
   const navigation = useNavigation();
   const fetchers = useFetchers();
   const isFetching = useIsFetching() > 0 && handleQueryFetching;
@@ -28,7 +27,7 @@ function useNProgressLoader({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const fetchersIdle = fetchers.every((f) => f.state === 'idle');
-      if (shouldCompleteBeforeUnmount && navigation.state === 'idle' && fetchersIdle && !isFetching && isAuthenticatedUserHydrated) {
+      if (shouldCompleteBeforeUnmount && navigation.state === 'idle' && fetchersIdle && !isFetching) {
         nprogress.done();
         setIsLoaded(true);
       } else {
@@ -39,7 +38,7 @@ function useNProgressLoader({
       nprogress.done();
       clearTimeout(timeoutId);
     };
-  }, [navigation, fetchers, isFetching, isAuthenticatedUserHydrated, shouldCompleteBeforeUnmount]);
+  }, [navigation, fetchers, isFetching, shouldCompleteBeforeUnmount]);
 
   return isLoaded;
 }
