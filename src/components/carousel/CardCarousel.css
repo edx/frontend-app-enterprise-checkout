@@ -1,0 +1,68 @@
+/* Styles for CardInterval component */
+.card-interval {
+  /* Fixed height to ensure consistent size */
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-interval-content {
+  /* Ensure content is centered vertically */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 120px; /* Minimum height for the content area */
+}
+
+/* Transition effects */
+.quote-text, .author-text {
+  transition: opacity 0.6s ease;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+/* Styles for RegularCarousel component */
+.carousel-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.carousel-container .carousel {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.carousel-container .carousel-control-prev,
+.carousel-container .carousel-control-next {
+  width: 10%;
+  opacity: 0.5;
+  background-color: transparent;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-container .carousel-control-prev:hover,
+.carousel-container .carousel-control-next:hover {
+  opacity: 0.8;
+  background-color: transparent;
+}
+
+.carousel-container .carousel-indicators {
+  bottom: 0;
+}
+
+.carousel-container .card {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
