@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const authenticatedSteps: AuthStep[] = [
+export const authenticatedSteps = [
   'create-access-link',
   'start-trial',
   'success',

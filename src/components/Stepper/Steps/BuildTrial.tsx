@@ -46,7 +46,7 @@ const BuildTrial: React.FC = () => {
           <h1 className="mb-5">
             <FormattedMessage
               id="checkout.planDetails.title"
-              defaultMessage="Build your free trial subscription"
+              defaultMessage="Build your free trial"
             />
           </h1>
           <Stack gap={3}>
@@ -61,7 +61,6 @@ const BuildTrial: React.FC = () => {
               registerOptions={{
                 validate: () => {
                   // Check react-hook-form docs for more info...
-                  console.log('validating users');
                 },
               }}
               autoFocus

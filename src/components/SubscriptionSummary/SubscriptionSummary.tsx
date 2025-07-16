@@ -15,8 +15,8 @@ function calculateSubscriptionCost(numUsers?: number) {
 
 const SubscriptionSummary: React.FC = () => {
   const { step } = useParams<{ step: Step }>();
-  const numUsers = useCheckoutFormStore((state) => state.formData.plan?.numUsers);
-  const planType = useCheckoutFormStore((state) => state.formData.plan?.planType);
+  const numUsers = useCheckoutFormStore((state) => state.formData.buildTrial?.numUsers);
+  const planType = useCheckoutFormStore((state) => state.formData.buildTrial?.planType);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
   return (
     <Card variant="muted">

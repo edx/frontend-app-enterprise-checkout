@@ -3,7 +3,6 @@ import {
 } from '@openedx/paragon';
 import CheckoutStepper from '@/components/Stepper/CheckoutStepper';
 import { SubscriptionSummary } from '@/components/SubscriptionSummary';
-import { CardInterval } from '@/components/carousel';
 
 const CheckoutPage: React.FC = () => (
   <main>

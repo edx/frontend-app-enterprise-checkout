@@ -21,12 +21,10 @@ const StepWrapper = () => {
     : <CheckoutPage />;
 };
 
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getCheckoutRoutes(queryClient: QueryClient) {
   const checkoutChildRoutes: RouteObject[] = [
-    {
-      index: true,
-      element: <Navigate to="build-trial" replace />,
-    },
     {
       path: '/:step?',
       element: (
@@ -34,6 +32,10 @@ function getCheckoutRoutes(queryClient: QueryClient) {
           <StepWrapper />
         </PageWrap>
       ),
+    },
+    {
+      index: true,
+      element: <Navigate to="build-trial" replace />,
     },
   ];
   const checkoutRoutes: RouteObject[] = [

@@ -13,6 +13,7 @@ import messages from './i18n';
 import './index.scss';
 
 const container = document.getElementById('root');
+// @ts-ignore
 const root = createRoot(container);
 
 subscribe(APP_READY, () => {

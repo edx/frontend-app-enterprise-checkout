@@ -105,9 +105,9 @@ const CreateAccount: React.FC = () => {
   }, [planFormData, navigate]);
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const form = useForm<AccountData>({
+  const form = useForm<CreateAccount>({
     mode: 'onBlur',
-    resolver: zodResolver(AccountSchema),
+    resolver: zodResolver(CreateAccountSchema),
   });
   const {
     handleSubmit,

@@ -104,6 +104,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const { ref: registerRef, ...registerFieldOptions } = register(name, {
     ...registerOptions,
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
+      // @ts-ignore
       setFormData(currentStep, {
         ...formData,
         [name]: event.target.value,
