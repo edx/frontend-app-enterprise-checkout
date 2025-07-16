@@ -1,23 +1,32 @@
 import { z } from 'zod';
 
-export const steps = [
-  'plan',
-  'account',
+export const authenticatedSteps: AuthStep[] = [
+  'create-access-link',
+  'start-trial',
+  'success',
 ] as const;
+
+export const steps = [
+  'build-trial',
+  'create-account',
+  'create-access-link',
+  'start-trial',
+  'success',
+];
 
 export const planTypes = [
   'annual',
   'quarterly',
 ] as const;
 
-export const PlanSchema = z.object({
+export const BuildTrialSchema = z.object({
   numUsers: z.coerce.number()
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users'),
   planType: z.enum(planTypes),
 });
 
-export const AccountSchema = z.object({
+export const CreateAccountSchema = z.object({
   fullName: z.string().trim()
     .min(1, 'Full name is required')
     .max(255),
@@ -37,6 +46,12 @@ export const AccountSchema = z.object({
   country: z.string().trim()
     .min(1, 'Country is required'),
 });
+
+export const CreateAccessLinkSchema = z.object({});
+
+export const StartTrialSchema = z.object({});
+
+export const SuccessSchema = z.object({});
 
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import { steps } from '@/constants';
+import { steps } from '@/components/Stepper/constants';
 
 const StepCounter: React.FC = () => {
   const { step } = useParams<{ step: Step }>();

@@ -1,34 +1,38 @@
 import { QueryClient } from '@tanstack/react-query';
-import { RouteObject } from 'react-router';
+import { RouteObject, useParams } from 'react-router';
 import { AuthenticatedPageRoute, PageWrap } from '@edx/frontend-platform/react';
 import { Suspense } from 'react';
 import Root from '@/components/app/Root';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import { Navigate } from 'react-router-dom';
-import CheckoutPage from '@/components/CheckoutPage';
-import ConfirmationPage from '@/components/ConfirmationPage';
+import CheckoutPage from '@/components/checkout-page/CheckoutPage';
 import Layout from '@/components/app/Layout';
+import { authenticatedSteps } from '@/components/Stepper/constants';
+
+const StepWrapper = () => {
+  const { step } = useParams<{ step: AuthStep }>();
+
+  return authenticatedSteps.includes(step as AuthStep)
+    ? (
+      <AuthenticatedPageRoute>
+        <CheckoutPage />
+      </AuthenticatedPageRoute>
+    )
+    : <CheckoutPage />;
+};
 
 function getCheckoutRoutes(queryClient: QueryClient) {
   const checkoutChildRoutes: RouteObject[] = [
     {
       index: true,
-      element: <Navigate to="checkout" replace />,
+      element: <Navigate to="build-trial" replace />,
     },
     {
-      path: 'checkout/:step?',
+      path: '/:step?',
       element: (
         <PageWrap>
-          <CheckoutPage />
+          <StepWrapper />
         </PageWrap>
-      ),
-    },
-    {
-      path: 'checkout/confirmation',
-      element: (
-        <AuthenticatedPageRoute>
-          <ConfirmationPage />
-        </AuthenticatedPageRoute>
       ),
     },
   ];

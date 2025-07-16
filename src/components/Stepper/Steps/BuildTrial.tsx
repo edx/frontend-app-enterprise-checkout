@@ -7,19 +7,19 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import { PlanSchema, steps } from '@/constants';
-import Field, { useIsFieldInvalid, useIsFieldValid } from '@/components/Field';
-import StepCounter from '@/components/StepCounter';
+import { BuildTrialSchema, steps } from '@/components/Stepper/constants';
+import Field, { useIsFieldInvalid, useIsFieldValid } from '@/components/FormFields/Field';
+import StepCounter from '@/components/Stepper/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
-const PlanDetails: React.FC = () => {
-  const planFormData = useCheckoutFormStore((state) => state.formData.plan);
+const BuildTrial: React.FC = () => {
+  const planFormData = useCheckoutFormStore((state) => state.formData.buildTrial);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const navigate = useNavigate();
 
-  const form = useForm<PlanData>({
+  const form = useForm<BuildTrial>({
     mode: 'onTouched',
-    resolver: zodResolver(PlanSchema),
+    resolver: zodResolver(BuildTrialSchema),
     defaultValues: planFormData,
   });
   const {
@@ -28,9 +28,9 @@ const PlanDetails: React.FC = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmit = (data: PlanData) => {
-    setFormData('plan', data);
-    navigate('/checkout/account');
+  const onSubmit = (data: BuildTrial) => {
+    setFormData('buildTrial', data);
+    navigate('/create-account');
   };
 
   const isFieldValid = useIsFieldValid(form);
@@ -61,6 +61,7 @@ const PlanDetails: React.FC = () => {
               registerOptions={{
                 validate: () => {
                   // Check react-hook-form docs for more info...
+                  console.log('validating users');
                 },
               }}
               autoFocus
@@ -86,7 +87,7 @@ const PlanDetails: React.FC = () => {
                     ariaLabelledby="planTypeLabel"
                     value={value}
                     onChange={(e) => {
-                      setFormData('plan', {
+                      setFormData('buildTrial', {
                         ...planFormData,
                         planType: e.target.value as PlanType,
                       });
@@ -150,4 +151,4 @@ const PlanDetails: React.FC = () => {
   );
 };
 
-export default PlanDetails;
+export default BuildTrial;

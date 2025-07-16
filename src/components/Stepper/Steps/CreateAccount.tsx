@@ -14,9 +14,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import slugify from 'slugify';
 import classNames from 'classnames';
 
-import { AccountSchema, PlanSchema, steps } from '@/constants';
-import Field from '@/components/Field';
-import StepCounter from '@/components/StepCounter';
+import { CreateAccountSchema, BuildTrialSchema, steps } from '@/components/Stepper/constants';
+import Field from '@/components/FormFields/Field';
+import StepCounter from '@/components/Stepper/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 interface StatefulPurchaseButtonProps {
@@ -73,7 +73,7 @@ interface OrganizatonEmailHelpTextProps {
   isInvalid: boolean;
 }
 
-const OrganizatonEmailHelpText: React.FC<OrganizatonEmailHelpTextProps> = ({ isInvalid }) => {
+const OrganizationEmailHelpText: React.FC<OrganizatonEmailHelpTextProps> = ({ isInvalid }) => {
   if (isInvalid) {
     return null;
   }
@@ -88,26 +88,26 @@ const OrganizatonEmailHelpText: React.FC<OrganizatonEmailHelpTextProps> = ({ isI
   );
 };
 
-OrganizatonEmailHelpText.propTypes = {
+OrganizationEmailHelpText.propTypes = {
   isInvalid: PropTypes.bool.isRequired,
 };
 
-const AccountDetails: React.FC = () => {
+const CreateAccount: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const planFormData = useCheckoutFormStore((state) => state.formData.plan);
-  const accountFormData = useCheckoutFormStore((state) => state.formData.account);
+  const planFormData = useCheckoutFormStore((state) => state.formData.buildTrial);
+  const accountFormData = useCheckoutFormStore((state) => state.formData.createAccount);
 
   useEffect(() => {
-    if (!planFormData || !PlanSchema.safeParse(planFormData).success) {
-      navigate('/checkout/plan');
+    if (!planFormData || !BuildTrialSchema.safeParse(planFormData).success) {
+      navigate('/build-trial');
     }
   }, [planFormData, navigate]);
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const form = useForm<AccountData>({
+  const form = useForm<CreateAccount>({
     mode: 'onTouched',
-    resolver: zodResolver(AccountSchema),
+    resolver: zodResolver(CreateAccountSchema),
   });
   const {
     handleSubmit,
@@ -127,12 +127,12 @@ const AccountDetails: React.FC = () => {
   }, [isEditingSlug]);
 
   const handlePrevious = () => {
-    navigate('/checkout/plan');
+    navigate('/build-trial');
   };
 
-  const onSubmit = (data: AccountData) => {
-    setFormData('account', data);
-    navigate('/checkout/confirmation');
+  const onSubmit = (data: CreateAccount) => {
+    setFormData('createAccount', data);
+    navigate('/create-access-link');
   };
 
   const orgName = watch('orgName');
@@ -198,7 +198,7 @@ const AccountDetails: React.FC = () => {
               placeholder="john.doe@organization.com"
               defaultValue={accountFormData?.orgEmail}
               controlClassName="mr-0"
-              controlFooterNode={OrganizatonEmailHelpText}
+              controlFooterNode={OrganizationEmailHelpText}
             />
             <Field
               form={form}
@@ -389,4 +389,4 @@ const AccountDetails: React.FC = () => {
   );
 };
 
-export default AccountDetails;
+export default CreateAccount;
