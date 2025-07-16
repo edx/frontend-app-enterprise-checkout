@@ -2,8 +2,8 @@ import { Link, useParams } from 'react-router-dom';
 import { Button, Card, Stack } from '@openedx/paragon';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
-import Currency from '@/components/Currency';
+import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/components/Stepper/constants';
+import Currency from '@/components/SubscriptionSummary/Currency';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 function calculateSubscriptionCost(numUsers?: number) {
@@ -45,13 +45,13 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of users"
                       description="Label for the number of users"
                     />
-                    {step !== 'plan' && (
+                    {step !== 'build-trial' && (
                       <Button
                         as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to="/checkout/plan"
+                        to="/build-trial"
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editNumUsers"
