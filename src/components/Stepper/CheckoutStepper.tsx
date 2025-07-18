@@ -1,20 +1,29 @@
 import { Stepper } from '@openedx/paragon';
 import { Navigate, useParams } from 'react-router-dom';
 
-import PlanDetails from '@/components/PlanDetails';
-import AccountDetails from '@/components/AccountDetails';
+import { CheckoutStep } from '@/components/Stepper/constants';
+import {
+  BuildTrial,
+  CreateAccount,
+  CreateAccessLink,
+  StartTrial,
+  Success,
+} from '@/components/Stepper/Steps';
 
 const Steps: React.FC = () => (
   <div className="py-4">
-    <PlanDetails />
-    <AccountDetails />
+    <BuildTrial />
+    <CreateAccount />
+    <CreateAccessLink />
+    <StartTrial />
+    <Success />
   </div>
 );
 
 const CheckoutStepper: React.FC = () => {
   const { step } = useParams<{ step: Step }>();
   if (!step) {
-    return <Navigate to="plan" />;
+    return <Navigate to={CheckoutStep.BuildTrial} />;
   }
   return (
     <Stepper activeKey={step}>

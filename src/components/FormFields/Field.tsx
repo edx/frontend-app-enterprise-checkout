@@ -1,14 +1,16 @@
+import { useIntl } from '@edx/frontend-platform/i18n';
+import { Form } from '@openedx/paragon';
+import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
 import {
   forwardRef, useCallback, useImperativeHandle, useRef,
 } from 'react';
-import { Form } from '@openedx/paragon';
-import { useIntl } from '@edx/frontend-platform/i18n';
+
+import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+import useCurrentStep from '@/hooks/useCurrentStep';
+
 import type {
   FieldValues, Path, RegisterOptions, UseFormReturn,
 } from 'react-hook-form';
-import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import useCurrentStep from '@/hooks/useCurrentStep';
 
 interface FieldChildrenProps {
   isValid: boolean;
@@ -104,6 +106,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const { ref: registerRef, ...registerFieldOptions } = register(name, {
     ...registerOptions,
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
+      // @ts-ignore
       setFormData(currentStep, {
         ...formData,
         [name]: event.target.value,

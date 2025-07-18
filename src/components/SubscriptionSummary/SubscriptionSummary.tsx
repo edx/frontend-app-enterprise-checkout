@@ -1,9 +1,9 @@
-import { Link, useParams } from 'react-router-dom';
-import { Button, Card, Stack } from '@openedx/paragon';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { Button, Card, Stack } from '@openedx/paragon';
+import { Link, useParams } from 'react-router-dom';
 
-import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/constants';
-import Currency from '@/components/Currency';
+import { CheckoutStep, SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/components/Stepper/constants';
+import Currency from '@/components/SubscriptionSummary/Currency';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 function calculateSubscriptionCost(numUsers?: number) {
@@ -15,8 +15,8 @@ function calculateSubscriptionCost(numUsers?: number) {
 
 const SubscriptionSummary: React.FC = () => {
   const { step } = useParams<{ step: Step }>();
-  const numUsers = useCheckoutFormStore((state) => state.formData.plan?.numUsers);
-  const planType = useCheckoutFormStore((state) => state.formData.plan?.planType);
+  const numUsers = useCheckoutFormStore((state) => state.formData.buildTrial?.numUsers);
+  const planType = useCheckoutFormStore((state) => state.formData.buildTrial?.planType);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
   return (
     <Card variant="muted">
@@ -45,13 +45,13 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of users"
                       description="Label for the number of users"
                     />
-                    {step !== 'plan' && (
+                    {step !== CheckoutStep.BuildTrial && (
                       <Button
                         as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to="/checkout/plan"
+                        to="/build-trial"
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editNumUsers"

@@ -2,8 +2,8 @@ import {
   Col, Container, Row, Stack,
 } from '@openedx/paragon';
 
-import CheckoutStepper from '@/components/CheckoutStepper';
-import SubscriptionSummary from '@/components/SubscriptionSummary';
+import CheckoutStepper from '@/components/Stepper/CheckoutStepper';
+import { SubscriptionSummary } from '@/components/SubscriptionSummary';
 
 const CheckoutPage: React.FC = () => (
   <main>
@@ -12,7 +12,7 @@ const CheckoutPage: React.FC = () => (
         <Col xs={12} lg={8}>
           <CheckoutStepper />
         </Col>
-        <Col>
+        <Col lg={4}>
           <Stack gap={4}>
             <SubscriptionSummary />
           </Stack>

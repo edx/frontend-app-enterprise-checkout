@@ -1,12 +1,13 @@
-import { useParams } from 'react-router';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useParams } from 'react-router';
 
-import { steps } from '@/constants';
+import { CheckoutStep } from '@/components/Stepper/constants';
 
 const StepCounter: React.FC = () => {
-  const { step } = useParams<{ step: Step }>();
-  const numSteps = steps.length;
-  const currentStepIndex = steps.indexOf(step!);
+  const { step } = useParams<{ step: string }>();
+  const stepKeys = Object.values(CheckoutStep);
+  const numSteps = stepKeys.length;
+  const currentStepIndex = stepKeys.indexOf(step as CheckoutStep);
   const currentStep = currentStepIndex + 1;
   return (
     <p className="h3 text-muted font-weight-normal">

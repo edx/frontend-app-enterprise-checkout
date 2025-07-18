@@ -1,25 +1,25 @@
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button, Form, SelectableBox, Stack, Stepper,
 } from '@openedx/paragon';
-import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useNavigate } from 'react-router-dom';
 
-import { PlanSchema, steps } from '@/constants';
-import Field, { useIsFieldInvalid, useIsFieldValid } from '@/components/Field';
-import StepCounter from '@/components/StepCounter';
+import Field, { useIsFieldInvalid, useIsFieldValid } from '@/components/FormFields/Field';
+import { BuildTrialSchema, CheckoutStep } from '@/components/Stepper/constants';
+import StepCounter from '@/components/Stepper/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
-const PlanDetails: React.FC = () => {
-  const planFormData = useCheckoutFormStore((state) => state.formData.plan);
+const BuildTrial: React.FC = () => {
+  const planFormData = useCheckoutFormStore((state) => state.formData.buildTrial);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const navigate = useNavigate();
 
-  const form = useForm<PlanData>({
+  const form = useForm<BuildTrialData>({
     mode: 'onTouched',
-    resolver: zodResolver(PlanSchema),
+    resolver: zodResolver(BuildTrialSchema),
     defaultValues: planFormData,
   });
   const {
@@ -28,15 +28,15 @@ const PlanDetails: React.FC = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmit = (data: PlanData) => {
-    setFormData('plan', data);
-    navigate('/checkout/account');
+  const onSubmit = (data: BuildTrialData) => {
+    setFormData('buildTrial', data);
+    navigate('/create-account');
   };
 
   const isFieldValid = useIsFieldValid(form);
   const isFieldInvalid = useIsFieldInvalid(form);
 
-  const eventKey = steps[0];
+  const eventKey = CheckoutStep.BuildTrial;
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />
@@ -46,7 +46,7 @@ const PlanDetails: React.FC = () => {
           <h1 className="mb-5">
             <FormattedMessage
               id="checkout.planDetails.title"
-              defaultMessage="Build your free trial subscription"
+              defaultMessage="Build your free trial"
             />
           </h1>
           <Stack gap={3}>
@@ -86,7 +86,7 @@ const PlanDetails: React.FC = () => {
                     ariaLabelledby="planTypeLabel"
                     value={value}
                     onChange={(e) => {
-                      setFormData('plan', {
+                      setFormData('buildTrial', {
                         ...planFormData,
                         planType: e.target.value as PlanType,
                       });
@@ -150,4 +150,4 @@ const PlanDetails: React.FC = () => {
   );
 };
 
-export default PlanDetails;
+export default BuildTrial;
