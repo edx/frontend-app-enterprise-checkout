@@ -5,7 +5,6 @@ interface CurrencyProps {
   value: number;
   currency?: string;
 }
-
 const Currency: React.FC<CurrencyProps> = ({ value, currency = 'USD' }) => {
   const isInt = Number.isInteger(value);
   const formattingProps = {
@@ -27,5 +26,4 @@ Currency.propTypes = {
   value: PropTypes.number.isRequired,
   currency: PropTypes.string,
 };
-
 export default Currency;

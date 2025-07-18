@@ -15,14 +15,14 @@ declare global {
   type AuthStep = 'create-access-link' | 'start-trial' | 'success';
 
   type BuildTrialData = z.infer<typeof BuildTrialSchema>;
-  type CreateAccount = z.infer<typeof CreateAccountSchema>;
+  type CreateAccountData = z.infer<typeof CreateAccountSchema>;
   type CreateAccessLinkData = z.infer<typeof CreateAccessLinkSchema>;
   type StartTrialData = z.infer<typeof StartTrialSchema>;
   type SuccessTrialData = z.infer<typeof SuccessSchema>;
 
   type StepDataMap = {
     'buildTrial': Partial<BuildTrialData>;
-    'createAccount': Partial<CreateAccount>;
+    'createAccount': Partial<CreateAccountData>;
     'createAccessLink': Partial<CreateAccessLinkData>,
     'startTrial': Partial<StartTrialData>,
     'success': Partial<SuccessTrialData>,

@@ -7,7 +7,6 @@ import {
   CreateAccount,
   CreateAccessLink,
   StartTrial,
-  Success,
 } from '@/components/Stepper/Steps';
 
 const Steps: React.FC = () => (
@@ -16,7 +15,6 @@ const Steps: React.FC = () => (
     <CreateAccount />
     <CreateAccessLink />
     <StartTrial />
-    <Success />
   </div>
 );
 
@@ -27,6 +25,7 @@ const CheckoutStepper: React.FC = () => {
   }
   return (
     <Stepper activeKey={step}>
+      <Stepper.Header />
       <Steps />
     </Stepper>
   );

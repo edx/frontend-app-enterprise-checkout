@@ -7,12 +7,12 @@ import { SubscriptionSummary } from '@/components/SubscriptionSummary';
 
 const CheckoutPage: React.FC = () => (
   <main>
-    <Container size="lg" className="py-4.5">
+    <Container size="xl" className="py-4.5">
       <Row>
         <Col xs={12} lg={8}>
           <CheckoutStepper />
         </Col>
-        <Col lg={4}>
+        <Col xl={4}>
           <Stack gap={4}>
             <SubscriptionSummary />
           </Stack>
