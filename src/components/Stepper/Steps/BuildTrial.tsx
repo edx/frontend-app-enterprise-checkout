@@ -1,14 +1,14 @@
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button, Form, SelectableBox, Stack, Stepper,
 } from '@openedx/paragon';
-import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useNavigate } from 'react-router-dom';
 
-import { BuildTrialSchema, steps } from '@/components/Stepper/constants';
 import Field, { useIsFieldInvalid, useIsFieldValid } from '@/components/FormFields/Field';
+import { BuildTrialSchema, CheckoutStep } from '@/components/Stepper/constants';
 import StepCounter from '@/components/Stepper/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
@@ -17,7 +17,7 @@ const BuildTrial: React.FC = () => {
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const navigate = useNavigate();
 
-  const form = useForm<BuildTrial>({
+  const form = useForm<BuildTrialData>({
     mode: 'onTouched',
     resolver: zodResolver(BuildTrialSchema),
     defaultValues: planFormData,
@@ -28,7 +28,7 @@ const BuildTrial: React.FC = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmit = (data: BuildTrial) => {
+  const onSubmit = (data: BuildTrialData) => {
     setFormData('buildTrial', data);
     navigate('/create-account');
   };
@@ -36,7 +36,7 @@ const BuildTrial: React.FC = () => {
   const isFieldValid = useIsFieldValid(form);
   const isFieldInvalid = useIsFieldInvalid(form);
 
-  const eventKey = steps[0];
+  const eventKey = CheckoutStep.BuildTrial;
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />

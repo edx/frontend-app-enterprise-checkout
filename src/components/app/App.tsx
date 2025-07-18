@@ -1,7 +1,3 @@
-import {
-  Suspense, lazy, useEffect, useMemo, useState,
-} from 'react';
-import { RouterProvider } from 'react-router-dom';
 import { AppProvider } from '@edx/frontend-platform/react';
 import {
   QueryCache,
@@ -10,11 +6,16 @@ import {
   keepPreviousData,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import {
+  Suspense, lazy, useEffect, useMemo, useState,
+} from 'react';
+import { RouterProvider } from 'react-router-dom';
 
 import {
   queryCacheOnErrorHandler,
   defaultQueryClientRetryHandler,
 } from '@/utils/common';
+
 import { RouterFallback, createAppRouter } from './routes';
 
 // @ts-ignore

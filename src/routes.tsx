@@ -1,13 +1,14 @@
-import { QueryClient } from '@tanstack/react-query';
-import { RouteObject, useParams } from 'react-router';
 import { AuthenticatedPageRoute, PageWrap } from '@edx/frontend-platform/react';
+import { QueryClient } from '@tanstack/react-query';
 import { Suspense } from 'react';
+import { RouteObject, useParams } from 'react-router';
+import { Navigate } from 'react-router-dom';
+
+import Layout from '@/components/app/Layout';
 import Root from '@/components/app/Root';
 import RouterFallback from '@/components/app/routes/RouterFallback';
-import { Navigate } from 'react-router-dom';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import Layout from '@/components/app/Layout';
-import { authenticatedSteps } from '@/components/Stepper/constants';
+import { authenticatedSteps, CheckoutStep } from '@/components/Stepper/constants';
 
 const StepWrapper = () => {
   const { step } = useParams<{ step: AuthStep }>();
@@ -35,7 +36,7 @@ function getCheckoutRoutes(queryClient: QueryClient) {
     },
     {
       index: true,
-      element: <Navigate to="build-trial" replace />,
+      element: <Navigate to={CheckoutStep.BuildTrial} replace />,
     },
   ];
   const checkoutRoutes: RouteObject[] = [

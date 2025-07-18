@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 import { Container, Image, Navbar } from '@openedx/paragon';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => (
   <header>

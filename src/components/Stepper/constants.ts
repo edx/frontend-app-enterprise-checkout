@@ -12,7 +12,15 @@ export const steps = [
   'create-access-link',
   'start-trial',
   'success',
-];
+] as const;
+
+export enum CheckoutStep {
+  BuildTrial = 'build-trial',
+  CreateAccount = 'create-account',
+  CreateAccessLink = 'create-access-link',
+  StartTrial = 'start-trial',
+  Success = 'success',
+}
 
 export const planTypes = [
   'annual',

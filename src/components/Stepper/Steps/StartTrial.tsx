@@ -1,10 +1,11 @@
-import { steps } from '@/components/Stepper/constants';
 import { Stepper } from '@openedx/paragon';
 
+import { CheckoutStep } from '@/components/Stepper/constants';
+
 const StartTrial = () => {
-  const eventKey = steps[3];
+  const eventKey = CheckoutStep.StartTrial;
   return (
-    <Stepper.Step eventKey={eventKey} title="Create Trial">
+    <Stepper.Step eventKey={eventKey} title="Start Trial">
       Start Trial
     </Stepper.Step>
   );

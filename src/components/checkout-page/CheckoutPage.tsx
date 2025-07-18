@@ -1,6 +1,7 @@
 import {
   Col, Container, Row, Stack,
 } from '@openedx/paragon';
+
 import CheckoutStepper from '@/components/Stepper/CheckoutStepper';
 import { SubscriptionSummary } from '@/components/SubscriptionSummary';
 

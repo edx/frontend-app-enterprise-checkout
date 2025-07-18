@@ -1,7 +1,7 @@
+import { useIsFetching } from '@tanstack/react-query';
+import nprogress from 'accessible-nprogress';
 import { useEffect, useState } from 'react';
 import { useFetchers, useNavigation } from 'react-router-dom';
-import nprogress from 'accessible-nprogress';
-import { useIsFetching } from '@tanstack/react-query';
 
 // Determines amount of time that must elapse before the
 // NProgress loader is shown in the UI. No need to show it

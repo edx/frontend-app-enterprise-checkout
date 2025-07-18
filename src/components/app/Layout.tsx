@@ -1,6 +1,6 @@
+import FooterSlot from '@openedx/frontend-slot-footer';
 import { Helmet } from 'react-helmet';
 import { Outlet, ScrollRestoration } from 'react-router-dom';
-import FooterSlot from '@openedx/frontend-slot-footer';
 
 import Header from '@/components/Header/Header';
 

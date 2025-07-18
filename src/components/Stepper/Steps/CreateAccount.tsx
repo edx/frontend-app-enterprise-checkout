@@ -1,21 +1,21 @@
-import {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
-import PropTypes from 'prop-types';
-import { Helmet } from 'react-helmet';
-import { useNavigate } from 'react-router-dom';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ActionRow, Button, Card, Form, Stack, StatefulButton, Stepper,
 } from '@openedx/paragon';
 import { Lock } from '@openedx/paragon/icons';
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import slugify from 'slugify';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
+import {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
+import { Helmet } from 'react-helmet';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import slugify from 'slugify';
 
-import { CreateAccountSchema, BuildTrialSchema, steps } from '@/components/Stepper/constants';
 import Field from '@/components/FormFields/Field';
+import { CreateAccountSchema, BuildTrialSchema, CheckoutStep } from '@/components/Stepper/constants';
 import StepCounter from '@/components/Stepper/StepCounter';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
@@ -100,7 +100,7 @@ const CreateAccount: React.FC = () => {
 
   useEffect(() => {
     if (!planFormData || !BuildTrialSchema.safeParse(planFormData).success) {
-      navigate('/build-trial');
+      navigate(`/${CheckoutStep.BuildTrial}`);
     }
   }, [planFormData, navigate]);
 
@@ -127,7 +127,7 @@ const CreateAccount: React.FC = () => {
   }, [isEditingSlug]);
 
   const handlePrevious = () => {
-    navigate('/build-trial');
+    navigate(`/${CheckoutStep.BuildTrial}`);
   };
 
   const onSubmit = (data: CreateAccount) => {
@@ -156,7 +156,7 @@ const CreateAccount: React.FC = () => {
     [],
   );
 
-  const eventKey = steps[1];
+  const eventKey = CheckoutStep.CreateAccount;
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>

@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { FormattedNumber } from '@edx/frontend-platform/i18n';
+import PropTypes from 'prop-types';
 
 interface CurrencyProps {
   value: number;

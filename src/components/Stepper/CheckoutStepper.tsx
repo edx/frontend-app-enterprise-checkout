@@ -1,6 +1,7 @@
 import { Stepper } from '@openedx/paragon';
 import { Navigate, useParams } from 'react-router-dom';
 
+import { CheckoutStep } from '@/components/Stepper/constants';
 import {
   BuildTrial,
   CreateAccount,
@@ -22,7 +23,7 @@ const Steps: React.FC = () => (
 const CheckoutStepper: React.FC = () => {
   const { step } = useParams<{ step: Step }>();
   if (!step) {
-    return <Navigate to="build-trial" />;
+    return <Navigate to={CheckoutStep.BuildTrial} />;
   }
   return (
     <Stepper activeKey={step}>

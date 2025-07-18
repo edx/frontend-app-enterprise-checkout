@@ -1,7 +1,9 @@
-import type { Router } from '@remix-run/router';
 import { QueryClient } from '@tanstack/react-query';
 import { createBrowserRouter } from 'react-router-dom';
+
 import { getRoutes } from '../../../routes';
+
+import type { Router } from '@remix-run/router';
 
 // eslint-disable-next-line import/extensions
 

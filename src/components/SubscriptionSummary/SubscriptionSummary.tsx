@@ -1,8 +1,8 @@
-import { Link, useParams } from 'react-router-dom';
-import { Button, Card, Stack } from '@openedx/paragon';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { Button, Card, Stack } from '@openedx/paragon';
+import { Link, useParams } from 'react-router-dom';
 
-import { SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/components/Stepper/constants';
+import { CheckoutStep, SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/components/Stepper/constants';
 import Currency from '@/components/SubscriptionSummary/Currency';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
@@ -45,7 +45,7 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of users"
                       description="Label for the number of users"
                     />
-                    {step !== 'build-trial' && (
+                    {step !== CheckoutStep.BuildTrial && (
                       <Button
                         as={Link}
                         variant="link"

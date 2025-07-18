@@ -1,11 +1,12 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 import {
   APP_INIT_ERROR, APP_READY, subscribe, initialize,
 } from '@edx/frontend-platform';
 import {
   ErrorPage,
 } from '@edx/frontend-platform/react';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+
 import App from '@/components/app/App';
 
 import messages from './i18n';

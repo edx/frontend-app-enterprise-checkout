@@ -1,13 +1,14 @@
-import { screen, waitFor } from '@testing-library/react';
-import { AppContext } from '@edx/frontend-platform/react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { QueryClientProvider } from '@tanstack/react-query';
+import { useNProgressLoader } from '@/components/app/data';
+import Root from '@/components/app/Root';
+import { CheckoutStep } from '@/components/Stepper/constants';
 import { queryClient, renderWithRouterProvider } from '@/utils/tests';
 
-import Root from '@/components/app/Root';
-import { useNProgressLoader } from '@/components/app/data';
 import { getRoutes } from '../../../routes';
 
 jest.mock('@/components/app/data', () => ({
@@ -57,8 +58,8 @@ describe('Root tests', () => {
     const { routes } = getRoutes(queryClient());
 
     renderWithRouterProvider(<RootWrapper />, {
-      initialEntries: ['/build-trial'],
-      routes, // ✅ use full route config
+      initialEntries: [`/${CheckoutStep.BuildTrial}`],
+      routes,
     });
 
     if (isAppDataHydrated) {
