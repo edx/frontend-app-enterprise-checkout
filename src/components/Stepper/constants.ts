@@ -31,7 +31,6 @@ export const BuildTrialSchema = z.object({
   numUsers: z.coerce.number()
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users'),
-  planType: z.enum(planTypes),
 });
 
 export const CreateAccountSchema = z.object({
@@ -63,4 +62,4 @@ export const SuccessSchema = z.object({});
 
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.
-export const SUBSCRIPTION_ANNUAL_PRICE_PER_USER = 394;
+export const SUBSCRIPTION_PRICE_PER_USER_PER_MONTH = 33;
