@@ -25,7 +25,6 @@ const CheckoutStepper: React.FC = () => {
   }
   return (
     <Stepper activeKey={step}>
-      <Stepper.Header />
       <Steps />
     </Stepper>
   );
