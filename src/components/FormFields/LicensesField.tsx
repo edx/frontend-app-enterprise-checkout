@@ -6,7 +6,7 @@ import FieldWrapper from '@/components/FormFields/FieldWrapper';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface LicensesFieldProps {
-  form: UseFormReturn<BuildTrialData>;
+  form: UseFormReturn<PlanDetailsData>;
 }
 
 const LicensesField = ({ form }: LicensesFieldProps) => {

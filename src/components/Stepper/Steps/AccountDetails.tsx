@@ -5,14 +5,17 @@ import {
 } from '@openedx/paragon';
 import { Lock } from '@openedx/paragon/icons';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import LoginFields from '@/components/FormFields/LoginFields';
-import RegisterAccountFields from '@/components/FormFields/RegisterAccountFields';
-import { CreateAccountSchema, BuildTrialSchema, CheckoutStep } from '@/components/Stepper/constants';
+import {
+  AccountDetailsSchema,
+  PlanDetailsSchema,
+  CheckoutStepKey,
+  CheckoutStepperPath,
+} from '@/components/Stepper/constants';
 import PriceAlert from '@/components/Stepper/Steps/PriceAlert';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
@@ -89,41 +92,37 @@ OrganizationEmailHelpText.propTypes = {
   isInvalid: PropTypes.bool.isRequired,
 };
 
-const CreateAccount: React.FC = () => {
+const AccountDetails: React.FC = () => {
   const navigate = useNavigate();
-  const planFormData = useCheckoutFormStore((state) => state.formData.buildTrial);
+  const planFormData = useCheckoutFormStore((state) => state.formData.planDetails);
   const accountFormData = useCheckoutFormStore((state) => state.formData.createAccount);
-  const [existingUserEmail, setExistingUserEmail] = useState(false);
   useEffect(() => {
-    if (!planFormData || !BuildTrialSchema.safeParse(planFormData).success) {
-      navigate(`/${CheckoutStep.BuildTrial}`);
+    if (!planFormData || !PlanDetailsSchema.safeParse(planFormData).success) {
+      navigate(CheckoutStepperPath.PlanDetailsRoute);
     }
   }, [planFormData, navigate]);
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const form = useForm<CreateAccountData>({
+  const form = useForm<AccountDetailsData>({
     mode: 'onBlur',
-    resolver: zodResolver(CreateAccountSchema),
+    resolver: zodResolver(AccountDetailsSchema),
   });
 
   const {
     handleSubmit,
     formState: { isValid },
   } = form;
-  const AccountDetailComponent = existingUserEmail
-    ? (<LoginFields form={form} />)
-    : (<RegisterAccountFields form={form} />);
 
   const handlePrevious = () => {
-    navigate(`/${CheckoutStep.BuildTrial}`);
+    navigate(CheckoutStepperPath.PlanDetailsRoute);
   };
 
-  const onSubmit = (data: CreateAccountData) => {
+  const onSubmit = (data: AccountDetailsData) => {
     setFormData('createAccount', data);
-    navigate(`/${CheckoutStep.CreateAccessLink}`);
+    navigate(CheckoutStepperPath.BillingDetailsRoute);
   };
 
-  const eventKey = CheckoutStep.CreateAccount;
+  const eventKey = CheckoutStepKey.AccountDetails;
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -138,9 +137,6 @@ const CreateAccount: React.FC = () => {
             />
           </h1>
           <PriceAlert />
-          {existingUserEmail
-            ? <LoginFields form={form} />
-            : <RegisterAccountFields form={form} />}
         </Stepper.Step>
         <Stepper.ActionRow eventKey={eventKey} className="flex-row-reverse align-items-start">
           <StatefulPurchaseButton isFormValid={isValid} />
@@ -162,4 +158,4 @@ const CreateAccount: React.FC = () => {
   );
 };
 
-export default CreateAccount;
+export default AccountDetails;

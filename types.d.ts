@@ -1,31 +1,23 @@
 import { z } from 'zod';
 
 import {
-  BuildTrialSchema,
-  CreateAccountSchema,
-  steps,
-  planTypes, CreateAccessLinkSchema, StartTrialSchema, SuccessSchema,
+  PlanDetailsSchema,
+  AccountDetailsSchema,
+  BillingDetailsSchema,
 } from '@/components/Stepper/constants';
 
 declare global {
-  type PlanType = typeof planTypes[number];
 
-  type Step = typeof steps[number];
+  type AuthStep = 'account-details' | 'billing-details';
 
-  type AuthStep = 'create-access-link' | 'start-trial' | 'success';
-
-  type BuildTrialData = z.infer<typeof BuildTrialSchema>;
-  type CreateAccountData = z.infer<typeof CreateAccountSchema>;
-  type CreateAccessLinkData = z.infer<typeof CreateAccessLinkSchema>;
-  type StartTrialData = z.infer<typeof StartTrialSchema>;
-  type SuccessTrialData = z.infer<typeof SuccessSchema>;
+  type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
+  type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
+  type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
 
   type StepDataMap = {
-    'buildTrial': Partial<BuildTrialData>;
-    'createAccount': Partial<CreateAccountData>;
-    'createAccessLink': Partial<CreateAccessLinkData>,
-    'startTrial': Partial<StartTrialData>,
-    'success': Partial<SuccessTrialData>,
+    'planDetails': Partial<PlanDetailsData>;
+    'createAccount': Partial<AccountDetailsData>;
+    'billingDetails': Partial<BillingDetailsData>,
   };
 
   type FormData = {

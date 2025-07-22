@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import Currency from '@/components/Currency/Currency';
 import {
-  CheckoutStep,
+  CheckoutStepKey, CheckoutStepperPath,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 } from '@/components/Stepper/constants';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
@@ -17,8 +17,8 @@ function calculateSubscriptionCost(numUsers?: number) {
 }
 
 const SubscriptionSummary: React.FC = () => {
-  const { step } = useParams<{ step: Step }>();
-  const numUsers = useCheckoutFormStore((state) => state.formData.buildTrial?.numUsers);
+  const { step } = useParams<{ step: CheckoutStepKey }>();
+  const numUsers = useCheckoutFormStore((state) => state.formData.planDetails?.numUsers);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
   return (
     <Card variant="muted">
@@ -47,13 +47,13 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of licenses"
                       description="Label for the number of licenses"
                     />
-                    {step !== CheckoutStep.BuildTrial && (
+                    {step !== CheckoutStepKey.PlanDetails && (
                       <Button
                         as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to={`/${CheckoutStep.BuildTrial}`}
+                        to={CheckoutStepperPath.PlanDetailsRoute}
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editNumUsers"

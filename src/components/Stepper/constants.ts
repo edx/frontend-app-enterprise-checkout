@@ -1,64 +1,64 @@
 import { z } from 'zod';
 
 export const authenticatedSteps = [
-  'create-access-link',
-  'start-trial',
-  'success',
+  'account-details',
+  'billing-details',
 ] as const;
 
-export const steps = [
-  'build-trial',
-  'create-account',
-  'create-access-link',
-  'start-trial',
-  'success',
-] as const;
+export enum CheckoutStepKey {
+  PlanDetails = 'plan-details',
+  AccountDetails = 'account-details',
+  BillingDetails = 'billing-details',
+}
 
-export enum CheckoutStep {
-  BuildTrial = 'build-trial',
-  CreateAccount = 'create-account',
-  CreateAccessLink = 'create-access-link',
-  StartTrial = 'start-trial',
+export enum CheckoutSubstepKey {
+  Login = 'login',
+  Register = 'register',
   Success = 'success',
 }
 
-export const planTypes = [
-  'annual',
-  'quarterly',
-] as const;
+export enum CheckoutStepperPath {
+  PlanDetailsRoute = `/${CheckoutStepKey.PlanDetails}`,
+  LoginRoute = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+  RegisterRoute = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+  AccountDetailsRoute = `/${CheckoutStepKey.AccountDetails}`,
+  BillingDetailsRoute = `/${CheckoutStepKey.BillingDetails}`,
+  SuccessRoute = `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+}
 
-export const BuildTrialSchema = z.object({
+export const PlanDetailsSchema = z.object({
   numUsers: z.coerce.number()
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users'),
-});
-
-export const CreateAccountSchema = z.object({
   fullName: z.string().trim()
     .min(1, 'Full name is required')
-    .max(255),
+    .max(255)
+    .optional(),
   orgEmail: z.string().trim()
     .email()
-    .max(254),
+    .max(254)
+    .optional(),
   orgName: z.string().trim()
     .min(1, 'Organization name is required')
-    .max(255, 'Maximum 255 characters'),
+    .max(255, 'Maximum 255 characters')
+    .optional(),
+  country: z.string().trim()
+    .min(1, 'Country is required').optional(),
+});
+
+export const AccountDetailsSchema = z.object({
   orgSlug: z.string().trim()
     .min(1, 'Access link is required')
     .max(30, 'Maximum 30 characters')
     .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
     .refine(slug => !slug.startsWith('-') && !slug.endsWith('-'), {
       message: 'Access link may not start or end with a hyphen',
-    }),
-  country: z.string().trim()
-    .min(1, 'Country is required'),
+    })
+    .optional(),
+
 });
 
-export const CreateAccessLinkSchema = z.object({});
-
-export const StartTrialSchema = z.object({});
-
-export const SuccessSchema = z.object({});
+export const BillingDetailsSchema = z.object({});
 
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.

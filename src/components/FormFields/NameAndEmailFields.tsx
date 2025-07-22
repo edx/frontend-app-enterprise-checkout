@@ -7,7 +7,7 @@ import FieldWrapper from '@/components/FormFields/FieldWrapper';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface NameAndEmailFieldsProps {
-  form: UseFormReturn<BuildTrialData>;
+  form: UseFormReturn<PlanDetailsData>;
 }
 
 const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
