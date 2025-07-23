@@ -3,8 +3,10 @@ import { create } from 'zustand';
 const useCheckoutFormStore = create<FormStore>(
   (set) => ({
     formData: {
-      buildTrial: {},
-      createAccount: {},
+      planDetails: {},
+      planDetailsAuthentication: {},
+      accountDetails: {},
+      billingDetails: {},
     },
     setFormData: (step, data) => set(
       (store) => ({

@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
+import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
 import Field from '@/components/FormFields/Field';
-import FieldWrapper from '@/components/FormFields/FieldWrapper';
 
 import type { UseFormReturn } from 'react-hook-form';
 

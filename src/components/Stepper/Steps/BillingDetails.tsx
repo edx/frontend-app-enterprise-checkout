@@ -1,14 +1,17 @@
-import { Stepper } from '@openedx/paragon';
+import { useParams } from 'react-router';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
+import BillingDetailsPage from '@/components/billing-details-pages/BillingDetailsPage';
+import SuccessPage from '@/components/billing-details-pages/SuccessPage';
+import { CheckoutSubstepKey } from '@/components/Stepper/constants';
 
 const BillingDetails = () => {
-  const eventKey = CheckoutStepKey.BillingDetails;
-  return (
-    <Stepper.Step eventKey={eventKey} title="Create Access Link">
-      Create Access Link
-    </Stepper.Step>
-  );
+  const { substep } = useParams<{ substep: CheckoutSubstepKey }>();
+
+  if (substep === 'success') {
+    return <SuccessPage />;
+  }
+
+  return <BillingDetailsPage />;
 };
 
 export default BillingDetails;

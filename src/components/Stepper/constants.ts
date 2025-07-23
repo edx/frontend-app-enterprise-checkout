@@ -27,23 +27,30 @@ export enum CheckoutStepperPath {
 }
 
 export const PlanDetailsSchema = z.object({
-  numUsers: z.coerce.number()
-    .min(5, 'Minimum 5 users')
-    .max(500, 'Maximum 500 users'),
-  fullName: z.string().trim()
-    .min(1, 'Full name is required')
-    .max(255)
-    .optional(),
-  orgEmail: z.string().trim()
-    .email()
-    .max(254)
-    .optional(),
-  orgName: z.string().trim()
-    .min(1, 'Organization name is required')
-    .max(255, 'Maximum 255 characters')
-    .optional(),
-  country: z.string().trim()
-    .min(1, 'Country is required').optional(),
+  // numUsers: z.coerce.number()
+  //   .min(5, 'Minimum 5 users')
+  //   .max(500, 'Maximum 500 users'),
+  // fullName: z.string().trim()
+  //   .min(1, 'Full name is required')
+  //   .max(255)
+  //   .optional(),
+  // orgEmail: z.string().trim()
+  //   .email()
+  //   .max(254)
+  //   .optional(),
+  // orgName: z.string().trim()
+  //   .min(1, 'Organization name is required')
+  //   .max(255, 'Maximum 255 characters')
+  //   .optional(),
+  // country: z.string().trim()
+  //   .min(1, 'Country is required').optional(),
+});
+
+export const PlanDetailsRegistrationSchema = z.object({
+  authenticated: z.boolean().optional(),
+});
+export const PlanDetailsLoginSchema = z.object({
+  authenticated: z.boolean().optional(),
 });
 
 export const AccountDetailsSchema = z.object({

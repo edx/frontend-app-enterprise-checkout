@@ -3,7 +3,7 @@ import { Navigate, useParams } from 'react-router-dom';
 
 import { CheckoutStepKey, CheckoutStepperPath } from '@/components/Stepper/constants';
 import {
-  AccountDetails,
+  AccountDetails, BillingDetails,
   PlanDetails,
 } from '@/components/Stepper/Steps';
 
@@ -11,7 +11,7 @@ const Steps: React.FC = () => (
   <div className="py-4">
     <PlanDetails />
     <AccountDetails />
-    {/* <BillingDetails /> */}
+    <BillingDetails />
   </div>
 );
 
@@ -22,6 +22,7 @@ const CheckoutStepper: React.FC = () => {
   }
   return (
     <Stepper activeKey={step}>
+      <Stepper.Header />
       <Steps />
     </Stepper>
   );

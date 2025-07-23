@@ -1,6 +1,6 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import FieldWrapper from '@/components/FormFields/FieldWrapper';
+import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
 
 // eslint-disable-next-line react/prop-types
 const AuthenticatedUserField = ({ fullName, orgEmail }) => (
