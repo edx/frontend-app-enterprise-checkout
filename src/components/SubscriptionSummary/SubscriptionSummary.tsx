@@ -2,7 +2,7 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button, Card, Stack } from '@openedx/paragon';
 import { Link, useParams } from 'react-router-dom';
 
-import Currency from '@/components/Currency/Currency';
+import DisplayPrice from '@/components/DisplayPrice/DisplayPrice';
 import {
   CheckoutStepKey, CheckoutStepperPath,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
@@ -37,7 +37,7 @@ const SubscriptionSummary: React.FC = () => {
                     />
                   </div>
                   <div className="text-right">
-                    <Currency value={SUBSCRIPTION_PRICE_PER_USER_PER_MONTH} />
+                    <DisplayPrice value={SUBSCRIPTION_PRICE_PER_USER_PER_MONTH} />
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-start">
@@ -77,7 +77,7 @@ const SubscriptionSummary: React.FC = () => {
                   </div>
                   <div className="text-right">
                     {totalSubscriptionCost
-                      ? <Currency value={totalSubscriptionCost} />
+                      ? <DisplayPrice value={totalSubscriptionCost} />
                       : '-'}
                   </div>
                 </Stack>
@@ -100,7 +100,7 @@ const SubscriptionSummary: React.FC = () => {
                   </div>
                   <div className="text-right font-weight-bold">
                     {totalSubscriptionCost
-                      ? <Currency value={totalSubscriptionCost} />
+                      ? <DisplayPrice value={totalSubscriptionCost} />
                       : '-'}
                   </div>
                 </Stack>
@@ -126,7 +126,7 @@ const SubscriptionSummary: React.FC = () => {
                 </div>
                 <div className="text-align-right">
                   {totalSubscriptionCost
-                    ? <Currency value={0} />
+                    ? <DisplayPrice value={0} />
                     : '-'}
                 </div>
               </Stack>

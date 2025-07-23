@@ -5,7 +5,7 @@ interface CurrencyProps {
   value: number;
   currency?: string;
 }
-const Currency: React.FC<CurrencyProps> = ({ value, currency = 'USD' }) => {
+const DisplayPrice: React.FC<CurrencyProps> = ({ value, currency = 'USD' }) => {
   const isInt = Number.isInteger(value);
   const formattingProps = {
     minimumFractionDigits: isInt ? 0 : 2,
@@ -22,8 +22,8 @@ const Currency: React.FC<CurrencyProps> = ({ value, currency = 'USD' }) => {
   );
 };
 
-Currency.propTypes = {
+DisplayPrice.propTypes = {
   value: PropTypes.number.isRequired,
   currency: PropTypes.string,
 };
-export default Currency;
+export default DisplayPrice;

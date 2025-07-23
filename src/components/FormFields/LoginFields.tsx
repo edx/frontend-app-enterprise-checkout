@@ -1,6 +1,6 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
+import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -11,7 +11,7 @@ interface LoginFieldsProps {
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LoginFields = ({ form }: LoginFieldsProps) => (
-  <FieldWrapper>
+  <FieldContainer>
     <div>
       <h3>
         <FormattedMessage
@@ -28,7 +28,7 @@ const LoginFields = ({ form }: LoginFieldsProps) => (
         />
       </h3>
     </div>
-  </FieldWrapper>
+  </FieldContainer>
 );
 
 export default LoginFields;

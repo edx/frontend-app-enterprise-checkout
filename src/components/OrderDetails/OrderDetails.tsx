@@ -1,9 +1,9 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
+import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 
 const OrderDetails = () => (
-  <FieldWrapper>
+  <FieldContainer>
     <div>
       <h3>
         <FormattedMessage
@@ -20,7 +20,7 @@ const OrderDetails = () => (
         />
       </h3>
     </div>
-  </FieldWrapper>
+  </FieldContainer>
 );
 
 export default OrderDetails;

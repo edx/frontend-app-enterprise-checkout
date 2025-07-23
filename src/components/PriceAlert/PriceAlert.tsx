@@ -1,7 +1,7 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Alert } from '@openedx/paragon';
 
-import Currency from '@/components/Currency/Currency';
+import DisplayPrice from '@/components/DisplayPrice/DisplayPrice';
 import { SUBSCRIPTION_PRICE_PER_USER_PER_MONTH } from '@/components/Stepper/constants';
 
 const PriceAlert = () => (
@@ -23,7 +23,7 @@ const PriceAlert = () => (
             description="Text indicating the starting price of a subscription"
           />
         </span>{' '}
-        <Currency value={SUBSCRIPTION_PRICE_PER_USER_PER_MONTH} />
+        <DisplayPrice value={SUBSCRIPTION_PRICE_PER_USER_PER_MONTH} />
         <span className="font-weight-light">
           <FormattedMessage
             id="checkout.priceAlert.perMonth"

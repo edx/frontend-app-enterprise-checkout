@@ -1,10 +1,10 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
+import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 
 // eslint-disable-next-line react/prop-types
 const AuthenticatedUserField = ({ fullName, orgEmail }) => (
-  <FieldWrapper>
+  <FieldContainer>
     <div>
       <h3>
         <FormattedMessage
@@ -24,7 +24,7 @@ const AuthenticatedUserField = ({ fullName, orgEmail }) => (
         </span>
       </h3>
     </div>
-  </FieldWrapper>
+  </FieldContainer>
 );
 
 export default AuthenticatedUserField;

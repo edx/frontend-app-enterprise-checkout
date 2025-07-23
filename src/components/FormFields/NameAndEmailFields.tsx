@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Stack } from '@openedx/paragon';
 
-import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
+import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 import Field from '@/components/FormFields/Field';
 
 import type { UseFormReturn } from 'react-hook-form';
@@ -13,7 +13,7 @@ interface NameAndEmailFieldsProps {
 const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
   const intl = useIntl();
   return (
-    <FieldWrapper>
+    <FieldContainer>
       <div>
         <h3>
           <FormattedMessage
@@ -131,7 +131,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           controlClassName="mr-0 mt-3"
         />
       </Stack>
-    </FieldWrapper>
+    </FieldContainer>
   );
 };
 

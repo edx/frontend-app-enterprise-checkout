@@ -1,9 +1,9 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
+import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 
-const FreeTrialSuccessField = () => (
-  <FieldWrapper>
+const SuccessNotification = () => (
+  <FieldContainer>
     <div>
       <h3>
         <FormattedMessage
@@ -13,7 +13,7 @@ const FreeTrialSuccessField = () => (
         />
       </h3>
     </div>
-  </FieldWrapper>
+  </FieldContainer>
 );
 
-export default FreeTrialSuccessField;
+export default SuccessNotification;

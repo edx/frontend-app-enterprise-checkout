@@ -5,10 +5,10 @@ interface FieldWrapperProps {
   children: React.ReactNode;
 }
 
-const FieldWrapper = ({ children }: FieldWrapperProps) => (
+const FieldContainer = ({ children }: FieldWrapperProps) => (
   <Stack spacing={2} className="bg-light-300 p-4.5 rounded">
     {children}
   </Stack>
 );
 
-export default FieldWrapper;
+export default FieldContainer;

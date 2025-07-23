@@ -1,6 +1,6 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
-import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
+import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 import Field from '@/components/FormFields/Field';
 
 import type { UseFormReturn } from 'react-hook-form';
@@ -12,7 +12,7 @@ interface LicensesFieldProps {
 const LicensesField = ({ form }: LicensesFieldProps) => {
   const intl = useIntl();
   return (
-    <FieldWrapper>
+    <FieldContainer>
       <div>
         <h3>
           <FormattedMessage
@@ -52,7 +52,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         }}
         autoFocus
       />
-    </FieldWrapper>
+    </FieldContainer>
   );
 };
 
