@@ -15,7 +15,7 @@ const CustomUrlField = () => (
       <h3 className="font-weight-light">
         <FormattedMessage
           id="checkout.customUrl.description"
-          defaultMessage="This is how your colleagues willa ccess your team subscription on edX.
+          defaultMessage="This is how your colleagues will access your team subscription on edX.
            This access link name cannot be changed after your trial subscription starts."
           description="Description text explaining the custom url field purpose"
         />

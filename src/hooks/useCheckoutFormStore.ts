@@ -1,12 +1,15 @@
 import { create } from 'zustand';
 
+import { CheckoutStepKey } from '@/components/Stepper/constants';
+
 const useCheckoutFormStore = create<FormStore>(
   (set) => ({
     formData: {
-      planDetails: {},
-      planDetailsAuthentication: {},
-      accountDetails: {},
-      billingDetails: {},
+      [CheckoutStepKey.PlanDetails]: {},
+      [CheckoutStepKey.AccountDetails]: {},
+      [CheckoutStepKey.BillingDetails]: {},
+      planDetailsLogin: {},
+      planDetailsRegistration: {},
     },
     setFormData: (step, data) => set(
       (store) => ({

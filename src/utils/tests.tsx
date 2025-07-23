@@ -1,3 +1,5 @@
+import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { Stepper } from '@openedx/paragon';
 import { QueryCache, QueryClient } from '@tanstack/react-query';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render } from '@testing-library/react';
@@ -83,3 +85,49 @@ export const generateTestPermutations = (options: { [s: string]: any[]; }): obje
   (acc, [key, values]) => acc.flatMap(prev => values.map(value => ({ ...prev, [key]: value }))),
   [{}],
 );
+
+/**
+ * Renders a component with a Stepper context provider.
+ * This is useful for testing components that use Stepper.Step or Stepper.ActionRow.
+ *
+ * @param {ReactElement} children - The component to render
+ * @param {string} activeKey - The active step key to set in the Stepper context
+ * @returns {RenderResult} - The render result
+ */
+export function renderWithStepperProvider(
+  children: ReactElement,
+  activeKey: string,
+): RenderResult {
+  return render(
+    <IntlProvider locale="en">
+      <Stepper activeKey={activeKey}>
+        {children}
+      </Stepper>
+    </IntlProvider>,
+  );
+}
+
+/**
+ * Renders a component with both a Router and Stepper context provider.
+ * This is useful for testing components that use both routing and Stepper.Step or Stepper.ActionRow.
+ *
+ * @param {ReactElement} children - The component to render
+ * @param {string} activeKey - The active step key to set in the Stepper context
+ * @param {RenderWithRouterOptions} routerOptions - Options for the router provider
+ * @returns {RenderResult} - The render result
+ */
+export function renderWithRouterAndStepperProvider(
+  children: ReactElement,
+  activeKey: string,
+  routerOptions: RenderWithRouterOptions = {},
+): RenderResult {
+  const wrappedChildren = (
+    <IntlProvider locale="en">
+      <Stepper activeKey={activeKey}>
+        {children}
+      </Stepper>
+    </IntlProvider>
+  );
+
+  return renderWithRouterProvider(wrappedChildren, routerOptions);
+}
