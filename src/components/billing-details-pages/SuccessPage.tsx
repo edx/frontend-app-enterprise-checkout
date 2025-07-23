@@ -1,10 +1,13 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { Stack, Stepper } from '@openedx/paragon';
+import {
+  Stack, Stepper,
+} from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 
-import DataPrivacyPolicyField from '@/components/FormFields/DataPrivacyPolicyField';
 import OrderDetails from '@/components/OrderDetails/OrderDetails';
 import { CheckoutStepKey } from '@/components/Stepper/constants';
+import SuccessHeading from '@/components/SuccessHeading/SuccessHeading';
+import SuccessNotification from '@/components/SuccessNotification/SuccessNotification';
 
 const SuccessPage: React.FC = () => {
   const eventKey = CheckoutStepKey.BillingDetails;
@@ -21,8 +24,9 @@ const SuccessPage: React.FC = () => {
               values={{ firstName: 'Don' }}
             />
           </h1>
+          <SuccessHeading />
           <Stack gap={4}>
-            <DataPrivacyPolicyField />
+            <SuccessNotification />
             <OrderDetails />
           </Stack>
         </Stepper.Step>

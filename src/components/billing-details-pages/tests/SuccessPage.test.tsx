@@ -17,16 +17,17 @@ describe('SuccessPage', () => {
     expect(screen.getByText('Thank you, Don.')).toBeInTheDocument();
   });
 
-  it('renders the DataPrivacyPolicyField component', () => {
-    renderComponent();
-    // Test the actual component's content instead of a mock
-    expect(screen.getByText('Data Privacy Policy and Master Service Agreement')).toBeInTheDocument();
-  });
-
   it('renders the OrderDetails component', () => {
     renderComponent();
     // Test the actual component's content instead of a mock
     expect(screen.getByText('Order Details')).toBeInTheDocument();
     expect(screen.getByText('You have purchased an edX team\'s subscription.')).toBeInTheDocument();
+  });
+
+  it('renders the SuccessHeading component', () => {
+    renderComponent();
+    // Test the actual component's content instead of a mock
+    expect(screen.getByText((content) => content.includes('Welcome to edX for teams!'))).toBeInTheDocument();
+    expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
   });
 });
