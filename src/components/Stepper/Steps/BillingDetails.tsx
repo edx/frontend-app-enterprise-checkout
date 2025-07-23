@@ -7,7 +7,7 @@ import { CheckoutSubstepKey } from '@/components/Stepper/constants';
 const BillingDetails = () => {
   const { substep } = useParams<{ substep: CheckoutSubstepKey }>();
 
-  if (substep === 'success') {
+  if (substep === CheckoutSubstepKey.Success) {
     return <SuccessPage />;
   }
 

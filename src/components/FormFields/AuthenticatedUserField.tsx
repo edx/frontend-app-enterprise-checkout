@@ -1,9 +1,14 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import PropTypes from 'prop-types';
 
 import FieldContainer from '@/components/FieldWrapper/FieldContainer';
 
-// eslint-disable-next-line react/prop-types
-const AuthenticatedUserField = ({ fullName, orgEmail }) => (
+interface AuthenticatedUserFieldProps {
+  fullName: string;
+  orgEmail: string;
+}
+
+const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullName, orgEmail }) => (
   <FieldContainer>
     <div>
       <h3>
@@ -26,5 +31,10 @@ const AuthenticatedUserField = ({ fullName, orgEmail }) => (
     </div>
   </FieldContainer>
 );
+
+AuthenticatedUserField.propTypes = {
+  fullName: PropTypes.string.isRequired,
+  orgEmail: PropTypes.string.isRequired,
+};
 
 export default AuthenticatedUserField;
