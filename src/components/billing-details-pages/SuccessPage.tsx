@@ -1,13 +1,14 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import {
-  Stack, Stepper,
+  Stack,
+  Stepper,
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 
-import OrderDetails from '@/components/OrderDetails/OrderDetails';
-import { CheckoutStepKey } from '@/components/Stepper/constants';
-import SuccessHeading from '@/components/SuccessHeading/SuccessHeading';
-import SuccessNotification from '@/components/SuccessNotification/SuccessNotification';
+import { OrderDetails } from '@/components/OrderDetails';
+import { SuccessHeading } from '@/components/SuccessHeading';
+import { SuccessNotification } from '@/components/SuccessNotification';
+import { CheckoutStepKey } from '@/constants/checkout';
 
 const SuccessPage: React.FC = () => {
   const eventKey = CheckoutStepKey.BillingDetails;

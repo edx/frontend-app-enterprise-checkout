@@ -16,7 +16,28 @@ module.exports = createConfig('eslint', {
         },
       },
     ],
+    'sort-imports': [
+      'error',
+      {
+        ignoreCase: true,
+        ignoreDeclarationSort: true, // Let import/order handle the declaration sorting
+        ignoreMemberSort: false, // Enable sorting of import members within destructured imports
+        allowSeparatedGroups: true,
+      },
+    ],
+    // For multi-line imports, enforce consistent formatting
+    'object-curly-newline': [
+      'error',
+      {
+        ImportDeclaration: { consistent: true },
+      },
+    ],
+    'object-curly-spacing': ['error', 'always'],
     'unused-imports/no-unused-imports': 'error',
+    // Note: To fully enforce each destructured import on its own line,
+    // a custom plugin like 'eslint-plugin-import-newlines' would be ideal.
+    // This configuration achieves alphabetizing but may not fully enforce
+    // the one-import-per-line requirement for all cases.
   },
   overrides: [
     {

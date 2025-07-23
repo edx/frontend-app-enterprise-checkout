@@ -1,7 +1,7 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Alert } from '@openedx/paragon';
 
-import DisplayPrice from '@/components/DisplayPrice/DisplayPrice';
+import { DisplayPrice } from '@/components/DisplayPrice';
 import { SUBSCRIPTION_PRICE_PER_USER_PER_MONTH } from '@/components/Stepper/constants';
 
 const PriceAlert = () => (

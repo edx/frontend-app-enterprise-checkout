@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 import {
-  PlanDetailsSchema,
   AccountDetailsSchema,
   BillingDetailsSchema,
-  PlanDetailsRegistrationSchema, PlanDetailsLoginSchema,
+  PlanDetailsLoginSchema,
+  PlanDetailsRegistrationSchema,
+  PlanDetailsSchema,
 } from '@/components/Stepper/constants';
 
 // Declaration for SVG modules

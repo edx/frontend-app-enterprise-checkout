@@ -1,18 +1,21 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Button, Form, Stack, Stepper,
+  Button,
+  Form,
+  Stack,
+  Stepper,
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import LoginFields from '@/components/FormFields/LoginFields';
-import PriceAlert from '@/components/PriceAlert/PriceAlert';
+import { LoginFields } from '@/components/FormFields';
+import { PriceAlert } from '@/components/PriceAlert';
 import {
   CheckoutStepKey,
   CheckoutStepperPath, PlanDetailsLoginSchema,
-} from '@/components/Stepper/constants';
+} from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 const LoginPage: React.FC = () => {

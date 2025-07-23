@@ -2,7 +2,7 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button, Card, Stack } from '@openedx/paragon';
 import { Link, useParams } from 'react-router-dom';
 
-import DisplayPrice from '@/components/DisplayPrice/DisplayPrice';
+import { DisplayPrice } from '@/components/DisplayPrice';
 import {
   CheckoutStepKey, CheckoutStepperPath,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,

@@ -1,6 +1,6 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import FieldContainer from '@/components/FieldWrapper/FieldContainer';
+import { FieldContainer } from '@/components/FieldWrapper';
 
 const OrganizationNameField = () => (
   <FieldContainer>

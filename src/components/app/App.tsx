@@ -1,22 +1,22 @@
 import { AppProvider } from '@edx/frontend-platform/react';
 import {
+  keepPreviousData,
   QueryCache,
   QueryClient,
   QueryClientProvider,
-  keepPreviousData,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import {
-  Suspense, lazy, useEffect, useMemo, useState,
+  lazy, Suspense, useEffect, useMemo, useState,
 } from 'react';
 import { RouterProvider } from 'react-router-dom';
 
 import {
-  queryCacheOnErrorHandler,
   defaultQueryClientRetryHandler,
+  queryCacheOnErrorHandler,
 } from '@/utils/common';
 
-import { RouterFallback, createAppRouter } from './routes';
+import { createAppRouter, RouterFallback } from './routes';
 
 // @ts-ignore
 const ReactQueryDevtoolsProduction = lazy(() => import('@tanstack/react-query-devtools/production').then((d) => ({

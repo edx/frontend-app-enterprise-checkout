@@ -1,14 +1,21 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Button, Form, Stack, Stepper,
+  Button,
+  Form,
+  Stack,
+  Stepper,
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import DataPrivacyPolicyField from '@/components/FormFields/DataPrivacyPolicyField';
-import { BillingDetailsSchema, CheckoutStepKey, CheckoutStepperPath } from '@/components/Stepper/constants';
+import { DataPrivacyPolicyField } from '@/components/FormFields';
+import {
+  BillingDetailsSchema,
+  CheckoutStepKey,
+  CheckoutStepperPath,
+} from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 const BillingDetailsPage: React.FC = () => {

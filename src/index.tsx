@@ -1,5 +1,5 @@
 import {
-  APP_INIT_ERROR, APP_READY, subscribe, initialize,
+  APP_INIT_ERROR, APP_READY, initialize, subscribe,
 } from '@edx/frontend-platform';
 import {
   ErrorPage,

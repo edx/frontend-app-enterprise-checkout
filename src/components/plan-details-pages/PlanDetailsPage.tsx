@@ -1,20 +1,26 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Button, Form, Stack, Stepper,
+  Button,
+  Form,
+  Stack,
+  Stepper,
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import AuthenticatedUserField from '@/components/FormFields/AuthenticatedUserField';
-import LicensesField from '@/components/FormFields/LicensesField';
-import NameAndEmailFields from '@/components/FormFields/NameAndEmailFields';
-import PriceAlert from '@/components/PriceAlert/PriceAlert';
 import {
+  AuthenticatedUserField,
+  LicensesField,
+  NameAndEmailFields,
+} from '@/components/FormFields';
+import { PriceAlert } from '@/components/PriceAlert';
+import {
+  CheckoutStepKey,
+  CheckoutStepperPath,
   PlanDetailsSchema,
-  CheckoutStepKey, CheckoutStepperPath,
-} from '@/components/Stepper/constants';
+} from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 import '../Stepper/Steps/css/PriceAlert.css';

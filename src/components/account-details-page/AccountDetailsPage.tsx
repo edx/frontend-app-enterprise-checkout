@@ -1,7 +1,10 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Button, Form, Stack, Stepper,
+  Button,
+  Form,
+  Stack,
+  Stepper,
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';

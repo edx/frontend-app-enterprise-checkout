@@ -1,8 +1,9 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Stack } from '@openedx/paragon';
 
-import FieldContainer from '@/components/FieldWrapper/FieldContainer';
-import Field from '@/components/FormFields/Field';
+import { FieldContainer } from '@/components/FieldWrapper';
+
+import Field from './Field';
 
 import type { UseFormReturn } from 'react-hook-form';
 

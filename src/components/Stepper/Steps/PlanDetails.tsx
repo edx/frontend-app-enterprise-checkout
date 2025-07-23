@@ -5,7 +5,7 @@ import PlanDetailsPage from '@/components/plan-details-pages/PlanDetailsPage';
 import RegistrationPage from '@/components/plan-details-pages/RegistrationPage';
 import {
   CheckoutSubstepKey,
-} from '@/components/Stepper/constants';
+} from '@/constants/checkout';
 import './css/PriceAlert.css';
 
 const PlanDetails: React.FC = () => {

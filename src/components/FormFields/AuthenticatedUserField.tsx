@@ -1,7 +1,7 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import PropTypes from 'prop-types';
 
-import FieldContainer from '@/components/FieldWrapper/FieldContainer';
+import { FieldContainer } from '@/components/FieldWrapper';
 
 interface AuthenticatedUserFieldProps {
   fullName: string;
