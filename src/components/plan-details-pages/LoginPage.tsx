@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmit = (data: PlanDetailsData) => {
+  const onSubmit = (data: PlanDetailsLoginData) => {
     setFormData('planDetailsLogin', {
       ...data,
       authenticated: true,

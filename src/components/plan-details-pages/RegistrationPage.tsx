@@ -31,7 +31,7 @@ const RegistrationPage: React.FC = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmit = (data: PlanDetailsData) => {
+  const onSubmit = (data: PlanDetailsRegistrationData) => {
     // Store data state
     setFormData('planDetailsRegistration', {
       ...data,

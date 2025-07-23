@@ -18,18 +18,19 @@ export enum CheckoutSubstepKey {
 }
 
 export enum CheckoutStepperPath {
-  PlanDetailsRoute = `/${CheckoutStepKey.PlanDetails}`,
-  LoginRoute = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
-  RegisterRoute = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
-  AccountDetailsRoute = `/${CheckoutStepKey.AccountDetails}`,
-  BillingDetailsRoute = `/${CheckoutStepKey.BillingDetails}`,
-  SuccessRoute = `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+  PlanDetailsRoute = '/plan-details',
+  LoginRoute = '/plan-details/login',
+  RegisterRoute = '/plan-details/register',
+  AccountDetailsRoute = '/account-details',
+  BillingDetailsRoute = '/billing-details',
+  SuccessRoute = '/billing-details/success',
 }
 
 export const PlanDetailsSchema = z.object({
-  // numUsers: z.coerce.number()
-  //   .min(5, 'Minimum 5 users')
-  //   .max(500, 'Maximum 500 users'),
+  numUsers: z.coerce.number()
+    .min(5, 'Minimum 5 users')
+    .max(500, 'Maximum 500 users')
+    .optional(),
   // fullName: z.string().trim()
   //   .min(1, 'Full name is required')
   //   .max(255)

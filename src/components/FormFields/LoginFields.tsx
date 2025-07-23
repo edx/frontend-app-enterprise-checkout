@@ -5,7 +5,7 @@ import FieldWrapper from '@/components/FieldWrapper/FieldWrapper';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface LoginFieldsProps {
-  form: UseFormReturn<PlanDetailsData>;
+  form: UseFormReturn<PlanDetailsLoginData>;
 }
 
 // @ts-ignore

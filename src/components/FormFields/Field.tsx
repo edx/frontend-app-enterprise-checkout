@@ -5,6 +5,7 @@ import {
   forwardRef, useCallback, useImperativeHandle, useRef,
 } from 'react';
 
+import { CheckoutStepKey } from '@/components/Stepper/constants';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
@@ -95,7 +96,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const controlRef = useRef<FormControlElement | null>(null);
   const currentStep = useCurrentStep()!;
   const formData = useCheckoutFormStore((state) => state.formData[currentStep]);
-  const currentValue = formData?.[name as Step];
+  const currentValue = formData?.[name as CheckoutStepKey];
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { register } = form;
   const { onChange } = registerOptions;
