@@ -1,6 +1,6 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import { FieldContainer } from '@/components/FieldWrapper';
+import { FieldContainer } from '@/components/FieldContainer';
 
 import type { UseFormReturn } from 'react-hook-form';
 

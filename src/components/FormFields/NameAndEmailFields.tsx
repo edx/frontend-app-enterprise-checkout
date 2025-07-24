@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Stack } from '@openedx/paragon';
 
-import { FieldContainer } from '@/components/FieldWrapper';
+import { FieldContainer } from '@/components/FieldContainer';
 
 import Field from './Field';
 
