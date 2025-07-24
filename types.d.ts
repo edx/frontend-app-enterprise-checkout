@@ -1,31 +1,39 @@
 import { z } from 'zod';
 
 import {
-  BuildTrialSchema,
-  CreateAccountSchema,
-  steps,
-  planTypes, CreateAccessLinkSchema, StartTrialSchema, SuccessSchema,
+  AccountDetailsSchema,
+  BillingDetailsSchema,
+  PlanDetailsLoginSchema,
+  PlanDetailsRegistrationSchema,
+  PlanDetailsSchema,
 } from '@/components/Stepper/constants';
 
+// Declaration for SVG modules
+declare module '*.svg' {
+  import React from 'react';
+
+  const SVG: React.FC<React.SVGProps<SVGSVGElement>>;
+  export default SVG;
+}
+
 declare global {
-  type PlanType = typeof planTypes[number];
 
-  type Step = typeof steps[number];
+  type AuthStep = 'account-details' | 'billing-details';
 
-  type AuthStep = 'create-access-link' | 'start-trial' | 'success';
-
-  type BuildTrialData = z.infer<typeof BuildTrialSchema>;
-  type CreateAccount = z.infer<typeof CreateAccountSchema>;
-  type CreateAccessLinkData = z.infer<typeof CreateAccessLinkSchema>;
-  type StartTrialData = z.infer<typeof StartTrialSchema>;
-  type SuccessTrialData = z.infer<typeof SuccessSchema>;
+  type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
+  type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
+  type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
+  // TODO: This is added an a means to iterate through the project. Will need to be removed.
+  type PlanDetailsRegistrationData = z.infer<typeof PlanDetailsRegistrationSchema>;
+  type PlanDetailsLoginData = z.infer<typeof PlanDetailsLoginSchema>;
 
   type StepDataMap = {
-    'buildTrial': Partial<BuildTrialData>;
-    'createAccount': Partial<CreateAccount>;
-    'createAccessLink': Partial<CreateAccessLinkData>,
-    'startTrial': Partial<StartTrialData>,
-    'success': Partial<SuccessTrialData>,
+    'planDetails': Partial<PlanDetailsData>;
+    'createAccount': Partial<AccountDetailsData>;
+    'billingDetails': Partial<BillingDetailsData>,
+    // TODO: This is added an a means to iterate through the project. Will need to be removed.
+    'planDetailsRegistration': Partial<PlanDetailsRegistrationData>;
+    'planDetailsLogin': Partial<PlanDetailsLoginData>;
   };
 
   type FormData = {

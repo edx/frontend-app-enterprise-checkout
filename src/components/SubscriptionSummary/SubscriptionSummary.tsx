@@ -2,25 +2,27 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button, Card, Stack } from '@openedx/paragon';
 import { Link, useParams } from 'react-router-dom';
 
-import { CheckoutStep, SUBSCRIPTION_ANNUAL_PRICE_PER_USER } from '@/components/Stepper/constants';
-import Currency from '@/components/SubscriptionSummary/Currency';
+import { DisplayPrice } from '@/components/DisplayPrice';
+import {
+  CheckoutStepKey, CheckoutStepperPath,
+  SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
+} from '@/components/Stepper/constants';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 function calculateSubscriptionCost(numUsers?: number) {
   if (!numUsers) {
     return null;
   }
-  return numUsers * SUBSCRIPTION_ANNUAL_PRICE_PER_USER;
+  return numUsers * (SUBSCRIPTION_PRICE_PER_USER_PER_MONTH * 12);
 }
 
 const SubscriptionSummary: React.FC = () => {
-  const { step } = useParams<{ step: Step }>();
-  const numUsers = useCheckoutFormStore((state) => state.formData.buildTrial?.numUsers);
-  const planType = useCheckoutFormStore((state) => state.formData.buildTrial?.planType);
+  const { step } = useParams<{ step: CheckoutStepKey }>();
+  const numUsers = useCheckoutFormStore((state) => state.formData.planDetails?.numUsers);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
   return (
     <Card variant="muted">
-      <Card.Header title="Subscription Summary" subtitle="Review your selected subscription." size="sm" />
+      <Card.Header title="Purchase Summary" subtitle="Review your selected subscription." size="sm" />
       <Card.Section>
         <Stack gap={3}>
           <Card className="shadow-none border border-light" aria-live="polite">
@@ -29,29 +31,29 @@ const SubscriptionSummary: React.FC = () => {
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
                   <div>
                     <FormattedMessage
-                      id="checkout.subscriptionSummary.price.annual"
-                      defaultMessage="Price per user per year"
-                      description="Label for the team plan (annual)"
+                      id="checkout.subscriptionSummary.price.monthly"
+                      defaultMessage="Team Subscription, price per user per month"
+                      description="Label for the team plan (monthly)"
                     />
                   </div>
                   <div className="text-right">
-                    <Currency value={SUBSCRIPTION_ANNUAL_PRICE_PER_USER} />
+                    <DisplayPrice value={SUBSCRIPTION_PRICE_PER_USER_PER_MONTH} />
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-start">
                   <div>
                     <FormattedMessage
-                      id="checkout.subscriptionSummary.users"
-                      defaultMessage="Number of users"
-                      description="Label for the number of users"
+                      id="checkout.subscriptionSummary.licenses"
+                      defaultMessage="Number of licenses"
+                      description="Label for the number of licenses"
                     />
-                    {step !== CheckoutStep.BuildTrial && (
+                    {step !== CheckoutStepKey.PlanDetails && (
                       <Button
                         as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to="/build-trial"
+                        to={CheckoutStepperPath.PlanDetailsRoute}
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editNumUsers"
@@ -75,25 +77,17 @@ const SubscriptionSummary: React.FC = () => {
                   </div>
                   <div className="text-right">
                     {totalSubscriptionCost
-                      ? <Currency value={totalSubscriptionCost} />
+                      ? <DisplayPrice value={totalSubscriptionCost} />
                       : '-'}
                   </div>
                 </Stack>
               </Stack>
               <div className="border-top border-muted mt-3 pt-3 font-weight-bold">
-                {planType === 'annual' ? (
-                  <FormattedMessage
-                    id="checkout.subscriptionSummary.annualPayment"
-                    defaultMessage="Annual Payment"
-                    description="Label for the annual payment"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="checkout.subscriptionSummary.quarterlyPayments"
-                    defaultMessage="Quarterly Payments"
-                    description="Label for the quarterly payments"
-                  />
-                )}
+                <FormattedMessage
+                  id="checkout.subscriptionSummary.annualPayment"
+                  defaultMessage="Annual Payment"
+                  description="Label for the annual payment"
+                />
               </div>
               <Stack gap={2}>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-end">
@@ -106,26 +100,10 @@ const SubscriptionSummary: React.FC = () => {
                   </div>
                   <div className="text-right font-weight-bold">
                     {totalSubscriptionCost
-                      ? <Currency value={totalSubscriptionCost} />
+                      ? <DisplayPrice value={totalSubscriptionCost} />
                       : '-'}
                   </div>
                 </Stack>
-                {planType === 'quarterly' && (
-                  <Stack direction="horizontal" gap={2} className="justify-content-between align-items-end">
-                    <div>
-                      <FormattedMessage
-                        id="checkout.subscriptionSummary.quarterlyTotal"
-                        defaultMessage="4x quarterly payments"
-                        description="Label for the quarterly total"
-                      />
-                    </div>
-                    <div className="text-right">
-                      {totalSubscriptionCost
-                        ? <Currency value={totalSubscriptionCost / 4} />
-                        : '-'}
-                    </div>
-                  </Stack>
-                )}
               </Stack>
             </Card.Section>
             <Card.Status variant="info">
@@ -148,7 +126,7 @@ const SubscriptionSummary: React.FC = () => {
                 </div>
                 <div className="text-align-right">
                   {totalSubscriptionCost
-                    ? <Currency value={0} />
+                    ? <DisplayPrice value={0} />
                     : '-'}
                 </div>
               </Stack>

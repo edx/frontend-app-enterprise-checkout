@@ -1,15 +1,24 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
-import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
 import {
-  forwardRef, useCallback, useImperativeHandle, useRef,
+  CheckCircle, Error as ErrorIcon,
+} from '@openedx/paragon/icons';
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
 } from 'react';
 
+import { CheckoutStepKey } from '@/components/Stepper/constants';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
 import type {
-  FieldValues, Path, RegisterOptions, UseFormReturn,
+  FieldValues,
+  Path,
+  RegisterOptions,
+  UseFormReturn,
 } from 'react-hook-form';
 
 interface FieldChildrenProps {
@@ -95,7 +104,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const controlRef = useRef<FormControlElement | null>(null);
   const currentStep = useCurrentStep()!;
   const formData = useCheckoutFormStore((state) => state.formData[currentStep]);
-  const currentValue = formData?.[name as Step];
+  const currentValue = formData?.[name as CheckoutStepKey];
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { register } = form;
   const { onChange } = registerOptions;
@@ -208,7 +217,8 @@ const FieldBase = <T extends FieldValues>(
 ) => {
   const isValid = useIsFieldValid(form)(name);
   const isInvalid = useIsFieldInvalid(form)(name);
-  const trailingElement = getTrailingElement({ isValid, isInvalid });
+  const trailingElement = getTrailingElement({ isValid,
+    isInvalid });
   const errorMessage = form.formState.errors[name]?.message as string | undefined;
 
   const renderDefaultControl = () => (
@@ -227,7 +237,8 @@ const FieldBase = <T extends FieldValues>(
 
   const renderControlFooterNode = () => {
     if (typeof controlFooterNode === 'function') {
-      return controlFooterNode({ isValid, isInvalid });
+      return controlFooterNode({ isValid,
+        isInvalid });
     }
     return controlFooterNode;
   };

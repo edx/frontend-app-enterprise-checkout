@@ -6,7 +6,7 @@ import '@testing-library/jest-dom/extend-expect';
 
 import { useNProgressLoader } from '@/components/app/data';
 import Root from '@/components/app/Root';
-import { CheckoutStep } from '@/components/Stepper/constants';
+import { CheckoutStepKey } from '@/components/Stepper/constants';
 import { queryClient, renderWithRouterProvider } from '@/utils/tests';
 
 import { getRoutes } from '../../../routes';
@@ -58,7 +58,7 @@ describe('Root tests', () => {
     const { routes } = getRoutes(queryClient());
 
     renderWithRouterProvider(<RootWrapper />, {
-      initialEntries: [`/${CheckoutStep.BuildTrial}`],
+      initialEntries: [`/${CheckoutStepKey.PlanDetails}`],
       routes,
     });
 

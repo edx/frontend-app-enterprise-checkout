@@ -8,7 +8,7 @@ import Layout from '@/components/app/Layout';
 import Root from '@/components/app/Root';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import { authenticatedSteps, CheckoutStep } from '@/components/Stepper/constants';
+import { authenticatedSteps, CheckoutStepKey } from '@/components/Stepper/constants';
 
 const StepWrapper = () => {
   const { step } = useParams<{ step: AuthStep }>();
@@ -35,8 +35,16 @@ function getCheckoutRoutes(queryClient: QueryClient) {
       ),
     },
     {
+      path: '/:step/:substep',
+      element: (
+        <PageWrap>
+          <StepWrapper />
+        </PageWrap>
+      ),
+    },
+    {
       index: true,
-      element: <Navigate to={CheckoutStep.BuildTrial} replace />,
+      element: <Navigate to={CheckoutStepKey.PlanDetails} replace />,
     },
   ];
   const checkoutRoutes: RouteObject[] = [
