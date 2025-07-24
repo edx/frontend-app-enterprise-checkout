@@ -21,17 +21,19 @@ declare global {
   type AuthStep = 'account-details' | 'billing-details';
 
   type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
-  type PlanDetailsRegistrationData = z.infer<typeof PlanDetailsRegistrationSchema>;
-  type PlanDetailsLoginData = z.infer<typeof PlanDetailsLoginSchema>;
   type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
   type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
+  // TODO: This is added an a means to iterate through the project. Will need to be removed.
+  type PlanDetailsRegistrationData = z.infer<typeof PlanDetailsRegistrationSchema>;
+  type PlanDetailsLoginData = z.infer<typeof PlanDetailsLoginSchema>;
 
   type StepDataMap = {
     'planDetails': Partial<PlanDetailsData>;
-    'planDetailsRegistration': Partial<PlanDetailsRegistrationData>;
-    'planDetailsLogin': Partial<PlanDetailsLoginData>;
     'createAccount': Partial<AccountDetailsData>;
     'billingDetails': Partial<BillingDetailsData>,
+    // TODO: This is added an a means to iterate through the project. Will need to be removed.
+    'planDetailsRegistration': Partial<PlanDetailsRegistrationData>;
+    'planDetailsLogin': Partial<PlanDetailsLoginData>;
   };
 
   type FormData = {

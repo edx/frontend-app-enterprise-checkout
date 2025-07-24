@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
-
 const useCheckoutFormStore = create<FormStore>(
   (set) => ({
     formData: {
-      [CheckoutStepKey.PlanDetails]: {},
-      [CheckoutStepKey.AccountDetails]: {},
-      [CheckoutStepKey.BillingDetails]: {},
+      planDetails: {},
+      accountDetails: {},
+      billingDetails: {},
+      // TODO: This is added an a means to iterate through the project. Will need to be removed.
       planDetailsLogin: {},
       planDetailsRegistration: {},
     },
