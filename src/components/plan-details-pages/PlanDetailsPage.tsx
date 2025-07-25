@@ -10,6 +10,9 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
+import { baseValidation } from '@/components/app/data/constants';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import useBFFValidation from '@/components/app/data/hooks/useBFFValidation';
 import {
   AuthenticatedUserField,
   LicensesField,
@@ -26,14 +29,17 @@ import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 import '../Stepper/Steps/css/PriceAlert.css';
 
 const PlanDetailsPage: React.FC = () => {
+  const bffContext = useBFFContext();
+  console.log(bffContext);
+  const bffValidation = useBFFValidation(baseValidation);
+  console.log(bffValidation);
   const planFormData = useCheckoutFormStore((state) => state.formData.planDetails);
   const formData = useCheckoutFormStore((state) => state.formData);
   const { planDetailsRegistration, planDetailsLogin } = formData;
   const isAuthenticated = planDetailsRegistration?.authenticated || planDetailsLogin?.authenticated;
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   // TODO: Once the user is logged in, use this field for authenticated user validation
-  // const { authenticatedUser } = useContext(AppContext);
-
+  // const { authenticatedUser } = useContext<AppContext>(AppContext);
   const navigate = useNavigate();
 
   const form = useForm<PlanDetailsData>({

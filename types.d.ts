@@ -1,3 +1,4 @@
+import { SnakeCasedPropertiesDeep } from 'type-fest';
 import { z } from 'zod';
 
 import {
@@ -49,4 +50,15 @@ declare global {
   };
 
   type FormControlElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+  type ValidationSchema = {
+    fullName: string;
+    adminEmail: string;
+    companyName: string;
+    enterpriseSlug: string;
+    quantity: number;
+    stripePriceId: string;
+  };
+
+  type ValidationSchemaPayload = SnakeCasedPropertiesDeep<ValidationSchema>;
 }

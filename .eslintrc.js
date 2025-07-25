@@ -5,6 +5,7 @@ module.exports = createConfig('eslint', {
   plugins: ['import', 'unused-imports'],
   rules: {
     'react/require-default-props': 'off',
+    'no-underscore-dangle': ['error', { allow: ['_ctx', '_def'] }],
     'import/order': [
       'error',
       {
