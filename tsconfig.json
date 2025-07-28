@@ -11,7 +11,7 @@
     }
   },
   "include": [
-    "types.d.ts",
+    "src/types/types.d.ts",
     "src/**/*",
     "config/**/*",
     "*.config.*",

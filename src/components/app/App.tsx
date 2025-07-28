@@ -1,4 +1,3 @@
-import { getConfig } from '@edx/frontend-platform/config';
 import { AppProvider } from '@edx/frontend-platform/react';
 import {
   keepPreviousData,
@@ -61,7 +60,6 @@ function useReactQueryDevTools() {
 
 const App = () => {
   const queryClient = useAppQueryClient();
-  const config = getConfig();
 
   // Create the app router during render vs. at the top-level of the module to ensure
   // the logging and auth modules are initialized before the router is created.

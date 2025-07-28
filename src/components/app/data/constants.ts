@@ -7,6 +7,14 @@ const baseValidation: ValidationSchema = {
   fullName: '',
 };
 
+const baseCheckoutSession: CheckoutSessionSchema = {
+  adminEmail: '',
+  enterpriseSlug: '',
+  quantity: 0,
+  stripePriceId: '',
+};
+
 export {
   baseValidation,
+  baseCheckoutSession,
 };
