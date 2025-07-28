@@ -1,5 +1,9 @@
 import {
-  APP_INIT_ERROR, APP_READY, initialize, subscribe,
+  APP_INIT_ERROR,
+  APP_READY,
+  initialize,
+  mergeConfig,
+  subscribe,
 } from '@edx/frontend-platform';
 import {
   ErrorPage,
@@ -34,5 +38,17 @@ subscribe(APP_INIT_ERROR, (error) => {
 });
 
 initialize({
+  handlers: {
+    config: () => {
+      mergeConfig({
+        ENTERPRISE_ACCESS_BASE_URL: process.env.ENTERPRISE_ACCESS_BASE_URL || null,
+        ENTERPRISE_ADMIN_PORTAL_URL: process.env.ENTERPRISE_ADMIN_PORTAL_URL || null,
+        ENTERPRISE_LEARNER_PORTAL_URL: process.env.ENTERPRISE_LEARNER_PORTAL_URL || null,
+      });
+    },
+  },
   messages,
+  // Hydrate extra user info from edxapp accounts API for keys not in the JWT. This is
+  // especially useful for the "country" key which helps us populate checkout state.
+  hydrateAuthenticatedUser: true,
 });
