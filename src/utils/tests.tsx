@@ -1,7 +1,6 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { Stepper } from '@openedx/paragon';
 import { QueryCache, QueryClient } from '@tanstack/react-query';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { render } from '@testing-library/react';
 import { ReactElement } from 'react';
 import { RouteObject } from 'react-router';

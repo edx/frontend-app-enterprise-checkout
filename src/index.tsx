@@ -1,7 +1,6 @@
 import {
-  APP_INIT_ERROR, APP_READY, initialize, subscribe,
+  APP_INIT_ERROR, APP_READY, initialize, mergeConfig, subscribe,
 } from '@edx/frontend-platform';
-import { mergeConfig } from '@edx/frontend-platform/config';
 import {
   ErrorPage,
 } from '@edx/frontend-platform/react';

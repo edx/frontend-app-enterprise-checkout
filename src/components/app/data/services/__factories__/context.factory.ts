@@ -1,6 +1,6 @@
 import { camelCaseObject } from '@edx/frontend-platform/utils';
-import { faker } from '@faker-js/faker'; // eslint-disable-line import/no-extraneous-dependencies
-import { Factory } from 'rosie'; // eslint-disable-line import/no-extraneous-dependencies
+import { faker } from '@faker-js/faker';
+import { Factory } from 'rosie';
 
 /**
  * Type aliases to simplify complex type annotations

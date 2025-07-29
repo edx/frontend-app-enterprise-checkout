@@ -39,6 +39,7 @@ module.exports = createConfig('eslint', {
     // a custom plugin like 'eslint-plugin-import-newlines' would be ideal.
     // This configuration achieves alphabetizing but may not fully enforce
     // the one-import-per-line requirement for all cases.
+
   },
   overrides: [
     {
@@ -46,6 +47,19 @@ module.exports = createConfig('eslint', {
       rules: {
         'react/prop-types': 'off',
         'react/jsx-no-constructed-context-values': 'off',
+        'import/no-extraneous-dependencies': 'off',
+      },
+    },
+    {
+      files: ['*.factory.ts'],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+      },
+    },
+    {
+      files: ['**/utils/tests.tsx'],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
       },
     },
   ],
