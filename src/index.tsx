@@ -13,9 +13,8 @@ import { createRoot } from 'react-dom/client';
 
 import App from '@/components/app/App';
 
-import messages from './i18n';
-
 import './index.scss';
+import messages from './i18n';
 
 const container = document.getElementById('root');
 // @ts-ignore
@@ -48,6 +47,9 @@ initialize({
     },
   },
   messages,
+  // We don't require authenticated users so that we can perform our own auth redirect to a proxy login that depends on
+  // the route, rather than the LMS like frontend-platform does.
+  requireAuthenticatedUser: false,
   // Hydrate extra user info from edxapp accounts API for keys not in the JWT. This is
   // especially useful for the "country" key which helps us populate checkout state.
   hydrateAuthenticatedUser: true,
