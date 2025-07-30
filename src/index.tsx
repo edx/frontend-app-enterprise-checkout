@@ -1,5 +1,9 @@
 import {
-  APP_INIT_ERROR, APP_READY, initialize, mergeConfig, subscribe,
+  APP_INIT_ERROR,
+  APP_READY,
+  initialize,
+  mergeConfig,
+  subscribe,
 } from '@edx/frontend-platform';
 import {
   ErrorPage,
@@ -37,6 +41,8 @@ initialize({
     config: () => {
       mergeConfig({
         ENTERPRISE_ACCESS_BASE_URL: process.env.ENTERPRISE_ACCESS_BASE_URL || null,
+        ENTERPRISE_ADMIN_PORTAL_URL: process.env.ENTERPRISE_ADMIN_PORTAL_URL || null,
+        ENTERPRISE_LEARNER_PORTAL_URL: process.env.ENTERPRISE_LEARNER_PORTAL_URL || null,
       });
     },
   },
@@ -44,5 +50,7 @@ initialize({
   // We don't require authenticated users so that we can perform our own auth redirect to a proxy login that depends on
   // the route, rather than the LMS like frontend-platform does.
   requireAuthenticatedUser: false,
+  // Hydrate extra user info from edxapp accounts API for keys not in the JWT. This is
+  // especially useful for the "country" key which helps us populate checkout state.
   hydrateAuthenticatedUser: true,
 });
