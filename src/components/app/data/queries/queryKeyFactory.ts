@@ -1,6 +1,6 @@
 import { createQueryKeys, mergeQueryKeys } from '@lukemorales/query-key-factory';
 
-import fetchCheckoutSession from '@/components/app/data/services/checkout-session';
+import createCheckoutSession from '@/components/app/data/services/checkout-session';
 import fetchCheckoutContext from '@/components/app/data/services/context';
 import fetchCheckoutValidation from '@/components/app/data/services/validation';
 
@@ -20,7 +20,7 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
   },
   createCheckoutSession: (fields, payload) => ({
     queryKey: [fields],
-    queryFn: () => fetchCheckoutSession(payload),
+    queryFn: () => createCheckoutSession(payload),
   }),
 });
 

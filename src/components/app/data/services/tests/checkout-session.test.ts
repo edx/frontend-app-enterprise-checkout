@@ -6,7 +6,7 @@ import {
   checkoutSessionResponseFactory,
   checkoutSessionSchemaPayloadFactory,
 } from '../__factories__/checkout-session-schema.factory';
-import fetchCheckoutSession from '../checkout-session';
+import createCheckoutSession from '../checkout-session';
 
 // Mock setup
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -55,7 +55,7 @@ const verifyErrorCheckoutSessionResponse = (response: CheckoutSessionErrorRespon
   return response;
 };
 
-describe('fetchCheckoutSession', () => {
+describe('createCheckoutSession', () => {
   const mockPost = jest.fn();
   const mockConfig = {
     ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
@@ -79,7 +79,7 @@ describe('fetchCheckoutSession', () => {
     mockPost.mockResolvedValue(mockSuccessResponse);
 
     // Execute
-    await fetchCheckoutSession(mockPayload);
+    await createCheckoutSession(mockPayload);
 
     // Verify
     expect(getConfig).toHaveBeenCalled();
@@ -95,7 +95,7 @@ describe('fetchCheckoutSession', () => {
     mockPost.mockResolvedValue(mockSuccessResponse);
 
     // Execute
-    const result = await fetchCheckoutSession(mockPayload) as CheckoutSessionResponse;
+    const result = await createCheckoutSession(mockPayload) as CheckoutSessionResponse;
 
     // Verify
     verifySuccessfulCheckoutSessionResponse(result);
@@ -115,7 +115,7 @@ describe('fetchCheckoutSession', () => {
     mockPost.mockResolvedValue(mockErrorResponse);
 
     // Execute
-    const result = await fetchCheckoutSession(mockPayload) as CheckoutSessionErrorResponse;
+    const result = await createCheckoutSession(mockPayload) as CheckoutSessionErrorResponse;
 
     // Verify
     verifyErrorCheckoutSessionResponse(result);
@@ -149,7 +149,7 @@ describe('fetchCheckoutSession', () => {
     });
 
     // Execute
-    const result = await fetchCheckoutSession(mockPayload) as CheckoutSessionErrorResponse;
+    const result = await createCheckoutSession(mockPayload) as CheckoutSessionErrorResponse;
 
     // Verify
     expect(result.adminEmail.errorCode).toBe('not_registered');
@@ -165,6 +165,6 @@ describe('fetchCheckoutSession', () => {
     mockPost.mockRejectedValue(mockError);
 
     // Execute & Verify
-    await expect(fetchCheckoutSession(mockPayload)).rejects.toThrow('API call fails');
+    await expect(createCheckoutSession(mockPayload)).rejects.toThrow('API call fails');
   });
 });

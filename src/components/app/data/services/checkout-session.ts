@@ -7,7 +7,7 @@ import type { AxiosResponse } from 'axios';
 // Type alias for the checkout session response
 
 /**
- * Fetches a checkout session from the API
+ * Creates a checkout session from the API
  *
  * @param payload - The payload to send to the API
  * @returns A promise that resolves to an AxiosResponse containing either a success or error response
@@ -34,9 +34,10 @@ import type { AxiosResponse } from 'axios';
  *   }
  * }
  */
-const fetchCheckoutSession = async (
+const createCheckoutSession = async (
   payload: CheckoutSessionSchemaPayload,
 ): Promise<CheckoutSessionResponseType> => {
+  // TODO: When this API is called, invalidate the upstream helper, queryCheckoutSession on success
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/customer-billing/create-checkout-session`;
 
@@ -45,4 +46,4 @@ const fetchCheckoutSession = async (
   return camelCaseObject(response.data);
 };
 
-export default fetchCheckoutSession;
+export default createCheckoutSession;
