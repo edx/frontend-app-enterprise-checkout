@@ -1,23 +1,19 @@
+import './css/PriceAlert.css';
 import { useParams } from 'react-router';
 
-import LoginPage from '@/components/plan-details-pages/LoginPage';
-import PlanDetailsPage from '@/components/plan-details-pages/PlanDetailsPage';
-import RegistrationPage from '@/components/plan-details-pages/RegistrationPage';
-import {
-  CheckoutSubstepKey,
-} from '@/constants/checkout';
-import './css/PriceAlert.css';
+import { PlanDetailsPage } from '@/components/plan-details-pages';
+import { CheckoutSubstepKey } from '@/constants/checkout';
 
 const PlanDetails: React.FC = () => {
   const { substep } = useParams<{ substep: CheckoutSubstepKey }>();
 
-  if (substep === CheckoutSubstepKey.Register) {
-    return <RegistrationPage />;
-  }
-
-  if (substep === CheckoutSubstepKey.Login) {
-    return <LoginPage />;
-  }
+  // if (substep === CheckoutSubstepKey.Register) {
+  //   return <RegistrationPage />;
+  // }
+  //
+  // if (substep === CheckoutSubstepKey.Login) {
+  //   return <LoginPage />;
+  // }
 
   return <PlanDetailsPage />;
 };

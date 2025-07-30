@@ -1,5 +1,4 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import {
   Button,
   Form,
@@ -8,28 +7,32 @@ import {
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
+import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
 import {
   AuthenticatedUserField,
-  LicensesField,
-  NameAndEmailFields,
+  LicensesField, LoginFields,
+  NameAndEmailFields, RegisterAccountFields,
 } from '@/components/FormFields';
+import { determineStepperTitle } from '@/components/plan-details-pages/utils';
 import { PriceAlert } from '@/components/PriceAlert';
 import {
   CheckoutStepKey,
   CheckoutStepperPath,
-  PlanDetailsSchema,
+  CheckoutSubstepKey, PlanDetailsSchema,
 } from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 import '../Stepper/Steps/css/PriceAlert.css';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const PlanDetailsPage: React.FC = () => {
   // TODO: Example usage of retrieving context data and validation
   // const bffContext = useBFFContext();
-  // console.log(bffContext.data);
   // const bffValidation = useBFFValidation(baseValidation);
+  const { step, substep } = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
+  const intl = useIntl();
   const planFormData = useCheckoutFormStore((state) => state.formData.planDetails);
   const formData = useCheckoutFormStore((state) => state.formData);
   const { planDetailsRegistration, planDetailsLogin } = formData;
@@ -77,15 +80,14 @@ const PlanDetailsPage: React.FC = () => {
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Plan Details">
           <h1 className="mb-5 text-center">
-            <FormattedMessage
-              id="checkout.planDetails.title"
-              defaultMessage="Plan Details"
-            />
+            {intl.formatMessage(determineStepperTitle({ step, substep }))}
           </h1>
           <Stack gap={4}>
             <PriceAlert />
-            <LicensesField form={form} />
-            {!isAuthenticated && <NameAndEmailFields form={form} />}
+            {!substep && <LicensesField form={form} />}
+            {substep === CheckoutSubstepKey.Login && <LoginFields form={form} />}
+            {substep === CheckoutSubstepKey.Register && <RegisterAccountFields form={form} />}
+            {!(isAuthenticated || substep) && <NameAndEmailFields form={form} />}
             {isAuthenticated && <AuthenticatedUserField orgEmail="test@example.com" fullName="Don Schapps" />}
           </Stack>
         </Stepper.Step>

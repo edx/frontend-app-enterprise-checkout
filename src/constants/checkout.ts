@@ -21,6 +21,14 @@ export enum CheckoutStepperPath {
   SuccessRoute = '/billing-details/success',
 }
 
+export enum HelmetTitle {
+  PlanDetails = 'Plan Details',
+  PlanDetailsRegister = 'Create your account',
+  PlanDetailsLogin = 'Log in to your account',
+  AccountDetails = 'Account Details',
+  BillingDetails = 'Billing Details',
+}
+
 export const PlanDetailsSchema = z.object({
   numUsers: z.coerce.number()
     .min(5, 'Minimum 5 users')

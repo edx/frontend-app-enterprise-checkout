@@ -3,6 +3,7 @@ import { Form } from '@openedx/paragon';
 import {
   CheckCircle, Error as ErrorIcon,
 } from '@openedx/paragon/icons';
+import { camelCase } from 'lodash-es';
 import {
   forwardRef,
   useCallback,
@@ -102,7 +103,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
 ) => {
   const intl = useIntl();
   const controlRef = useRef<FormControlElement | null>(null);
-  const currentStep = useCurrentStep()!;
+  const currentStep = camelCase(useCurrentStep()!);
   const formData = useCheckoutFormStore((state) => state.formData[currentStep]);
   const currentValue = formData?.[name as CheckoutStepKey];
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
