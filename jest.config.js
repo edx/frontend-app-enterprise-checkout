@@ -4,18 +4,22 @@ const { compilerOptions } = require("./tsconfig.json");
 
 process.env.TZ='UTC'
 
-module.exports = createConfig('jest', {
+const config = createConfig('jest', {
   // setupFilesAfterEnv is used after the jest environment has been loaded.  In general this is what you want.
   // If you want to add config BEFORE jest loads, use setupFiles instead.
   setupFilesAfterEnv: [
-    '<rootDir>/src/setupTest.js',
+    '<rootDir>/src/setupTest.ts',
   ],
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
     prefix: '<rootDir>/',
   }),
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   coveragePathIgnorePatterns: [
-    'src/setupTest.js',
+    'src/setupTest.ts',
     'src/i18n',
   ],
 });
+
+config.transformIgnorePatterns = ['node_modules/(?!(lodash-es|@(open)?edx)/)'];
+
+module.exports = config;

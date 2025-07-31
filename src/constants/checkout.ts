@@ -26,6 +26,7 @@ export const PlanDetailsSchema = z.object({
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users')
     .optional(),
+  authenticated: z.boolean().optional(),
   // fullName: z.string().trim()
   //   .min(1, 'Full name is required')
   //   .max(255)

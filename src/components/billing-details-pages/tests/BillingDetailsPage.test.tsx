@@ -1,42 +1,41 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
-import { renderWithRouterAndStepperProvider } from '@/utils/tests';
-
-import BillingDetailsPage from '../BillingDetailsPage';
-
-// Mock the hooks
-jest.mock('@/hooks/useCheckoutFormStore', () => ({
-  __esModule: true,
-  default: () => ({
-    formData: {
-      billingDetails: {},
-    },
-    setFormData: jest.fn(),
-  }),
-}));
+import { CheckoutStepperPath } from '@/components/Stepper';
+import { renderStepperRoute } from '@/utils/tests';
 
 describe('BillingDetailsPage', () => {
-  const renderComponent = () => renderWithRouterAndStepperProvider(
-    <BillingDetailsPage />,
-    CheckoutStepKey.BillingDetails,
-  );
-
   it('renders the title correctly', () => {
-    renderComponent();
-    expect(screen.getByText('Billing Details')).toBeInTheDocument();
+    renderStepperRoute(CheckoutStepperPath.BillingDetailsRoute);
+    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Billing Details');
   });
 
   it('renders the purchase button correctly', () => {
-    renderComponent();
-    expect(screen.getByText('Purchase Now')).toBeInTheDocument();
+    renderStepperRoute(CheckoutStepperPath.BillingDetailsRoute);
+    validateText('Purchase Now');
   });
 
   it('renders the DataPrivacyPolicyField component', () => {
-    renderComponent();
-    // Instead of looking for a mock, we're now testing the actual component
-    // The DataPrivacyPolicyField renders a title that we can check for
-    expect(screen.getByText('Data Privacy Policy and Master Service Agreement')).toBeInTheDocument();
+    renderStepperRoute(CheckoutStepperPath.BillingDetailsRoute);
+    validateText('Data Privacy Policy and Master Service Agreement');
+  });
+});
+
+describe('BillingDetailsSuccessPage', () => {
+  it('renders the title correctly', () => {
+    renderStepperRoute(CheckoutStepperPath.SuccessRoute);
+    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Thank you, Don.');
+  });
+
+  it('renders the OrderDetails component', () => {
+    renderStepperRoute(CheckoutStepperPath.SuccessRoute);
+    validateText('Order Details');
+    validateText('You have purchased an edX team\'s subscription.');
+  });
+
+  it('renders the SuccessHeading component', () => {
+    renderStepperRoute(CheckoutStepperPath.SuccessRoute);
+    validateText((content) => content.includes('Welcome to edX for teams!'));
+    expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
   });
 });

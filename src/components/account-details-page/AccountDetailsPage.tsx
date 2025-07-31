@@ -1,4 +1,4 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -8,20 +8,23 @@ import {
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
+import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
-import CustomUrlField from '@/components/FormFields/CustomUrlField';
-import OrganizationNameField from '@/components/FormFields/OrganizationNameField';
 import {
   AccountDetailsSchema,
   CheckoutStepKey,
-  CheckoutStepperPath,
+  CheckoutStepperPath, CheckoutSubstepKey,
 } from '@/components/Stepper/constants';
+import useStepperContent from '@/components/Stepper/Steps/hooks/useStepperContent';
+import { determineStepperButtonText, determineStepperTitleText } from '@/components/Stepper/utils';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 const AccountDetailsPage: React.FC = () => {
+  const intl = useIntl();
   const navigate = useNavigate();
   const accountFormData = useCheckoutFormStore((state) => state.formData.createAccount);
+  const { step, substep } = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountDetailsData>({
@@ -40,21 +43,18 @@ const AccountDetailsPage: React.FC = () => {
 
   const eventKey = CheckoutStepKey.AccountDetails;
 
+  const StepperContent = useStepperContent();
+
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Account Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
-          <h1 className="mb-5 text-center">
-            <FormattedMessage
-              id="checkout.accountDetails.title"
-              defaultMessage="Account Details"
-              description="Title for the account details step"
-            />
+          <h1 className="mb-5 text-center" data-testid="stepper-title">
+            {intl.formatMessage(determineStepperTitleText({ step, substep }))}
           </h1>
           <Stack gap={4}>
-            <OrganizationNameField />
-            <CustomUrlField />
+            <StepperContent />
           </Stack>
         </Stepper.Step>
         <Stepper.ActionRow eventKey={eventKey}>
@@ -62,11 +62,7 @@ const AccountDetailsPage: React.FC = () => {
             variant="secondary"
             type="submit"
           >
-            <FormattedMessage
-              id="checkout.accountDetails.continue"
-              defaultMessage="Continue"
-              description="Button to go to the next page"
-            />
+            {intl.formatMessage(determineStepperButtonText({ step, substep }))}
           </Button>
         </Stepper.ActionRow>
       </Stack>
