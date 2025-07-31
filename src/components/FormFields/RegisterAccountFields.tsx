@@ -5,7 +5,7 @@ import { FieldContainer } from '@/components/FieldContainer';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface RegisterAccountFieldsProps {
-  form: UseFormReturn<PlanDetailsRegistrationData>;
+  form: UseFormReturn<PlanDetailsData>;
 }
 
 // @ts-ignore

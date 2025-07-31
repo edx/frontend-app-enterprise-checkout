@@ -1,13 +1,14 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button, Card, Stack } from '@openedx/paragon';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { DisplayPrice } from '@/components/DisplayPrice';
 import {
-  CheckoutStepKey, CheckoutStepperPath,
+  CheckoutPageDetails,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
-} from '@/components/Stepper/constants';
+} from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+import useCurrentStep from '@/hooks/useCurrentStep';
 
 function calculateSubscriptionCost(numUsers?: number) {
   if (!numUsers) {
@@ -17,8 +18,8 @@ function calculateSubscriptionCost(numUsers?: number) {
 }
 
 const SubscriptionSummary: React.FC = () => {
-  const { step } = useParams<{ step: CheckoutStepKey }>();
-  const numUsers = useCheckoutFormStore((state) => state.formData.planDetails?.numUsers);
+  const { currentStep } = useCurrentStep();
+  const numUsers = useCheckoutFormStore((state) => state.formData.PlanDetails?.numUsers);
   const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
   return (
     <Card variant="muted">
@@ -47,13 +48,13 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of licenses"
                       description="Label for the number of licenses"
                     />
-                    {step !== CheckoutStepKey.PlanDetails && (
+                    {currentStep !== 'PlanDetails' && (
                       <Button
                         as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to={CheckoutStepperPath.PlanDetailsRoute}
+                        to={CheckoutPageDetails.PlanDetails.route}
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editNumUsers"

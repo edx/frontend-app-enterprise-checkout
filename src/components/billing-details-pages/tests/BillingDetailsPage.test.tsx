@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
+import { CheckoutPageDetails, CheckoutStepKey } from '@/components/Stepper/constants';
 import { renderWithRouterAndStepperProvider } from '@/utils/tests';
 
 import BillingDetailsPage from '../BillingDetailsPage';
@@ -9,11 +9,14 @@ import BillingDetailsPage from '../BillingDetailsPage';
 // Mock the hooks
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
   __esModule: true,
-  default: () => ({
-    formData: {
-      billingDetails: {},
-    },
-    setFormData: jest.fn(),
+  default: jest.fn((cb) => {
+    const defaultState = {
+      formData: { BillingDetails: {} },
+      setFormData: jest.fn(),
+      isAuthenticated: true,
+      setIsAuthenticated: jest.fn(),
+    };
+    return cb(defaultState);
   }),
 }));
 
@@ -21,6 +24,9 @@ describe('BillingDetailsPage', () => {
   const renderComponent = () => renderWithRouterAndStepperProvider(
     <BillingDetailsPage />,
     CheckoutStepKey.BillingDetails,
+    {
+      initialEntries: [CheckoutPageDetails.BillingDetails.route],
+    },
   );
 
   it('renders the title correctly', () => {
