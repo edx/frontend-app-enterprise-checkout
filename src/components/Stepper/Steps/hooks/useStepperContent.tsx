@@ -1,5 +1,3 @@
-import { useParams } from 'react-router';
-
 import {
   AccountDetailsContent,
   BillingDetailsContent,
@@ -8,24 +6,20 @@ import {
   PlanDetailsLoginContent,
   PlanDetailsRegisterContent,
 } from '@/components/Stepper/StepperContent';
-import { determineStepperStep } from '@/components/Stepper/utils';
-import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
+import { useCurrentPage } from '@/hooks/useCurrentStep';
 
-const StepperContent = {
-  [CheckoutStepKey.PlanDetails]: PlanDetailsContent,
-  [CheckoutSubstepKey.Login]: PlanDetailsLoginContent,
-  [CheckoutSubstepKey.Register]: PlanDetailsRegisterContent,
-  [CheckoutStepKey.AccountDetails]: AccountDetailsContent,
-  [CheckoutStepKey.BillingDetails]: BillingDetailsContent,
-  [CheckoutSubstepKey.Success]: BillingDetailsSuccessContent,
-  fallback: () => {},
-};
+const StepperContentByPage = {
+  PlanDetails: PlanDetailsContent,
+  PlanDetailsLogin: PlanDetailsLoginContent,
+  PlanDetailsRegister: PlanDetailsRegisterContent,
+  AccountDetails: AccountDetailsContent,
+  BillingDetails: BillingDetailsContent,
+  BillingDetailsSuccess: BillingDetailsSuccessContent,
+} as { [K in CheckoutPage]: React.FC };
 
 const useStepperContent = () => {
-  const params = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
-  const currentStep = determineStepperStep(params);
-  // @ts-ignore
-  return StepperContent[currentStep];
+  const currentPage = useCurrentPage();
+  return currentPage ? StepperContentByPage[currentPage] : undefined;
 };
 
 export default useStepperContent;
