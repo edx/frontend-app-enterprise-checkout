@@ -36,6 +36,20 @@ declare global {
    * ==============================
    */
 
+  type CheckoutStep = 'PlanDetails' | 'AccountDetails' | 'BillingDetails';
+
+  type CheckoutSubstep = 'Login' | 'Register' | 'Success';
+
+  type CheckoutPage = 'PlanDetails' | 'PlanDetailsLogin' | 'PlanDetailsRegister' | 'AccountDetails' | 'BillingDetails' | 'BillingDetailsSuccess';
+
+  interface CheckoutPageDetails {
+    step: CheckoutStep,
+    substep: CheckoutSubstep | undefined,
+    route: string,
+    title: object,
+    buttonMessage: object | null,
+  }
+
   /**
    * Authentication step identifier
    */

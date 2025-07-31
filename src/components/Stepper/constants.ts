@@ -2,8 +2,10 @@
 import {
   AccountDetailsSchema,
   BillingDetailsSchema,
+  CheckoutPageDetails,
+  CheckoutStepByKey,
   CheckoutStepKey,
-  CheckoutStepperPath,
+  CheckoutSubstepByKey,
   CheckoutSubstepKey,
   PlanDetailsLoginSchema,
   PlanDetailsRegistrationSchema,
@@ -21,8 +23,10 @@ export const authenticatedSteps = [
 export {
   AccountDetailsSchema,
   BillingDetailsSchema,
+  CheckoutPageDetails,
+  CheckoutStepByKey,
   CheckoutStepKey,
-  CheckoutStepperPath,
+  CheckoutSubstepByKey,
   CheckoutSubstepKey,
   PlanDetailsLoginSchema,
   PlanDetailsRegistrationSchema,

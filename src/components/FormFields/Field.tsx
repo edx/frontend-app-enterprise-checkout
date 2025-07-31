@@ -3,7 +3,6 @@ import { Form } from '@openedx/paragon';
 import {
   CheckCircle, Error as ErrorIcon,
 } from '@openedx/paragon/icons';
-import { camelCase } from 'lodash-es';
 import {
   forwardRef,
   useCallback,
@@ -11,7 +10,6 @@ import {
   useRef,
 } from 'react';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
@@ -103,9 +101,9 @@ const DefaultFormControlBase = <T extends FieldValues>(
 ) => {
   const intl = useIntl();
   const controlRef = useRef<FormControlElement | null>(null);
-  const currentStep = camelCase(useCurrentStep()!);
-  const formData = useCheckoutFormStore((state) => state.formData[currentStep]);
-  const currentValue = formData?.[name as CheckoutStepKey];
+  const { currentStep } = useCurrentStep();
+  const formData = useCheckoutFormStore((state) => state.formData[currentStep!]);
+  const currentValue = formData?.[name];
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { register } = form;
   const { onChange } = registerOptions;
@@ -117,7 +115,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
     ...registerOptions,
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
       // @ts-ignore
-      setFormData(currentStep, {
+      setFormData(step, {
         ...formData,
         [name]: event.target.value,
       });

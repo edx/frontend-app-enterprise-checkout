@@ -8,19 +8,17 @@ import {
 } from '@openedx/paragon';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
 import { PriceAlert } from '@/components/PriceAlert';
 import useStepperContent from '@/components/Stepper/Steps/hooks/useStepperContent';
-import { determineStepperButtonText, determineStepperStep, determineStepperTitleText } from '@/components/Stepper/utils';
 import {
+  CheckoutPageDetails,
   CheckoutStepKey,
-  CheckoutStepperPath,
-  CheckoutSubstepKey,
   PlanDetailsSchema,
 } from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+import { useCurrentPageDetails } from '@/hooks/useCurrentStep';
 
 import '../Stepper/Steps/css/PriceAlert.css';
 
@@ -28,7 +26,6 @@ const PlanDetailsPage: React.FC = () => {
   // TODO: Example usage of retrieving context data and validation
   // const bffContext = useBFFContext();
   // const bffValidation = useBFFValidation(baseValidation);
-  const { step, substep } = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
   const intl = useIntl();
   const planFormData = useCheckoutFormStore((state) => state.formData.planDetails);
   const formData = useCheckoutFormStore((state) => state.formData);
@@ -57,29 +54,29 @@ const PlanDetailsPage: React.FC = () => {
     // TODO: replace with an authenticatedUser
     if (!isAuthenticated) {
       if (randomExistingEmail) {
-        navigate(CheckoutStepperPath.LoginRoute);
+        navigate(CheckoutPageDetails.PlanDetailsLogin.route);
       } else {
-        navigate(CheckoutStepperPath.RegisterRoute);
+        navigate(CheckoutPageDetails.PlanDetailsRegister.route);
       }
       return;
     }
 
     if (isAuthenticated) {
-      navigate(CheckoutStepperPath.AccountDetailsRoute);
+      navigate(CheckoutPageDetails.AccountDetails.route);
     }
   };
 
+  const { title: pageTitle, buttonMessage: stepperActionButtonMessage } = useCurrentPageDetails();
   const StepperContent = useStepperContent();
 
   const eventKey = CheckoutStepKey.PlanDetails;
-  determineStepperStep({ step, substep });
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Plan Details">
           <h1 className="mb-5 text-center" data-testid="stepper-title">
-            {intl.formatMessage(determineStepperTitleText({ step, substep }))}
+            {intl.formatMessage(pageTitle)}
           </h1>
           <Stack gap={4}>
             <PriceAlert />
@@ -93,7 +90,7 @@ const PlanDetailsPage: React.FC = () => {
             disabled={!isValid}
             data-testid="stepper-submit-button"
           >
-            {intl.formatMessage(determineStepperButtonText({ step, substep }))}
+            {intl.formatMessage(stepperActionButtonMessage)}
           </Button>
         </Stepper.ActionRow>
       </Stack>
