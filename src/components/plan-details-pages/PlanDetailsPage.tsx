@@ -1,4 +1,5 @@
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@edx/frontend-platform/i18n';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
   Form,
@@ -10,22 +11,18 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  AuthenticatedUserField,
-  LicensesField, LoginFields,
-  NameAndEmailFields, RegisterAccountFields,
-} from '@/components/FormFields';
-import { determineStepperTitle } from '@/components/plan-details-pages/utils';
 import { PriceAlert } from '@/components/PriceAlert';
+import useStepperContent from '@/components/Stepper/Steps/hooks/useStepperContent';
+import { determineStepperButtonText, determineStepperStep, determineStepperTitleText } from '@/components/Stepper/utils';
 import {
   CheckoutStepKey,
   CheckoutStepperPath,
-  CheckoutSubstepKey, PlanDetailsSchema,
+  CheckoutSubstepKey,
+  PlanDetailsSchema,
 } from '@/constants/checkout';
 import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 import '../Stepper/Steps/css/PriceAlert.css';
-import { zodResolver } from '@hookform/resolvers/zod';
 
 const PlanDetailsPage: React.FC = () => {
   // TODO: Example usage of retrieving context data and validation
@@ -72,23 +69,21 @@ const PlanDetailsPage: React.FC = () => {
     }
   };
 
-  const eventKey = CheckoutStepKey.PlanDetails;
+  const StepperContent = useStepperContent();
 
+  const eventKey = CheckoutStepKey.PlanDetails;
+  determineStepperStep({ step, substep });
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Plan Details">
-          <h1 className="mb-5 text-center">
-            {intl.formatMessage(determineStepperTitle({ step, substep }))}
+          <h1 className="mb-5 text-center" data-testid="stepper-title">
+            {intl.formatMessage(determineStepperTitleText({ step, substep }))}
           </h1>
           <Stack gap={4}>
             <PriceAlert />
-            {!substep && <LicensesField form={form} />}
-            {substep === CheckoutSubstepKey.Login && <LoginFields form={form} />}
-            {substep === CheckoutSubstepKey.Register && <RegisterAccountFields form={form} />}
-            {!(isAuthenticated || substep) && <NameAndEmailFields form={form} />}
-            {isAuthenticated && <AuthenticatedUserField orgEmail="test@example.com" fullName="Don Schapps" />}
+            <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
         <Stepper.ActionRow eventKey={eventKey}>
@@ -96,12 +91,9 @@ const PlanDetailsPage: React.FC = () => {
             variant="secondary"
             type="submit"
             disabled={!isValid}
+            data-testid="stepper-submit-button"
           >
-            <FormattedMessage
-              id="checkout.planDetails.continue"
-              defaultMessage="Continue"
-              description="Button label for the next step in the plan details step"
-            />
+            {intl.formatMessage(determineStepperButtonText({ step, substep }))}
           </Button>
         </Stepper.ActionRow>
       </Stack>

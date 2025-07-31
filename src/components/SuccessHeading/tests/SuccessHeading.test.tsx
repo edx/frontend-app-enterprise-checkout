@@ -13,8 +13,8 @@ describe('SuccessHeading', () => {
 
   it('renders the welcome message correctly', () => {
     renderComponent();
-    expect(screen.getByText((content) => content.includes('Welcome to edX for teams!'))).toBeInTheDocument();
-    expect(screen.getByText((content) => content.includes('Go to your administrator dashboard'))).toBeInTheDocument();
+    validateText((content: string | string[]) => content.includes('Welcome to edX for teams!'));
+    validateText((content: string | string[]) => content.includes('Go to your administrator dashboard'));
   });
 
   it('renders the celebration image', () => {

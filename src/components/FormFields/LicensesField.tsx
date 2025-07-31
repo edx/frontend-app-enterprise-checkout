@@ -1,7 +1,6 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
 import { FieldContainer } from '@/components/FieldContainer';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
 
 import Field from './Field';
 
@@ -13,7 +12,6 @@ interface LicensesFieldProps {
 
 const LicensesField = ({ form }: LicensesFieldProps) => {
   const intl = useIntl();
-  const planFormData = useCheckoutFormStore((state) => state.formData);
   return (
     <FieldContainer>
       <div>
@@ -50,12 +48,9 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         className="mr-0 mt-3"
         registerOptions={{
           required: true,
-          validate: (data) => {
-            console.log('hi');
-            console.log(data);
-            return false;
-            // Check react-hook-form docs for more info...
-          },
+          validate: () => false
+          // Check react-hook-form docs for more info...
+          ,
         }}
         autoFocus
       />
