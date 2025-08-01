@@ -4,13 +4,13 @@ import { FieldContainer } from '@/components/FieldContainer';
 
 import type { UseFormReturn } from 'react-hook-form';
 
-interface LoginFieldsProps {
-  form: UseFormReturn<PlanDetailsLoginData>;
+interface PlanDetailsProps {
+  form: UseFormReturn<PlanDetailsData>;
 }
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const LoginFields = ({ form }: LoginFieldsProps) => (
+const LoginFields = ({ form }: PlanDetailsProps) => (
   <FieldContainer>
     <div>
       <h3>

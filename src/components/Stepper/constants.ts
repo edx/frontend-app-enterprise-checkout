@@ -2,11 +2,11 @@
 import {
   AccountDetailsSchema,
   BillingDetailsSchema,
+  CheckoutPageDetails,
+  CheckoutStepByKey,
   CheckoutStepKey,
-  CheckoutStepperPath,
+  CheckoutSubstepByKey,
   CheckoutSubstepKey,
-  PlanDetailsLoginSchema,
-  PlanDetailsRegistrationSchema,
   PlanDetailsSchema,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 } from '@/constants/checkout';
@@ -21,11 +21,11 @@ export const authenticatedSteps = [
 export {
   AccountDetailsSchema,
   BillingDetailsSchema,
+  CheckoutPageDetails,
+  CheckoutStepByKey,
   CheckoutStepKey,
-  CheckoutStepperPath,
+  CheckoutSubstepByKey,
   CheckoutSubstepKey,
-  PlanDetailsLoginSchema,
-  PlanDetailsRegistrationSchema,
   PlanDetailsSchema,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 };

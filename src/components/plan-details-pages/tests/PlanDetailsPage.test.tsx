@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
+import { CheckoutPageDetails, CheckoutStepKey } from '@/components/Stepper/constants';
 import { renderWithRouterAndStepperProvider } from '@/utils/tests';
 
 import PlanDetailsPage from '../PlanDetailsPage';
@@ -9,18 +9,22 @@ import PlanDetailsPage from '../PlanDetailsPage';
 // Create a mock implementation that can be configured for each test
 const mockSetFormData = jest.fn();
 const mockFormData = {
-  planDetails: {},
-  planDetailsRegistration: { authenticated: false },
-  planDetailsLogin: { authenticated: false },
+  PlanDetails: {},
 };
+const mockSetIsAuthenticated = jest.fn();
 
 // Mock the hooks and components
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
   __esModule: true,
-  default: jest.fn(() => ({
-    formData: mockFormData,
-    setFormData: mockSetFormData,
-  })),
+  default: jest.fn((cb) => {
+    const defaultState = {
+      formData: mockFormData,
+      setFormData: mockSetFormData,
+      isAuthenticated: false,
+      setIsAuthenticated: mockSetIsAuthenticated,
+    };
+    return cb(defaultState);
+  }),
 }));
 
 // Keep mocks for complex components for now
@@ -48,6 +52,9 @@ describe('PlanDetailsPage', () => {
   const renderComponent = () => renderWithRouterAndStepperProvider(
     <PlanDetailsPage />,
     CheckoutStepKey.PlanDetails,
+    {
+      initialEntries: [CheckoutPageDetails.PlanDetails.route],
+    },
   );
 
   it('renders the title correctly', () => {

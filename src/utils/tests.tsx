@@ -20,9 +20,13 @@ export function renderWithRouterProvider(
   children: ReactElement,
   { routes = [], initialEntries, customRouter }: RenderWithRouterOptions = {},
 ): RenderResult {
-  const defaultRoute: RouteObject = { path: '/', element: children };
+  const defaultRoutes: RouteObject[] = [
+    // Do we really need to hard-code these??
+    { path: '/:step', element: children },
+    { path: '/:step/:substep', element: children },
+  ];
 
-  const router = customRouter ?? createMemoryRouter([defaultRoute, ...routes], {
+  const router = customRouter ?? createMemoryRouter([...defaultRoutes, ...routes], {
     initialEntries: initialEntries ?? ['/'],
     initialIndex: 0,
   });

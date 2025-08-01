@@ -1,11 +1,11 @@
 import { Stepper } from '@openedx/paragon';
-import { Navigate, useParams } from 'react-router-dom';
 
-import { CheckoutStepKey, CheckoutStepperPath } from '@/components/Stepper/constants';
 import {
-  AccountDetails, BillingDetails,
+  AccountDetails,
+  BillingDetails,
   PlanDetails,
 } from '@/components/Stepper/Steps';
+import useCurrentStep from '@/hooks/useCurrentStep';
 
 const Steps: React.FC = () => (
   <div className="py-4">
@@ -16,12 +16,9 @@ const Steps: React.FC = () => (
 );
 
 const CheckoutStepper: React.FC = () => {
-  const { step } = useParams<{ step: CheckoutStepKey }>();
-  if (!step) {
-    return <Navigate to={CheckoutStepperPath.PlanDetailsRoute} />;
-  }
+  const { currentStepKey } = useCurrentStep();
   return (
-    <Stepper activeKey={step}>
+    <Stepper activeKey={currentStepKey}>
       <Stepper.Header />
       <Steps />
     </Stepper>
