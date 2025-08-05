@@ -1,5 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import SuccessNotification from '../SuccessNotification';
@@ -13,6 +13,6 @@ describe('SuccessNotification', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    expect(screen.getByText('Your free trial for edX team\'s subscription has started.')).toBeInTheDocument();
+    validateText('Your free trial for edX team\'s subscription has started.');
   });
 });

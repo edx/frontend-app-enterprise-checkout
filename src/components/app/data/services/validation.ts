@@ -1,6 +1,9 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
+import { debounce } from 'lodash-es';
+
+import { snakeCaseBaseValidation } from '@/components/app/data/constants';
 
 import type { AxiosResponse } from 'axios';
 
@@ -22,6 +25,35 @@ const fetchCheckoutValidation = async (
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/bffs/checkout/validation/`;
   const response: AxiosResponse<ValidationResponsePayload> = await getAuthenticatedHttpClient().post(url, payload);
   return camelCaseObject(response.data);
+};
+
+let previousQuantity: number | undefined;
+
+const debouncedValidateQuantity = debounce(async (
+  quantity: number,
+  resolve: (val: boolean) => void,
+) => {
+  try {
+    const response = await fetchCheckoutValidation({
+      ...snakeCaseBaseValidation,
+      quantity,
+      stripe_price_id: 'price_9876_replace-me',
+    });
+    console.log({ response });
+    resolve(true);
+  } catch {
+    resolve(false);
+  }
+}, 500);
+
+export const validateQuantity = async (quantity: number) => {
+  // Don't revalidate if quantity hasn't changed
+  if (quantity === previousQuantity) { return true; }
+  previousQuantity = quantity;
+
+  return new Promise<boolean>((resolve) => {
+    debouncedValidateQuantity(quantity, resolve);
+  });
 };
 
 export default fetchCheckoutValidation;

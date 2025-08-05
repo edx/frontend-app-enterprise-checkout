@@ -9,6 +9,8 @@ import {
   PlanDetailsSchema,
 } from '@/components/Stepper/constants';
 
+import type { TextMatch } from '@testing-library/react';
+
 // Declaration for SVG modules
 declare module '*.svg' {
   import React from 'react';
@@ -18,6 +20,16 @@ declare module '*.svg' {
 }
 
 declare global {
+
+  let validateText: (
+    text: TextMatch,
+    options?: {
+      exact?: boolean;
+      selector?: string;
+      ignore?: string | boolean;
+      normalizer?: (text: string) => string;
+    }
+  ) => void;
   /**
    * ==============================
    * Form and UI Related Types

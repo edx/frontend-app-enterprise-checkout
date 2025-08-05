@@ -32,7 +32,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
       </div>
       <Field
         form={form}
-        name="numUsers"
+        name="quantity"
         type="number"
         floatingLabel={intl.formatMessage({
           id: 'checkout.licensesField.floatingLabel',
@@ -47,9 +47,10 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         min="0"
         className="mr-0 mt-3"
         registerOptions={{
-          validate: () => {
-            // Check react-hook-form docs for more info...
-          },
+          required: true,
+          validate: () => false
+          // Check react-hook-form docs for more info...
+          ,
         }}
         autoFocus
       />
