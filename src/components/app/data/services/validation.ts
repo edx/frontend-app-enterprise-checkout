@@ -1,9 +1,8 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
+import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
-import { debounce } from 'lodash-es';
-
-import { snakeCaseBaseValidation } from '@/components/app/data/constants';
+import { debounce, isNull } from 'lodash-es';
 
 import type { AxiosResponse } from 'axios';
 
@@ -19,7 +18,7 @@ import type { AxiosResponse } from 'axios';
  * @returns A promise that resolves to an AxiosResponse containing the validation results
  */
 const fetchCheckoutValidation = async (
-  payload: ValidationSchemaPayload,
+  payload: Partial<ValidationSchemaPayload>,
 ): Promise<ValidationResponse> => {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/bffs/checkout/validation/`;
@@ -35,13 +34,16 @@ const debouncedValidateQuantity = debounce(async (
 ) => {
   try {
     const response = await fetchCheckoutValidation({
-      ...snakeCaseBaseValidation,
       quantity,
       stripe_price_id: 'price_9876_replace-me',
     });
-    console.log({ response });
-    resolve(true);
-  } catch {
+    if (response?.validationDecisions) {
+      resolve(!!isNull(response.validationDecisions.quantity));
+      return;
+    }
+    resolve(false);
+  } catch (error) {
+    logError(error);
     resolve(false);
   }
 }, 500);

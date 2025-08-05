@@ -89,7 +89,7 @@ const PlanDetailsPage = () => {
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;
-
+  console.log(isValid);
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />

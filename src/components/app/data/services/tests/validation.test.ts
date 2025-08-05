@@ -18,6 +18,10 @@ jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform', () => ({
+  snakeCaseObject: jest.fn(),
+}));
+
 /**
  * Helper function to verify the structure of a validation response
  */
