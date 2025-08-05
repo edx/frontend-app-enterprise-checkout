@@ -66,6 +66,7 @@ const AccountDetailsPage: React.FC = () => {
           <Button
             variant="secondary"
             type="submit"
+            data-testid="stepper-submit-button"
           >
             {intl.formatMessage(stepperActionButtonMessage)}
           </Button>

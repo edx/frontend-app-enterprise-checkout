@@ -1,11 +1,13 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { Stepper } from '@openedx/paragon';
-import { QueryCache, QueryClient } from '@tanstack/react-query';
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { ReactElement } from 'react';
-import { RouteObject } from 'react-router';
+import { MemoryRouter, Route, RouteObject, Routes } from 'react-router';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
+import { CheckoutStepper } from '@/components/Stepper';
+import { CheckoutStepperPath } from '@/constants/checkout';
 import { queryCacheOnErrorHandler } from '@/utils/common';
 
 import type { RenderResult } from '@testing-library/react';
@@ -90,27 +92,6 @@ export const generateTestPermutations = (options: { [s: string]: any[]; }): obje
 );
 
 /**
- * Renders a component with a Stepper context provider.
- * This is useful for testing components that use Stepper.Step or Stepper.ActionRow.
- *
- * @param {ReactElement} children - The component to render
- * @param {string} activeKey - The active step key to set in the Stepper context
- * @returns {RenderResult} - The render result
- */
-export function renderWithStepperProvider(
-  children: ReactElement,
-  activeKey: string,
-): RenderResult {
-  return render(
-    <IntlProvider locale="en">
-      <Stepper activeKey={activeKey}>
-        {children}
-      </Stepper>
-    </IntlProvider>,
-  );
-}
-
-/**
  * Renders a component with both a Router and Stepper context provider.
  * This is useful for testing components that use both routing and Stepper.Step or Stepper.ActionRow.
  *
@@ -125,12 +106,30 @@ export function renderWithRouterAndStepperProvider(
   routerOptions: RenderWithRouterOptions = {},
 ): RenderResult {
   const wrappedChildren = (
-    <IntlProvider locale="en">
-      <Stepper activeKey={activeKey}>
-        {children}
-      </Stepper>
-    </IntlProvider>
+    <Stepper activeKey={activeKey}>
+      {children}
+    </Stepper>
   );
 
   return renderWithRouterProvider(wrappedChildren, routerOptions);
 }
+
+export const renderStepperRoute = (route: CheckoutStepperPath): RenderResult => (
+  render(
+    <QueryClientProvider client={queryClient()}>
+      <IntlProvider locale="en">
+        <MemoryRouter initialEntries={[route]}>
+          <Routes>
+            <Route
+              path="/:step"
+              element={<CheckoutStepper />}
+            />
+            <Route
+              path="/:step/:substep"
+              element={<CheckoutStepper />}
+            />
+          </Routes>
+        </MemoryRouter>
+      </IntlProvider>
+    </QueryClientProvider>,
+  ));

@@ -32,12 +32,12 @@ describe('LicensesField', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    expect(screen.getByText('Number of licenses')).toBeInTheDocument();
+    validateText('Number of licenses');
   });
 
   it('renders the description correctly', () => {
     renderComponent();
-    expect(screen.getByText('Enter in the number of licenses you want to purchase.')).toBeInTheDocument();
+    validateText('Enter in the number of licenses you want to purchase.');
   });
 
   it('renders the field with correct labels', () => {

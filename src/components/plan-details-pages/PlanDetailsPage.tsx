@@ -108,6 +108,7 @@ const PlanDetailsPage = () => {
             variant="secondary"
             type="submit"
             disabled={!isValid}
+            data-testid="stepper-submit-button"
           >
             {intl.formatMessage(stepperActionButtonMessage)}
           </Button>
