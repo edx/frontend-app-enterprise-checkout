@@ -11,9 +11,10 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
+import { useValidate } from '@/components/app/data';
 import { PriceAlert } from '@/components/PriceAlert';
 import useStepperContent from '@/components/Stepper/Steps/hooks/useStepperContent';
-import { determineStepperButtonText, determineStepperStep, determineStepperTitleText } from '@/components/Stepper/utils';
+import { determineStepperButtonText, determineStepperTitleText } from '@/components/Stepper/utils';
 import {
   CheckoutStepKey,
   CheckoutStepperPath,
@@ -27,17 +28,16 @@ import '../Stepper/Steps/css/PriceAlert.css';
 const PlanDetailsPage: React.FC = () => {
   // TODO: Example usage of retrieving context data and validation
   // const bffContext = useBFFContext();
-  // const bffValidation = useBFFValidation(baseValidation);
   const { step, substep } = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
   const intl = useIntl();
   const planFormData = useCheckoutFormStore((state) => state.formData.planDetails);
-  const formData = useCheckoutFormStore((state) => state.formData);
-  const { planDetailsRegistration, planDetailsLogin } = formData;
-  const isAuthenticated = planDetailsRegistration?.authenticated || planDetailsLogin?.authenticated;
+  const isAuthenticated = planFormData?.authenticated;
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   // TODO: Once the user is logged in, use this field for authenticated user validation
   // const { authenticatedUser } = useContext<AppContext>(AppContext);
   const navigate = useNavigate();
+
+  const { mutateAsync: validate } = useValidate();
 
   const form = useForm<PlanDetailsData>({
     mode: 'onTouched',
@@ -48,11 +48,20 @@ const PlanDetailsPage: React.FC = () => {
     handleSubmit,
     formState: { isValid },
   } = form;
-
   const onSubmit = (data: PlanDetailsData) => {
     // TODO: replace with existing user email logic
     const randomExistingEmail = !!(Math.random() < 0.5 ? 0 : 1);
-    setFormData('planDetails', data);
+
+    // TODO: replace with login/register logic
+    if (!isAuthenticated && (substep === CheckoutSubstepKey.Login || substep === CheckoutSubstepKey.Register)) {
+      setFormData('planDetails', {
+        ...planFormData,
+        authenticated: true,
+        ...data,
+      });
+      navigate(CheckoutStepperPath.PlanDetailsRoute);
+      return;
+    }
 
     // TODO: replace with an authenticatedUser
     if (!isAuthenticated) {
@@ -72,7 +81,7 @@ const PlanDetailsPage: React.FC = () => {
   const StepperContent = useStepperContent();
 
   const eventKey = CheckoutStepKey.PlanDetails;
-  determineStepperStep({ step, substep });
+
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />

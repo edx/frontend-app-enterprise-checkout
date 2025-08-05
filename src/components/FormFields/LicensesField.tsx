@@ -32,7 +32,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
       </div>
       <Field
         form={form}
-        name="numUsers"
+        name="quantity"
         type="number"
         floatingLabel={intl.formatMessage({
           id: 'checkout.licensesField.floatingLabel',

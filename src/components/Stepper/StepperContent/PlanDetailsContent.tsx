@@ -8,9 +8,8 @@ interface PlanDetailsContentProps {
 }
 
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
-  const formData = useCheckoutFormStore((state) => state.formData);
-  const { planDetailsRegistration, planDetailsLogin } = formData;
-  const isAuthenticated = planDetailsRegistration?.authenticated || planDetailsLogin?.authenticated;
+  const planDetails = useCheckoutFormStore((state) => state.formData.planDetails);
+  const isAuthenticated = planDetails?.authenticated;
   if (isAuthenticated) {
     return (
       <>

@@ -5,6 +5,7 @@ import { queryBffValidation } from '@/components/app/data/queries/queries';
 const useBFFValidation = (formFields: ValidationSchema) => useQuery(
   queryOptions({
     ...queryBffValidation(formFields),
+    staleTime: 0,
   }),
 );
 export default useBFFValidation;

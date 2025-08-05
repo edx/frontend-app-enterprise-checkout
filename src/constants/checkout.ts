@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { validateQuantity } from '@/components/app/data/services/validation';
+
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
   AccountDetails = 'account-details',
@@ -22,10 +24,30 @@ export enum CheckoutStepperPath {
 }
 
 export const PlanDetailsSchema = z.object({
-  numUsers: z.coerce.number()
+  quantity: z.coerce.number()
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users')
-    .optional(),
+    .refine(async (numUsers) => {
+      const response = await validateQuantity(numUsers);
+      console.log(response);
+      return response;
+    }, {
+      message: 'Failed server-side validation.',
+    }),
+  // .refine(async (numUsers) => {
+  //   try {
+  //     const response = await fetchCheckoutValidation({
+  //       ...snakeCaseObject(baseValidation),
+  //       quantity: numUsers,
+  //       stripe_price_id: 'price_9876_replace-me',
+  //     });
+  //     console.log(response);
+  //     return true;
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  //   return false;
+  // }),
   authenticated: z.boolean().optional(),
   // fullName: z.string().trim()
   //   .min(1, 'Full name is required')
