@@ -4,8 +4,6 @@ import { z } from 'zod';
 import {
   AccountDetailsSchema,
   BillingDetailsSchema,
-  PlanDetailsLoginSchema,
-  PlanDetailsRegistrationSchema,
   PlanDetailsSchema,
 } from '@/components/Stepper/constants';
 
@@ -24,6 +22,20 @@ declare global {
    * ==============================
    */
 
+  type CheckoutStep = 'PlanDetails' | 'AccountDetails' | 'BillingDetails';
+
+  type CheckoutSubstep = 'Login' | 'Register' | 'Success';
+
+  type CheckoutPage = 'PlanDetails' | 'PlanDetailsLogin' | 'PlanDetailsRegister' | 'AccountDetails' | 'BillingDetails' | 'BillingDetailsSuccess';
+
+  interface CheckoutPageDetails {
+    step: CheckoutStep,
+    substep: CheckoutSubstep | undefined,
+    route: string,
+    title: object,
+    buttonMessage: object | null,
+  }
+
   /**
    * Authentication step identifier
    */
@@ -36,19 +48,15 @@ declare global {
   type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
   type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
   // TODO: This is added an a means to iterate through the project. Will need to be removed.
-  type PlanDetailsRegistrationData = z.infer<typeof PlanDetailsRegistrationSchema>;
-  type PlanDetailsLoginData = z.infer<typeof PlanDetailsLoginSchema>;
+  type TempAuthenticatedData = { tempAuthenticated: boolean };
 
   /**
    * Maps step names to their corresponding data types
    */
   interface StepDataMap {
-    'planDetails': Partial<PlanDetailsData>;
-    'createAccount': Partial<AccountDetailsData>;
-    'billingDetails': Partial<BillingDetailsData>;
-    // TODO: This is added an a means to iterate through the project. Will need to be removed.
-    'planDetailsRegistration': Partial<PlanDetailsRegistrationData>;
-    'planDetailsLogin': Partial<PlanDetailsLoginData>;
+    'PlanDetails': Partial<PlanDetailsData>;
+    'AccountDetails': Partial<AccountDetailsData>;
+    'BillingDetails': Partial<BillingDetailsData>;
   }
 
   /**
@@ -66,6 +74,12 @@ declare global {
     setFormData<K extends keyof StepDataMap>(
       step: K,
       data: Partial<FormData<K>>,
+    ): void;
+
+    // TODO remove this authenticated state hack.
+    isAuthenticated: boolean
+    setIsAuthenticated(
+      newIsAuthenticated: boolean,
     ): void;
   }
 

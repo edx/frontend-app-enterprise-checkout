@@ -10,9 +10,10 @@ import {
   useRef,
 } from 'react';
 
-import { CheckoutStepKey } from '@/components/Stepper/constants';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import useCurrentStep from '@/hooks/useCurrentStep';
+import {
+  useCheckoutFormStore,
+  useCurrentStep,
+} from '@/hooks/index';
 
 import type {
   FieldValues,
@@ -102,9 +103,9 @@ const DefaultFormControlBase = <T extends FieldValues>(
 ) => {
   const intl = useIntl();
   const controlRef = useRef<FormControlElement | null>(null);
-  const currentStep = useCurrentStep()!;
-  const formData = useCheckoutFormStore((state) => state.formData[currentStep]);
-  const currentValue = formData?.[name as CheckoutStepKey];
+  const { currentStep } = useCurrentStep();
+  const stepData = useCheckoutFormStore((state) => state.formData[currentStep!]);
+  const currentValue = stepData?.[name as string];
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { register } = form;
   const { onChange } = registerOptions;
@@ -117,7 +118,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
       // @ts-ignore
       setFormData(currentStep, {
-        ...formData,
+        ...stepData,
         [name]: event.target.value,
       });
       if (onChange) {

@@ -1,3 +1,4 @@
+import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
 export enum CheckoutStepKey {
@@ -12,14 +13,103 @@ export enum CheckoutSubstepKey {
   Success = 'success',
 }
 
-export enum CheckoutStepperPath {
-  PlanDetailsRoute = '/plan-details',
-  LoginRoute = '/plan-details/login',
-  RegisterRoute = '/plan-details/register',
-  AccountDetailsRoute = '/account-details',
-  BillingDetailsRoute = '/billing-details',
-  SuccessRoute = '/billing-details/success',
+function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[keyof E], keyof E> {
+  return Object.fromEntries(
+    Object.entries(enumObj).map(([key, value]) => [value, key]),
+  ) as Record<E[keyof E], keyof E>;
 }
+
+export const CheckoutStepByKey: Record<CheckoutStepKey, CheckoutStep> = reverseEnum(CheckoutStepKey);
+export const CheckoutSubstepByKey: Record<CheckoutSubstepKey, CheckoutSubstep> = reverseEnum(CheckoutSubstepKey);
+
+export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
+  PlanDetails: {
+    step: 'PlanDetails',
+    substep: undefined,
+    route: `/${CheckoutStepKey.PlanDetails}`,
+    title: defineMessages({
+      id: 'checkout.planDetails.title',
+      defaultMessage: 'Plan Details',
+      description: 'Title for the plan details page',
+    }),
+    buttonMessage: defineMessages({
+      id: 'checkout.planDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button label for the next step in the plan details step',
+    }),
+  } as CheckoutPageDetails,
+  PlanDetailsLogin: {
+    step: 'PlanDetails',
+    substep: 'Login',
+    route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+    title: defineMessages({
+      id: 'checkout.planDetailsLogin.title',
+      defaultMessage: 'Log in to your account',
+      description: 'Title for the login page in the plan details step',
+    }),
+    buttonMessage: defineMessages({
+      id: 'checkout.registrationPage.login',
+      defaultMessage: 'Log in',
+      description: 'Button label to login a user in the plan details step',
+    }),
+  },
+  PlanDetailsRegister: {
+    step: 'PlanDetails',
+    substep: 'Register',
+    route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+    title: defineMessages({
+      id: 'checkout.planDetailsRegistration.title',
+      defaultMessage: 'Create your Account',
+      description: 'Title for the registration page in the plan details step',
+    }),
+    buttonMessage: defineMessages({
+      id: 'checkout.registrationPage.register',
+      defaultMessage: 'Sign up',
+      description: 'Button label to register a new user in the plan details step',
+    }),
+  },
+  AccountDetails: {
+    step: 'AccountDetails',
+    substep: undefined,
+    route: `/${CheckoutStepKey.AccountDetails}`,
+    title: defineMessages({
+      id: 'checkout.accountDetails.title',
+      defaultMessage: 'Account Details',
+      description: 'Title for the account details step',
+    }),
+    buttonMessage: defineMessages({
+      id: 'checkout.accountDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button to go to the next page',
+    }),
+  },
+  BillingDetails: {
+    step: 'BillingDetails',
+    substep: undefined,
+    route: `/${CheckoutStepKey.BillingDetails}`,
+    title: defineMessages({
+      id: 'checkout.billingDetails.title',
+      defaultMessage: 'Billing Details',
+      description: 'Title for the billing details step',
+    }),
+    buttonMessage: defineMessages({
+      id: 'checkout.billingDetails.purchaseNow',
+      defaultMessage: 'Purchase Now',
+      description: 'Button to purchase the subscription product',
+    }),
+  },
+  BillingDetailsSuccess: {
+    step: 'BillingDetails',
+    substep: 'Success',
+    route: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+    title: defineMessages({
+      id: 'checkout.billingDetailsSuccess.title',
+      defaultMessage: 'Thank you, {firstName}.',
+      description: 'Title for the success page',
+    }),
+    buttonMessage: null,
+  },
+};
 
 export const PlanDetailsSchema = z.object({
   numUsers: z.coerce.number()
@@ -40,14 +130,6 @@ export const PlanDetailsSchema = z.object({
   //   .optional(),
   // country: z.string().trim()
   //   .min(1, 'Country is required').optional(),
-});
-
-export const PlanDetailsRegistrationSchema = z.object({
-  authenticated: z.boolean().optional(),
-});
-
-export const PlanDetailsLoginSchema = z.object({
-  authenticated: z.boolean().optional(),
 });
 
 export const AccountDetailsSchema = z.object({

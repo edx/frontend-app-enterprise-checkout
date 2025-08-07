@@ -1,4 +1,4 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -10,31 +10,38 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { DataPrivacyPolicyField } from '@/components/FormFields';
+import { DataStores } from '@/components/Stepper/constants';
+import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   BillingDetailsSchema,
+  CheckoutPageDetails,
   CheckoutStepKey,
-  CheckoutStepperPath,
 } from '@/constants/checkout';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 
 const BillingDetailsPage: React.FC = () => {
+  const intl = useIntl();
   const navigate = useNavigate();
-  const billingDetailsData = useCheckoutFormStore((state) => state.formData.billingDetails);
+  const billingDetailsData = useCheckoutFormStore((state) => state.formData.BillingDetails);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-
-  const form = useForm<AccountDetailsData>({
+  const form = useForm<BillingDetailsData>({
     mode: 'onBlur',
     resolver: zodResolver(BillingDetailsSchema),
     defaultValues: billingDetailsData,
   });
   const {
+    title: pageTitle,
+    buttonMessage: stepperActionButtonMessage,
+  } = useCurrentPageDetails();
+  const {
     handleSubmit,
   } = form;
 
-  const onSubmit = (data: AccountDetailsData) => {
-    setFormData('billingDetails', data);
-    navigate(CheckoutStepperPath.SuccessRoute);
+  const StepperContent = useStepperContent();
+
+  const onSubmit = (data: BillingDetailsData) => {
+    setFormData(DataStores.BillingDetailsStoreKey, data);
+    navigate(CheckoutPageDetails.BillingDetailsSuccess.route);
   };
 
   const eventKey = CheckoutStepKey.BillingDetails;
@@ -44,28 +51,22 @@ const BillingDetailsPage: React.FC = () => {
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Billing Details">
           <h1 className="mb-5 text-center">
-            <FormattedMessage
-              id="checkout.billingDetails.title"
-              defaultMessage="Billing Details"
-              description="Title for the billing details step"
-            />
+            {intl.formatMessage(pageTitle, { firstName: 'Don' })}
           </h1>
           <Stack gap={4}>
-            <DataPrivacyPolicyField />
+            <StepperContent />
           </Stack>
         </Stepper.Step>
-        <Stepper.ActionRow eventKey={eventKey}>
-          <Button
-            variant="secondary"
-            type="submit"
-          >
-            <FormattedMessage
-              id="checkout.billingDetails.purchaseNow"
-              defaultMessage="Purchase Now"
-              description="Button to purchase the subscription product"
-            />
-          </Button>
-        </Stepper.ActionRow>
+        {stepperActionButtonMessage && (
+          <Stepper.ActionRow eventKey={eventKey}>
+            <Button
+              variant="secondary"
+              type="submit"
+            >
+              {intl.formatMessage(stepperActionButtonMessage)}
+            </Button>
+          </Stepper.ActionRow>
+        )}
       </Stack>
     </Form>
   );

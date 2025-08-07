@@ -1,4 +1,4 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -10,34 +10,43 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import CustomUrlField from '@/components/FormFields/CustomUrlField';
-import OrganizationNameField from '@/components/FormFields/OrganizationNameField';
+import { DataStores } from '@/components/Stepper/constants';
+import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   AccountDetailsSchema,
+  CheckoutPageDetails,
   CheckoutStepKey,
-  CheckoutStepperPath,
-} from '@/components/Stepper/constants';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
+} from '@/constants/checkout';
+import {
+  useCheckoutFormStore,
+  useCurrentPageDetails,
+} from '@/hooks/index';
 
 const AccountDetailsPage: React.FC = () => {
+  const intl = useIntl();
   const navigate = useNavigate();
-  const accountFormData = useCheckoutFormStore((state) => state.formData.createAccount);
+  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData.AccountDetails);
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountDetailsData>({
     mode: 'onBlur',
     resolver: zodResolver(AccountDetailsSchema),
-    defaultValues: accountFormData,
+    defaultValues: accountDetailsFormData,
   });
+  const {
+    title: pageTitle,
+    buttonMessage: stepperActionButtonMessage,
+  } = useCurrentPageDetails();
   const {
     handleSubmit,
   } = form;
 
   const onSubmit = (data: AccountDetailsData) => {
-    setFormData('createAccount', data);
-    navigate(CheckoutStepperPath.BillingDetailsRoute);
+    setFormData(DataStores.AccountDetailsStoreKey, data);
+    navigate(CheckoutPageDetails.BillingDetails.route);
   };
 
+  const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.AccountDetails;
 
   return (
@@ -46,29 +55,22 @@ const AccountDetailsPage: React.FC = () => {
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
           <h1 className="mb-5 text-center">
-            <FormattedMessage
-              id="checkout.accountDetails.title"
-              defaultMessage="Account Details"
-              description="Title for the account details step"
-            />
+            {intl.formatMessage(pageTitle)}
           </h1>
           <Stack gap={4}>
-            <OrganizationNameField />
-            <CustomUrlField />
+            <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
+        {stepperActionButtonMessage && (
         <Stepper.ActionRow eventKey={eventKey}>
           <Button
             variant="secondary"
             type="submit"
           >
-            <FormattedMessage
-              id="checkout.accountDetails.continue"
-              defaultMessage="Continue"
-              description="Button to go to the next page"
-            />
+            {intl.formatMessage(stepperActionButtonMessage)}
           </Button>
         </Stepper.ActionRow>
+        )}
       </Stack>
     </Form>
   );

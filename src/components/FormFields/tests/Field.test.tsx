@@ -8,9 +8,14 @@ import Field, { getTrailingElement } from '../Field';
 // Mock the hooks
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
   __esModule: true,
-  default: () => ({
-    formData: { planDetails: {} },
-    setFormData: jest.fn(),
+  default: jest.fn((cb) => {
+    const defaultState = {
+      formData: { PlanDetails: {} },
+      setFormData: jest.fn(),
+      isAuthenticated: false,
+      setIsAuthenticated: jest.fn(),
+    };
+    return cb(defaultState);
   }),
 }));
 
