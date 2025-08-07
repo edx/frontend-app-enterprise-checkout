@@ -10,8 +10,10 @@ import {
   useRef,
 } from 'react';
 
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import useCurrentStep from '@/hooks/useCurrentStep';
+import {
+  useCheckoutFormStore,
+  useCurrentStep,
+} from '@/hooks/index';
 
 import type {
   FieldValues,

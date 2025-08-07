@@ -13,15 +13,16 @@ export enum CheckoutSubstepKey {
   Success = 'success',
 }
 
-export const CheckoutStepByKey = Object.fromEntries(
-  Object.entries(CheckoutStepKey).map(([key, value]) => [value, key as keyof typeof CheckoutStepKey]),
-) as Record<CheckoutStepKey, CheckoutStep>;
+function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[keyof E], keyof E> {
+  return Object.fromEntries(
+    Object.entries(enumObj).map(([key, value]) => [value, key]),
+  ) as Record<E[keyof E], keyof E>;
+}
 
-export const CheckoutSubstepByKey = Object.fromEntries(
-  Object.entries(CheckoutSubstepKey).map(([key, value]) => [value, key as keyof typeof CheckoutSubstepKey]),
-) as Record<CheckoutSubstepKey, CheckoutSubstep>;
+export const CheckoutStepByKey: Record<CheckoutStepKey, CheckoutStep> = reverseEnum(CheckoutStepKey);
+export const CheckoutSubstepByKey: Record<CheckoutSubstepKey, CheckoutSubstep> = reverseEnum(CheckoutSubstepKey);
 
-export const CheckoutPageDetails = {
+export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
@@ -108,7 +109,7 @@ export const CheckoutPageDetails = {
     }),
     buttonMessage: null,
   },
-} as { [K in CheckoutPage]: CheckoutPageDetails };
+};
 
 export const PlanDetailsSchema = z.object({
   numUsers: z.coerce.number()

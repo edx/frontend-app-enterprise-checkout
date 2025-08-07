@@ -2,7 +2,7 @@ import {
   Col, Container, Row, Stack,
 } from '@openedx/paragon';
 
-import CheckoutStepper from '@/components/Stepper/CheckoutStepper';
+import { CheckoutStepper } from '@/components/Stepper';
 import { SubscriptionSummary } from '@/components/SubscriptionSummary';
 
 const CheckoutPage: React.FC = () => (

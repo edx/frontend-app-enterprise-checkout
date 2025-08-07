@@ -1,11 +1,17 @@
 import { Stack } from '@openedx/paragon';
 
-import { DataPrivacyPolicyField } from '@/components/FormFields';
+import { OrderDetails } from '@/components/OrderDetails';
+import { SuccessHeading } from '@/components/SuccessHeading';
+import { SuccessNotification } from '@/components/SuccessNotification';
 
-const BillingDetailsContent = () => (
-  <Stack gap={4}>
-    <DataPrivacyPolicyField />
-  </Stack>
+const BillingDetailsSuccessContent = () => (
+  <>
+    <SuccessHeading />
+    <Stack gap={4}>
+      <SuccessNotification />
+      <OrderDetails />
+    </Stack>
+  </>
 );
 
-export default BillingDetailsContent;
+export default BillingDetailsSuccessContent;

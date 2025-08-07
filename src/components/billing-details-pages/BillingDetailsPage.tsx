@@ -10,14 +10,14 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { DataPrivacyPolicyField } from '@/components/FormFields';
+import { DataStores } from '@/components/Stepper/constants';
+import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   BillingDetailsSchema,
   CheckoutPageDetails,
   CheckoutStepKey,
 } from '@/constants/checkout';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import useCurrentPageDetails from '@/hooks/useCurrentPageDetails';
+import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 
 const BillingDetailsPage: React.FC = () => {
   const intl = useIntl();
@@ -37,8 +37,10 @@ const BillingDetailsPage: React.FC = () => {
     handleSubmit,
   } = form;
 
+  const StepperContent = useStepperContent();
+
   const onSubmit = (data: AccountDetailsData) => {
-    setFormData('BillingDetails', data);
+    setFormData(DataStores.BillingDetailsStoreKey, data);
     navigate(CheckoutPageDetails.BillingDetailsSuccess.route);
   };
 
@@ -49,20 +51,22 @@ const BillingDetailsPage: React.FC = () => {
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Billing Details">
           <h1 className="mb-5 text-center">
-            {intl.formatMessage(pageTitle)}
+            {intl.formatMessage(pageTitle, { firstName: 'Don' })}
           </h1>
           <Stack gap={4}>
-            <DataPrivacyPolicyField />
+            <StepperContent />
           </Stack>
         </Stepper.Step>
-        <Stepper.ActionRow eventKey={eventKey}>
-          <Button
-            variant="secondary"
-            type="submit"
-          >
-            {stepperActionButtonMessage ? intl.formatMessage(stepperActionButtonMessage) : ''}
-          </Button>
-        </Stepper.ActionRow>
+        {stepperActionButtonMessage && (
+          <Stepper.ActionRow eventKey={eventKey}>
+            <Button
+              variant="secondary"
+              type="submit"
+            >
+              {intl.formatMessage(stepperActionButtonMessage)}
+            </Button>
+          </Stepper.ActionRow>
+        )}
       </Stack>
     </Form>
   );

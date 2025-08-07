@@ -10,14 +10,17 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import useStepperContent from '@/components/Stepper/Steps/hooks/useStepperContent';
+import { DataStores } from '@/components/Stepper/constants';
+import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   AccountDetailsSchema,
   CheckoutPageDetails,
   CheckoutStepKey,
 } from '@/constants/checkout';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import useCurrentPageDetails from '@/hooks/useCurrentPageDetails';
+import {
+  useCheckoutFormStore,
+  useCurrentPageDetails,
+} from '@/hooks/index';
 
 const AccountDetailsPage: React.FC = () => {
   const intl = useIntl();
@@ -39,7 +42,7 @@ const AccountDetailsPage: React.FC = () => {
   } = form;
 
   const onSubmit = (data: AccountDetailsData) => {
-    setFormData('AccountDetails', data);
+    setFormData(DataStores.AccountDetailsStoreKey, data);
     navigate(CheckoutPageDetails.BillingDetails.route);
   };
 
@@ -58,14 +61,16 @@ const AccountDetailsPage: React.FC = () => {
             <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
+        {stepperActionButtonMessage && (
         <Stepper.ActionRow eventKey={eventKey}>
           <Button
             variant="secondary"
             type="submit"
           >
-            {stepperActionButtonMessage ? intl.formatMessage(stepperActionButtonMessage) : ''}
+            {intl.formatMessage(stepperActionButtonMessage)}
           </Button>
         </Stepper.ActionRow>
+        )}
       </Stack>
     </Form>
   );

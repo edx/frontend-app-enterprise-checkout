@@ -10,19 +10,22 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import useStepperContent from '@/components/Stepper/Steps/hooks/useStepperContent';
+import { DataStores, SubmitCallbacks } from '@/components/Stepper/constants';
+import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
   CheckoutStepKey,
   PlanDetailsSchema,
 } from '@/constants/checkout';
-import useCheckoutFormStore from '@/hooks/useCheckoutFormStore';
-import useCurrentPage from '@/hooks/useCurrentPage';
-import useCurrentPageDetails from '@/hooks/useCurrentPageDetails';
+import {
+  useCheckoutFormStore,
+  useCurrentPage,
+  useCurrentPageDetails,
+} from '@/hooks/index';
 
 import '../Stepper/Steps/css/PriceAlert.css';
 
-const PlanDetailsPage: React.FC = () => {
+const PlanDetailsPage = () => {
   // TODO: Example usage of retrieving context data and validation
   // const bffContext = useBFFContext();
   // console.log(bffContext.data);
@@ -51,9 +54,9 @@ const PlanDetailsPage: React.FC = () => {
     formState: { isValid },
   } = form;
 
-  const onSubmitCallbacks = {
-    PlanDetails: (data: PlanDetailsData) => {
-      setFormData('PlanDetails', data);
+  const onSubmitCallbacks: { [K in SubmitCallbacks]: (data: PlanDetailsData) => void } = {
+    [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
+      setFormData(DataStores.PlanDetailsStoreKey, data);
 
       // TODO: replace with existing user email logic
       const randomExistingEmail = !!(Math.random() < 0.5 ? 0 : 1);
@@ -72,17 +75,15 @@ const PlanDetailsPage: React.FC = () => {
         navigate(CheckoutPageDetails.AccountDetails.route);
       }
     },
-    PlanDetailsLogin: (data: PlanDetailsData) => {
-      console.log(data);
+    [SubmitCallbacks.PlanDetailsLoginCallback]: () => {
       setIsAuthenticated(true);
       navigate(CheckoutPageDetails.PlanDetails.route);
     },
-    PlanDetailsRegister: (data: PlanDetailsData) => {
-      console.log(data);
+    [SubmitCallbacks.PlanDetailsRegisterCallback]: () => {
       setIsAuthenticated(true);
       navigate(CheckoutPageDetails.PlanDetails.route);
     },
-  } as { [K in CheckoutPage]: (data: PlanDetailsData) => void };
+  };
 
   const onSubmit = (data: PlanDetailsData) => onSubmitCallbacks[currentPage!](data);
 
@@ -101,18 +102,21 @@ const PlanDetailsPage: React.FC = () => {
             <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
+        {stepperActionButtonMessage && (
         <Stepper.ActionRow eventKey={eventKey}>
           <Button
             variant="secondary"
             type="submit"
             disabled={!isValid}
           >
-            {stepperActionButtonMessage ? intl.formatMessage(stepperActionButtonMessage) : ''}
+            {intl.formatMessage(stepperActionButtonMessage)}
           </Button>
         </Stepper.ActionRow>
+        )}
       </Stack>
     </Form>
   );
 };
 
+// @ts-ignore
 export default PlanDetailsPage;
