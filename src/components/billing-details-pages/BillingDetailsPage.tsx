@@ -24,7 +24,7 @@ const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData.BillingDetails);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const form = useForm<AccountDetailsData>({
+  const form = useForm<BillingDetailsData>({
     mode: 'onBlur',
     resolver: zodResolver(BillingDetailsSchema),
     defaultValues: billingDetailsData,
@@ -39,7 +39,7 @@ const BillingDetailsPage: React.FC = () => {
 
   const StepperContent = useStepperContent();
 
-  const onSubmit = (data: AccountDetailsData) => {
+  const onSubmit = (data: BillingDetailsData) => {
     setFormData(DataStores.BillingDetailsStoreKey, data);
     navigate(CheckoutPageDetails.BillingDetailsSuccess.route);
   };
