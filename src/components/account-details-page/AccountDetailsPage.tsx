@@ -29,7 +29,7 @@ const AccountDetailsPage: React.FC = () => {
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountDetailsData>({
-    mode: 'onBlur',
+    mode: 'onChange',
     resolver: zodResolver(AccountDetailsSchema),
     defaultValues: accountDetailsFormData,
   });
@@ -39,6 +39,7 @@ const AccountDetailsPage: React.FC = () => {
   } = useCurrentPageDetails();
   const {
     handleSubmit,
+    formState: { isValid },
   } = form;
 
   const onSubmit = (data: AccountDetailsData) => {
@@ -54,7 +55,7 @@ const AccountDetailsPage: React.FC = () => {
       <Helmet title="Account Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
-          <h1 className="mb-5 text-center">
+          <h1 className="mb-5 text-center" data-testid="stepper-title">
             {intl.formatMessage(pageTitle)}
           </h1>
           <Stack gap={4}>
@@ -66,6 +67,7 @@ const AccountDetailsPage: React.FC = () => {
           <Button
             variant="secondary"
             type="submit"
+            disabled={!isValid}
             data-testid="stepper-submit-button"
           >
             {intl.formatMessage(stepperActionButtonMessage)}

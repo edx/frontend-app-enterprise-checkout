@@ -89,12 +89,12 @@ const PlanDetailsPage = () => {
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;
-  console.log(isValid);
+
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />
       <Stack gap={4}>
-        <Stepper.Step eventKey={eventKey} title="Plan Details">
+        <Stepper.Step eventKey={eventKey} title="Plan Details" data-testid="stepper-title">
           <h1 className="mb-5 text-center" data-testid="stepper-title">
             {intl.formatMessage(pageTitle)}
           </h1>

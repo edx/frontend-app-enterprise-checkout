@@ -1,7 +1,7 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
-import { validateQuantity } from '@/components/app/data/services/validation';
+import { validateField } from '@/components/app/data/services/validation';
 
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
@@ -51,7 +51,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     }),
     buttonMessage: defineMessages({
       id: 'checkout.registrationPage.login',
-      defaultMessage: 'Log in',
+      defaultMessage: 'Sign in',
       description: 'Button label to login a user in the plan details step',
     }),
   },
@@ -66,7 +66,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     }),
     buttonMessage: defineMessages({
       id: 'checkout.registrationPage.register',
-      defaultMessage: 'Sign up',
+      defaultMessage: 'Register',
       description: 'Button label to register a new user in the plan details step',
     }),
   },
@@ -117,53 +117,46 @@ export const PlanDetailsSchema = z.object({
   quantity: z.coerce.number()
     .min(5, 'Minimum 5 users')
     .max(500, 'Maximum 500 users')
-    .refine(async (numUsers) => {
-      const response = await validateQuantity(numUsers);
-      console.log(response);
-      return response;
-    }, {
-      message: 'Failed server-side validation.',
-    }),
-  // .refine(async (numUsers) => {
-  //   try {
-  //     const response = await fetchCheckoutValidation({
-  //       ...snakeCaseObject(baseValidation),
-  //       quantity: numUsers,
-  //       stripe_price_id: 'price_9876_replace-me',
-  //     });
-  //     console.log(response);
-  //     return true;
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  //   return false;
-  // }),
+    .refine(
+      (quantity) => validateField('quantity', quantity, {
+        stripe_price_id: 'price_9876_replace-me',
+      }),
+      { message: 'Failed server-side validation.' },
+    ),
   authenticated: z.boolean().optional(),
-  // fullName: z.string().trim()
-  //   .min(1, 'Full name is required')
-  //   .max(255)
-  //   .optional(),
-  // orgEmail: z.string().trim()
-  //   .email()
-  //   .max(254)
-  //   .optional(),
-  // orgName: z.string().trim()
-  //   .min(1, 'Organization name is required')
-  //   .max(255, 'Maximum 255 characters')
-  //   .optional(),
-  // country: z.string().trim()
-  //   .min(1, 'Country is required').optional(),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255)
+    .refine(
+      (fullName) => validateField('fullName', fullName),
+      { message: 'Failed server-side validation.' },
+    ),
+  adminEmail: z.string().trim()
+    .max(254)
+    .refine(
+      (adminEmail) => validateField('adminEmail', adminEmail),
+      { message: 'Failed server-side validation.' },
+    ),
+  country: z.string().trim()
+    .min(1, 'Country is required'),
 });
 
 export const AccountDetailsSchema = z.object({
-  orgSlug: z.string().trim()
-    .min(1, 'Access link is required')
-    .max(30, 'Maximum 30 characters')
-    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
-    .refine(slug => !slug.startsWith('-') && !slug.endsWith('-'), {
-      message: 'Access link may not start or end with a hyphen',
-    })
-    .optional(),
+  companyName: z.string().trim()
+    .min(1, 'Company name is required')
+    .max(255, 'Maximum 255 characters')
+    .refine(
+      (companyName) => validateField('companyName', companyName),
+      { message: 'Failed server-side validation.' },
+    ),
+  // enterpriseSlug: z.string().trim()
+  //   .min(1, ' is required')
+  //   .max(30, 'Maximum 30 characters')
+  //   .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
+  //   .refine(
+  //     (enterpriseSlug) => validateField('enterpriseSlug', enterpriseSlug),
+  //     { message: 'Failed server-side validation.' },
+  //   ),
 });
 
 export const BillingDetailsSchema = z.object({});

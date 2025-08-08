@@ -49,25 +49,10 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           controlClassName="mr-0 mt-3"
           className="bg-light-300"
         />
+
         <Field
           form={form}
-          name="orgName"
-          type="text"
-          floatingLabel={intl.formatMessage({
-            id: 'checkout.nameAndEmailFields.companyName.floatingLabel',
-            defaultMessage: 'Company Name',
-            description: 'Floating label for the company name input field',
-          })}
-          placeholder={intl.formatMessage({
-            id: 'checkout.nameAndEmailFields.companyName.placeholder',
-            defaultMessage: 'Enter your company name',
-            description: 'Placeholder for the company name input field',
-          })}
-          controlClassName="mr-0 mt-3"
-        />
-        <Field
-          form={form}
-          name="orgEmail"
+          name="adminEmail"
           type="email"
           floatingLabel={intl.formatMessage({
             id: 'checkout.nameAndEmailFields.workEmail.floatingLabel',

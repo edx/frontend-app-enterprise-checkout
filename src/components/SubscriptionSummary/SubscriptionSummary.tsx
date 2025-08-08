@@ -22,8 +22,8 @@ function calculateSubscriptionCost(quantity?: number) {
 
 const SubscriptionSummary: React.FC = () => {
   const { currentStep } = useCurrentStep();
-  const numUsers = useCheckoutFormStore((state) => state.formData.PlanDetails?.numUsers);
-  const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
+  const quantity = useCheckoutFormStore((state) => state.formData.PlanDetails?.quantity);
+  const totalSubscriptionCost = calculateSubscriptionCost(quantity);
   return (
     <Card variant="muted">
       <Card.Header title="Purchase Summary" subtitle="Review your selected subscription." size="sm" />

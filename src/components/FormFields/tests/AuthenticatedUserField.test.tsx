@@ -7,7 +7,7 @@ import AuthenticatedUserField from '../AuthenticatedUserField';
 describe('AuthenticatedUserField', () => {
   const defaultProps = {
     fullName: 'John Doe',
-    orgEmail: 'john.doe@example.com',
+    adminEmail: 'john.doe@example.com',
   };
 
   const renderComponent = (props = {}) => render(
@@ -28,15 +28,15 @@ describe('AuthenticatedUserField', () => {
 
   it('renders the user name and email correctly', () => {
     renderComponent();
-    validateText(`${defaultProps.fullName} (${defaultProps.orgEmail})`);
+    validateText(`${defaultProps.fullName} (${defaultProps.adminEmail})`);
   });
 
   it('renders with custom user name and email', () => {
     const customProps = {
       fullName: 'Jane Smith',
-      orgEmail: 'jane.smith@example.com',
+      adminEmail: 'jane.smith@example.com',
     };
     renderComponent(customProps);
-    validateText(`${customProps.fullName} (${customProps.orgEmail})`);
+    validateText(`${customProps.fullName} (${customProps.adminEmail})`);
   });
 });

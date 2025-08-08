@@ -1,8 +1,9 @@
+import { snakeCaseObject } from '@edx/frontend-platform';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
-import { debounce, isNull } from 'lodash-es';
+import { debounce, isEqual, snakeCase } from 'lodash-es';
 
 import type { AxiosResponse } from 'axios';
 
@@ -26,36 +27,135 @@ const fetchCheckoutValidation = async (
   return camelCaseObject(response.data);
 };
 
-let previousQuantity: number | undefined;
+type FieldKey = keyof ValidationSchema;
 
-const debouncedValidateQuantity = debounce(async (
-  quantity: number,
-  resolve: (val: boolean) => void,
-) => {
-  try {
-    const response = await fetchCheckoutValidation({
-      quantity,
-      stripe_price_id: 'price_9876_replace-me',
-    });
-    if (response?.validationDecisions) {
-      resolve(!!isNull(response.validationDecisions.quantity));
-      return;
-    }
-    resolve(false);
-  } catch (error) {
-    logError(error);
-    resolve(false);
+// Cache previous values per field
+const previousValues = new Map<FieldKey, unknown>();
+
+// Store debounced validators per field
+const debouncers = new Map<FieldKey, ReturnType<typeof debounce>>();
+
+/**
+ * Returns (and caches) a debounced async validator function for a given field.
+ *
+ * The returned debounced function will:
+ *  - Call the server-side checkout validation API (`fetchCheckoutValidation`)
+ *    for the given field and its value, plus any optional extra fields/values.
+ *  - Convert both the main field key and all extra field keys to `snake_case`
+ *    for the API payload.
+ *  - Consider validation successful only if the API returns `null` decisions
+ *    for the main field **and** all provided extras.
+ *  - Debounce calls so rapid changes to the same field only trigger the API
+ *    once per configured wait time (500 ms default here).
+ *
+ * @template K - The key of the main field being validated (must exist in ValidationSchema).
+ * @param field - The main field name in camelCase (e.g., `'quantity'`, `'fullName'`).
+ * @returns A debounced validation function with the signature:
+ *   `(value: ValidationSchema[K], extras?: Partial<ValidationSchemaPayload>,
+ *   resolve: (valid: boolean) => void) => void`
+ *   where:
+ *     - `value` is the value to validate for the main field
+ *     - `extras` is an optional object of other fields/values to include and require as valid
+ *     - `resolve` is a callback that receives `true` if all fields validate successfully, otherwise `false`
+ *
+ * @example
+ * // Create a debounced validator for quantity that also validates stripePriceId
+ * const debouncedQuantityValidator = getDebouncer('quantity');
+ *
+ * debouncedQuantityValidator(
+ *   42,
+ *   { stripePriceId: 'price_123' },
+ *   (valid) => {
+ *     console.log(valid ? 'Valid' : 'Invalid');
+ *   }
+ * );
+ */
+function getDebouncer<K extends FieldKey>(field: K) {
+  if (!debouncers.has(field)) {
+    debouncers.set(
+      field,
+      debounce(
+        async (
+          value: ValidationSchema[K],
+          extras: Partial<ValidationSchemaPayload> | undefined,
+          resolve: (valid: boolean) => void,
+        ) => {
+          try {
+            const payload: Partial<ValidationSchemaPayload> = {
+              [snakeCase(field)]: value as any,
+              ...(snakeCaseObject(extras) ?? {}),
+            };
+            const response: Partial<ValidationResponse> = await fetchCheckoutValidation(
+              payload as ValidationSchemaPayload,
+            );
+            const decisions = response?.validationDecisions ?? {};
+
+            // All fields to check: main + extras
+            const fieldsToCheck: FieldKey[] = [
+              field,
+              ...(extras ? (Object.keys(extras) as FieldKey[]) : []),
+            ];
+
+            const allNull = fieldsToCheck.every(
+              (k) => decisions[k] === null,
+            );
+            resolve(allNull);
+          } catch (err) {
+            logError(err);
+            resolve(false);
+          }
+        },
+        500,
+      ),
+    );
   }
-}, 500);
+  return debouncers.get(field)!;
+}
 
-export const validateQuantity = async (quantity: number) => {
-  // Don't revalidate if quantity hasn't changed
-  if (quantity === previousQuantity) { return true; }
-  previousQuantity = quantity;
+/**
+ * Validates a single field value against the checkout API with debouncing and previous-value caching.
+ *
+ * - Uses a per-field debounced function from `getDebouncer` so that
+ *   multiple rapid calls for the same field collapse into one API request.
+ * - Skips validation entirely if the value has not changed since the last check.
+ * - Resolves to `true` if the API returns a `null` decision for the field
+ *   (meaning no errors), otherwise `false`.
+ *
+ * @template K - The key of the field being validated (must be in ValidationSchema).
+ * @param field - The field name (e.g., `'quantity'`, `'fullName'`).
+ * @param value - The value to validate for this field.
+ * @param extras - Optional additional fields to include in the validation payload
+ *                 (e.g., `{ stripe_price_id: 'price_9876' }`).
+ * @returns A Promise that resolves to:
+ *  - `true` if the server-side validation passes
+ *  - `false` if it fails or an error occurs
+ *
+ * @example
+ * // In a Zod refinement:
+ * z.string().refine(
+ *   (fullName) => validateField('fullName', fullName),
+ *   { message: 'Invalid name' }
+ * );
+ *
+ * @example
+ * // With extras:
+ * validateField('quantity', 10, { stripe_price_id: 'price_123' })
+ *   .then((isValid) => console.log(isValid));
+ */
+export function validateField<K extends FieldKey>(
+  field: K,
+  value: ValidationSchema[K],
+  extras?: Partial<ValidationSchemaPayload>,
+): Promise<boolean> {
+  // Short-circuit if value hasn’t changed
+  if (isEqual(previousValues.get(field), value)) {
+    return Promise.resolve(true);
+  }
+  previousValues.set(field, value);
 
   return new Promise<boolean>((resolve) => {
-    debouncedValidateQuantity(quantity, resolve);
+    getDebouncer(field)(value, extras, resolve);
   });
-};
+}
 
 export default fetchCheckoutValidation;
