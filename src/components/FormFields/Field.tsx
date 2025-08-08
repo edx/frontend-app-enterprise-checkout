@@ -3,7 +3,6 @@ import { Form } from '@openedx/paragon';
 import {
   CheckCircle, Error as ErrorIcon,
 } from '@openedx/paragon/icons';
-import { camelCase } from 'lodash-es';
 import {
   forwardRef,
   useCallback,

@@ -7,7 +7,6 @@ import { MemoryRouter, Route, RouteObject, Routes } from 'react-router';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import { CheckoutStepper } from '@/components/Stepper';
-import { CheckoutStepperPath } from '@/constants/checkout';
 import { queryCacheOnErrorHandler } from '@/utils/common';
 
 import type { RenderResult } from '@testing-library/react';
@@ -114,7 +113,7 @@ export function renderWithRouterAndStepperProvider(
   return renderWithRouterProvider(wrappedChildren, routerOptions);
 }
 
-export const renderStepperRoute = (route: CheckoutStepperPath): RenderResult => (
+export const renderStepperRoute = (route): RenderResult => (
   render(
     <QueryClientProvider client={queryClient()}>
       <IntlProvider locale="en">
