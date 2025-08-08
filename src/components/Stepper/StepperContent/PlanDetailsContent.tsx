@@ -17,7 +17,7 @@ const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
       <PriceAlert />
       <LicensesField form={form} />
       {isAuthenticated
-        ? (<AuthenticatedUserField orgEmail="test@example.com" fullName="Don Schapps" />)
+        ? (<AuthenticatedUserField adminEmail="test@example.com" fullName="Don Schapps" />)
         : (<NameAndEmailFields form={form} />)}
     </>
   );

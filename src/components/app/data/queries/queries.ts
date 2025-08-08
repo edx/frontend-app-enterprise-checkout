@@ -1,6 +1,9 @@
 import { snakeCaseObject } from '@edx/frontend-platform';
 
-import { baseCheckoutSession, baseValidation } from '@/components/app/data/constants';
+import {
+  snakeCaseBaseCheckoutSession,
+  snakeCaseBaseValidation,
+} from '@/components/app/data/constants';
 
 import queries from './queryKeyFactory';
 
@@ -15,7 +18,7 @@ export const queryBffContext = () => (
 export const queryBffValidation = (payload: ValidationSchema) => {
   const fields = Object.keys(payload);
   const snakeCasedPayload = snakeCaseObject({
-    ...baseValidation,
+    ...snakeCaseBaseValidation,
     ...payload,
   });
   return (
@@ -30,7 +33,7 @@ export const queryBffValidation = (payload: ValidationSchema) => {
 export const queryCheckoutSession = (payload: CheckoutSessionSchema) => {
   const fields = Object.keys(payload);
   const snakeCasedPayload = snakeCaseObject({
-    ...baseCheckoutSession,
+    ...snakeCaseBaseCheckoutSession,
     ...payload,
   });
   return (

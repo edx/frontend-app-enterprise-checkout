@@ -13,17 +13,17 @@ import {
   useCurrentStep,
 } from '@/hooks/index';
 
-function calculateSubscriptionCost(numUsers?: number) {
-  if (!numUsers) {
+function calculateSubscriptionCost(quantity?: number) {
+  if (!quantity) {
     return null;
   }
-  return numUsers * (SUBSCRIPTION_PRICE_PER_USER_PER_MONTH * 12);
+  return quantity * (SUBSCRIPTION_PRICE_PER_USER_PER_MONTH * 12);
 }
 
 const SubscriptionSummary: React.FC = () => {
   const { currentStep } = useCurrentStep();
-  const numUsers = useCheckoutFormStore((state) => state.formData.PlanDetails?.numUsers);
-  const totalSubscriptionCost = calculateSubscriptionCost(numUsers);
+  const quantity = useCheckoutFormStore((state) => state.formData.PlanDetails?.quantity);
+  const totalSubscriptionCost = calculateSubscriptionCost(quantity);
   return (
     <Card variant="muted">
       <Card.Header title="Purchase Summary" subtitle="Review your selected subscription." size="sm" />
@@ -60,7 +60,7 @@ const SubscriptionSummary: React.FC = () => {
                         to={CheckoutPageDetails.PlanDetails.route}
                       >
                         <FormattedMessage
-                          id="checkout.subscriptionSummary.editNumUsers"
+                          id="checkout.subscriptionSummary.editQuantity"
                           defaultMessage="Edit"
                           description="Label for the edit number of users button"
                         />
@@ -68,7 +68,7 @@ const SubscriptionSummary: React.FC = () => {
                     )}
                   </div>
                   <div className="text-right">
-                    {numUsers ? `x ${numUsers}` : '-'}
+                    {quantity ? `x ${quantity}` : '-'}
                   </div>
                 </Stack>
                 <Stack direction="horizontal" gap={2} className="justify-content-between align-items-center">
