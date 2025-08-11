@@ -305,4 +305,14 @@ declare global {
    * Snake-cased version of CheckoutContextResponse for API communication
    */
   type CheckoutContextResponsePayload = Payload<CheckoutContextResponse>;
+
+  // Test helper for asserting debounced behavior (declared globally in setupTest.ts)
+  interface DebounceTestOptions {
+    baseDelayMs: number;
+    call: () => Promise<unknown>;
+    preCalls?: Array<() => unknown>;
+    getInvocationCount?: () => number;
+    upperMarginMs?: number;
+  }
+  function assertDebounce(options: DebounceTestOptions): Promise<{ elapsedMs: number }>;
 }

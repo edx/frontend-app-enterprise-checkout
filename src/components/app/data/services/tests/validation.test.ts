@@ -445,22 +445,26 @@ describe('validateField', () => {
     expect(result).toBe(false);
   });
 
-  it('ensures the calls are debounced', async () => {
-    // This test verifies that the validateField function uses debouncing
-    // We're testing the implementation detail that it uses the debounce function
-    // from lodash-es, which is already well-tested
+  it('debounces validations: executes ~500ms after last call and only once', async () => {
+    // Minimal config and HTTP client mocks
+    (getConfig as jest.Mock).mockReturnValue({ ENTERPRISE_ACCESS_BASE_URL: 'https://example.test' });
 
-    // Mock the debounce function to verify it's being used
-    jest.mock('lodash-es', () => ({
-      ...jest.requireActual('lodash-es'),
-      debounce: jest.fn((fn) => fn),
-      isEqual: jest.requireActual('lodash-es').isEqual,
-      snakeCase: jest.requireActual('lodash-es').snakeCase,
-    }));
+    const mockPost = jest.fn().mockResolvedValue({
+      data: {
+        validation_decisions: {
+          company_name: null,
+        },
+        user_authn: { user_exists_for_email: true },
+      },
+    });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({ post: mockPost });
 
-    // Verify the implementation uses debouncing by checking the code
-    // This is a simplified test that acknowledges the implementation
-    // uses debouncing without testing the actual debounce behavior
-    expect(true).toBe(true);
+    await assertDebounce({
+      baseDelayMs: 500,
+      preCalls: [() => validateField('companyName', 'Acme-1')],
+      call: () => validateField('companyName', 'Acme-2'),
+      getInvocationCount: () => mockPost.mock.calls.length,
+      upperMarginMs: 20,
+    });
   });
 });
