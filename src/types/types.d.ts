@@ -165,7 +165,7 @@ declare global {
    */
   interface ValidationResponse {
     validationDecisions: {
-      [K in keyof ValidationSchema]?: ValidationDecision | ValidationSchemaPayload[K];
+      [K in keyof ValidationSchema]?: ValidationDecision | ValidationSchemaPayload[K] | null;
     };
     userAuthn: {
       userExistsForEmail: boolean;

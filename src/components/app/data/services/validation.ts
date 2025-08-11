@@ -77,7 +77,7 @@ function getDebouncer<K extends FieldKey>(field: K) {
       debounce(
         async (
           value: ValidationSchema[K],
-          extras: Partial<ValidationSchemaPayload> | undefined,
+          extras: Partial<ValidationSchema> | undefined,
           resolve: (valid: boolean) => void,
         ) => {
           try {
@@ -85,9 +85,11 @@ function getDebouncer<K extends FieldKey>(field: K) {
               [snakeCase(field)]: value as any,
               ...(snakeCaseObject(extras) ?? {}),
             };
+
             const response: Partial<ValidationResponse> = await fetchCheckoutValidation(
               payload as ValidationSchemaPayload,
             );
+
             const decisions = response?.validationDecisions ?? {};
 
             // All fields to check: main + extras
@@ -96,10 +98,10 @@ function getDebouncer<K extends FieldKey>(field: K) {
               ...(extras ? (Object.keys(extras) as FieldKey[]) : []),
             ];
 
-            const allNull = fieldsToCheck.every(
-              (k) => decisions[k] === null,
+            const allValid = fieldsToCheck.every(
+              (k) => decisions[k] == null,
             );
-            resolve(allNull);
+            resolve(allValid);
           } catch (err) {
             logError(err);
             resolve(false);
@@ -147,11 +149,12 @@ export function validateField<K extends FieldKey>(
   value: ValidationSchema[K],
   extras?: Partial<ValidationSchema>,
 ): Promise<boolean> {
-  // Short-circuit if value hasn’t changed
-  if (isEqual(previousValues.get(field), value)) {
+  // Short-circuit if value and extras haven’t changed
+  const current = { value, extras: extras ?? {} };
+  if (isEqual(previousValues.get(field), current)) {
     return Promise.resolve(true);
   }
-  previousValues.set(field, value);
+  previousValues.set(field, current);
 
   return new Promise<boolean>((resolve) => {
     getDebouncer(field)(value, extras, resolve);

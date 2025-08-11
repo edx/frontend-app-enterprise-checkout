@@ -119,7 +119,7 @@ export const PlanDetailsSchema = z.object({
     .max(500, 'Maximum 500 users')
     .refine(
       (quantity) => validateField('quantity', quantity, {
-        stripe_price_id: 'price_9876_replace-me',
+        stripePriceId: 'price_9876_replace-me',
       }),
       { message: 'Failed server-side validation.' },
     ),

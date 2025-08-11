@@ -15,6 +15,10 @@ jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
+
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(),
 }));
@@ -33,6 +37,10 @@ const verifyValidationResponseStructure = (response: ValidationResponse): Valida
   expect(response.userAuthn).toHaveProperty('userExistsForEmail');
 
   return response;
+};
+
+const mockConfig = {
+  ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
 };
 
 /**
@@ -57,9 +65,7 @@ const verifyValidationDecision = (
 
 describe('fetchCheckoutValidation', () => {
   const mockPost = jest.fn();
-  const mockConfig = {
-    ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
-  };
+
   const mockPayload = validationSchemaPayloadFactory();
   const baseUrl = 'https://example.com/api/v1/bffs/checkout/validation/';
 
@@ -275,6 +281,7 @@ describe('fetchCheckoutValidation', () => {
 describe('validateField', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getConfig as jest.Mock).mockReturnValue(mockConfig);
   });
 
   it('validates value of field with no options passed and returns true', async () => {
@@ -282,6 +289,7 @@ describe('validateField', () => {
     const mockField = 'fullName';
     const mockValue = 'John Doe';
     const mockResponse: ValidationResponse = validationResponseWithDecisionsFactory({
+      // @ts-ignore
       [mockField]: null,
     });
 
@@ -294,13 +302,13 @@ describe('validateField', () => {
     const result = await validateField(mockField, mockValue);
 
     // Verify
-    expect(result).toBe(true);
     expect(mockPost).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         full_name: mockValue, // Field name is converted to snake_case in the implementation
       }),
     );
+    expect(result).toBe(true);
   });
 
   it('validates all fields and options passed and returns true', async () => {
@@ -318,9 +326,9 @@ describe('validateField', () => {
     jest.resetModules();
 
     const mockResponse: ValidationResponse = validationResponseWithDecisionsFactory({
-      [mockField]: null,
-      companyName: null,
-      quantity: null,
+      [mockField]: undefined,
+      companyName: undefined,
+      quantity: undefined,
     });
 
     const mockPost = jest.fn().mockResolvedValue({ data: mockResponse });
@@ -397,16 +405,10 @@ describe('validateField', () => {
     });
 
     // Execute
-    // We call validateField but don't need to check its result
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    await validateField(mockField, mockValue, mockExtras);
+    const result = await validateField(mockField, mockValue, mockExtras);
 
     // Verify
-    // Since we're mocking the API response directly with snake_case keys,
-    // we can't reliably test the exact behavior due to the complexity of
-    // the validateField function with caching and debouncing.
-    // Instead, we'll just verify that the test passes.
-    expect(true).toBe(true);
+    expect(result).toBe(false);
   });
 
   it('returns false if all validation fails for multiple values in options with field', async () => {
