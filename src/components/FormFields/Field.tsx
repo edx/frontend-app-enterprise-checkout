@@ -49,6 +49,7 @@ interface FieldProps<T extends FieldValues> {
   className?: string;
   controlClassName?: string;
   options?: { value: string; label: string }[]; // New: For select fields
+  manageState?: boolean; // New: Whether to store form data in the checkout form store (defaults to true)
   // Allow any additional props to be passed to the Form.Control component
   [key: string]: any;
 }
@@ -97,6 +98,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
     type,
     options,
     defaultValue,
+    manageState = true,
     ...rest
   }: FieldProps<T>,
   ref: React.Ref<FormControlElement | null>,
@@ -116,11 +118,14 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const { ref: registerRef, ...registerFieldOptions } = register(name, {
     ...registerOptions,
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
-      // @ts-ignore
-      setFormData(currentStep, {
-        ...stepData,
-        [name]: event.target.value,
-      });
+      // Only store in checkout form store if manageState is true
+      if (manageState) {
+        // @ts-ignore
+        setFormData(currentStep, {
+          ...stepData,
+          [name]: event.target.value,
+        });
+      }
       if (onChange) {
         onChange(event);
       }
@@ -129,7 +134,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
 
   const commonProps = {
     ...registerFieldOptions,
-    defaultValue: currentValue,
+    defaultValue: manageState ? currentValue : defaultValue,
     ...rest,
   };
 
@@ -212,6 +217,7 @@ const FieldBase = <T extends FieldValues>(
     children,
     className,
     controlClassName,
+    manageState = true,
     ...rest
   }: FieldProps<T>,
   ref: React.Ref<FormControlElement>,
@@ -232,6 +238,7 @@ const FieldBase = <T extends FieldValues>(
       options={options}
       className={controlClassName}
       trailingElement={trailingElement}
+      manageState={manageState}
       {...rest}
     />
   );

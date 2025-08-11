@@ -7,6 +7,7 @@ import {
   CheckoutStepKey,
   CheckoutSubstepByKey,
   CheckoutSubstepKey,
+  LoginSchema,
   PlanDetailsSchema,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 } from '@/constants/checkout';
@@ -38,6 +39,7 @@ export {
   CheckoutStepKey,
   CheckoutSubstepByKey,
   CheckoutSubstepKey,
+  LoginSchema,
   PlanDetailsSchema,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 };

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import {
   AccountDetailsSchema,
   BillingDetailsSchema,
+  LoginSchema,
   PlanDetailsSchema,
 } from '@/components/Stepper/constants';
 
@@ -47,6 +48,7 @@ declare global {
   type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
   type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
   type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
+  type LoginData = z.infer<typeof LoginSchema>;
   // TODO: This is added an a means to iterate through the project. Will need to be removed.
   type TempAuthenticatedData = { tempAuthenticated: boolean };
 

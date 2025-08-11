@@ -27,6 +27,23 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
   }),
 }));
 
+// Mock useMutation from React Query
+jest.mock('@tanstack/react-query', () => ({
+  ...jest.requireActual('@tanstack/react-query'),
+  useMutation: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  })),
+}));
+
+// Mock getAuthenticatedUser
+jest.mock('@edx/frontend-platform/auth', () => ({
+  ...jest.requireActual('@edx/frontend-platform/auth'),
+  getAuthenticatedUser: jest.fn(() => null),
+}));
+
 // Keep mocks for complex components for now
 jest.mock('@/components/FormFields/LicensesField', () => ({
   __esModule: true,

@@ -145,6 +145,15 @@ export const AccountDetailsSchema = z.object({
 
 export const BillingDetailsSchema = z.object({});
 
+export const LoginSchema = z.object({
+  email: z.string().trim()
+    .email('Please enter a valid email address')
+    .max(254, 'Email address is too long'),
+  password: z.string()
+    .min(1, 'Password is required')
+    .max(128, 'Password is too long'),
+});
+
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.
 export const SUBSCRIPTION_PRICE_PER_USER_PER_MONTH = 33;
