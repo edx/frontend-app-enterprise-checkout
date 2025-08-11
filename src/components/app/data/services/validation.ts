@@ -145,7 +145,7 @@ function getDebouncer<K extends FieldKey>(field: K) {
 export function validateField<K extends FieldKey>(
   field: K,
   value: ValidationSchema[K],
-  extras?: Partial<ValidationSchemaPayload>,
+  extras?: Partial<ValidationSchema>,
 ): Promise<boolean> {
   // Short-circuit if value hasn’t changed
   if (isEqual(previousValues.get(field), value)) {

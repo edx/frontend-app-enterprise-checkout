@@ -15,7 +15,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
   const intl = useIntl();
   return (
     <FieldContainer>
-      <div>
+      <div className="mb-3">
         <h3>
           <FormattedMessage
             id="checkout.NameAndEmailFields.title"
@@ -31,7 +31,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           />
         </h3>
       </div>
-      <Stack gap={1}>
+      <Stack>
         <Field
           form={form}
           name="fullName"
@@ -46,7 +46,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             defaultMessage: 'Enter your full name',
             description: 'Placeholder for the full name input field',
           })}
-          controlClassName="mr-0 mt-3"
+          controlClassName="mr-0"
           className="bg-light-300"
         />
 
@@ -64,7 +64,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             defaultMessage: 'Enter your work email',
             description: 'Placeholder for the work email input field',
           })}
-          controlClassName="mr-0 mt-3"
+          controlClassName="mr-0"
         />
         <Field
           form={form}
@@ -114,7 +114,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             defaultMessage: 'Select a country',
             description: 'Placeholder for the country of residence dropdown field',
           })}
-          controlClassName="mr-0 mt-3"
+          controlClassName="mr-0"
         />
       </Stack>
     </FieldContainer>
