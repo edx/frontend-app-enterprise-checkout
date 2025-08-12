@@ -77,6 +77,7 @@ function getDebouncer<K extends FieldKey>(field: K) {
         async (
           value: ValidationSchema[K],
           extras: Partial<ValidationSchema> | undefined,
+          resolve: (result: { isValid: boolean; validationDecisions: ValidationResponse['validationDecisions'] | null }) => void,
         ) => {
           try {
             const payload: Partial<ValidationSchema> = {
@@ -92,10 +93,10 @@ function getDebouncer<K extends FieldKey>(field: K) {
             ];
 
             const allValid = !fieldsToCheck.filter(k => decisions[k] != null)?.length;
-            return { isValid: allValid, validationDecisions: decisions };
+            resolve({ isValid: allValid, validationDecisions: decisions });
           } catch (err) {
             logError(err);
-            return { isValid: false, validationDecisions: null };
+            resolve({ isValid: false, validationDecisions: null });
           }
         },
         500,
@@ -135,22 +136,37 @@ function getDebouncer<K extends FieldKey>(field: K) {
  * validateField('quantity', 10, { stripe_price_id: 'price_123' })
  *   .then((isValid) => console.log(isValid));
  */
+/**
+ * Validates a single field value against the checkout API and returns a detailed result.
+ * - Debounced per field (via getDebouncer)
+ * - Caches previous values and skips when unchanged
+ */
+export function validateFieldDetailed<K extends FieldKey>(
+  field: K,
+  value: ValidationSchema[K],
+  extras?: Partial<ValidationSchema>,
+): Promise<{ isValid: boolean; validationDecisions: ValidationResponse['validationDecisions'] | null }> {
+  const current = { value, extras: extras ?? {} };
+  if (isEqual(previousValues.get(field), current)) {
+    // Treat unchanged value as valid and with no new decisions
+    return Promise.resolve({ isValid: true, validationDecisions: null });
+  }
+  previousValues.set(field, current);
+  return new Promise((resolve) => {
+    const debounced = getDebouncer(field);
+    debounced(value, extras, resolve);
+  });
+}
+
+/**
+ * Backward-compatible boolean validator using the detailed API.
+ */
 export function validateField<K extends FieldKey>(
   field: K,
   value: ValidationSchema[K],
   extras?: Partial<ValidationSchema>,
 ): Promise<boolean> {
-  // Short-circuit if value and extras haven’t changed
-  const current = { value, extras: extras ?? {} };
-  if (isEqual(previousValues.get(field), current)) {
-    return Promise.resolve({ isValid: false, validationDecisions: null });
-  }
-
-  return new Promise<boolean>((resolve) => {
-    const debouncedResponse = getDebouncer(field)(value, extras);
-    previousValues.set(field, current);
-    resolve(debouncedResponse);
-  });
+  return validateFieldDetailed(field, value, extras).then((r) => r.isValid);
 }
 
 export default fetchCheckoutValidation;
