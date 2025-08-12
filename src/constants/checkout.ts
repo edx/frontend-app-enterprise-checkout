@@ -2,6 +2,7 @@ import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
+import { serverValidationError } from '@/utils/common';
 
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
@@ -23,9 +24,6 @@ function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[key
 
 export const CheckoutStepByKey: Record<CheckoutStepKey, CheckoutStep> = reverseEnum(CheckoutStepKey);
 export const CheckoutSubstepByKey: Record<CheckoutSubstepKey, CheckoutSubstep> = reverseEnum(CheckoutSubstepKey);
-
-// Server-validated fields and their known error codes (from backend contract)
-export type ServerValidatedField = 'adminEmail' | 'enterpriseSlug' | 'quantity' | 'stripePriceId';
 
 export type FieldErrorCodes = {
   adminEmail: 'invalid_format' | 'not_registered' | 'incomplete_data';
@@ -148,19 +146,6 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   },
 };
 
-const serverValidationError = <K extends keyof FieldErrorCodes>(
-  field: K,
-  validationDecisions: ValidationResponse['validationDecisions'] | null,
-): string => {
-  if (validationDecisions) {
-    const errorCode = CheckoutErrorMessagesByField[field][
-      (validationDecisions[field] as ValidationDecision | undefined)?.errorCode as FieldErrorCodes[K]
-    ];
-    return errorCode || 'Failed server-side validation';
-  }
-  return 'Failed server-side validation';
-};
-
 export const PlanDetailsSchema = z.object({
   quantity: z.coerce.number()
     .min(5, 'Minimum 5 users')
@@ -175,7 +160,7 @@ export const PlanDetailsSchema = z.object({
       if (!isValid) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: serverValidationError('quantity', validationDecisions),
+          message: serverValidationError('quantity', validationDecisions, CheckoutErrorMessagesByField),
         });
       }
     }),

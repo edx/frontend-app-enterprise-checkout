@@ -152,7 +152,7 @@ export function validateFieldDetailed<K extends FieldKey>(
   const current = { value, extras: extras ?? {} };
   if (isEqual(previousValues.get(field), current)) {
     // Treat unchanged value as valid and with no new decisions
-    return Promise.resolve({ isValid: false, validationDecisions: {} });
+    return Promise.resolve({ isValid: true, validationDecisions: {} });
   }
   previousValues.set(field, current);
   return new Promise((resolve) => {
