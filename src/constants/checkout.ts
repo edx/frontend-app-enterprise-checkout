@@ -24,7 +24,17 @@ function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[key
 export const CheckoutStepByKey: Record<CheckoutStepKey, CheckoutStep> = reverseEnum(CheckoutStepKey);
 export const CheckoutSubstepByKey: Record<CheckoutSubstepKey, CheckoutSubstep> = reverseEnum(CheckoutSubstepKey);
 
-export const CheckoutErrorMessagesByField = {
+// Server-validated fields and their known error codes (from backend contract)
+export type ServerValidatedField = 'adminEmail' | 'enterpriseSlug' | 'quantity' | 'stripePriceId';
+
+export type FieldErrorCodes = {
+  adminEmail: 'invalid_format' | 'not_registered' | 'incomplete_data';
+  enterpriseSlug: 'invalid_format' | 'existing_enterprise_customer' | 'slug_reserved' | 'incomplete_data';
+  quantity: 'invalid_format' | 'range_exceeded' | 'incomplete_data';
+  stripePriceId: 'invalid_format' | 'does_not_exist' | 'incomplete_data';
+};
+
+export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Record<FieldErrorCodes[K], string> } = {
   adminEmail: {
     invalid_format: 'Invalid format for given email address.',
     not_registered: 'Given email address does not correspond to an existing user.',
@@ -138,12 +148,14 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   },
 };
 
-const serverValidationError = (field, validationDecisions) => {
-  // const queryData = queryClient?.getQueryData(queryBFFValidationQueryKey(field));
+const serverValidationError = <K extends keyof FieldErrorCodes>(
+  field: K,
+  validationDecisions: ValidationResponse['validationDecisions'] | null,
+): string => {
   if (validationDecisions) {
-    const errorCode = CheckoutErrorMessagesByField[
-      field
-    ][validationDecisions[field].errorCode];
+    const errorCode = CheckoutErrorMessagesByField[field][
+      (validationDecisions[field] as ValidationDecision | undefined)?.errorCode as FieldErrorCodes[K]
+    ];
     return errorCode || 'Failed server-side validation';
   }
   return 'Failed server-side validation';

@@ -5,7 +5,10 @@ import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 import { debounce, isEqual, snakeCase } from 'lodash-es';
 
+import { VALIDATION_DEBOUNCE_MS } from '@/components/app/data/constants';
+
 import type { AxiosResponse } from 'axios';
+
 /**
  * Validates checkout form data by sending it to the validation API
  *
@@ -99,7 +102,7 @@ function getDebouncer<K extends FieldKey>(field: K) {
             resolve({ isValid: false, validationDecisions: null });
           }
         },
-        500,
+        VALIDATION_DEBOUNCE_MS,
       ),
     );
   }
@@ -149,24 +152,13 @@ export function validateFieldDetailed<K extends FieldKey>(
   const current = { value, extras: extras ?? {} };
   if (isEqual(previousValues.get(field), current)) {
     // Treat unchanged value as valid and with no new decisions
-    return Promise.resolve({ isValid: true, validationDecisions: null });
+    return Promise.resolve({ isValid: false, validationDecisions: {} });
   }
   previousValues.set(field, current);
   return new Promise((resolve) => {
     const debounced = getDebouncer(field);
     debounced(value, extras, resolve);
   });
-}
-
-/**
- * Backward-compatible boolean validator using the detailed API.
- */
-export function validateField<K extends FieldKey>(
-  field: K,
-  value: ValidationSchema[K],
-  extras?: Partial<ValidationSchema>,
-): Promise<boolean> {
-  return validateFieldDetailed(field, value, extras).then((r) => r.isValid);
 }
 
 export default fetchCheckoutValidation;

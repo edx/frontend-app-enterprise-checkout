@@ -1,6 +1,8 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 
+import { VALIDATION_DEBOUNCE_MS } from '@/components/app/data/constants';
+
 import {
   validationDecisionFactory,
   validationResponsePayloadFactory,
@@ -8,7 +10,7 @@ import {
   validationResponseWithDecisionsFactory,
   validationSchemaPayloadFactory,
 } from '../__factories__';
-import fetchCheckoutValidation, { validateField } from '../validation';
+import fetchCheckoutValidation, { validateFieldDetailed } from '../validation';
 
 // Mock setup
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -278,7 +280,7 @@ describe('fetchCheckoutValidation', () => {
   });
 });
 
-describe('validateField', () => {
+describe('validateFieldDetailed', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getConfig as jest.Mock).mockReturnValue(mockConfig);
@@ -299,7 +301,7 @@ describe('validateField', () => {
     });
 
     // Execute
-    const result = await validateField(mockField, mockValue);
+    const result = await validateFieldDetailed(mockField, mockValue);
 
     // Verify
     expect(mockPost).toHaveBeenCalledWith(
@@ -308,7 +310,7 @@ describe('validateField', () => {
         full_name: mockValue, // Field name is converted to snake_case in the implementation
       }),
     );
-    expect(result).toBe(true);
+    expect(result.isValid).toBe(true);
   });
 
   it('validates all fields and options passed and returns true', async () => {
@@ -321,7 +323,7 @@ describe('validateField', () => {
     };
 
     // Clear any previous values in the cache
-    // This is necessary because validateField caches previous values
+    // This is necessary because validateFieldDetailed caches previous values
     // and skips validation if the value hasn't changed
     jest.resetModules();
 
@@ -337,12 +339,12 @@ describe('validateField', () => {
     });
 
     // Execute
-    const result = await validateField(mockField, mockValue, mockExtras);
+    const result = await validateFieldDetailed(mockField, mockValue, mockExtras);
 
     // Verify
-    expect(result).toBe(true);
+    expect(result.isValid).toBe(true);
 
-    // Since validateField uses debouncing and caching, we can't reliably
+    // Since validateFieldDetailed uses debouncing and caching, we can't reliably
     // test the exact payload in this test. Instead, we'll just verify
     // that the function returns the expected result.
   });
@@ -365,14 +367,14 @@ describe('validateField', () => {
     });
 
     // Execute
-    const result = await validateField(mockField, mockValue);
+    const result = await validateFieldDetailed(mockField, mockValue);
 
     // Verify
-    expect(result).toBe(false);
+    expect(result.isValid).toBe(false);
   });
 
   it('returns false if partial validation fails for multiple values in options with field', async () => {
-    // This test verifies that validateField returns false if any field in the extras fails validation
+    // This test verifies that validateFieldDetailed returns false if any field in the extras fails validation
 
     // Setup
     const mockField = 'fullName';
@@ -405,10 +407,10 @@ describe('validateField', () => {
     });
 
     // Execute
-    const result = await validateField(mockField, mockValue, mockExtras);
+    const result = await validateFieldDetailed(mockField, mockValue, mockExtras);
 
     // Verify
-    expect(result).toBe(false);
+    expect(result.isValid).toBe(false);
   });
 
   it('returns false if all validation fails for multiple values in options with field', async () => {
@@ -441,10 +443,10 @@ describe('validateField', () => {
     });
 
     // Execute
-    const result = await validateField(mockField, mockValue, mockExtras);
+    const result = await validateFieldDetailed(mockField, mockValue, mockExtras);
 
     // Verify
-    expect(result).toBe(false);
+    expect(result.isValid).toBe(false);
   });
 
   it('debounces validations: executes ~500ms after last call and only once', async () => {
@@ -462,9 +464,9 @@ describe('validateField', () => {
     (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({ post: mockPost });
 
     await assertDebounce({
-      baseDelayMs: 500,
-      preCalls: [() => validateField('companyName', 'Acme-1')],
-      call: () => validateField('companyName', 'Acme-2'),
+      baseDelayMs: VALIDATION_DEBOUNCE_MS,
+      preCalls: [() => validateFieldDetailed('companyName', 'Acme-1')],
+      call: () => validateFieldDetailed('companyName', 'Acme-2'),
       getInvocationCount: () => mockPost.mock.calls.length,
       upperMarginMs: 20,
     });

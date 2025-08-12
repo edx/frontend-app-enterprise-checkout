@@ -20,9 +20,12 @@ const baseCheckoutSession: CheckoutSessionSchema = {
 
 const snakeCaseBaseCheckoutSession: CheckoutSessionSchemaPayload = snakeCaseObject(baseCheckoutSession);
 
+const VALIDATION_DEBOUNCE_MS = 500;
+
 export {
   baseValidation,
   baseCheckoutSession,
   snakeCaseBaseValidation,
   snakeCaseBaseCheckoutSession,
+  VALIDATION_DEBOUNCE_MS,
 };
