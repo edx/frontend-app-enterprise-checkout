@@ -6,9 +6,20 @@ import { Navigate } from 'react-router-dom';
 
 import Layout from '@/components/app/Layout';
 import Root from '@/components/app/Root';
+import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
 import { authenticatedSteps, CheckoutStepKey } from '@/components/Stepper/constants';
+
+/**
+ * Returns the route loader function if a queryClient is available; otherwise, returns null.
+ */
+export function getRouteLoader(makeRouteLoaderFn: MakeRouteLoaderFunction, queryClient?: QueryClient) {
+  if (!queryClient) {
+    return undefined;
+  }
+  return makeRouteLoaderFn(queryClient);
+}
 
 const StepWrapper = () => {
   const { step } = useParams<{ step: AuthStep }>();
@@ -28,6 +39,7 @@ function getCheckoutRoutes(queryClient: QueryClient) {
   const checkoutChildRoutes: RouteObject[] = [
     {
       path: '/:step?',
+      loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
       element: (
         <PageWrap>
           <StepWrapper />
@@ -36,6 +48,7 @@ function getCheckoutRoutes(queryClient: QueryClient) {
     },
     {
       path: '/:step/:substep',
+      loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
       element: (
         <PageWrap>
           <StepWrapper />
@@ -50,6 +63,7 @@ function getCheckoutRoutes(queryClient: QueryClient) {
   const checkoutRoutes: RouteObject[] = [
     {
       path: '/',
+      loader: getRouteLoader(makeRootLoader, queryClient),
       element: <Layout />,
       children: checkoutChildRoutes,
       shouldRevalidate: ({ currentUrl, nextUrl, defaultShouldRevalidate }) => {

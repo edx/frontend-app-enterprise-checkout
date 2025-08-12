@@ -1,14 +1,14 @@
 import { CheckoutPageDetails } from '@/components/Stepper/constants';
 import useCurrentStep from '@/hooks/useCurrentStep';
+import { getCheckoutPageDetails } from '@/utils/checkout';
 
 function useCurrentPage(): keyof typeof CheckoutPageDetails | null {
   const { currentStep, currentSubstep } = useCurrentStep();
-
-  const entry = Object.entries(CheckoutPageDetails).find(
-    ([, value]) => value.step === currentStep && value.substep === currentSubstep,
-  );
-
-  return entry?.[0] as CheckoutPage ?? null;
+  const foundDetails = getCheckoutPageDetails({ step: currentStep, substep: currentSubstep });
+  if (foundDetails) {
+    return foundDetails.name;
+  }
+  return null;
 }
 
 export default useCurrentPage;

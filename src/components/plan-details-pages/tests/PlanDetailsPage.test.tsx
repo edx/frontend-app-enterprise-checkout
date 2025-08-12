@@ -1,8 +1,11 @@
+import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import { CheckoutPageDetails, CheckoutStepKey } from '@/components/Stepper/constants';
-import { renderWithRouterAndStepperProvider } from '@/utils/tests';
+import { queryClient, renderWithRouterAndStepperProvider } from '@/utils/tests';
 
 import PlanDetailsPage from '../PlanDetailsPage';
 
@@ -11,7 +14,6 @@ const mockSetFormData = jest.fn();
 const mockFormData = {
   PlanDetails: {},
 };
-const mockSetIsAuthenticated = jest.fn();
 
 // Mock the hooks and components
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
@@ -20,8 +22,6 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
     const defaultState = {
       formData: mockFormData,
       setFormData: mockSetFormData,
-      isAuthenticated: false,
-      setIsAuthenticated: mockSetIsAuthenticated,
     };
     return cb(defaultState);
   }),
@@ -48,9 +48,26 @@ jest.mock('@/components/PriceAlert/PriceAlert', () => ({
   default: () => <div data-testid="price-alert-mock" />,
 }));
 
+const defaultAppContextValue = {
+  config: {},
+  authenticatedUser: null,
+};
+
+const PlanDetailsPageWrapper = ({
+  appContextValue = defaultAppContextValue,
+}) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient()}>
+      <AppContext.Provider value={appContextValue}>
+        <PlanDetailsPage />
+      </AppContext.Provider>
+    </QueryClientProvider>
+  </IntlProvider>
+);
+
 describe('PlanDetailsPage', () => {
   const renderComponent = () => renderWithRouterAndStepperProvider(
-    <PlanDetailsPage />,
+    <PlanDetailsPageWrapper />,
     CheckoutStepKey.PlanDetails,
     {
       initialEntries: [CheckoutPageDetails.PlanDetails.route],

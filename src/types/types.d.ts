@@ -4,6 +4,8 @@ import { z } from 'zod';
 import {
   AccountDetailsSchema,
   BillingDetailsSchema,
+  PlanDetailsLoginPageSchema,
+  PlanDetailsRegisterPageSchema,
   PlanDetailsSchema,
 } from '@/components/Stepper/constants';
 
@@ -16,6 +18,29 @@ declare module '*.svg' {
 }
 
 declare global {
+
+  /**
+   * Routes
+   */
+  type MakeRouteLoaderFunction = (queryClient?: QueryClient) => LoaderFunction;
+  type MakeRouteLoaderFunctionWithQueryClient = (queryClient: QueryClient) => LoaderFunction;
+
+  /**
+   * Application Data (general)
+   */
+  type AuthenticatedUser = {
+    userId: number;
+    username: string;
+    name: string;
+    email: string;
+    roles: string[];
+    administrator: boolean;
+    extendedProfile?: Record<string, any>;
+  };
+  type AppContextValue = {
+    authenticatedUser: AuthenticatedUser;
+  };
+
   /**
    * ==============================
    * Form and UI Related Types
@@ -32,6 +57,7 @@ declare global {
     step: CheckoutStep,
     substep: CheckoutSubstep | undefined,
     route: string,
+    formSchema?: any,
     title: object,
     buttonMessage: object | null,
   }
@@ -45,6 +71,8 @@ declare global {
    * Form data types derived from Zod schemas
    */
   type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
+  type PlanDetailsLoginPageData = z.infer<typeof PlanDetailsLoginPageSchema>;
+  type PlanDetailsRegisterPageData = z.infer<typeof PlanDetailsRegisterPageSchema>;
   type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
   type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
   // TODO: This is added an a means to iterate through the project. Will need to be removed.
@@ -74,12 +102,6 @@ declare global {
     setFormData<K extends keyof StepDataMap>(
       step: K,
       data: Partial<FormData<K>>,
-    ): void;
-
-    // TODO remove this authenticated state hack.
-    isAuthenticated: boolean
-    setIsAuthenticated(
-      newIsAuthenticated: boolean,
     ): void;
   }
 
@@ -293,4 +315,37 @@ declare global {
    * Snake-cased version of CheckoutContextResponse for API communication
    */
   type CheckoutContextResponsePayload = Payload<CheckoutContextResponse>;
+
+  /**
+   * ==============================
+   * Login Request/Response Types
+   * ==============================
+   */
+
+  /**
+   * Data structure for a login request payload.
+   */
+  interface LoginRequestSchema {
+    emailOrUsername: string;
+    password: string;
+  }
+
+  /**
+   * Snake-cased version of LoginRequestSchema for API communication
+   */
+  type LoginRequestPayload = Payload<LoginRequestSchema>;
+
+  /**
+   * Data structure for a login response payload.
+   */
+  interface LoginResponseSchema {
+    redirectUrl: string;
+    success: boolean;
+  }
+
+  /**
+   * Snake-cased version of LoginResponseSchema for API communication
+   */
+  type LoginResponsePayload = Payload<LoginResponseSchema>;
+
 }

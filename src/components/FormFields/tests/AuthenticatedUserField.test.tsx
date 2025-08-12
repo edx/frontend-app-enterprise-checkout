@@ -7,7 +7,7 @@ import AuthenticatedUserField from '../AuthenticatedUserField';
 describe('AuthenticatedUserField', () => {
   const defaultProps = {
     fullName: 'John Doe',
-    orgEmail: 'john.doe@example.com',
+    email: 'john.doe@example.com',
   };
 
   const renderComponent = (props = {}) => render(
@@ -28,15 +28,15 @@ describe('AuthenticatedUserField', () => {
 
   it('renders the user name and email correctly', () => {
     renderComponent();
-    expect(screen.getByText(`${defaultProps.fullName} (${defaultProps.orgEmail})`)).toBeInTheDocument();
+    expect(screen.getByText(`${defaultProps.fullName} (${defaultProps.email})`)).toBeInTheDocument();
   });
 
   it('renders with custom user name and email', () => {
     const customProps = {
       fullName: 'Jane Smith',
-      orgEmail: 'jane.smith@example.com',
+      email: 'jane.smith@example.com',
     };
     renderComponent(customProps);
-    expect(screen.getByText(`${customProps.fullName} (${customProps.orgEmail})`)).toBeInTheDocument();
+    expect(screen.getByText(`${customProps.fullName} (${customProps.email})`)).toBeInTheDocument();
   });
 });

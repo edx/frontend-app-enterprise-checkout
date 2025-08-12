@@ -67,7 +67,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
         />
         <Field
           form={form}
-          name="orgEmail"
+          name="email"
           type="email"
           floatingLabel={intl.formatMessage({
             id: 'checkout.nameAndEmailFields.workEmail.floatingLabel',

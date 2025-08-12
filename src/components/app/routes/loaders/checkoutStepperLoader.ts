@@ -1,0 +1,108 @@
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { redirect } from 'react-router-dom';
+
+import { CheckoutPageDetails } from '@/constants/checkout';
+import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
+
+/**
+ * Route loader for Plan Details page
+ */
+async function planDetailsLoader(): Promise<Response | null> {
+  // Plan Details page doesn't require authentication
+  return null;
+}
+
+/**
+ * Route loader for Plan Details Login page
+ */
+async function planDetailsLoginLoader(): Promise<Response | null> {
+  const authenticatedUser = getAuthenticatedUser();
+  if (authenticatedUser) {
+    // If the user is already authenticated, redirect to PlanDetails Page.
+    return redirect(CheckoutPageDetails.PlanDetails.route);
+  }
+  return null;
+}
+
+/**
+ * Route loader for Plan Details Register page
+ */
+async function planDetailsRegisterLoader(): Promise<Response | null> {
+  const authenticatedUser = getAuthenticatedUser();
+  if (authenticatedUser) {
+    // If the user is already authenticated, redirect to PlanDetails Page.
+    return redirect(CheckoutPageDetails.PlanDetails.route);
+  }
+  return null;
+}
+
+/**
+ * Route loader for Account Details page
+ */
+async function accountDetailsLoader(): Promise<Response | null> {
+  const authenticatedUser = getAuthenticatedUser();
+  if (!authenticatedUser) {
+    // If the user is NOT authenticated, redirect to PlanDetails Page.
+    return redirect(CheckoutPageDetails.PlanDetails.route);
+  }
+  return null;
+}
+
+/**
+ * Route loader for Billing Details page
+ */
+async function billingDetailsLoader(): Promise<Response | null> {
+  const authenticatedUser = getAuthenticatedUser();
+  if (!authenticatedUser) {
+    // If the user is NOT authenticated, redirect to PlanDetails Page.
+    return redirect(CheckoutPageDetails.PlanDetails.route);
+  }
+  return null;
+}
+
+/**
+ * Route loader for Billing Details Success page
+ */
+async function billingDetailsSuccessLoader(): Promise<Response | null> {
+  const authenticatedUser = getAuthenticatedUser();
+  if (!authenticatedUser) {
+    // If the user is NOT authenticated, redirect to PlanDetails Page.
+    return redirect(CheckoutPageDetails.PlanDetails.route);
+  }
+  return null;
+}
+
+/**
+ * Page-specific route loaders mapped by checkout page
+ */
+const PAGE_LOADERS: Record<CheckoutPage, () => Promise<Response | null>> = {
+  PlanDetails: planDetailsLoader,
+  PlanDetailsLogin: planDetailsLoginLoader,
+  PlanDetailsRegister: planDetailsRegisterLoader,
+  AccountDetails: accountDetailsLoader,
+  BillingDetails: billingDetailsLoader,
+  BillingDetailsSuccess: billingDetailsSuccessLoader,
+};
+
+/**
+ * Gateway route loader that handles both /:step and /:step/:substep routes
+ * This function acts as a router that fans out to page-specific loaders
+ */
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRootLoader(queryClient) {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return async function checkoutStepperLoader({ params = {}, request }) {
+    const { currentStep, currentSubstep } = getStepFromParams(params);
+    const pageDetails = getCheckoutPageDetails({ step: currentStep, substep: currentSubstep });
+    if (!pageDetails) {
+      // Invalid route, do nothing. 404 page should kick in automatically.
+      return null;
+    }
+    const pageLoader = PAGE_LOADERS[pageDetails.name];
+    return pageLoader();
+  };
+};
+
+export default makeCheckoutStepperLoader;
