@@ -2,6 +2,7 @@ import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
 import { validateField } from '@/components/app/data/services/validation';
+import { CheckoutErrorMessagesByField } from '@/components/Stepper';
 
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
@@ -113,30 +114,41 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   },
 };
 
+const serverValidationError = (field, validationDecisions) => {
+  // const queryData = queryClient?.getQueryData(queryBFFValidationQueryKey(field));
+  if (validationDecisions) {
+    const errorCode = CheckoutErrorMessagesByField[
+      field
+    ][validationDecisions[field].errorCode];
+    return errorCode || 'Failed server-side validation';
+  }
+  return 'Failed server-side validation';
+};
+
 export const PlanDetailsSchema = z.object({
   quantity: z.coerce.number()
     .min(5, 'Minimum 5 users')
-    .max(500, 'Maximum 500 users')
-    .refine(
-      (quantity) => validateField('quantity', quantity, {
-        stripePriceId: 'price_9876_replace-me',
-      }),
-      { message: 'Failed server-side validation.' },
-    ),
+    .max(30, 'Maximum 30 users')
+    .superRefine(async (quantity, ctx) => {
+      // TODO: Nice to have to avoid calling this API if client side validation catches first
+      const { isValid, validationDecisions } = await validateField(
+        'quantity',
+        quantity,
+        { stripePriceId: 'price_9876_replace-me' },
+      );
+      if (!isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverValidationError('quantity', validationDecisions),
+        });
+      }
+    }),
   authenticated: z.boolean().optional(),
   fullName: z.string().trim()
     .min(1, 'Full name is required')
-    .max(255)
-    .refine(
-      (fullName) => validateField('fullName', fullName),
-      { message: 'Failed server-side validation.' },
-    ),
+    .max(255),
   adminEmail: z.string().trim()
-    .max(254)
-    .refine(
-      (adminEmail) => validateField('adminEmail', adminEmail),
-      { message: 'Failed server-side validation.' },
-    ),
+    .max(254),
   country: z.string().trim()
     .min(1, 'Country is required'),
 });
@@ -144,11 +156,7 @@ export const PlanDetailsSchema = z.object({
 export const AccountDetailsSchema = z.object({
   companyName: z.string().trim()
     .min(1, 'Company name is required')
-    .max(255, 'Maximum 255 characters')
-    .refine(
-      (companyName) => validateField('companyName', companyName),
-      { message: 'Failed server-side validation.' },
-    ),
+    .max(255, 'Maximum 255 characters'),
   // enterpriseSlug: z.string().trim()
   //   .min(1, ' is required')
   //   .max(30, 'Maximum 30 characters')

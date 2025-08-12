@@ -6,7 +6,6 @@ import { camelCaseObject } from '@edx/frontend-platform/utils';
 import { debounce, isEqual, snakeCase } from 'lodash-es';
 
 import type { AxiosResponse } from 'axios';
-
 /**
  * Validates checkout form data by sending it to the validation API
  *
@@ -78,33 +77,25 @@ function getDebouncer<K extends FieldKey>(field: K) {
         async (
           value: ValidationSchema[K],
           extras: Partial<ValidationSchema> | undefined,
-          resolve: (valid: boolean) => void,
         ) => {
           try {
-            const payload: Partial<ValidationSchemaPayload> = {
-              [snakeCase(field)]: value as any,
-              ...(snakeCaseObject(extras) ?? {}),
+            const payload: Partial<ValidationSchema> = {
+              [snakeCase(field)]: value,
+              ...snakeCaseObject(extras) ?? {},
             };
-
-            const response: Partial<ValidationResponse> = await fetchCheckoutValidation(
-              payload as ValidationSchemaPayload,
-            );
-
+            const response = await fetchCheckoutValidation(payload);
             const decisions = response?.validationDecisions ?? {};
-
             // All fields to check: main + extras
             const fieldsToCheck: FieldKey[] = [
               field,
               ...(extras ? (Object.keys(extras) as FieldKey[]) : []),
             ];
 
-            const allValid = fieldsToCheck.every(
-              (k) => decisions[k] == null,
-            );
-            resolve(allValid);
+            const allValid = !fieldsToCheck.filter(k => decisions[k] != null)?.length;
+            return { isValid: allValid, validationDecisions: decisions };
           } catch (err) {
             logError(err);
-            resolve(false);
+            return { isValid: false, validationDecisions: null };
           }
         },
         500,
@@ -152,12 +143,13 @@ export function validateField<K extends FieldKey>(
   // Short-circuit if value and extras haven’t changed
   const current = { value, extras: extras ?? {} };
   if (isEqual(previousValues.get(field), current)) {
-    return Promise.resolve(true);
+    return Promise.resolve({ isValid: false, validationDecisions: null });
   }
-  previousValues.set(field, current);
 
   return new Promise<boolean>((resolve) => {
-    getDebouncer(field)(value, extras, resolve);
+    const debouncedResponse = getDebouncer(field)(value, extras);
+    previousValues.set(field, current);
+    resolve(debouncedResponse);
   });
 }
 

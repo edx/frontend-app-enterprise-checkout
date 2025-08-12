@@ -23,30 +23,32 @@ const ReactQueryDevtoolsProduction = lazy(() => import('@tanstack/react-query-de
   default: d.ReactQueryDevtools,
 })));
 
-function useAppQueryClient() {
-  const [queryClient] = useState(() => new QueryClient({
-    queryCache: new QueryCache({
-      onError: queryCacheOnErrorHandler,
-    }),
-    defaultOptions: {
-      queries: {
-        // Specifying a longer `staleTime` of 20 seconds means queries will not refetch their data
-        // as often; mitigates making duplicate queries when within the `staleTime` window, instead
-        // relying on the cached data until the `staleTime` window has exceeded. This may be modified
-        // per-query, as needed, if certain queries expect to be more up-to-date than others. Allows
-        // `useQuery` to be used as a state manager.
-        staleTime: 1000 * 20, // 20 seconds
-        // To prevent hard loading states if/when query keys change during automatic query background
-        // re-fetches, we can utilize `keepPreviousData` to keep the previous data until the new
-        // data is fetched. By enabling this option, UI components generally will not need to consider
-        // hard loading states when query keys change.
-        placeholderData: keepPreviousData,
-        // If a query fails, it will retry up to 3 times for queries with non-404 errors.
-        retry: defaultQueryClientRetryHandler,
-      },
+export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: queryCacheOnErrorHandler,
+  }),
+  defaultOptions: {
+    queries: {
+      // Specifying a longer `staleTime` of 20 seconds means queries will not refetch their data
+      // as often; mitigates making duplicate queries when within the `staleTime` window, instead
+      // relying on the cached data until the `staleTime` window has exceeded. This may be modified
+      // per-query, as needed, if certain queries expect to be more up-to-date than others. Allows
+      // `useQuery` to be used as a state manager.
+      staleTime: 1000 * 20, // 20 seconds
+      // To prevent hard loading states if/when query keys change during automatic query background
+      // re-fetches, we can utilize `keepPreviousData` to keep the previous data until the new
+      // data is fetched. By enabling this option, UI components generally will not need to consider
+      // hard loading states when query keys change.
+      placeholderData: keepPreviousData,
+      // If a query fails, it will retry up to 3 times for queries with non-404 errors.
+      retry: defaultQueryClientRetryHandler,
     },
-  }));
-  return queryClient;
+  },
+});
+
+function useAppQueryClient() {
+  const [appQueryClient] = useState(() => queryClient);
+  return appQueryClient;
 }
 
 function useReactQueryDevTools() {
@@ -59,11 +61,11 @@ function useReactQueryDevTools() {
 }
 
 const App = () => {
-  const queryClient = useAppQueryClient();
+  const stateQueryClient = useAppQueryClient();
 
   // Create the app router during render vs. at the top-level of the module to ensure
   // the logging and auth modules are initialized before the router is created.
-  const router = useMemo(() => createAppRouter(queryClient), [queryClient]);
+  const router = useMemo(() => createAppRouter(stateQueryClient), [stateQueryClient]);
 
   const showReactQueryDevtools = useReactQueryDevTools();
 
