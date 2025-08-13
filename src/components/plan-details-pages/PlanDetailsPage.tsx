@@ -1,4 +1,5 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -6,16 +7,19 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
+import { useMutation } from '@tanstack/react-query';
+import { useContext } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
+import loginRequest from '@/components/app/data/services/login';
 import { DataStores, SubmitCallbacks } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
   CheckoutStepKey,
-  PlanDetailsSchema,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
@@ -33,54 +37,68 @@ const PlanDetailsPage = () => {
   const intl = useIntl();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData.PlanDetails);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const isAuthenticated = useCheckoutFormStore((state) => state.isAuthenticated);
-  const setIsAuthenticated = useCheckoutFormStore((state) => state.setIsAuthenticated);
-  // TODO: Once the user is logged in, use this field for authenticated user validation
-  // const { authenticatedUser } = useContext<AppContext>(AppContext);
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
   const currentPage = useCurrentPage();
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
+    formSchema,
   } = useCurrentPageDetails();
 
-  const form = useForm<PlanDetailsData>({
+  const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onTouched',
-    resolver: zodResolver(PlanDetailsSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: planDetailsFormData,
   });
   const {
     handleSubmit,
     formState: { isValid },
+    setError,
   } = form;
 
-  const onSubmitCallbacks: { [K in SubmitCallbacks]: (data: PlanDetailsData) => void } = {
+  const loginMutation = useMutation({
+    mutationFn: (requestData: LoginRequestSchema) => loginRequest(requestData),
+    onSuccess: () => {
+      navigate(CheckoutPageDetails.PlanDetails.route);
+    },
+    onError: (error: any) => {
+      // Handle login errors
+      const errorMessage = error?.response?.data?.non_field_errors?.[0] || 'Invalid email or password';
+      setError('password', {
+        type: 'manual',
+        message: errorMessage,
+      });
+    },
+  });
+
+  const onSubmitCallbacks: { [K in SubmitCallbacks]: (data) => void } = {
     [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
       setFormData(DataStores.PlanDetailsStoreKey, data);
 
       // TODO: replace with existing user email logic
-      const randomExistingEmail = !!(Math.random() < 0.5 ? 0 : 1);
+      const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
 
-      // TODO: replace with an authenticatedUser
-      if (!isAuthenticated) {
-        if (randomExistingEmail) {
+      if (!authenticatedUser) {
+        if (emailExists) {
           navigate(CheckoutPageDetails.PlanDetailsLogin.route);
         } else {
           navigate(CheckoutPageDetails.PlanDetailsRegister.route);
         }
-        return;
-      }
-
-      if (isAuthenticated) {
+      } else {
         navigate(CheckoutPageDetails.AccountDetails.route);
       }
     },
-    [SubmitCallbacks.PlanDetailsLoginCallback]: () => {
-      setIsAuthenticated(true);
-      navigate(CheckoutPageDetails.PlanDetails.route);
+    [SubmitCallbacks.PlanDetailsLoginCallback]: (data: PlanDetailsLoginPageData) => {
+      loginMutation.mutate({
+        emailOrUsername: data.email,
+        password: data.password,
+      });
     },
-    [SubmitCallbacks.PlanDetailsRegisterCallback]: () => {
-      setIsAuthenticated(true);
+    [SubmitCallbacks.PlanDetailsRegisterCallback]: (data: PlanDetailsRegisterPageData) => {
+      // TODO: temporarily print data to make linter happy.
+      console.log(data);
+      // TODO: actually call registerRequest service function.
       navigate(CheckoutPageDetails.PlanDetails.route);
     },
   };

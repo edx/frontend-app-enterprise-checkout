@@ -22,11 +22,59 @@ function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[key
 export const CheckoutStepByKey: Record<CheckoutStepKey, CheckoutStep> = reverseEnum(CheckoutStepKey);
 export const CheckoutSubstepByKey: Record<CheckoutSubstepKey, CheckoutSubstep> = reverseEnum(CheckoutSubstepKey);
 
-export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
+export const PlanDetailsSchema = z.object({
+  numUsers: z.coerce.number()
+    .min(5, 'Minimum 5 users')
+    .max(500, 'Maximum 500 users')
+    .optional(),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255)
+    .optional(),
+  email: z.string().trim()
+    .email()
+    .max(254)
+    .optional(),
+  orgName: z.string().trim()
+    .min(1, 'Organization name is required')
+    .max(255, 'Maximum 255 characters')
+    .optional(),
+  country: z.string().trim()
+    .min(1, 'Country is required').optional(),
+});
+
+export const PlanDetailsLoginPageSchema = z.object({
+  email: z.string().trim()
+    .email()
+    .max(254)
+    .optional(),
+  password: z.string().trim()
+    .min(2, 'Password is required')
+    .max(255, 'Maximum 255 characters'),
+});
+
+// TODO: complete as part of ticket to do register page.
+export const PlanDetailsRegisterPageSchema = z.object({});
+
+export const AccountDetailsSchema = z.object({
+  orgSlug: z.string().trim()
+    .min(1, 'Access link is required')
+    .max(30, 'Maximum 30 characters')
+    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
+    .refine(slug => !slug.startsWith('-') && !slug.endsWith('-'), {
+      message: 'Access link may not start or end with a hyphen',
+    })
+    .optional(),
+});
+
+export const BillingDetailsSchema = z.object({});
+
+export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
     route: `/${CheckoutStepKey.PlanDetails}`,
+    formSchema: PlanDetailsSchema,
     title: defineMessages({
       id: 'checkout.planDetails.title',
       defaultMessage: 'Plan Details',
@@ -37,11 +85,12 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
       defaultMessage: 'Continue',
       description: 'Button label for the next step in the plan details step',
     }),
-  } as CheckoutPageDetails,
+  },
   PlanDetailsLogin: {
     step: 'PlanDetails',
     substep: 'Login',
     route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+    formSchema: PlanDetailsLoginPageSchema,
     title: defineMessages({
       id: 'checkout.planDetailsLogin.title',
       defaultMessage: 'Log in to your account',
@@ -57,6 +106,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     step: 'PlanDetails',
     substep: 'Register',
     route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+    formSchema: PlanDetailsRegisterPageSchema,
     title: defineMessages({
       id: 'checkout.planDetailsRegistration.title',
       defaultMessage: 'Create your Account',
@@ -72,6 +122,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     step: 'AccountDetails',
     substep: undefined,
     route: `/${CheckoutStepKey.AccountDetails}`,
+    formSchema: AccountDetailsSchema,
     title: defineMessages({
       id: 'checkout.accountDetails.title',
       defaultMessage: 'Account Details',
@@ -87,6 +138,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     step: 'BillingDetails',
     substep: undefined,
     route: `/${CheckoutStepKey.BillingDetails}`,
+    formSchema: BillingDetailsSchema,
     title: defineMessages({
       id: 'checkout.billingDetails.title',
       defaultMessage: 'Billing Details',
@@ -110,40 +162,6 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     buttonMessage: null,
   },
 };
-
-export const PlanDetailsSchema = z.object({
-  numUsers: z.coerce.number()
-    .min(5, 'Minimum 5 users')
-    .max(500, 'Maximum 500 users')
-    .optional(),
-  // fullName: z.string().trim()
-  //   .min(1, 'Full name is required')
-  //   .max(255)
-  //   .optional(),
-  // orgEmail: z.string().trim()
-  //   .email()
-  //   .max(254)
-  //   .optional(),
-  // orgName: z.string().trim()
-  //   .min(1, 'Organization name is required')
-  //   .max(255, 'Maximum 255 characters')
-  //   .optional(),
-  // country: z.string().trim()
-  //   .min(1, 'Country is required').optional(),
-});
-
-export const AccountDetailsSchema = z.object({
-  orgSlug: z.string().trim()
-    .min(1, 'Access link is required')
-    .max(30, 'Maximum 30 characters')
-    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
-    .refine(slug => !slug.startsWith('-') && !slug.endsWith('-'), {
-      message: 'Access link may not start or end with a hyphen',
-    })
-    .optional(),
-});
-
-export const BillingDetailsSchema = z.object({});
 
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.

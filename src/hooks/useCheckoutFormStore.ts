@@ -15,14 +15,6 @@ const useCheckoutFormStore = create<FormStore>(
         },
       }),
     ),
-    // TODO: This is added an a means to iterate through the project. Will need to be removed.
-    isAuthenticated: false,
-    setIsAuthenticated: (newIsAuthenticated) => set(
-      (store) => ({
-        ...store,
-        isAuthenticated: newIsAuthenticated,
-      }),
-    ),
   }),
 );
 

@@ -1,8 +1,8 @@
+import { AppContext } from '@edx/frontend-platform/react';
+import { useContext } from 'react';
+
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
 import { PriceAlert } from '@/components/PriceAlert';
-import {
-  useCheckoutFormStore,
-} from '@/hooks/index';
 
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -11,13 +11,18 @@ interface PlanDetailsContentProps {
 }
 
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
-  const isAuthenticated = useCheckoutFormStore((state) => state.isAuthenticated);
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
   return (
     <>
       <PriceAlert />
       <LicensesField form={form} />
-      {isAuthenticated
-        ? (<AuthenticatedUserField orgEmail="test@example.com" fullName="Don Schapps" />)
+      {authenticatedUser
+        ? (
+          <AuthenticatedUserField
+            email={authenticatedUser.email}
+            fullName={authenticatedUser.name || authenticatedUser.username}
+          />
+        )
         : (<NameAndEmailFields form={form} />)}
     </>
   );

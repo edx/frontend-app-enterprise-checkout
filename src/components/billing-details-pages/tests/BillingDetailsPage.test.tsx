@@ -13,8 +13,6 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
     const defaultState = {
       formData: { BillingDetails: {} },
       setFormData: jest.fn(),
-      isAuthenticated: true,
-      setIsAuthenticated: jest.fn(),
     };
     return cb(defaultState);
   }),

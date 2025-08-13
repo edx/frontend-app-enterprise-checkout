@@ -5,10 +5,10 @@ import { FieldContainer } from '@/components/FieldContainer';
 
 interface AuthenticatedUserFieldProps {
   fullName: string;
-  orgEmail: string;
+  email: string;
 }
 
-const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullName, orgEmail }) => (
+const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullName, email }) => (
   <FieldContainer>
     <div>
       <h3>
@@ -25,7 +25,7 @@ const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullNam
           description="Description text explaining the licenses field purpose"
         />
         <span className="font-weight-bold">
-          {fullName}&nbsp;({orgEmail})
+          {fullName}&nbsp;({email})
         </span>
       </h3>
     </div>
@@ -34,7 +34,7 @@ const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullNam
 
 AuthenticatedUserField.propTypes = {
   fullName: PropTypes.string.isRequired,
-  orgEmail: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
 };
 
 export default AuthenticatedUserField;

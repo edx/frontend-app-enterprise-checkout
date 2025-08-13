@@ -1,20 +1,14 @@
 import { useParams } from 'react-router-dom';
 
 import {
-  CheckoutStepByKey,
   CheckoutStepKey,
-  CheckoutSubstepByKey,
   CheckoutSubstepKey,
 } from '@/components/Stepper/constants';
+import { getStepFromParams } from '@/utils/checkout';
 
 function useCurrentStep() {
-  const {
-    step: currentStepKey,
-    substep: currentSubstepKey,
-  } = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
-  const currentStep = currentStepKey ? CheckoutStepByKey[currentStepKey] : undefined;
-  const currentSubstep = currentSubstepKey ? CheckoutSubstepByKey[currentSubstepKey] : undefined;
-  return { currentStep, currentStepKey, currentSubstep, currentSubstepKey };
+  const params = useParams<{ step: CheckoutStepKey, substep: CheckoutSubstepKey }>();
+  return getStepFromParams(params);
 }
 
 export default useCurrentStep;
