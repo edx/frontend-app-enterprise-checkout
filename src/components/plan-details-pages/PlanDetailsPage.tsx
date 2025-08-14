@@ -71,7 +71,9 @@ const PlanDetailsPage = () => {
     },
   });
 
-  const onSubmitCallbacks: { [K in SubmitCallbacks]: (data) => void } = {
+  const onSubmitCallbacks: {
+    [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
+  } = {
     [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
       setFormData(DataStoreKey.PlanDetailsStoreKey, data);
 
@@ -90,7 +92,7 @@ const PlanDetailsPage = () => {
     },
     [SubmitCallbacks.PlanDetailsLoginCallback]: (data: PlanDetailsLoginPageData) => {
       loginMutation.mutate({
-        emailOrUsername: data.email,
+        emailOrUsername: data.adminEmail,
         password: data.password,
       });
     },
