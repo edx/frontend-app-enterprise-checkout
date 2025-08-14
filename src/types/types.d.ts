@@ -47,6 +47,14 @@ declare global {
 
   /**
    * ==============================
+   * Loaders
+   * ==============================
+   */
+  type MakeRouteLoaderFunction = (queryClient?: QueryClient) => LoaderFunction;
+  export type MakeRouteLoaderFunctionWithQueryClient = (queryClient: QueryClient) => LoaderFunction;
+
+  /**
+   * ==============================
    * Form and UI Related Types
    * ==============================
    */

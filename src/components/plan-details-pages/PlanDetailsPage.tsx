@@ -16,10 +16,10 @@ import { z } from 'zod';
 
 import loginRequest from '@/components/app/data/services/login';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
-import {
-  CheckoutPageDetails,
-  CheckoutStepKey, DataStoreKey, SubmitCallbacks,
-} from '@/constants/checkout';
+import { CheckoutPageRoute,
+  CheckoutStepKey,
+  DataStoreKey,
+  SubmitCallbacks } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
   useCurrentPage,
@@ -59,7 +59,7 @@ const PlanDetailsPage = () => {
   const loginMutation = useMutation({
     mutationFn: (requestData: LoginRequestSchema) => loginRequest(requestData),
     onSuccess: () => {
-      navigate(CheckoutPageDetails.PlanDetails.route);
+      navigate(CheckoutPageRoute.PlanDetails);
     },
     onError: (error: any) => {
       // Handle login errors
@@ -82,12 +82,12 @@ const PlanDetailsPage = () => {
 
       if (!authenticatedUser) {
         if (emailExists) {
-          navigate(CheckoutPageDetails.PlanDetailsLogin.route);
+          navigate(CheckoutPageRoute.PlanDetailsLogin);
         } else {
-          navigate(CheckoutPageDetails.PlanDetailsRegister.route);
+          navigate(CheckoutPageRoute.PlanDetailsRegister);
         }
       } else {
-        navigate(CheckoutPageDetails.AccountDetails.route);
+        navigate(CheckoutPageRoute.AccountDetails);
       }
     },
     [SubmitCallbacks.PlanDetailsLoginCallback]: (data: PlanDetailsLoginPageData) => {
@@ -98,7 +98,7 @@ const PlanDetailsPage = () => {
     },
     [SubmitCallbacks.PlanDetailsRegisterCallback]: (data: PlanDetailsRegisterPageData) => {
       // TODO: actually call registerRequest service function.
-      navigate(CheckoutPageDetails.PlanDetails.route);
+      navigate(CheckoutPageRoute.PlanDetails);
       // TODO: temporarily return data to make linter happy.
       return data;
     },
