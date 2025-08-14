@@ -58,10 +58,26 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
 };
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
+
+export const PlanDetailsLoginPageSchema = z.object({
+  adminEmail: z.string().trim()
+    .email()
+    .max(254)
+    .optional(),
+  password: z.string().trim()
+    .min(2, 'Password is required')
+    .max(255, 'Maximum 255 characters'),
+});
+
+// TODO: complete as part of ticket to do register page.
+export const PlanDetailsRegisterPageSchema = z.object({});
+
+export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
     route: `/${CheckoutStepKey.PlanDetails}`,
+    formSchema: PlanDetailsSchema,
     title: defineMessages({
       id: 'checkout.planDetails.title',
       defaultMessage: 'Plan Details',
@@ -72,11 +88,12 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
       defaultMessage: 'Continue',
       description: 'Button label for the next step in the plan details step',
     }),
-  } as CheckoutPageDetails,
+  },
   PlanDetailsLogin: {
     step: 'PlanDetails',
     substep: 'Login',
     route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+    formSchema: PlanDetailsLoginPageSchema,
     title: defineMessages({
       id: 'checkout.planDetailsLogin.title',
       defaultMessage: 'Log in to your account',
@@ -92,6 +109,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     step: 'PlanDetails',
     substep: 'Register',
     route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+    formSchema: PlanDetailsRegisterPageSchema,
     title: defineMessages({
       id: 'checkout.planDetailsRegistration.title',
       defaultMessage: 'Create your Account',
@@ -107,6 +125,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     step: 'AccountDetails',
     substep: undefined,
     route: `/${CheckoutStepKey.AccountDetails}`,
+    formSchema: AccountDetailsSchema,
     title: defineMessages({
       id: 'checkout.accountDetails.title',
       defaultMessage: 'Account Details',
@@ -122,6 +141,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     step: 'BillingDetails',
     substep: undefined,
     route: `/${CheckoutStepKey.BillingDetails}`,
+    formSchema: BillingDetailsSchema,
     title: defineMessages({
       id: 'checkout.billingDetails.title',
       defaultMessage: 'Billing Details',
