@@ -3,7 +3,7 @@ import { Stack } from '@openedx/paragon';
 
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { DataStoreKey } from '@/components/Stepper';
+import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
 import type { UseFormReturn } from 'react-hook-form';

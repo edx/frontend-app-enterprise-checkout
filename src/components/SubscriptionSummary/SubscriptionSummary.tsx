@@ -3,9 +3,8 @@ import { Button, Card, Stack } from '@openedx/paragon';
 import { Link } from 'react-router-dom';
 
 import { DisplayPrice } from '@/components/DisplayPrice';
-import { DataStoreKey } from '@/components/Stepper';
 import {
-  CheckoutPageDetails,
+  CheckoutPageDetails, DataStoreKey,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 } from '@/constants/checkout';
 import {

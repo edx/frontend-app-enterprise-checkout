@@ -6,7 +6,7 @@ import '@testing-library/jest-dom/extend-expect';
 
 import { useNProgressLoader } from '@/components/app/data';
 import Root from '@/components/app/Root';
-import { CheckoutStepKey } from '@/components/Stepper/constants';
+import { CheckoutStepKey } from '@/constants/checkout';
 import { queryClient, renderWithRouterProvider } from '@/utils/tests';
 
 import { getRoutes } from '../../../routes';

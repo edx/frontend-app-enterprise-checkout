@@ -1,10 +1,12 @@
 import { Entries } from 'type-fest';
 
 import {
+  CheckoutPageDetails,
   CheckoutStepByKey,
+  CheckoutStepKey,
   CheckoutSubstepByKey,
-} from '@/components/Stepper/constants';
-import { CheckoutPageDetails, CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
+  CheckoutSubstepKey,
+} from '@/constants/checkout';
 
 /**
  * Determines the step identifiers from the given URL params.

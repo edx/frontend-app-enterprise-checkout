@@ -1,9 +1,6 @@
 import { useParams } from 'react-router-dom';
 
-import {
-  CheckoutStepKey,
-  CheckoutSubstepKey,
-} from '@/components/Stepper/constants';
+import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
 import { getStepFromParams } from '@/utils/checkout';
 
 function useCurrentStep() {

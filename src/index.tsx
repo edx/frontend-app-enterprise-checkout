@@ -54,3 +54,6 @@ initialize({
   // especially useful for the "country" key which helps us populate checkout state.
   hydrateAuthenticatedUser: true,
 });
+export { SubmitCallbacks } from '@/constants/checkout';
+export { DataStoreKey } from '@/constants/checkout';
+export { authenticatedSteps } from '@/constants/checkout';

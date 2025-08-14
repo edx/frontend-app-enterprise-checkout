@@ -10,12 +10,11 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { DataStoreKey } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   AccountDetailsSchema,
   CheckoutPageDetails,
-  CheckoutStepKey,
+  CheckoutStepKey, DataStoreKey,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,

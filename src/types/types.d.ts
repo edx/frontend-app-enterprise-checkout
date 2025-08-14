@@ -1,14 +1,6 @@
 import { SnakeCasedPropertiesDeep } from 'type-fest';
 import { z } from 'zod';
 
-import {
-  AccountDetailsSchema,
-  BillingDetailsSchema,
-  PlanDetailsLoginPageSchema,
-  PlanDetailsRegisterPageSchema,
-  PlanDetailsSchema,
-} from '@/components/Stepper/constants';
-
 import type { TextMatch } from '@testing-library/react';
 
 // Declaration for SVG modules

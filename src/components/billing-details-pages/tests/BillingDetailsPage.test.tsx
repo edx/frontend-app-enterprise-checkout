@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { CheckoutPageDetails } from '@/components/Stepper';
+import { CheckoutPageDetails } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
 
 describe('BillingDetailsPage', () => {

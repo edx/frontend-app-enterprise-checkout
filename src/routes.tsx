@@ -9,7 +9,7 @@ import Root from '@/components/app/Root';
 import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import { authenticatedSteps, CheckoutStepKey } from '@/components/Stepper/constants';
+import { authenticatedSteps, CheckoutStepKey } from '@/constants/checkout';
 
 /**
  * Returns the route loader function if a queryClient is available; otherwise, returns null.

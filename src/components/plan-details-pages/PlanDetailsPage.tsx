@@ -15,11 +15,10 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import loginRequest from '@/components/app/data/services/login';
-import { DataStoreKey, SubmitCallbacks } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
-  CheckoutStepKey,
+  CheckoutStepKey, DataStoreKey, SubmitCallbacks,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
