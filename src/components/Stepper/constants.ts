@@ -18,7 +18,7 @@ export const authenticatedSteps = [
   'billing-details',
 ] as const;
 
-export enum DataStores {
+export enum DataStoreKey {
   PlanDetailsStoreKey = 'PlanDetails',
   AccountDetailsStoreKey = 'AccountDetails',
   BillingDetailsStoreKey = 'BillingDetails',

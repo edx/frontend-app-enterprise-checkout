@@ -3,7 +3,7 @@ import { Button, Card, Stack } from '@openedx/paragon';
 import { Link } from 'react-router-dom';
 
 import { DisplayPrice } from '@/components/DisplayPrice';
-import { DataStores } from '@/components/Stepper';
+import { DataStoreKey } from '@/components/Stepper';
 import {
   CheckoutPageDetails,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
@@ -22,7 +22,7 @@ function calculateSubscriptionCost(quantity?: number) {
 
 const SubscriptionSummary: React.FC = () => {
   const { currentStep } = useCurrentStep();
-  const quantity = useCheckoutFormStore((state) => state.formData.PlanDetails?.quantity);
+  const quantity = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]?.quantity);
   const totalSubscriptionCost = calculateSubscriptionCost(quantity);
   return (
     <Card variant="muted">
@@ -51,7 +51,7 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of licenses"
                       description="Label for the number of licenses"
                     />
-                    {currentStep !== DataStores.PlanDetailsStoreKey && (
+                    {currentStep !== DataStoreKey.PlanDetailsStoreKey && (
                       <Button
                         as={Link}
                         variant="link"

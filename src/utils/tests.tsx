@@ -1,4 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
 import { Stepper } from '@openedx/paragon';
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
@@ -113,22 +114,30 @@ export function renderWithRouterAndStepperProvider(
   return renderWithRouterProvider(wrappedChildren, routerOptions);
 }
 
-export const renderStepperRoute = (route): RenderResult => (
+export const renderStepperRoute = (
+  route,
+  appContextValue = {
+    config: {},
+    authenticatedUser: null,
+  },
+): RenderResult => (
   render(
     <QueryClientProvider client={queryClient()}>
       <IntlProvider locale="en">
-        <MemoryRouter initialEntries={[route]}>
-          <Routes>
-            <Route
-              path="/:step"
-              element={<CheckoutStepper />}
-            />
-            <Route
-              path="/:step/:substep"
-              element={<CheckoutStepper />}
-            />
-          </Routes>
-        </MemoryRouter>
+        <AppContext.Provider value={appContextValue}>
+          <MemoryRouter initialEntries={[route]}>
+            <Routes>
+              <Route
+                path="/:step"
+                element={<CheckoutStepper />}
+              />
+              <Route
+                path="/:step/:substep"
+                element={<CheckoutStepper />}
+              />
+            </Routes>
+          </MemoryRouter>
+        </AppContext.Provider>
       </IntlProvider>
     </QueryClientProvider>,
   ));

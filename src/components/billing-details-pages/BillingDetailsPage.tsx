@@ -10,10 +10,9 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { DataStores } from '@/components/Stepper/constants';
+import { DataStoreKey } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
-  BillingDetailsSchema,
   CheckoutPageDetails,
   CheckoutStepKey,
 } from '@/constants/checkout';
@@ -22,17 +21,19 @@ import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 const BillingDetailsPage: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const billingDetailsData = useCheckoutFormStore((state) => state.formData.BillingDetails);
+  const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetailsStoreKey]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const form = useForm<BillingDetailsData>({
-    mode: 'onBlur',
-    resolver: zodResolver(BillingDetailsSchema),
-    defaultValues: billingDetailsData,
-  });
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
+    formSchema,
   } = useCurrentPageDetails();
+  const form = useForm<BillingDetailsData>({
+    mode: 'onTouched',
+    resolver: zodResolver(formSchema),
+    defaultValues: billingDetailsData,
+  });
+
   const {
     handleSubmit,
   } = form;
@@ -40,7 +41,7 @@ const BillingDetailsPage: React.FC = () => {
   const StepperContent = useStepperContent();
 
   const onSubmit = (data: BillingDetailsData) => {
-    setFormData(DataStores.BillingDetailsStoreKey, data);
+    setFormData(DataStoreKey.BillingDetailsStoreKey, data);
     navigate(CheckoutPageDetails.BillingDetailsSuccess.route);
   };
 

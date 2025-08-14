@@ -1,16 +1,8 @@
-import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { AppContext } from '@edx/frontend-platform/react';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import { CheckoutPageDetails } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
-
-const defaultAppContextValue = {
-  config: {},
-  authenticatedUser: null,
-};
 
 describe('PlanDetailsPage', () => {
   it('renders the title correctly', () => {

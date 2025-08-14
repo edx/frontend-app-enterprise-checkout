@@ -3,6 +3,7 @@ import { Stack } from '@openedx/paragon';
 
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
+import { DataStoreKey } from '@/components/Stepper';
 import { useCheckoutFormStore } from '@/hooks/index';
 
 import type { UseFormReturn } from 'react-hook-form';
@@ -13,8 +14,8 @@ interface LoginFieldsProps {
 
 const LoginFields = ({ form }: LoginFieldsProps) => {
   const intl = useIntl();
-  const planDetailsData = useCheckoutFormStore((state) => state.formData.PlanDetails);
-  const email = planDetailsData?.email;
+  const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]);
+  const adminEmail = planDetailsData?.adminEmail;
 
   return (
     <FieldContainer>
@@ -37,11 +38,11 @@ const LoginFields = ({ form }: LoginFieldsProps) => {
       <Stack gap={1}>
         <Field
           form={form}
-          name="email"
+          name="adminEmail"
           type="email"
-          value={email || ''}
-          disabled={!!email}
-          readOnly={!!email}
+          value={adminEmail || ''}
+          disabled={!!adminEmail}
+          readOnly={!!adminEmail}
           manageState={false}
           floatingLabel={intl.formatMessage({
             id: 'checkout.loginFields.email.floatingLabel',

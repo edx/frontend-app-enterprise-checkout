@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import loginRequest from '@/components/app/data/services/login';
-import { DataStores, SubmitCallbacks } from '@/components/Stepper/constants';
+import { DataStoreKey, SubmitCallbacks } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
@@ -35,7 +35,7 @@ const PlanDetailsPage = () => {
   // console.log(bffContext.data);
   // const bffValidation = useBFFValidation(baseValidation);
   const intl = useIntl();
-  const planDetailsFormData = useCheckoutFormStore((state) => state.formData.PlanDetails);
+  const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ const PlanDetailsPage = () => {
 
   const onSubmitCallbacks: { [K in SubmitCallbacks]: (data) => void } = {
     [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
-      setFormData(DataStores.PlanDetailsStoreKey, data);
+      setFormData(DataStoreKey.PlanDetailsStoreKey, data);
 
       // TODO: replace with existing user email logic
       const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
@@ -96,10 +96,10 @@ const PlanDetailsPage = () => {
       });
     },
     [SubmitCallbacks.PlanDetailsRegisterCallback]: (data: PlanDetailsRegisterPageData) => {
-      // TODO: temporarily print data to make linter happy.
-      console.log(data);
       // TODO: actually call registerRequest service function.
       navigate(CheckoutPageDetails.PlanDetails.route);
+      // TODO: temporarily return data to make linter happy.
+      return data;
     },
   };
 

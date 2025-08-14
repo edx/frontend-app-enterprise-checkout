@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { DataStores } from '@/components/Stepper/constants';
+import { DataStoreKey } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   AccountDetailsSchema,
@@ -25,7 +25,7 @@ import {
 const AccountDetailsPage: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData.AccountDetails);
+  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetailsStoreKey]);
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountDetailsData>({
@@ -43,7 +43,7 @@ const AccountDetailsPage: React.FC = () => {
   } = form;
 
   const onSubmit = (data: AccountDetailsData) => {
-    setFormData(DataStores.AccountDetailsStoreKey, data);
+    setFormData(DataStoreKey.AccountDetailsStoreKey, data);
     navigate(CheckoutPageDetails.BillingDetails.route);
   };
 

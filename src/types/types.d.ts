@@ -31,7 +31,6 @@ declare global {
     }
   ) => void;
 
-
   /**
    * Routes
    */
@@ -53,7 +52,6 @@ declare global {
   type AppContextValue = {
     authenticatedUser: AuthenticatedUser;
   };
-
 
   /**
    * ==============================
@@ -339,7 +337,7 @@ declare global {
     upperMarginMs?: number;
   }
   function assertDebounce(options: DebounceTestOptions): Promise<{ elapsedMs: number }>;
-  
+
   /**
    * ==============================
    * Login Request/Response Types

@@ -17,10 +17,12 @@ const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
       <PriceAlert />
       <LicensesField form={form} />
       {authenticatedUser
-        ? (<AuthenticatedUserField 
-             adminEmail={authenticatedUser.email}
-             fullName={authenticatedUser.name || authenticatedUser.username}
-           />)
+        ? (
+          <AuthenticatedUserField
+            adminEmail={authenticatedUser.email}
+            fullName={authenticatedUser.name || authenticatedUser.username}
+          />
+        )
         : (<NameAndEmailFields form={form} />)}
     </>
   );

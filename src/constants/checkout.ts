@@ -57,8 +57,6 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
   },
 };
 
-export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
-
 export const PlanDetailsLoginPageSchema = z.object({
   adminEmail: z.string().trim()
     .email()
@@ -72,7 +70,51 @@ export const PlanDetailsLoginPageSchema = z.object({
 // TODO: complete as part of ticket to do register page.
 export const PlanDetailsRegisterPageSchema = z.object({});
 
-export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
+export const PlanDetailsSchema = z.object({
+  quantity: z.coerce.number()
+    .min(5, 'Minimum 5 users')
+    .max(30, 'Maximum 30 users')
+    .superRefine(async (quantity, ctx) => {
+      // TODO: Nice to have to avoid calling this API if client side validation catches first
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'quantity',
+        quantity,
+        { stripePriceId: 'price_9876_replace-me' },
+      );
+      if (!isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverValidationError('quantity', validationDecisions, CheckoutErrorMessagesByField),
+        });
+      }
+    }),
+  authenticated: z.boolean().optional(),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255),
+  adminEmail: z.string().trim()
+    .max(254),
+  country: z.string().trim()
+    .min(1, 'Country is required'),
+});
+
+export const AccountDetailsSchema = z.object({
+  companyName: z.string().trim()
+    .min(1, 'Company name is required')
+    .max(255, 'Maximum 255 characters'),
+  // enterpriseSlug: z.string().trim()
+  //   .min(1, ' is required')
+  //   .max(30, 'Maximum 30 characters')
+  //   .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
+  //   .refine(
+  //     (enterpriseSlug) => validateField('enterpriseSlug', enterpriseSlug),
+  //     { message: 'Failed server-side validation.' },
+  //   ),
+});
+
+export const BillingDetailsSchema = z.object({});
+
+export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
@@ -157,6 +199,7 @@ export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
     step: 'BillingDetails',
     substep: 'Success',
     route: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+    formSchema: BillingDetailsSchema,
     title: defineMessages({
       id: 'checkout.billingDetailsSuccess.title',
       defaultMessage: 'Thank you, {firstName}.',
@@ -165,50 +208,6 @@ export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
     buttonMessage: null,
   },
 };
-
-export const PlanDetailsSchema = z.object({
-  quantity: z.coerce.number()
-    .min(5, 'Minimum 5 users')
-    .max(30, 'Maximum 30 users')
-    .superRefine(async (quantity, ctx) => {
-      // TODO: Nice to have to avoid calling this API if client side validation catches first
-      const { isValid, validationDecisions } = await validateFieldDetailed(
-        'quantity',
-        quantity,
-        { stripePriceId: 'price_9876_replace-me' },
-      );
-      if (!isValid) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: serverValidationError('quantity', validationDecisions, CheckoutErrorMessagesByField),
-        });
-      }
-    }),
-  authenticated: z.boolean().optional(),
-  fullName: z.string().trim()
-    .min(1, 'Full name is required')
-    .max(255),
-  adminEmail: z.string().trim()
-    .max(254),
-  country: z.string().trim()
-    .min(1, 'Country is required'),
-});
-
-export const AccountDetailsSchema = z.object({
-  companyName: z.string().trim()
-    .min(1, 'Company name is required')
-    .max(255, 'Maximum 255 characters'),
-  // enterpriseSlug: z.string().trim()
-  //   .min(1, ' is required')
-  //   .max(30, 'Maximum 30 characters')
-  //   .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
-  //   .refine(
-  //     (enterpriseSlug) => validateField('enterpriseSlug', enterpriseSlug),
-  //     { message: 'Failed server-side validation.' },
-  //   ),
-});
-
-export const BillingDetailsSchema = z.object({});
 
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.
