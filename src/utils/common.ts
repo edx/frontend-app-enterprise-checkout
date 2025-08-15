@@ -3,7 +3,7 @@ import { logError } from '@edx/frontend-platform/logging';
 /**
  * Given an error, returns the status code from the custom attributes (Axios error)
  * or the standard JS error response.
- * @param {Error} error An error object
+ * @param {AxiosError} error An error object
  * @returns {number} The status code (e.g., 404)
  */
 function getErrorResponseStatusCode(error) {

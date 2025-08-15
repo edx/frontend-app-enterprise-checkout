@@ -96,6 +96,7 @@ export function getRoutes(queryClient: QueryClient) {
   const routes: RouteObject[] = [
     {
       path: '/',
+      loader: getRouteLoader(makeRootLoader, queryClient),
       element: (
         <PageWrap>
           <Suspense fallback={<RouterFallback loaderOptions={{ handleQueryFetching: true }} />}>

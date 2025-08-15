@@ -13,8 +13,9 @@ import { useNavigate } from 'react-router-dom';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   AccountDetailsSchema,
-  CheckoutPageDetails,
-  CheckoutStepKey, DataStoreKey,
+  CheckoutPageRoute,
+  CheckoutStepKey,
+  DataStoreKey,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
@@ -43,7 +44,7 @@ const AccountDetailsPage: React.FC = () => {
 
   const onSubmit = (data: AccountDetailsData) => {
     setFormData(DataStoreKey.AccountDetailsStoreKey, data);
-    navigate(CheckoutPageDetails.BillingDetails.route);
+    navigate(CheckoutPageRoute.BillingDetails);
   };
 
   const StepperContent = useStepperContent();

@@ -114,12 +114,21 @@ export const AccountDetailsSchema = z.object({
 
 export const BillingDetailsSchema = z.object({});
 
+export enum CheckoutPageRoute {
+  PlanDetails = `/${CheckoutStepKey.PlanDetails}`,
+  PlanDetailsLogin = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+  PlanDetailsRegister = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+  AccountDetails = `/${CheckoutStepKey.AccountDetails}`,
+  BillingDetails = `/${CheckoutStepKey.BillingDetails}`,
+  BillingDetailsSuccess = `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+}
+
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
-    route: `/${CheckoutStepKey.PlanDetails}`,
     formSchema: PlanDetailsSchema,
+    route: CheckoutPageRoute.PlanDetails,
     title: defineMessages({
       id: 'checkout.planDetails.title',
       defaultMessage: 'Plan Details',
@@ -134,8 +143,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   PlanDetailsLogin: {
     step: 'PlanDetails',
     substep: 'Login',
-    route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
     formSchema: PlanDetailsLoginPageSchema,
+    route: CheckoutPageRoute.PlanDetailsLogin,
     title: defineMessages({
       id: 'checkout.planDetailsLogin.title',
       defaultMessage: 'Log in to your account',
@@ -150,8 +159,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   PlanDetailsRegister: {
     step: 'PlanDetails',
     substep: 'Register',
-    route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
     formSchema: PlanDetailsRegisterPageSchema,
+    route: CheckoutPageRoute.PlanDetailsRegister,
     title: defineMessages({
       id: 'checkout.planDetailsRegistration.title',
       defaultMessage: 'Create your Account',
@@ -166,8 +175,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   AccountDetails: {
     step: 'AccountDetails',
     substep: undefined,
-    route: `/${CheckoutStepKey.AccountDetails}`,
     formSchema: AccountDetailsSchema,
+    route: CheckoutPageRoute.AccountDetails,
     title: defineMessages({
       id: 'checkout.accountDetails.title',
       defaultMessage: 'Account Details',
@@ -182,8 +191,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   BillingDetails: {
     step: 'BillingDetails',
     substep: undefined,
-    route: `/${CheckoutStepKey.BillingDetails}`,
     formSchema: BillingDetailsSchema,
+    route: CheckoutPageRoute.BillingDetails,
     title: defineMessages({
       id: 'checkout.billingDetails.title',
       defaultMessage: 'Billing Details',
@@ -198,8 +207,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   BillingDetailsSuccess: {
     step: 'BillingDetails',
     substep: 'Success',
-    route: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
     formSchema: BillingDetailsSchema,
+    route: CheckoutPageRoute.BillingDetailsSuccess,
     title: defineMessages({
       id: 'checkout.billingDetailsSuccess.title',
       defaultMessage: 'Thank you, {firstName}.',

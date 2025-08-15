@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 
 import { DisplayPrice } from '@/components/DisplayPrice';
 import {
-  CheckoutPageDetails, DataStoreKey,
+  CheckoutPageRoute,
+  DataStoreKey,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 } from '@/constants/checkout';
 import {
@@ -56,7 +57,7 @@ const SubscriptionSummary: React.FC = () => {
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to={CheckoutPageDetails.PlanDetails.route}
+                        to={CheckoutPageRoute.PlanDetails}
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editQuantity"
