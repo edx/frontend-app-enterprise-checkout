@@ -3,7 +3,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { RegisterAccountFields } from '@/components/FormFields';
 
 interface PlanDetailsRegisterContentProps {
-  form: UseFormReturn<Partial<PlanDetailsData>>;
+  form: UseFormReturn<PlanDetailsData>;
 }
 
 const PlanDetailsRegisterContent = ({ form }: PlanDetailsRegisterContentProps) => (

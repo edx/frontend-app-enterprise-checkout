@@ -10,12 +10,11 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { DataStores } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   AccountDetailsSchema,
   CheckoutPageDetails,
-  CheckoutStepKey,
+  CheckoutStepKey, DataStoreKey,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
@@ -25,11 +24,11 @@ import {
 const AccountDetailsPage: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData.AccountDetails);
+  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetailsStoreKey]);
 
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const form = useForm<AccountDetailsData>({
-    mode: 'onBlur',
+    mode: 'onTouched',
     resolver: zodResolver(AccountDetailsSchema),
     defaultValues: accountDetailsFormData,
   });
@@ -39,10 +38,11 @@ const AccountDetailsPage: React.FC = () => {
   } = useCurrentPageDetails();
   const {
     handleSubmit,
+    formState: { isValid },
   } = form;
 
   const onSubmit = (data: AccountDetailsData) => {
-    setFormData(DataStores.AccountDetailsStoreKey, data);
+    setFormData(DataStoreKey.AccountDetailsStoreKey, data);
     navigate(CheckoutPageDetails.BillingDetails.route);
   };
 
@@ -54,7 +54,7 @@ const AccountDetailsPage: React.FC = () => {
       <Helmet title="Account Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
-          <h1 className="mb-5 text-center">
+          <h1 className="mb-5 text-center" data-testid="stepper-title">
             {intl.formatMessage(pageTitle)}
           </h1>
           <Stack gap={4}>
@@ -66,6 +66,8 @@ const AccountDetailsPage: React.FC = () => {
           <Button
             variant="secondary"
             type="submit"
+            disabled={!isValid}
+            data-testid="stepper-submit-button"
           >
             {intl.formatMessage(stepperActionButtonMessage)}
           </Button>

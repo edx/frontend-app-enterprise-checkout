@@ -1,11 +1,17 @@
 import {
+  CompanyNameField,
   CustomUrlField,
-  OrganizationNameField,
 } from '@/components/FormFields';
 
-const AccountDetailsContent = () => (
+import type { UseFormReturn } from 'react-hook-form';
+
+interface AccountDetailsContentProps {
+  form: UseFormReturn<AccountDetailsData>;
+}
+
+const AccountDetailsContent = ({ form }: AccountDetailsContentProps) => (
   <>
-    <OrganizationNameField />
+    <CompanyNameField form={form} />
     <CustomUrlField />
   </>
 );

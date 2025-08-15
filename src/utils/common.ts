@@ -41,6 +41,36 @@ function getComputedStylePropertyCSSVariable(cssVariableName: string) {
   return getComputedStyle(document.documentElement).getPropertyValue(cssVariableName);
 }
 
+/**
+ * Returns a user-friendly message for a field based on server-side validation
+ * decisions and a mapping of error codes to messages.
+ *
+ * This utility intentionally accepts the messages mapping as a parameter to
+ * avoid creating circular dependencies with modules that define those mappings.
+ *
+ * @param {string} field - The field name to read from decisions/messages.
+ * @param {ValidationResponse['validationDecisions'] | null | undefined} validationDecisions
+ * @param {Record<string, Record<string, string>>} messagesByField - field -> (errorCode -> message)
+ * @param {string} [defaultMessage='Failed server-side validation']
+ * @returns {string}
+ */
+function serverValidationError(
+  field: string,
+  validationDecisions: ValidationResponse['validationDecisions'] | null,
+  messagesByField: Record<string, Record<string, string>>,
+  defaultMessage: string = 'Failed server-side validation',
+): string {
+  if (validationDecisions) {
+    const decision = (validationDecisions as any)[field] as ValidationDecision | undefined;
+    const errorCode = (decision as any)?.errorCode as string | undefined;
+    const fieldMessages = messagesByField?.[field];
+    if (errorCode && fieldMessages?.[errorCode]) {
+      return fieldMessages[errorCode];
+    }
+  }
+  return defaultMessage;
+}
+
 const formatPrice = (price: number, options = {}) => {
   const USDollar = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -57,4 +87,5 @@ export {
   getComputedStylePropertyCSSVariable,
   formatPrice,
   queryCacheOnErrorHandler,
+  serverValidationError,
 };

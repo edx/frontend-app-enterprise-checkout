@@ -15,7 +15,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
   const intl = useIntl();
   return (
     <FieldContainer>
-      <div>
+      <div className="mb-3">
         <h3>
           <FormattedMessage
             id="checkout.NameAndEmailFields.title"
@@ -31,7 +31,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           />
         </h3>
       </div>
-      <Stack gap={1}>
+      <Stack>
         <Field
           form={form}
           name="fullName"
@@ -46,28 +46,13 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             defaultMessage: 'Enter your full name',
             description: 'Placeholder for the full name input field',
           })}
-          controlClassName="mr-0 mt-3"
+          controlClassName="mr-0"
           className="bg-light-300"
         />
+
         <Field
           form={form}
-          name="orgName"
-          type="text"
-          floatingLabel={intl.formatMessage({
-            id: 'checkout.nameAndEmailFields.companyName.floatingLabel',
-            defaultMessage: 'Company Name',
-            description: 'Floating label for the company name input field',
-          })}
-          placeholder={intl.formatMessage({
-            id: 'checkout.nameAndEmailFields.companyName.placeholder',
-            defaultMessage: 'Enter your company name',
-            description: 'Placeholder for the company name input field',
-          })}
-          controlClassName="mr-0 mt-3"
-        />
-        <Field
-          form={form}
-          name="email"
+          name="adminEmail"
           type="email"
           floatingLabel={intl.formatMessage({
             id: 'checkout.nameAndEmailFields.workEmail.floatingLabel',
@@ -79,7 +64,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             defaultMessage: 'Enter your work email',
             description: 'Placeholder for the work email input field',
           })}
-          controlClassName="mr-0 mt-3"
+          controlClassName="mr-0"
         />
         <Field
           form={form}
@@ -129,7 +114,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             defaultMessage: 'Select a country',
             description: 'Placeholder for the country of residence dropdown field',
           })}
-          controlClassName="mr-0 mt-3"
+          controlClassName="mr-0"
         />
       </Stack>
     </FieldContainer>

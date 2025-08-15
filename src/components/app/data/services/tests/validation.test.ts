@@ -1,21 +1,32 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 
+import { VALIDATION_DEBOUNCE_MS } from '@/components/app/data/constants';
+
 import {
   validationDecisionFactory,
   validationResponsePayloadFactory,
   validationResponsePayloadWithDecisionsFactory,
+  validationResponseWithDecisionsFactory,
   validationSchemaPayloadFactory,
 } from '../__factories__';
-import fetchCheckoutValidation from '../validation';
+import fetchCheckoutValidation, { validateFieldDetailed } from '../validation';
 
 // Mock setup
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedHttpClient: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
+
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform', () => ({
+  snakeCaseObject: jest.fn(),
 }));
 
 /**
@@ -28,6 +39,10 @@ const verifyValidationResponseStructure = (response: ValidationResponse): Valida
   expect(response.userAuthn).toHaveProperty('userExistsForEmail');
 
   return response;
+};
+
+const mockConfig = {
+  ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
 };
 
 /**
@@ -52,9 +67,7 @@ const verifyValidationDecision = (
 
 describe('fetchCheckoutValidation', () => {
   const mockPost = jest.fn();
-  const mockConfig = {
-    ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
-  };
+
   const mockPayload = validationSchemaPayloadFactory();
   const baseUrl = 'https://example.com/api/v1/bffs/checkout/validation/';
 
@@ -264,5 +277,198 @@ describe('fetchCheckoutValidation', () => {
 
     // Execute & Verify
     await expect(fetchCheckoutValidation(mockPayload)).rejects.toThrow('API call failed');
+  });
+});
+
+describe('validateFieldDetailed', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (getConfig as jest.Mock).mockReturnValue(mockConfig);
+  });
+
+  it('validates value of field with no options passed and returns true', async () => {
+    // Setup
+    const mockField = 'fullName';
+    const mockValue = 'John Doe';
+    const mockResponse: ValidationResponse = validationResponseWithDecisionsFactory({
+      // @ts-ignore
+      [mockField]: null,
+    });
+
+    const mockPost = jest.fn().mockResolvedValue({ data: mockResponse });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: mockPost,
+    });
+
+    // Execute
+    const result = await validateFieldDetailed(mockField, mockValue);
+
+    // Verify
+    expect(mockPost).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        full_name: mockValue, // Field name is converted to snake_case in the implementation
+      }),
+    );
+    expect(result.isValid).toBe(true);
+  });
+
+  it('validates all fields and options passed and returns true', async () => {
+    // Setup
+    const mockField = 'fullName';
+    const mockValue = 'John Doe';
+    const mockExtras = {
+      companyName: 'Acme Inc',
+      quantity: 10,
+    };
+
+    // Clear any previous values in the cache
+    // This is necessary because validateFieldDetailed caches previous values
+    // and skips validation if the value hasn't changed
+    jest.resetModules();
+
+    const mockResponse: ValidationResponse = validationResponseWithDecisionsFactory({
+      [mockField]: undefined,
+      companyName: undefined,
+      quantity: undefined,
+    });
+
+    const mockPost = jest.fn().mockResolvedValue({ data: mockResponse });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: mockPost,
+    });
+
+    // Execute
+    const result = await validateFieldDetailed(mockField, mockValue, mockExtras);
+
+    // Verify
+    expect(result.isValid).toBe(true);
+
+    // Since validateFieldDetailed uses debouncing and caching, we can't reliably
+    // test the exact payload in this test. Instead, we'll just verify
+    // that the function returns the expected result.
+  });
+
+  it('returns false if a single validation fails', async () => {
+    // Setup
+    const mockField = 'adminEmail';
+    const mockValue = 'invalid-email';
+
+    const mockResponse: ValidationResponse = validationResponseWithDecisionsFactory({
+      [mockField]: validationDecisionFactory({
+        errorCode: 'invalid_email',
+        developerMessage: 'The provided email is not valid.',
+      }),
+    });
+
+    const mockPost = jest.fn().mockResolvedValue({ data: mockResponse });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: mockPost,
+    });
+
+    // Execute
+    const result = await validateFieldDetailed(mockField, mockValue);
+
+    // Verify
+    expect(result.isValid).toBe(false);
+  });
+
+  it('returns false if partial validation fails for multiple values in options with field', async () => {
+    // This test verifies that validateFieldDetailed returns false if any field in the extras fails validation
+
+    // Setup
+    const mockField = 'fullName';
+    const mockValue = 'John Doe';
+    const mockExtras = {
+      companyName: '',
+      quantity: 10,
+    };
+
+    // Create a response where companyName has a validation error
+    const mockResponse = {
+      data: {
+        validation_decisions: {
+          full_name: null,
+          company_name: {
+            error_code: 'required_field',
+            developer_message: 'This field is required.',
+          },
+          quantity: null,
+        },
+        user_authn: {
+          user_exists_for_email: true,
+        },
+      },
+    };
+
+    const mockPost = jest.fn().mockResolvedValue(mockResponse);
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: mockPost,
+    });
+
+    // Execute
+    const result = await validateFieldDetailed(mockField, mockValue, mockExtras);
+
+    // Verify
+    expect(result.isValid).toBe(false);
+  });
+
+  it('returns false if all validation fails for multiple values in options with field', async () => {
+    // Setup
+    const mockField = 'fullName';
+    const mockValue = '';
+    const mockExtras = {
+      companyName: '',
+      quantity: 0,
+    };
+
+    const mockResponse: ValidationResponse = validationResponseWithDecisionsFactory({
+      [mockField]: validationDecisionFactory({
+        errorCode: 'required_field',
+        developerMessage: 'This field is required.',
+      }),
+      companyName: validationDecisionFactory({
+        errorCode: 'required_field',
+        developerMessage: 'This field is required.',
+      }),
+      quantity: validationDecisionFactory({
+        errorCode: 'invalid_range',
+        developerMessage: 'Quantity must be between 5 and 100.',
+      }),
+    });
+
+    const mockPost = jest.fn().mockResolvedValue({ data: mockResponse });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      post: mockPost,
+    });
+
+    // Execute
+    const result = await validateFieldDetailed(mockField, mockValue, mockExtras);
+
+    // Verify
+    expect(result.isValid).toBe(false);
+  });
+
+  it('debounces validations: executes ~500ms after last call and only once', async () => {
+    // Minimal config and HTTP client mocks
+    (getConfig as jest.Mock).mockReturnValue({ ENTERPRISE_ACCESS_BASE_URL: 'https://example.test' });
+
+    const mockPost = jest.fn().mockResolvedValue({
+      data: {
+        validation_decisions: {
+          company_name: null,
+        },
+        user_authn: { user_exists_for_email: true },
+      },
+    });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({ post: mockPost });
+
+    await assertDebounce({
+      baseDelayMs: VALIDATION_DEBOUNCE_MS,
+      preCalls: [() => validateFieldDetailed('companyName', 'Acme-1')],
+      call: () => validateFieldDetailed('companyName', 'Acme-2'),
+      getInvocationCount: () => mockPost.mock.calls.length,
+      upperMarginMs: 20,
+    });
   });
 });

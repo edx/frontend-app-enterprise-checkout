@@ -1,6 +1,9 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
+import { validateFieldDetailed } from '@/components/app/data/services/validation';
+import { serverValidationError } from '@/utils/common';
+
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
   AccountDetails = 'account-details',
@@ -22,29 +25,40 @@ function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[key
 export const CheckoutStepByKey: Record<CheckoutStepKey, CheckoutStep> = reverseEnum(CheckoutStepKey);
 export const CheckoutSubstepByKey: Record<CheckoutSubstepKey, CheckoutSubstep> = reverseEnum(CheckoutSubstepKey);
 
-export const PlanDetailsSchema = z.object({
-  numUsers: z.coerce.number()
-    .min(5, 'Minimum 5 users')
-    .max(500, 'Maximum 500 users')
-    .optional(),
-  fullName: z.string().trim()
-    .min(1, 'Full name is required')
-    .max(255)
-    .optional(),
-  email: z.string().trim()
-    .email()
-    .max(254)
-    .optional(),
-  orgName: z.string().trim()
-    .min(1, 'Organization name is required')
-    .max(255, 'Maximum 255 characters')
-    .optional(),
-  country: z.string().trim()
-    .min(1, 'Country is required').optional(),
-});
+export type FieldErrorCodes = {
+  adminEmail: 'invalid_format' | 'not_registered' | 'incomplete_data';
+  enterpriseSlug: 'invalid_format' | 'existing_enterprise_customer' | 'slug_reserved' | 'incomplete_data';
+  quantity: 'invalid_format' | 'range_exceeded' | 'incomplete_data';
+  stripePriceId: 'invalid_format' | 'does_not_exist' | 'incomplete_data';
+};
+
+export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Record<FieldErrorCodes[K], string> } = {
+  adminEmail: {
+    invalid_format: 'Invalid format for given email address.',
+    not_registered: 'Given email address does not correspond to an existing user.',
+    incomplete_data: 'Not enough parameters were given.',
+  },
+  enterpriseSlug: {
+    invalid_format: 'Invalid format for given slug.',
+    // EXISTING_ENTERPRISE_CUSTOMER_FOR_ADMIN uses the same error code on the backend
+    existing_enterprise_customer: 'The slug conflicts with an existing customer.',
+    slug_reserved: 'The slug is currently reserved by another user.',
+    incomplete_data: 'Not enough parameters were given.',
+  },
+  quantity: {
+    invalid_format: 'Must be a positive integer.',
+    range_exceeded: 'Exceeded allowed range for given stripe_price_id.',
+    incomplete_data: 'Not enough parameters were given.',
+  },
+  stripePriceId: {
+    invalid_format: 'Must be a non-empty string.',
+    does_not_exist: 'This stripe_price_id has not been configured.',
+    incomplete_data: 'Not enough parameters were given.',
+  },
+};
 
 export const PlanDetailsLoginPageSchema = z.object({
-  email: z.string().trim()
+  adminEmail: z.string().trim()
     .email()
     .max(254)
     .optional(),
@@ -56,20 +70,51 @@ export const PlanDetailsLoginPageSchema = z.object({
 // TODO: complete as part of ticket to do register page.
 export const PlanDetailsRegisterPageSchema = z.object({});
 
+export const PlanDetailsSchema = z.object({
+  quantity: z.coerce.number()
+    .min(5, 'Minimum 5 users')
+    .max(30, 'Maximum 30 users')
+    .superRefine(async (quantity, ctx) => {
+      // TODO: Nice to have to avoid calling this API if client side validation catches first
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'quantity',
+        quantity,
+        { stripePriceId: 'price_9876_replace-me' },
+      );
+      if (!isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverValidationError('quantity', validationDecisions, CheckoutErrorMessagesByField),
+        });
+      }
+    }),
+  authenticated: z.boolean().optional(),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255),
+  adminEmail: z.string().trim()
+    .max(254),
+  country: z.string().trim()
+    .min(1, 'Country is required'),
+});
+
 export const AccountDetailsSchema = z.object({
-  orgSlug: z.string().trim()
-    .min(1, 'Access link is required')
-    .max(30, 'Maximum 30 characters')
-    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
-    .refine(slug => !slug.startsWith('-') && !slug.endsWith('-'), {
-      message: 'Access link may not start or end with a hyphen',
-    })
-    .optional(),
+  companyName: z.string().trim()
+    .min(1, 'Company name is required')
+    .max(255, 'Maximum 255 characters'),
+  // enterpriseSlug: z.string().trim()
+  //   .min(1, ' is required')
+  //   .max(30, 'Maximum 30 characters')
+  //   .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
+  //   .refine(
+  //     (enterpriseSlug) => validateField('enterpriseSlug', enterpriseSlug),
+  //     { message: 'Failed server-side validation.' },
+  //   ),
 });
 
 export const BillingDetailsSchema = z.object({});
 
-export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
+export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
@@ -98,7 +143,7 @@ export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
     }),
     buttonMessage: defineMessages({
       id: 'checkout.registrationPage.login',
-      defaultMessage: 'Log in',
+      defaultMessage: 'Sign in',
       description: 'Button label to login a user in the plan details step',
     }),
   },
@@ -114,7 +159,7 @@ export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
     }),
     buttonMessage: defineMessages({
       id: 'checkout.registrationPage.register',
-      defaultMessage: 'Sign up',
+      defaultMessage: 'Register',
       description: 'Button label to register a new user in the plan details step',
     }),
   },
@@ -154,6 +199,7 @@ export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
     step: 'BillingDetails',
     substep: 'Success',
     route: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+    formSchema: BillingDetailsSchema,
     title: defineMessages({
       id: 'checkout.billingDetailsSuccess.title',
       defaultMessage: 'Thank you, {firstName}.',
@@ -166,3 +212,21 @@ export const CheckoutPageDetails: Record<CheckoutPage, CheckoutPageDetails> = {
 // TODO: these should be fetched from the Stripe, likely via
 // an exposed REST API endpoint on the server.
 export const SUBSCRIPTION_PRICE_PER_USER_PER_MONTH = 33;
+
+// Constants specific to the Stepper component
+export const authenticatedSteps = [
+  'account-details',
+  'billing-details',
+] as const;
+
+export enum DataStoreKey {
+  PlanDetailsStoreKey = 'PlanDetails',
+  AccountDetailsStoreKey = 'AccountDetails',
+  BillingDetailsStoreKey = 'BillingDetails',
+}
+
+export enum SubmitCallbacks {
+  PlanDetailsCallback = 'PlanDetails',
+  PlanDetailsLoginCallback = 'PlanDetailsLogin',
+  PlanDetailsRegisterCallback = 'PlanDetailsRegister',
+}

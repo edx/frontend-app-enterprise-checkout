@@ -19,7 +19,7 @@ const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
       {authenticatedUser
         ? (
           <AuthenticatedUserField
-            email={authenticatedUser.email}
+            adminEmail={authenticatedUser.email}
             fullName={authenticatedUser.name || authenticatedUser.username}
           />
         )

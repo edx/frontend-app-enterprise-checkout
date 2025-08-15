@@ -1,13 +1,7 @@
 import { SnakeCasedPropertiesDeep } from 'type-fest';
 import { z } from 'zod';
 
-import {
-  AccountDetailsSchema,
-  BillingDetailsSchema,
-  PlanDetailsLoginPageSchema,
-  PlanDetailsRegisterPageSchema,
-  PlanDetailsSchema,
-} from '@/components/Stepper/constants';
+import type { TextMatch } from '@testing-library/react';
 
 // Declaration for SVG modules
 declare module '*.svg' {
@@ -18,6 +12,16 @@ declare module '*.svg' {
 }
 
 declare global {
+
+  let validateText: (
+    text: TextMatch,
+    options?: {
+      exact?: boolean;
+      selector?: string;
+      ignore?: string | boolean;
+      normalizer?: (text: string) => string;
+    }
+  ) => void;
 
   /**
    * Routes
@@ -175,7 +179,7 @@ declare global {
    */
   interface ValidationResponse {
     validationDecisions: {
-      [K in keyof ValidationSchema]?: ValidationDecision | ValidationSchemaPayload[K];
+      [K in keyof ValidationSchema]?: ValidationDecision | ValidationSchemaPayload[K] | null;
     };
     userAuthn: {
       userExistsForEmail: boolean;
@@ -316,6 +320,16 @@ declare global {
    */
   type CheckoutContextResponsePayload = Payload<CheckoutContextResponse>;
 
+  // Test helper for asserting debounced behavior (declared globally in setupTest.ts)
+  interface DebounceTestOptions {
+    baseDelayMs: number;
+    call: () => Promise<unknown>;
+    preCalls?: Array<() => unknown>;
+    getInvocationCount?: () => number;
+    upperMarginMs?: number;
+  }
+  function assertDebounce(options: DebounceTestOptions): Promise<{ elapsedMs: number }>;
+
   /**
    * ==============================
    * Login Request/Response Types
@@ -347,5 +361,4 @@ declare global {
    * Snake-cased version of LoginResponseSchema for API communication
    */
   type LoginResponsePayload = Payload<LoginResponseSchema>;
-
 }

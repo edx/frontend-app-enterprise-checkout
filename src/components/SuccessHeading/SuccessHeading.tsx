@@ -14,7 +14,7 @@ const SuccessHeading = () => (
     </Container>
     <h3 className="font-weight-light text-center">
       <FormattedMessage
-        id="checkout.dataPrivacyPolicyField.description"
+        id="checkout.success.description"
         defaultMessage="Welcome to edX for teams! Go to your administrator dashboard to onboard and invite your team members to start learning."
         description="Description text explaining the data privacy field purpose"
       />

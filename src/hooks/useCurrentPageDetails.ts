@@ -1,4 +1,4 @@
-import { CheckoutPageDetails } from '@/components/Stepper/constants';
+import { CheckoutPageDetails } from '@/constants/checkout';
 import useCurrentPage from '@/hooks/useCurrentPage';
 
 function useCurrentPageDetails() {

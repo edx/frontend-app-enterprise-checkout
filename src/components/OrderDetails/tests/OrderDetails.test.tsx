@@ -1,5 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import OrderDetails from '../OrderDetails';
@@ -13,11 +13,11 @@ describe('OrderDetails', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    expect(screen.getByText('Order Details')).toBeInTheDocument();
+    validateText('Order Details');
   });
 
   it('renders the description correctly', () => {
     renderComponent();
-    expect(screen.getByText('You have purchased an edX team\'s subscription.')).toBeInTheDocument();
+    validateText('You have purchased an edX team\'s subscription.');
   });
 });

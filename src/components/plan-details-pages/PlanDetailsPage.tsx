@@ -15,11 +15,10 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import loginRequest from '@/components/app/data/services/login';
-import { DataStores, SubmitCallbacks } from '@/components/Stepper/constants';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
-  CheckoutStepKey,
+  CheckoutStepKey, DataStoreKey, SubmitCallbacks,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
@@ -35,7 +34,7 @@ const PlanDetailsPage = () => {
   // console.log(bffContext.data);
   // const bffValidation = useBFFValidation(baseValidation);
   const intl = useIntl();
-  const planDetailsFormData = useCheckoutFormStore((state) => state.formData.PlanDetails);
+  const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
@@ -72,9 +71,11 @@ const PlanDetailsPage = () => {
     },
   });
 
-  const onSubmitCallbacks: { [K in SubmitCallbacks]: (data) => void } = {
+  const onSubmitCallbacks: {
+    [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
+  } = {
     [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
-      setFormData(DataStores.PlanDetailsStoreKey, data);
+      setFormData(DataStoreKey.PlanDetailsStoreKey, data);
 
       // TODO: replace with existing user email logic
       const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
@@ -91,15 +92,15 @@ const PlanDetailsPage = () => {
     },
     [SubmitCallbacks.PlanDetailsLoginCallback]: (data: PlanDetailsLoginPageData) => {
       loginMutation.mutate({
-        emailOrUsername: data.email,
+        emailOrUsername: data.adminEmail,
         password: data.password,
       });
     },
     [SubmitCallbacks.PlanDetailsRegisterCallback]: (data: PlanDetailsRegisterPageData) => {
-      // TODO: temporarily print data to make linter happy.
-      console.log(data);
       // TODO: actually call registerRequest service function.
       navigate(CheckoutPageDetails.PlanDetails.route);
+      // TODO: temporarily return data to make linter happy.
+      return data;
     },
   };
 
@@ -112,7 +113,7 @@ const PlanDetailsPage = () => {
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Plan Details" />
       <Stack gap={4}>
-        <Stepper.Step eventKey={eventKey} title="Plan Details">
+        <Stepper.Step eventKey={eventKey} title="Plan Details" data-testid="stepper-title">
           <h1 className="mb-5 text-center" data-testid="stepper-title">
             {intl.formatMessage(pageTitle)}
           </h1>
@@ -126,6 +127,7 @@ const PlanDetailsPage = () => {
             variant="secondary"
             type="submit"
             disabled={!isValid}
+            data-testid="stepper-submit-button"
           >
             {intl.formatMessage(stepperActionButtonMessage)}
           </Button>

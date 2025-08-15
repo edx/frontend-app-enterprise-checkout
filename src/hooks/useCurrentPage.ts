@@ -1,4 +1,4 @@
-import { CheckoutPageDetails } from '@/components/Stepper/constants';
+import { CheckoutPageDetails } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
 import { getCheckoutPageDetails } from '@/utils/checkout';
 

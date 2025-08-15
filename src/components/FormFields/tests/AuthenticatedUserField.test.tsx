@@ -1,5 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import AuthenticatedUserField from '../AuthenticatedUserField';
@@ -7,7 +7,7 @@ import AuthenticatedUserField from '../AuthenticatedUserField';
 describe('AuthenticatedUserField', () => {
   const defaultProps = {
     fullName: 'John Doe',
-    email: 'john.doe@example.com',
+    adminEmail: 'john.doe@example.com',
   };
 
   const renderComponent = (props = {}) => render(
@@ -18,25 +18,25 @@ describe('AuthenticatedUserField', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    expect(screen.getByText('Account details')).toBeInTheDocument();
+    validateText('Account details');
   });
 
   it('renders the description correctly', () => {
     renderComponent();
-    expect(screen.getByText('Signed in as:')).toBeInTheDocument();
+    validateText('Signed in as:');
   });
 
   it('renders the user name and email correctly', () => {
     renderComponent();
-    expect(screen.getByText(`${defaultProps.fullName} (${defaultProps.email})`)).toBeInTheDocument();
+    validateText(`${defaultProps.fullName} (${defaultProps.adminEmail})`);
   });
 
   it('renders with custom user name and email', () => {
     const customProps = {
       fullName: 'Jane Smith',
-      email: 'jane.smith@example.com',
+      adminEmail: 'jane.smith@example.com',
     };
     renderComponent(customProps);
-    expect(screen.getByText(`${customProps.fullName} (${customProps.email})`)).toBeInTheDocument();
+    validateText(`${customProps.fullName} (${customProps.adminEmail})`);
   });
 });
