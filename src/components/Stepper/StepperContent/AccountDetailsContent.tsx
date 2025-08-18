@@ -12,7 +12,7 @@ interface AccountDetailsContentProps {
 const AccountDetailsContent = ({ form }: AccountDetailsContentProps) => (
   <>
     <CompanyNameField form={form} />
-    <CustomUrlField />
+    <CustomUrlField form={form} />
   </>
 );
 

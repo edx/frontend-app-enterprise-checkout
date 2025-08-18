@@ -6,10 +6,12 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
+import { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
+import { useFormValidationConstraints } from '@/components/app/data';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
@@ -23,14 +25,18 @@ const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetailsStoreKey]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
+  const { data: formValidationConstraints } = useFormValidationConstraints();
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+  const billingDetailsSchema = useMemo(() => (
+    formSchema(formValidationConstraints)
+  ), [formSchema, formValidationConstraints]);
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(billingDetailsSchema),
     defaultValues: billingDetailsData,
   });
 
@@ -55,7 +61,7 @@ const BillingDetailsPage: React.FC = () => {
             {intl.formatMessage(pageTitle, { firstName: 'Don' })}
           </h1>
           <Stack gap={4}>
-            <StepperContent />
+            <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
         {stepperActionButtonMessage && (

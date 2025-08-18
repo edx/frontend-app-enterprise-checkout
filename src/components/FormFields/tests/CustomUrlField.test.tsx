@@ -4,10 +4,28 @@ import '@testing-library/jest-dom/extend-expect';
 
 import CustomUrlField from '../CustomUrlField';
 
+const mockForm = {
+  formState: {
+    errors: {},
+    touchedFields: {},
+  },
+  register: jest.fn().mockReturnValue({}),
+};
+
+jest.mock('@/components/FormFields/Field', () => ({
+  __esModule: true,
+  default: ({ floatingLabel, placeholder }) => (
+    <div data-testid="field-mock">
+      <div data-testid="floating-label">{floatingLabel}</div>
+      <div data-testid="placeholder">{placeholder}</div>
+    </div>
+  ),
+}));
+
 describe('CustomUrlField', () => {
   const renderComponent = () => render(
     <IntlProvider locale="en">
-      <CustomUrlField />
+      <CustomUrlField form={mockForm as any} />
     </IntlProvider>,
   );
 

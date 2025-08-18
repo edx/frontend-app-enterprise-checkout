@@ -6,13 +6,14 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
+import { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
+import { useFormValidationConstraints } from '@/components/app/data';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
-  AccountDetailsSchema,
   CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
@@ -24,19 +25,27 @@ import {
 
 const AccountDetailsPage: React.FC = () => {
   const intl = useIntl();
+  const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetailsStoreKey]);
-
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const form = useForm<AccountDetailsData>({
-    mode: 'onTouched',
-    resolver: zodResolver(AccountDetailsSchema),
-    defaultValues: accountDetailsFormData,
-  });
+
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
+    formSchema,
   } = useCurrentPageDetails();
+
+  const accountDetailsSchema = useMemo(() => (
+    formSchema(formValidationConstraints)
+  ), [formSchema, formValidationConstraints]);
+
+  const form = useForm<AccountDetailsData>({
+    mode: 'onTouched',
+    resolver: zodResolver(accountDetailsSchema),
+    defaultValues: accountDetailsFormData,
+  });
+
   const {
     handleSubmit,
     formState: { isValid },

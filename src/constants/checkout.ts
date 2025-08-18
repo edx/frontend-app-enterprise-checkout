@@ -57,7 +57,9 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
   },
 };
 
-export const PlanDetailsLoginPageSchema = z.object({
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   adminEmail: z.string().trim()
     .email()
     .max(254)
@@ -65,17 +67,19 @@ export const PlanDetailsLoginPageSchema = z.object({
   password: z.string().trim()
     .min(2, 'Password is required')
     .max(255, 'Maximum 255 characters'),
-});
+}));
 
 // TODO: complete as part of ticket to do register page.
-export const PlanDetailsRegisterPageSchema = z.object({});
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const PlanDetailsRegisterPageSchema = () => (z.object({}));
 
-export const PlanDetailsSchema = z.object({
+export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   quantity: z.coerce.number()
-    .min(5, 'Minimum 5 users')
-    .max(30, 'Maximum 30 users')
+    .min(constraints.quantity.min, 'Minimum 5 users')
+    .max(constraints.quantity.max, 'Maximum 30 users')
     .superRefine(async (quantity, ctx) => {
-      // TODO: Nice to have to avoid calling this API if client side validation catches first
+    // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'quantity',
         quantity,
@@ -96,32 +100,30 @@ export const PlanDetailsSchema = z.object({
     .max(254),
   country: z.string().trim()
     .min(1, 'Country is required'),
-});
+}));
 
-export const AccountDetailsSchema = z.object({
+export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   companyName: z.string().trim()
     .min(1, 'Company name is required')
     .max(255, 'Maximum 255 characters'),
-  // enterpriseSlug: z.string().trim()
-  //   .min(1, ' is required')
-  //   .max(30, 'Maximum 30 characters')
-  //   .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
-  //   .refine(
-  //     (enterpriseSlug) => validateField('enterpriseSlug', enterpriseSlug),
-  //     { message: 'Failed server-side validation.' },
-  //   ),
-});
+  enterpriseSlug: z.string().trim()
+    .min(constraints.enterpriseSlug.min, ' is required')
+    .max(constraints.enterpriseSlug.max, 'Maximum 30 characters')
+    .regex(new RegExp(constraints.enterpriseSlug.pattern), 'Only lowercase letters, numbers, and hyphens allowed'),
+}));
 
-export const BillingDetailsSchema = z.object({});
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
 
-export enum CheckoutPageRoute {
-  PlanDetails = `/${CheckoutStepKey.PlanDetails}`,
-  PlanDetailsLogin = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
-  PlanDetailsRegister = `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
-  AccountDetails = `/${CheckoutStepKey.AccountDetails}`,
-  BillingDetails = `/${CheckoutStepKey.BillingDetails}`,
-  BillingDetailsSuccess = `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
-}
+export const CheckoutPageRoute = {
+  PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
+  PlanDetailsLogin: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+  PlanDetailsRegister: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+  AccountDetails: `/${CheckoutStepKey.AccountDetails}`,
+  BillingDetails: `/${CheckoutStepKey.BillingDetails}`,
+  BillingDetailsSuccess: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+} as const;
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {

@@ -12,6 +12,7 @@ interface PlanDetailsContentProps {
 
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+
   return (
     <>
       <PriceAlert />

@@ -1,10 +1,28 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
+import { useFormValidationConstraints } from '@/components/app/data';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
 
+jest.mock('@/components/app/data', () => ({
+  ...jest.requireActual('@/components/app/data'),
+  useFormValidationConstraints: jest.fn(),
+}));
+
 describe('PlanDetailsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: {
+        quantity: {
+          min: 5,
+          max: 30,
+        },
+      },
+    });
+  });
+
   it('renders the title correctly', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Plan Details');
