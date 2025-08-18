@@ -7,14 +7,13 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
-import { useMutation } from '@tanstack/react-query';
 import { useContext } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-import loginRequest from '@/components/app/data/services/login';
+import { useLoginMutation } from '@/components/app/data/hooks';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
@@ -56,14 +55,11 @@ const PlanDetailsPage = () => {
     setError,
   } = form;
 
-  const loginMutation = useMutation({
-    mutationFn: (requestData: LoginRequestSchema) => loginRequest(requestData),
+  const loginMutation = useLoginMutation({
     onSuccess: () => {
       navigate(CheckoutPageDetails.PlanDetails.route);
     },
-    onError: (error: any) => {
-      // Handle login errors
-      const errorMessage = error?.response?.data?.non_field_errors?.[0] || 'Invalid email or password';
+    onError: (errorMessage) => {
       setError('password', {
         type: 'manual',
         message: errorMessage,
