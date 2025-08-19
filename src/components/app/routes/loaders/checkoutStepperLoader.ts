@@ -85,8 +85,14 @@ const PAGE_LOADERS: Record<CheckoutPage, () => Promise<Response | null>> = {
 };
 
 /**
- * Gateway route loader that handles both /:step and /:step/:substep routes
- * This function acts as a router that fans out to page-specific loaders
+ * Factory that creates the checkout stepper loader handling both `/:step` and `/:step/:substep`.
+ *
+ * It determines the current step/substep from the route params, looks up the matching page details,
+ * and delegates to the page-specific loader (see PAGE_LOADERS). If the route is invalid, it returns null
+ * so that the 404 boundary can take over.
+ *
+ * @param {QueryClient} _queryClient - Provided for parity with other loader factories (unused here).
+ * @returns {LoaderFunction} A loader that dispatches to page-specific loaders based on route params.
  */
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

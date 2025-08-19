@@ -6,14 +6,26 @@ import {
 import { redirect } from 'react-router-dom';
 
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import { determineExistingPaidCheckoutIntent } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 
 /**
- * Root loader for the Enterprise Checkout MFE.
+ * Factory that creates the root route loader for the Enterprise Checkout MFE.
+ *
+ * Behavior overview:
+ * - Hydrates the authenticated user (JWT + LMS profile) to get user details.
+ * - Fetches the BFF checkout context and inspects checkoutIntent.
+ * - Redirects based on user/auth state and checkout intent:
+ *   - Unauthenticated → Plan Details
+ *   - Successful intent (paid/fulfilled) → Billing Details Success
+ *   - Expired intent → Plan Details
+ *   - Otherwise (active/in-progress) → Billing Details
+ *
+ * @param {QueryClient} queryClient - TanStack Query client used to prefetch/ensure the BFF context.
+ * @returns {LoaderFunction} A React Router loader that performs the redirect logic described above.
  */
 const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRootLoader(queryClient) {
-  return async function rootLoader() {
+  return async function rootLoader({ request }) {
     // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
     // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the
     // logged-in user's country if they are pre-registered.
@@ -23,22 +35,33 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
 
     const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(queryBffContext());
 
-    // TODO: do the right stuff depending on whether the user is logged in.
+    const currentPath = new URL(request.url).pathname;
+
+    // Helper to avoid self-redirect loops
+    const redirectOrNull = (to: string) => (to !== currentPath ? redirect(to) : null);
+
+    // Unauthenticated user → Plan Details
     if (!authenticatedUser) {
-      redirect(CheckoutPageRoute.PlanDetails);
-      return null;
+      return redirectOrNull(CheckoutPageRoute.PlanDetails);
     }
 
     const { checkoutIntent } = contextMetadata;
-    const { existingPaidCheckoutIntent } = determineExistingPaidCheckoutIntent(checkoutIntent);
+    const {
+      existingSuccessfulCheckoutIntent, expiredCheckoutIntent,
+    } = determineExistingCheckoutIntentState(checkoutIntent);
 
-    if (!existingPaidCheckoutIntent) {
-      redirect(CheckoutPageRoute.PlanDetails);
-    } else {
-      redirect(CheckoutPageRoute.BillingDetailsSuccess);
+    // Successful intent → Success page
+    if (existingSuccessfulCheckoutIntent) {
+      return redirectOrNull(CheckoutPageRoute.BillingDetailsSuccess);
     }
 
-    return null;
+    // Expired intent → Plan Details
+    if (expiredCheckoutIntent) {
+      return redirectOrNull(CheckoutPageRoute.PlanDetails);
+    }
+
+    // Active/in-progress → Billing Details
+    return redirectOrNull(CheckoutPageRoute.BillingDetails);
   };
 };
 

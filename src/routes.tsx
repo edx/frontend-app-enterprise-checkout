@@ -6,6 +6,7 @@ import { Navigate } from 'react-router-dom';
 
 import Layout from '@/components/app/Layout';
 import Root from '@/components/app/Root';
+import AppShell from '@/components/app/routes/AppShell';
 import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
@@ -95,17 +96,28 @@ export function getRoutes(queryClient: QueryClient) {
 
   const routes: RouteObject[] = [
     {
-      path: '/',
-      loader: getRouteLoader(makeRootLoader, queryClient),
       element: (
         <PageWrap>
-          <Suspense fallback={<RouterFallback loaderOptions={{ handleQueryFetching: true }} />}>
-            <Root />
-          </Suspense>
+          <AppShell />
         </PageWrap>
       ),
-      children: rootChildRoutes,
-      errorElement: (<div>Error Boundary</div>),
+      children: [{
+        path: '/',
+        loader: getRouteLoader(makeRootLoader, queryClient),
+        element: (
+          <PageWrap>
+            <Suspense fallback={<RouterFallback />}>
+              <Root />
+            </Suspense>
+          </PageWrap>
+        ),
+        children: rootChildRoutes,
+        errorElement: (<div>Error Boundary</div>),
+      },
+      {
+        path: '*',
+        element: (<div>Not Found</div>),
+      }],
     },
   ];
 

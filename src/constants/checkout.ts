@@ -70,8 +70,6 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
 }));
 
 // TODO: complete as part of ticket to do register page.
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const PlanDetailsRegisterPageSchema = () => (z.object({}));
 
 export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({

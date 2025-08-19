@@ -23,7 +23,7 @@ const ReactQueryDevtoolsProduction = lazy(() => import('@tanstack/react-query-de
   default: d.ReactQueryDevtools,
 })));
 
-export function useAppQueryClient() {
+function useAppQueryClient() {
   const [queryClient] = useState(() => new QueryClient({
     queryCache: new QueryCache({
       onError: queryCacheOnErrorHandler,
