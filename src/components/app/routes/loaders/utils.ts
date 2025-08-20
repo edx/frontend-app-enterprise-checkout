@@ -73,15 +73,15 @@ const populateCompletedFormFields = ({
     (s) => ({
       formData: {
         ...s.formData,
-        [DataStoreKey.PlanDetailsStoreKey]: {
-          ...s.formData[DataStoreKey.PlanDetailsStoreKey],
+        [DataStoreKey.PlanDetails]: {
+          ...s.formData[DataStoreKey.PlanDetails],
           authenticated: !isEmpty(authenticatedUser),
           fullName: authenticatedUser.name || authenticatedUser.username,
           adminEmail: authenticatedUser.email,
           country: authenticatedUser.country || null,
         },
-        [DataStoreKey.AccountDetailsStoreKey]: {
-          ...s.formData[DataStoreKey.AccountDetailsStoreKey],
+        [DataStoreKey.AccountDetails]: {
+          ...s.formData[DataStoreKey.AccountDetails],
           enterpriseSlug: checkoutIntent?.enterpriseSlug,
           companyName: checkoutIntent?.enterpriseName,
         },

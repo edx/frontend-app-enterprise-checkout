@@ -34,7 +34,7 @@ import '../Stepper/Steps/css/PriceAlert.css';
 const PlanDetailsPage = () => {
   const intl = useIntl();
   const { data: formValidationConstraints } = useFormValidationConstraints();
-  const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]);
+  const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
@@ -79,8 +79,8 @@ const PlanDetailsPage = () => {
   const onSubmitCallbacks: {
     [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
   } = {
-    [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
-      setFormData(DataStoreKey.PlanDetailsStoreKey, data);
+    [SubmitCallbacks.PlanDetails]: (data: PlanDetailsData) => {
+      setFormData(DataStoreKey.PlanDetails, data);
 
       // TODO: replace with existing user email logic
       const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
@@ -95,13 +95,13 @@ const PlanDetailsPage = () => {
         navigate(CheckoutPageRoute.AccountDetails);
       }
     },
-    [SubmitCallbacks.PlanDetailsLoginCallback]: (data: PlanDetailsLoginPageData) => {
+    [SubmitCallbacks.PlanDetailsLogin]: (data: PlanDetailsLoginPageData) => {
       loginMutation.mutate({
         emailOrUsername: data.adminEmail,
         password: data.password,
       });
     },
-    [SubmitCallbacks.PlanDetailsRegisterCallback]: (data: PlanDetailsRegisterPageData) => {
+    [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
       // TODO: actually call registerRequest service function.
       navigate(CheckoutPageRoute.PlanDetails);
       // TODO: temporarily return data to make linter happy.

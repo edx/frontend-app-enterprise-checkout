@@ -27,7 +27,7 @@ const AccountDetailsPage: React.FC = () => {
   const intl = useIntl();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
-  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetailsStoreKey]);
+  const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
   const {
@@ -52,7 +52,7 @@ const AccountDetailsPage: React.FC = () => {
   } = form;
 
   const onSubmit = (data: AccountDetailsData) => {
-    setFormData(DataStoreKey.AccountDetailsStoreKey, data);
+    setFormData(DataStoreKey.AccountDetails, data);
     navigate(CheckoutPageRoute.BillingDetails);
   };
 

@@ -65,9 +65,9 @@ describe('utils.ts', () => {
     it('merges user details and intent details into the store while preserving existing fields', () => {
       const initialState = {
         formData: {
-          [DataStoreKey.PlanDetailsStoreKey]: { quantity: 5, authenticated: false },
-          [DataStoreKey.AccountDetailsStoreKey]: { enterpriseSlug: undefined, companyName: undefined },
-          [DataStoreKey.BillingDetailsStoreKey]: { address1: '123 Main' },
+          [DataStoreKey.PlanDetails]: { quantity: 5, authenticated: false },
+          [DataStoreKey.AccountDetails]: { enterpriseSlug: undefined, companyName: undefined },
+          [DataStoreKey.BillingDetails]: { address1: '123 Main' },
         },
       } as any;
 
@@ -94,7 +94,7 @@ describe('utils.ts', () => {
       expect(replaceFlag).toBe(false);
 
       const computed = updater(initialState);
-      expect(computed.formData[DataStoreKey.PlanDetailsStoreKey]).toEqual(
+      expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
         expect.objectContaining({
           quantity: 5, // preserved
           authenticated: true,
@@ -103,22 +103,22 @@ describe('utils.ts', () => {
           country: 'US',
         }),
       );
-      expect(computed.formData[DataStoreKey.AccountDetailsStoreKey]).toEqual(
+      expect(computed.formData[DataStoreKey.AccountDetails]).toEqual(
         expect.objectContaining({
           enterpriseSlug: 'acme',
           companyName: 'Acme Inc',
         }),
       );
       // Ensure other step data remain intact
-      expect(computed.formData[DataStoreKey.BillingDetailsStoreKey]).toEqual({ address1: '123 Main' });
+      expect(computed.formData[DataStoreKey.BillingDetails]).toEqual({ address1: '123 Main' });
     });
 
     it('handles empty user and null intent, setting authenticated=false and country=null', () => {
       const initialState = {
         formData: {
-          [DataStoreKey.PlanDetailsStoreKey]: {},
-          [DataStoreKey.AccountDetailsStoreKey]: {},
-          [DataStoreKey.BillingDetailsStoreKey]: {},
+          [DataStoreKey.PlanDetails]: {},
+          [DataStoreKey.AccountDetails]: {},
+          [DataStoreKey.BillingDetails]: {},
         },
       } as any;
 
@@ -130,7 +130,7 @@ describe('utils.ts', () => {
       const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];
       const computed = updater(initialState);
 
-      expect(computed.formData[DataStoreKey.PlanDetailsStoreKey]).toEqual(
+      expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
         expect.objectContaining({
           authenticated: false,
           fullName: undefined,
@@ -138,7 +138,7 @@ describe('utils.ts', () => {
           country: null,
         }),
       );
-      expect(computed.formData[DataStoreKey.AccountDetailsStoreKey]).toEqual(
+      expect(computed.formData[DataStoreKey.AccountDetails]).toEqual(
         expect.objectContaining({
           enterpriseSlug: undefined,
           companyName: undefined,

@@ -13,9 +13,9 @@ export const useCheckoutFormStore = create<FormStore>(
   (set) => ({
     /** Container for form values keyed by step. */
     formData: {
-      [DataStoreKey.PlanDetailsStoreKey]: {},
-      [DataStoreKey.AccountDetailsStoreKey]: {},
-      [DataStoreKey.BillingDetailsStoreKey]: {},
+      [DataStoreKey.PlanDetails]: {},
+      [DataStoreKey.AccountDetails]: {},
+      [DataStoreKey.BillingDetails]: {},
     },
     /**
      * Replace the current data for a given step.

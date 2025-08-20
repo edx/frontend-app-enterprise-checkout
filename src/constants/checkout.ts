@@ -229,13 +229,13 @@ export const authenticatedSteps = [
 ] as const;
 
 export enum DataStoreKey {
-  PlanDetailsStoreKey = 'PlanDetails',
-  AccountDetailsStoreKey = 'AccountDetails',
-  BillingDetailsStoreKey = 'BillingDetails',
+  PlanDetails = 'PlanDetails',
+  AccountDetails = 'AccountDetails',
+  BillingDetails = 'BillingDetails',
 }
 
 export enum SubmitCallbacks {
-  PlanDetailsCallback = 'PlanDetails',
-  PlanDetailsLoginCallback = 'PlanDetailsLogin',
-  PlanDetailsRegisterCallback = 'PlanDetailsRegister',
+  PlanDetails = 'PlanDetails',
+  PlanDetailsLogin = 'PlanDetailsLogin',
+  PlanDetailsRegister = 'PlanDetailsRegister',
 }

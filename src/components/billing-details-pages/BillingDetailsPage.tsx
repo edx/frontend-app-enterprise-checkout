@@ -23,7 +23,7 @@ import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 const BillingDetailsPage: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
-  const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetailsStoreKey]);
+  const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const {
@@ -47,7 +47,7 @@ const BillingDetailsPage: React.FC = () => {
   const StepperContent = useStepperContent();
 
   const onSubmit = (data: BillingDetailsData) => {
-    setFormData(DataStoreKey.BillingDetailsStoreKey, data);
+    setFormData(DataStoreKey.BillingDetails, data);
     navigate(CheckoutPageRoute.BillingDetailsSuccess);
   };
 

@@ -22,7 +22,7 @@ function calculateSubscriptionCost(quantity?: number) {
 
 const SubscriptionSummary: React.FC = () => {
   const { currentStep } = useCurrentStep();
-  const quantity = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]?.quantity);
+  const quantity = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]?.quantity);
   const totalSubscriptionCost = calculateSubscriptionCost(quantity);
   return (
     <Card variant="muted">
@@ -51,7 +51,7 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of licenses"
                       description="Label for the number of licenses"
                     />
-                    {currentStep !== DataStoreKey.PlanDetailsStoreKey && (
+                    {currentStep !== DataStoreKey.PlanDetails && (
                       <Button
                         as={Link}
                         variant="link"
