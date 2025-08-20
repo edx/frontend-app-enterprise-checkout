@@ -90,7 +90,6 @@ export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) 
         });
       }
     }),
-  authenticated: z.boolean().optional(),
   fullName: z.string().trim()
     .min(1, 'Full name is required')
     .max(255),

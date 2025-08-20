@@ -65,7 +65,7 @@ describe('utils.ts', () => {
     it('merges user details and intent details into the store while preserving existing fields', () => {
       const initialState = {
         formData: {
-          [DataStoreKey.PlanDetails]: { quantity: 5, authenticated: false },
+          [DataStoreKey.PlanDetails]: { quantity: 5 },
           [DataStoreKey.AccountDetails]: { enterpriseSlug: undefined, companyName: undefined },
           [DataStoreKey.BillingDetails]: { address1: '123 Main' },
         },
@@ -97,7 +97,6 @@ describe('utils.ts', () => {
       expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
         expect.objectContaining({
           quantity: 5, // preserved
-          authenticated: true,
           fullName: 'Alice Boss',
           adminEmail: 'boss@acme.com',
           country: 'US',
@@ -132,7 +131,6 @@ describe('utils.ts', () => {
 
       expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
         expect.objectContaining({
-          authenticated: false,
           fullName: undefined,
           adminEmail: undefined,
           country: null,

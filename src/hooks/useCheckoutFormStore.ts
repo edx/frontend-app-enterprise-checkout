@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { DataStoreKey } from '@/constants/checkout';
 
 /**
- * Zustand store used to hold and mutate the multi-step checkout form data.
+ * Zustand store used to hold and mutate the multistep checkout form data.
  *
  * Shape:
  * - formData: keyed by DataStoreKey to avoid hard-coded strings.

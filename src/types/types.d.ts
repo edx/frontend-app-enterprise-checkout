@@ -91,8 +91,6 @@ declare global {
   type PlanDetailsRegisterPageData = z.infer<typeof PlanDetailsRegisterPageSchema>;
   type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
   type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
-  // TODO: This is added an a means to iterate through the project. Will need to be removed.
-  type TempAuthenticatedData = { tempAuthenticated: boolean };
 
   /**
    * Maps step names to their corresponding data types
