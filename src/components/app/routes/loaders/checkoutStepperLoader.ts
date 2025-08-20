@@ -1,7 +1,7 @@
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { redirect } from 'react-router-dom';
 
-import { CheckoutPageDetails } from '@/constants/checkout';
+import { CheckoutPageRoute } from '@/constants/checkout';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
@@ -19,7 +19,7 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (authenticatedUser) {
     // If the user is already authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageDetails.PlanDetails.route);
+    return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
 }
@@ -31,7 +31,7 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (authenticatedUser) {
     // If the user is already authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageDetails.PlanDetails.route);
+    return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
 }
@@ -43,7 +43,7 @@ async function accountDetailsLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageDetails.PlanDetails.route);
+    return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
 }
@@ -55,7 +55,7 @@ async function billingDetailsLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageDetails.PlanDetails.route);
+    return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
 }
@@ -67,7 +67,7 @@ async function billingDetailsSuccessLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageDetails.PlanDetails.route);
+    return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
 }

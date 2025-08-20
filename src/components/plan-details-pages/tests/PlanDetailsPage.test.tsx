@@ -62,3 +62,34 @@ describe('PlanDetailsRegistrationPage', () => {
     expect(screen.getByTestId('stepper-submit-button')).toHaveTextContent('Register');
   });
 });
+
+describe('PlanDetailsPage - authenticated user', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: {
+        quantity: {
+          min: 5,
+          max: 30,
+        },
+      },
+    });
+  });
+
+  it('renders authenticated user info when authenticatedUser exists', () => {
+    const mockUser = {
+      email: 'user@example.com',
+      name: 'Test User',
+      username: 'testuser',
+      country: 'US',
+    } as AuthenticatedUser;
+
+    renderStepperRoute(
+      CheckoutPageRoute.PlanDetails,
+      { config: {}, authenticatedUser: mockUser },
+    );
+
+    validateText(/Signed in as:/i);
+    validateText(/Test User.*\(user@example.com\)/i);
+  });
+});

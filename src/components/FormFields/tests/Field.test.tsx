@@ -5,22 +5,23 @@ import '@testing-library/jest-dom/extend-expect';
 
 import Field, { getTrailingElement } from '../Field';
 
-// Mock the hooks
-jest.mock('@/hooks/useCheckoutFormStore', () => ({
-  __esModule: true,
-  default: jest.fn((cb) => {
-    const defaultState = {
-      formData: { PlanDetails: {} },
-      setFormData: jest.fn(),
-    };
-    return cb(defaultState);
-  }),
-}));
-
-jest.mock('@/hooks/useCurrentStep', () => ({
-  __esModule: true,
-  default: () => 'planDetails',
-}));
+// Mock the hooks used by Field via the hooks barrel
+jest.mock('@/hooks/index', () => {
+  const mockState = {
+    formData: { PlanDetails: {} },
+    setFormData: jest.fn(),
+  };
+  return {
+    __esModule: true,
+    useCheckoutFormStore: jest.fn((selector?: (s: any) => any) => (selector ? selector(mockState) : mockState)),
+    useCurrentStep: jest.fn(() => ({
+      currentStep: 'PlanDetails',
+      currentStepKey: 'PlanDetails',
+      currentSubstep: undefined,
+      currentSubstepKey: undefined,
+    })),
+  };
+});
 
 // Mock the icons
 jest.mock('@openedx/paragon/icons', () => ({
