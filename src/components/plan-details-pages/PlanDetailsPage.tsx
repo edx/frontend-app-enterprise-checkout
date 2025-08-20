@@ -16,6 +16,7 @@ import { z } from 'zod';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import loginRequest from '@/components/app/data/services/login';
+import { useLoginMutation } from '@/components/app/data/hooks';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
@@ -61,14 +62,11 @@ const PlanDetailsPage = () => {
     setError,
   } = form;
 
-  const loginMutation = useMutation({
-    mutationFn: (requestData: LoginRequestSchema) => loginRequest(requestData),
+  const loginMutation = useLoginMutation({
     onSuccess: () => {
       navigate(CheckoutPageRoute.PlanDetails);
     },
-    onError: (error: any) => {
-      // Handle login errors
-      const errorMessage = error?.response?.data?.non_field_errors?.[0] || 'Invalid email or password';
+    onError: (errorMessage) => {
       setError('password', {
         type: 'manual',
         message: errorMessage,
