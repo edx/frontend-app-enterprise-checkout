@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { isEmpty } from 'lodash-es';
 
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -75,15 +74,21 @@ const populateCompletedFormFields = ({
         ...s.formData,
         [DataStoreKey.PlanDetails]: {
           ...s.formData[DataStoreKey.PlanDetails],
-          authenticated: !isEmpty(authenticatedUser),
-          fullName: authenticatedUser.name || authenticatedUser.username,
-          adminEmail: authenticatedUser.email,
-          country: authenticatedUser.country || null,
+          fullName: s.formData[DataStoreKey.PlanDetails]?.fullName
+            ?? authenticatedUser.name
+            ?? authenticatedUser.username,
+          adminEmail: s.formData[DataStoreKey.PlanDetails]?.adminEmail
+            ?? authenticatedUser.email,
+          country: s.formData[DataStoreKey.PlanDetails]?.country
+            ?? authenticatedUser.country
+            ?? null,
         },
         [DataStoreKey.AccountDetails]: {
           ...s.formData[DataStoreKey.AccountDetails],
-          enterpriseSlug: checkoutIntent?.enterpriseSlug,
-          companyName: checkoutIntent?.enterpriseName,
+          enterpriseSlug: s.formData[DataStoreKey.AccountDetails]?.enterpriseSlug
+            ?? checkoutIntent?.enterpriseSlug,
+          companyName: s.formData[DataStoreKey.AccountDetails]?.companyName
+            ?? checkoutIntent?.enterpriseName,
         },
       },
     }),
