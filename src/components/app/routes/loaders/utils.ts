@@ -1,4 +1,18 @@
 import dayjs from 'dayjs';
+import { isEmpty } from 'lodash-es';
+
+import { DataStoreKey } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+
+/**
+ * Parameters for populateCompletedFormFields.
+ */
+type PopulateCompletedFormFieldsProps = {
+  /** The checkout intent from the backend context, if any. */
+  checkoutIntent: CheckoutContextCheckoutIntent | null,
+  /** The currently authenticated user as exposed by the platform auth util. */
+  authenticatedUser: AuthenticatedUser,
+};
 
 /**
  * Summary of checkout intent state used by loaders to decide routing.
@@ -37,6 +51,47 @@ const determineExistingCheckoutIntentState = (
   };
 };
 
+/**
+ * Populates relevant steps in the local checkout form store using information
+ * from the authenticated user and (optionally) an existing checkout intent.
+ *
+ * This function intentionally performs a shallow merge into the current form state
+ * so that any user-entered values are preserved unless explicitly overwritten.
+ *
+ * It sets:
+ * - Plan Details: authenticated flag, full name, admin email, and country
+ * - Account Details: enterprise slug and company name from the checkout intent
+ *
+ * @param {PopulateCompletedFormFieldsProps} params - Function parameters.
+ * @returns {void}
+ */
+const populateCompletedFormFields = ({
+  checkoutIntent,
+  authenticatedUser,
+}: PopulateCompletedFormFieldsProps): void => {
+  checkoutFormStore.setState(
+    (s) => ({
+      formData: {
+        ...s.formData,
+        [DataStoreKey.PlanDetailsStoreKey]: {
+          ...s.formData[DataStoreKey.PlanDetailsStoreKey],
+          authenticated: !isEmpty(authenticatedUser),
+          fullName: authenticatedUser.name || authenticatedUser.username,
+          adminEmail: authenticatedUser.email,
+          country: authenticatedUser.country || null,
+        },
+        [DataStoreKey.AccountDetailsStoreKey]: {
+          ...s.formData[DataStoreKey.AccountDetailsStoreKey],
+          enterpriseSlug: checkoutIntent?.enterpriseSlug,
+          companyName: checkoutIntent?.enterpriseName,
+        },
+      },
+    }),
+    false,
+  );
+};
+
 export {
   determineExistingCheckoutIntentState,
+  populateCompletedFormFields,
 };

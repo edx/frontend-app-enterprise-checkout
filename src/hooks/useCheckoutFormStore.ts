@@ -1,12 +1,31 @@
 import { create } from 'zustand';
 
-const useCheckoutFormStore = create<FormStore>(
+import { DataStoreKey } from '@/constants/checkout';
+
+/**
+ * Zustand store used to hold and mutate the multi-step checkout form data.
+ *
+ * Shape:
+ * - formData: keyed by DataStoreKey to avoid hard-coded strings.
+ * - setFormData(step, data): replaces the data for the given step key.
+ */
+export const useCheckoutFormStore = create<FormStore>(
   (set) => ({
+    /** Container for form values keyed by step. */
     formData: {
-      PlanDetails: {},
-      AccountDetails: {},
-      BillingDetails: {},
+      [DataStoreKey.PlanDetailsStoreKey]: {},
+      [DataStoreKey.AccountDetailsStoreKey]: {},
+      [DataStoreKey.BillingDetailsStoreKey]: {},
     },
+    /**
+     * Replace the current data for a given step.
+     *
+     * Note: This intentionally replaces the step payload as provided by callers,
+     * rather than deep-merging.
+     *
+     * @param {DataStoreKey} step - The step key from DataStoreKey enum.
+     * @param {unknown} data - The new data payload for the step.
+     */
     setFormData: (step, data) => set(
       (store) => ({
         formData: {
@@ -18,4 +37,7 @@ const useCheckoutFormStore = create<FormStore>(
   }),
 );
 
-export default useCheckoutFormStore;
+/**
+ * Direct reference to the store for imperative usage (e.g., setState outside React).
+ */
+export const checkoutFormStore = useCheckoutFormStore;
