@@ -329,36 +329,4 @@ declare global {
     upperMarginMs?: number;
   }
   function assertDebounce(options: DebounceTestOptions): Promise<{ elapsedMs: number }>;
-
-  /**
-   * ==============================
-   * Login Request/Response Types
-   * ==============================
-   */
-
-  /**
-   * Data structure for a login request payload.
-   */
-  interface LoginRequestSchema {
-    emailOrUsername: string;
-    password: string;
-  }
-
-  /**
-   * Snake-cased version of LoginRequestSchema for API communication
-   */
-  type LoginRequestPayload = Payload<LoginRequestSchema>;
-
-  /**
-   * Data structure for a login response payload.
-   */
-  interface LoginResponseSchema {
-    redirectUrl: string;
-    success: boolean;
-  }
-
-  /**
-   * Snake-cased version of LoginResponseSchema for API communication
-   */
-  type LoginResponsePayload = Payload<LoginResponseSchema>;
 }
