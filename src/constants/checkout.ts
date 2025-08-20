@@ -74,8 +74,8 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({}));
 
 export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   quantity: z.coerce.number()
-    .min(constraints.quantity.min, 'Minimum 5 users')
-    .max(constraints.quantity.max, 'Maximum 30 users')
+    .min(constraints.quantity.min, `Minimum ${constraints.quantity.min} users`)
+    .max(constraints.quantity.max, `Maximum ${constraints.quantity.max} users`)
     .superRefine(async (quantity, ctx) => {
     // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(
@@ -105,8 +105,8 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .min(1, 'Company name is required')
     .max(255, 'Maximum 255 characters'),
   enterpriseSlug: z.string().trim()
-    .min(constraints.enterpriseSlug.min, ' is required')
-    .max(constraints.enterpriseSlug.max, 'Maximum 30 characters')
+    .min(constraints.enterpriseSlug.min, 'Company Url is required')
+    .max(constraints.enterpriseSlug.max, `Maximum ${constraints.enterpriseSlug.max} characters`)
     .regex(new RegExp(constraints.enterpriseSlug.pattern), 'Only lowercase letters, numbers, and hyphens allowed'),
 }));
 
