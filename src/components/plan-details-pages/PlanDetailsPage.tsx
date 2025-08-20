@@ -7,7 +7,6 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
-import { useMutation } from '@tanstack/react-query';
 import { useContext, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
@@ -15,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import { useFormValidationConstraints } from '@/components/app/data';
-import loginRequest from '@/components/app/data/services/login';
 import { useLoginMutation } from '@/components/app/data/hooks';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
