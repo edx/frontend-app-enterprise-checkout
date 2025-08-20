@@ -18,7 +18,9 @@ import { CheckoutPageRoute } from '@/constants/checkout';
  * - Fetches the BFF checkout context and inspects checkoutIntent.
  * - Updates local form store with values inferred from the authenticated user and checkout intent.
  * - Redirects based on user/auth state and checkout intent:
- *   - Unauthenticated → Plan Details
+ *   - Unauthenticated:
+ *     - If on a protected path (Account Details, Billing Details, Billing Details Success) → redirect to Plan Details
+ *     - Otherwise (e.g., already on Plan Details or its subroutes) → no redirect (stay on current route)
  *   - Successful intent (paid/fulfilled) → Billing Details Success
  *   - Expired intent → Plan Details
  *   - Otherwise (active/in-progress) → No redirect (stay on current route)
@@ -37,15 +39,26 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     await hydrateAuthenticatedUser();
     const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
 
-    const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(queryBffContext());
+    const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+      queryBffContext(authenticatedUser?.userId || null),
+    );
     const currentPath = new URL(request.url).pathname;
 
     // Helper to avoid self-redirect loops
     const redirectOrNull = (to: string) => (to !== currentPath ? redirect(to) : null);
 
+    const protectedPaths = new Set<string>([
+      CheckoutPageRoute.BillingDetails,
+      CheckoutPageRoute.AccountDetails,
+      CheckoutPageRoute.BillingDetailsSuccess,
+    ]);
     // Unauthenticated user → Plan Details
     if (!authenticatedUser) {
-      return redirectOrNull(CheckoutPageRoute.PlanDetails);
+      if (protectedPaths.has(currentPath)) {
+        return redirectOrNull(CheckoutPageRoute.PlanDetails);
+      }
+      // For unauthenticated users on non-protected pages (e.g., Plan Details), do nothing.
+      return null;
     }
 
     const { checkoutIntent } = contextMetadata;
@@ -57,7 +70,6 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       checkoutIntent,
       authenticatedUser,
     });
-
     // Successful intent → Success page
     if (existingSuccessfulCheckoutIntent) {
       return redirectOrNull(CheckoutPageRoute.BillingDetailsSuccess);

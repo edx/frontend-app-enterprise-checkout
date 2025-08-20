@@ -6,18 +6,12 @@ import {
 
 import queries from './queryKeyFactory';
 
-export const queryBffContext = () => (
+export const queryBffContext = (lmsUserId = null) => (
   queries
     .enterpriseCheckout
     .bff
-    ._ctx
-    .context
+    ._ctx.context(lmsUserId)
 );
-
-export const queryBFFValidationQueryKey = (field) => {
-  const baseKey = queries.enterpriseCheckout.bff.queryKey;
-  return [...baseKey, 'validation', [field]];
-};
 
 export const queryBffValidation = (payload: ValidationSchema) => {
   const fields = Object.keys(payload);
@@ -29,8 +23,7 @@ export const queryBffValidation = (payload: ValidationSchema) => {
     queries
       .enterpriseCheckout
       .bff
-      ._ctx
-      .validation(fields, snakeCasedPayload)
+      ._ctx.validation(fields, snakeCasedPayload)
   );
 };
 
