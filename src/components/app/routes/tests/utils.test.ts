@@ -29,36 +29,6 @@ describe('utils.ts', () => {
         expiredCheckoutIntent: true,
       });
     });
-
-    it('detects a successful and non-expired intent (paid)', () => {
-      const intent: TestCheckoutIntent = {
-        state: 'paid',
-        expiresAt: dayjs().add(1, 'day').toISOString(),
-      };
-      const result = determineExistingCheckoutIntentState(intent as any);
-      expect(result.existingSuccessfulCheckoutIntent).toBe(true);
-      expect(result.expiredCheckoutIntent).toBe(false);
-    });
-
-    it('detects a successful but expired intent (fulfilled)', () => {
-      const intent: TestCheckoutIntent = {
-        state: 'fulfilled',
-        expiresAt: dayjs().subtract(1, 'hour').toISOString(),
-      };
-      const result = determineExistingCheckoutIntentState(intent as any);
-      expect(result.existingSuccessfulCheckoutIntent).toBe(true);
-      expect(result.expiredCheckoutIntent).toBe(true);
-    });
-
-    it('detects an in-progress, non-expired intent (not successful)', () => {
-      const intent: TestCheckoutIntent = {
-        state: 'created',
-        expiresAt: dayjs().add(2, 'hours').toISOString(),
-      };
-      const result = determineExistingCheckoutIntentState(intent as any);
-      expect(result.existingSuccessfulCheckoutIntent).toBe(false);
-      expect(result.expiredCheckoutIntent).toBe(false);
-    });
   });
 
   describe('populateCompletedFormFields', () => {

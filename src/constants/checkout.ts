@@ -74,8 +74,8 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({}));
 
 export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   quantity: z.coerce.number()
-    .min(constraints.quantity.min, `Minimum ${constraints.quantity.min} users`)
-    .max(constraints.quantity.max, `Maximum ${constraints.quantity.max} users`)
+    .min(constraints?.quantity.min, `Minimum ${constraints?.quantity.min} users`)
+    .max(constraints?.quantity.max, `Maximum ${constraints?.quantity.max} users`)
     .superRefine(async (quantity, ctx) => {
     // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(

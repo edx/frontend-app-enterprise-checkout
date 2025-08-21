@@ -2,7 +2,19 @@ import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 
+import { isExpired } from '@/utils/common';
+
 import type { AxiosResponse } from 'axios';
+
+const successfulCheckoutIntentStates = [
+  'paid',
+  'fulfilled',
+  'errored_provisioning',
+];
+
+const determineExistingSuccessfulCheckoutIntent = (
+  state: CheckoutContextCheckoutIntent['state'],
+): boolean | null => (state ? successfulCheckoutIntentStates.includes(state) : null);
 
 /**
  * Fetches checkout context information from the API
@@ -19,7 +31,21 @@ const fetchCheckoutContext = async (): Promise<CheckoutContextResponse> => {
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/bffs/checkout/context/`;
   const response: AxiosResponse<CheckoutContextResponsePayload> = await getAuthenticatedHttpClient()
     .post<CheckoutContextResponsePayload>(url);
-  return camelCaseObject(response.data);
+  const camelCasedResponse: CheckoutContextResponse = camelCaseObject(response.data);
+  return {
+    ...camelCasedResponse,
+    checkoutIntent: camelCasedResponse.checkoutIntent
+      ? {
+        ...camelCasedResponse.checkoutIntent,
+        existingSuccessfulCheckoutIntent: camelCasedResponse.checkoutIntent?.state
+          ? determineExistingSuccessfulCheckoutIntent(camelCasedResponse.checkoutIntent.state)
+          : null,
+        expiredCheckoutIntent: camelCasedResponse.checkoutIntent?.expiresAt
+          ? isExpired(camelCasedResponse.checkoutIntent?.expiresAt)
+          : null,
+      }
+      : null,
+  };
 };
 
 export default fetchCheckoutContext;

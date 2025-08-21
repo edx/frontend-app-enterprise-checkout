@@ -70,6 +70,7 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       checkoutIntent,
       authenticatedUser,
     });
+
     // Successful intent → Success page
     if (existingSuccessfulCheckoutIntent) {
       return redirectOrNull(CheckoutPageRoute.BillingDetailsSuccess);
@@ -79,7 +80,6 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     if (expiredCheckoutIntent) {
       return redirectOrNull(CheckoutPageRoute.PlanDetails);
     }
-
     return null;
   };
 };

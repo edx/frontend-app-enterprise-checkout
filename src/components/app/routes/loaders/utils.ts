@@ -1,8 +1,5 @@
-import dayjs from 'dayjs';
-
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
-
 /**
  * Parameters for populateCompletedFormFields.
  */
@@ -35,7 +32,7 @@ interface DetermineExistingPaidCheckoutIntent {
  *   Object indicating if a successful intent exists and if the intent is expired.
  */
 const determineExistingCheckoutIntentState = (
-  checkoutIntent: CheckoutContextCheckoutIntent | null,
+  checkoutIntent: ExtendedCheckoutContextCheckoutIntent | null,
 ): DetermineExistingPaidCheckoutIntent => {
   if (!checkoutIntent) {
     return {
@@ -45,8 +42,10 @@ const determineExistingCheckoutIntentState = (
   }
 
   return {
-    existingSuccessfulCheckoutIntent: ['paid', 'fulfilled'].includes(checkoutIntent.state),
-    expiredCheckoutIntent: dayjs(checkoutIntent.expiresAt).isBefore(dayjs()),
+    // @ts-ignore
+    existingSuccessfulCheckoutIntent: checkoutIntent.existingSuccessfulCheckoutIntent,
+    // @ts-ignore
+    expiredCheckoutIntent: checkoutIntent.expiredCheckoutIntent,
   };
 };
 

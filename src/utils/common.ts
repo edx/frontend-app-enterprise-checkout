@@ -1,4 +1,5 @@
 import { logError } from '@edx/frontend-platform/logging';
+import dayjs from 'dayjs';
 
 /**
  * Given an error, returns the status code from the custom attributes (Axios error)
@@ -82,10 +83,13 @@ const formatPrice = (price: number, options = {}) => {
   return USDollar.format(Math.abs(price));
 };
 
+const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
+
 export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
   formatPrice,
   queryCacheOnErrorHandler,
   serverValidationError,
+  isExpired,
 };

@@ -337,6 +337,11 @@ declare global {
     adminPortalUrl: string;
   }
 
+  interface ExtendedCheckoutContextCheckoutIntent extends CheckoutContextCheckoutIntent {
+    existingSuccessfulCheckoutIntent: boolean | null;
+    expiredCheckoutIntent: boolean | null;
+  }
+
   /**
    * Complete response structure for checkout context API
    */
@@ -344,7 +349,7 @@ declare global {
     existingCustomersForAuthenticatedUser: CheckoutContextCustomer[];
     pricing: CheckoutContextPricing;
     fieldConstraints: CheckoutContextFieldConstraints;
-    checkoutIntent: CheckoutContextCheckoutIntent | null;
+    checkoutIntent: ExtendedCheckoutContextCheckoutIntent | null;
   }
 
   /**

@@ -80,7 +80,6 @@ const PlanDetailsPage = () => {
 
       // TODO: replace with existing user email logic
       const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
-
       if (!authenticatedUser) {
         if (emailExists) {
           navigate(CheckoutPageRoute.PlanDetailsLogin);
