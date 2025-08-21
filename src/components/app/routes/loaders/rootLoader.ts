@@ -38,7 +38,7 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     await fetchAuthenticatedUser();
     await hydrateAuthenticatedUser();
     const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
-
+    console.log('authenticatedUser', authenticatedUser);
     const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
       queryBffContext(authenticatedUser?.userId || null),
     );

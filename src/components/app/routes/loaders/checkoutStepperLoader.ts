@@ -1,7 +1,10 @@
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
+import { queryBffSuccess } from '@/components/app/data/queries/queries';
 import { CheckoutPageRoute } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
@@ -9,6 +12,7 @@ import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
  */
 async function planDetailsLoader(): Promise<Response | null> {
   // Plan Details page doesn't require authentication
+  console.log('i am called');
   return null;
 }
 
@@ -51,12 +55,27 @@ async function accountDetailsLoader(): Promise<Response | null> {
 /**
  * Route loader for Billing Details page
  */
-async function billingDetailsLoader(): Promise<Response | null> {
-  const authenticatedUser = getAuthenticatedUser();
-  if (!authenticatedUser) {
-    // If the user is NOT authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageRoute.PlanDetails);
-  }
+async function billingDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
+  const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
+  // Seed query cache with success endpoint
+  const context = await queryClient.ensureQueryData(
+    queryBffSuccess(authenticatedUser?.userId || null),
+  );
+  console.log({ context, authenticatedUser });
+  console.log('key', checkoutFormStore.getState());
+
+  // await queryClient.ensureQueryData(
+  //   queryCheckoutSession({
+  //     adminEmail: authenticatedUser.email,
+  //     quantity:
+  //   })
+  // )
+
+  // if (!authenticatedUser) {
+  //   // If the user is NOT authenticated, redirect to PlanDetails Page.
+  //   return redirect(CheckoutPageRoute.PlanDetails);
+  // }
+
   return null;
 }
 
@@ -67,6 +86,7 @@ async function billingDetailsSuccessLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
+
     return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
@@ -107,7 +127,7 @@ const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = functi
       return null;
     }
     const pageLoader = PAGE_LOADERS[pageDetails.name];
-    return pageLoader();
+    return Promise.resolve(pageLoader(queryClient));
   };
 };
 

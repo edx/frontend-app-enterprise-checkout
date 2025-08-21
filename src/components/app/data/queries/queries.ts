@@ -6,12 +6,22 @@ import {
 
 import queries from './queryKeyFactory';
 
-export const queryBffContext = (lmsUserId = null) => (
+export const queryBffSuccess = (lmsUserId: number | null = null) => (
   queries
     .enterpriseCheckout
     .bff
-    ._ctx.context(lmsUserId)
+    ._ctx.success(lmsUserId)
 );
+
+export const queryBffContext = (lmsUserId: number | null = null) => {
+  console.log({ lmsUserId });
+  return (
+    queries
+      .enterpriseCheckout
+      .bff
+      ._ctx.context(lmsUserId)
+  );
+};
 
 export const queryBffValidation = (payload: ValidationSchema) => {
   const fields = Object.keys(payload);
