@@ -1,7 +1,10 @@
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
+import { queryBffSuccess } from '@/components/app/data/queries/queries';
 import { CheckoutPageRoute } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
@@ -51,12 +54,14 @@ async function accountDetailsLoader(): Promise<Response | null> {
 /**
  * Route loader for Billing Details page
  */
-async function billingDetailsLoader(): Promise<Response | null> {
-  const authenticatedUser = getAuthenticatedUser();
-  if (!authenticatedUser) {
-    // If the user is NOT authenticated, redirect to PlanDetails Page.
-    return redirect(CheckoutPageRoute.PlanDetails);
-  }
+async function billingDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
+  const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
+  // Seed query cache with success endpoint
+  const context = await queryClient.ensureQueryData(
+    queryBffSuccess(authenticatedUser?.userId || null),
+  );
+  console.log({ context, authenticatedUser });
+  console.log('key', checkoutFormStore.getState());
   return null;
 }
 
@@ -75,12 +80,12 @@ async function billingDetailsSuccessLoader(): Promise<Response | null> {
 /**
  * Page-specific route loaders mapped by checkout page
  */
-const PAGE_LOADERS: Record<CheckoutPage, () => Promise<Response | null>> = {
+const PAGE_LOADERS: Record<CheckoutPage, (queryClient: QueryClient) => Promise<Response | null>> = {
   PlanDetails: planDetailsLoader,
   PlanDetailsLogin: planDetailsLoginLoader,
   PlanDetailsRegister: planDetailsRegisterLoader,
   AccountDetails: accountDetailsLoader,
-  BillingDetails: billingDetailsLoader,
+  BillingDetails: (queryClient) => billingDetailsLoader(queryClient),
   BillingDetailsSuccess: billingDetailsSuccessLoader,
 };
 
@@ -107,7 +112,7 @@ const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = functi
       return null;
     }
     const pageLoader = PAGE_LOADERS[pageDetails.name];
-    return pageLoader();
+    return pageLoader(queryClient);
   };
 };
 

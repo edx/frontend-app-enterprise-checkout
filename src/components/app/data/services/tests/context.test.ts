@@ -5,7 +5,7 @@ import {
   checkoutContextCustomerFactory,
   contextFactory,
 } from '../__factories__/context.factory';
-import fetchCheckoutContext from '../context';
+import { fetchCheckoutContext } from '../context';
 
 // Mock setup
 jest.mock('@edx/frontend-platform/auth', () => ({

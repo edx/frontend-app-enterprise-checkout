@@ -6,7 +6,14 @@ import {
 
 import queries from './queryKeyFactory';
 
-export const queryBffContext = (lmsUserId = null) => (
+export const queryBffSuccess = (lmsUserId: number | null = null) => (
+  queries
+    .enterpriseCheckout
+    .bff
+    ._ctx.success(lmsUserId)
+);
+
+export const queryBffContext = (lmsUserId: number | null = null) => (
   queries
     .enterpriseCheckout
     .bff
