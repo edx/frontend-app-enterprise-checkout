@@ -9,14 +9,17 @@ import useBFFContext from '@/components/app/data/hooks/useBFFContext';
  *   `data` contains the field constraints (when available) or `null`.
  */
 const useFormValidationConstraints = (): UseQueryResult<CheckoutContextFieldConstraints | null> => {
-  const constraints = useBFFContext<CheckoutContextFieldConstraints | null>({
-    select: (data: CheckoutContextResponse): CheckoutContextFieldConstraints | null => {
-      if (data.fieldConstraints) {
-        return data.fieldConstraints;
-      }
-      return null;
+  const constraints = useBFFContext<CheckoutContextFieldConstraints | null>(
+    null,
+    {
+      select: (data: CheckoutContextResponse): CheckoutContextFieldConstraints | null => {
+        if (data.fieldConstraints) {
+          return data.fieldConstraints;
+        }
+        return null;
+      },
     },
-  });
+  );
   return constraints;
 };
 

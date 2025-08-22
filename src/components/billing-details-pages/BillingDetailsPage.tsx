@@ -25,7 +25,10 @@ const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
+
+  const StepperContent = useStepperContent();
   const { data: formValidationConstraints } = useFormValidationConstraints();
+
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
@@ -34,17 +37,15 @@ const BillingDetailsPage: React.FC = () => {
   const billingDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints)
   ), [formSchema, formValidationConstraints]);
+
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
     resolver: zodResolver(billingDetailsSchema),
     defaultValues: billingDetailsData,
   });
-
   const {
     handleSubmit,
   } = form;
-
-  const StepperContent = useStepperContent();
 
   const onSubmit = (data: BillingDetailsData) => {
     setFormData(DataStoreKey.BillingDetails, data);

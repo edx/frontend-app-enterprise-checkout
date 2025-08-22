@@ -39,7 +39,7 @@ const createCheckoutSession = async (
 ): Promise<CheckoutSessionResponseType> => {
   // TODO: When this API is called, invalidate the upstream helper, queryCheckoutSession on success
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/customer-billing/create-checkout-session`;
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-billing/create-checkout-session/`;
 
   const response: AxiosResponse<CheckoutSessionResponseTypePayload> = await getAuthenticatedHttpClient()
     .post<CheckoutSessionResponseTypePayload>(url, payload);

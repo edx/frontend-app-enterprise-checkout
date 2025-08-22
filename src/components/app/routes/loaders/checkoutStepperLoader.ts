@@ -2,9 +2,9 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { queryBffSuccess } from '@/components/app/data/queries/queries';
+import { queryCheckoutSession } from '@/components/app/data/queries/queries';
+import { extractCheckoutSessionPayload } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
-import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
@@ -55,13 +55,19 @@ async function accountDetailsLoader(): Promise<Response | null> {
  * Route loader for Billing Details page
  */
 async function billingDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
-  const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
-  // Seed query cache with success endpoint
-  const context = await queryClient.ensureQueryData(
-    queryBffSuccess(authenticatedUser?.userId || null),
+  const {
+    checkoutSessionPayload,
+    isValidPayload,
+  } = extractCheckoutSessionPayload();
+
+  if (!isValidPayload) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  await queryClient.ensureQueryData(
+    queryCheckoutSession(checkoutSessionPayload),
   );
-  console.log({ context, authenticatedUser });
-  console.log('key', checkoutFormStore.getState());
+
   return null;
 }
 

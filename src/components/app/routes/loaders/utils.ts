@@ -6,6 +6,8 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 type PopulateCompletedFormFieldsProps = {
   /** The checkout intent from the backend context, if any. */
   checkoutIntent: CheckoutContextCheckoutIntent | null,
+  /** Stripe price id from the backend context */
+  stripePriceId: CheckoutContextPrice['id'] | null,
   /** The currently authenticated user as exposed by the platform auth util. */
   authenticatedUser: AuthenticatedUser,
 };
@@ -65,6 +67,7 @@ const determineExistingCheckoutIntentState = (
  */
 const populateCompletedFormFields = ({
   checkoutIntent,
+  stripePriceId,
   authenticatedUser,
 }: PopulateCompletedFormFieldsProps): void => {
   checkoutFormStore.setState(
@@ -81,6 +84,9 @@ const populateCompletedFormFields = ({
           country: s.formData[DataStoreKey.PlanDetails]?.country
             ?? authenticatedUser.country
             ?? null,
+          stripePriceId: s.formData[DataStoreKey.PlanDetails]?.stripePriceId
+            ?? stripePriceId
+            ?? null,
         },
         [DataStoreKey.AccountDetails]: {
           ...s.formData[DataStoreKey.AccountDetails],
@@ -95,7 +101,42 @@ const populateCompletedFormFields = ({
   );
 };
 
+const extractCheckoutSessionPayload = (): {
+  checkoutSessionPayload: CheckoutSessionSchema,
+  isValidPayload: boolean,
+} => {
+  const checkoutFormData = checkoutFormStore.getState().formData;
+
+  const {
+    quantity,
+    adminEmail,
+    stripePriceId,
+  } = checkoutFormData[DataStoreKey.PlanDetails];
+  const {
+    enterpriseSlug,
+    companyName,
+  } = checkoutFormData[DataStoreKey.AccountDetails];
+
+  const checkoutSessionPayload = {
+    quantity,
+    adminEmail,
+    stripePriceId,
+    enterpriseSlug,
+    companyName,
+  };
+
+  const isPresent = v => v != null && v !== ''; // != null covers null and undefined
+
+  const isValidPayload = Object.values(checkoutSessionPayload).every(isPresent);
+
+  return {
+    checkoutSessionPayload,
+    isValidPayload,
+  };
+};
+
 export {
   determineExistingCheckoutIntentState,
   populateCompletedFormFields,
+  extractCheckoutSessionPayload,
 };

@@ -8,3 +8,4 @@ export { default as NameAndEmailFields } from './NameAndEmailFields';
 export { default as CompanyNameField } from './CompanyNameField';
 export { default as RegisterAccountFields } from './RegisterAccountFields';
 export { useIsFieldValid, useIsFieldInvalid, getTrailingElement } from './Field';
+export { default as StripeFormFields } from './StripeFormFields';

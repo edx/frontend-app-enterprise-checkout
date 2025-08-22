@@ -72,17 +72,20 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
 // TODO: complete as part of ticket to do register page.
 export const PlanDetailsRegisterPageSchema = () => (z.object({}));
 
-export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
+export const PlanDetailsSchema = (
+  constraints: CheckoutContextFieldConstraints,
+  stripePriceId: CheckoutContextPrice['id'],
+) => (z.object({
   quantity: z.coerce.number()
     .min(
-      constraints?.quantity.min,
-      constraints?.quantity.min
+      constraints?.quantity?.min,
+      constraints?.quantity?.min
         ? `Minimum ${constraints.quantity.min} users`
         : undefined,
     )
     .max(
-      constraints?.quantity.max,
-      constraints?.quantity.max
+      constraints?.quantity?.max,
+      constraints?.quantity?.max
         ? `Maximum ${constraints.quantity.max} users`
         : undefined,
     )
@@ -91,7 +94,7 @@ export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) 
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'quantity',
         quantity,
-        { stripePriceId: 'price_9876_replace-me' },
+        { stripePriceId },
       );
       if (!isValid) {
         ctx.addIssue({
@@ -107,6 +110,7 @@ export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) 
     .max(254),
   country: z.string().trim()
     .min(1, 'Country is required'),
+  stripePriceId: z.string().trim().optional().nullable(),
 }));
 
 export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
@@ -115,17 +119,17 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .max(255, 'Maximum 255 characters'),
   enterpriseSlug: z.string().trim()
     .min(
-      constraints?.enterpriseSlug.minLength,
+      constraints?.enterpriseSlug?.minLength,
       'Company Url is required',
     )
     .max(
-      constraints?.enterpriseSlug.maxLength,
-      constraints?.enterpriseSlug.maxLength
+      constraints?.enterpriseSlug?.maxLength,
+      constraints?.enterpriseSlug?.maxLength
         ? `Maximum ${constraints?.enterpriseSlug.maxLength} characters`
         : undefined,
     )
     .regex(
-      new RegExp(constraints?.enterpriseSlug.pattern),
+      new RegExp(constraints?.enterpriseSlug?.pattern),
       'Only lowercase letters, numbers, and hyphens allowed',
     ),
 }));

@@ -156,6 +156,7 @@ declare global {
     adminEmail: string;
     enterpriseSlug: string;
     quantity: number;
+    companyName: string;
     stripePriceId: string;
   }
 
@@ -171,7 +172,6 @@ declare global {
    */
   interface ValidationSchema extends BaseCheckoutSchema {
     fullName: string;
-    companyName: string;
   }
 
   /**
@@ -219,18 +219,10 @@ declare global {
   type CheckoutSessionSchemaPayload = Payload<CheckoutSessionSchema>;
 
   /**
-   * Data structure for successful checkout session response
-   */
-  interface CheckoutSessionData {
-    clientSecret: string;
-    expiresAt: string;
-  }
-
-  /**
    * Successful response structure for checkout session API
    */
   interface CheckoutSessionResponse {
-    checkoutSession: CheckoutSessionData;
+    checkoutSessionClientSecret: string;
   }
 
   /**

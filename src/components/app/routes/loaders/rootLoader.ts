@@ -6,6 +6,7 @@ import {
 import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunction, redirect } from 'react-router-dom';
 
+import { extractPriceId } from '@/components/app/data/hooks/useStripePriceId';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { determineExistingCheckoutIntentState, populateCompletedFormFields } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
@@ -61,13 +62,17 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       return null;
     }
 
-    const { checkoutIntent } = contextMetadata;
+    const { checkoutIntent, pricing } = contextMetadata;
+
     const {
       existingSuccessfulCheckoutIntent, expiredCheckoutIntent,
     } = determineExistingCheckoutIntentState(checkoutIntent);
 
+    const stripePriceId = extractPriceId(pricing);
+
     populateCompletedFormFields({
       checkoutIntent,
+      stripePriceId,
       authenticatedUser,
     });
 
