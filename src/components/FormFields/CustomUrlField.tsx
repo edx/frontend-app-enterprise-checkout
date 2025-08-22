@@ -40,8 +40,8 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
               defaultMessage: 'URL name',
               description: 'Floating label for the custom url input field',
             })}
-            controlClassName="ml-1"
-            className="flex-grow-1"
+            controlClassName="ml-1.5"
+            className="flex-grow-1 m-0 pt-2"
           />
         </span>
       </div>

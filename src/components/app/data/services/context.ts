@@ -6,7 +6,7 @@ import { isExpired } from '@/utils/common';
 
 import type { AxiosResponse } from 'axios';
 
-const successfulCheckoutIntentStates = [
+const paymentProcessedCheckoutIntentStates = [
   'paid',
   'fulfilled',
   'errored_provisioning',
@@ -14,7 +14,7 @@ const successfulCheckoutIntentStates = [
 
 const determineExistingSuccessfulCheckoutIntent = (
   state: CheckoutContextCheckoutIntent['state'],
-): boolean | null => (state ? successfulCheckoutIntentStates.includes(state) : null);
+): boolean | null => (state ? paymentProcessedCheckoutIntentStates.includes(state) : null);
 
 /**
  * Fetches checkout context information from the API

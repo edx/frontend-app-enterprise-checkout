@@ -303,8 +303,8 @@ declare global {
   interface CheckoutContextFieldConstraint {
     min: number;
     max: number;
-    minLength?: number;
-    maxLength?: number;
+    minLength: number;
+    maxLength: number;
     pattern: string;
   }
 
