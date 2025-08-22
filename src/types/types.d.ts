@@ -1,8 +1,10 @@
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { SnakeCasedPropertiesDeep } from 'type-fest';
 import { z } from 'zod';
 
-import type { TextMatch } from '@testing-library/react';
+import { CheckoutPageRoute } from '@/constants/checkout';
 
+import type { TextMatch } from '@testing-library/react';
 // Declaration for SVG modules
 declare module '*.svg' {
   import React from 'react';
@@ -32,7 +34,7 @@ declare global {
   /**
    * Application Data (general)
    */
-  type AuthenticatedUser = {
+  type AuthenticatedUser = ReturnType<typeof getAuthenticatedUser> & {
     userId: number;
     username: string;
     name: string;
@@ -47,6 +49,14 @@ declare global {
 
   /**
    * ==============================
+   * Loaders
+   * ==============================
+   */
+  type MakeRouteLoaderFunction = (queryClient?: QueryClient) => LoaderFunction;
+  export type MakeRouteLoaderFunctionWithQueryClient = (queryClient: QueryClient) => LoaderFunction;
+
+  /**
+   * ==============================
    * Form and UI Related Types
    * ==============================
    */
@@ -57,10 +67,12 @@ declare global {
 
   type CheckoutPage = 'PlanDetails' | 'PlanDetailsLogin' | 'PlanDetailsRegister' | 'AccountDetails' | 'BillingDetails' | 'BillingDetailsSuccess';
 
+  export type CheckoutPageRouteValue = (typeof CheckoutPageRoute)[keyof typeof CheckoutPageRoute];
+
   interface CheckoutPageDetails {
     step: CheckoutStep,
     substep: CheckoutSubstep | undefined,
-    route: string,
+    route: CheckoutPageRouteValue | string,
     formSchema?: any,
     title: object,
     buttonMessage: object | null,
@@ -79,8 +91,6 @@ declare global {
   type PlanDetailsRegisterPageData = z.infer<typeof PlanDetailsRegisterPageSchema>;
   type AccountDetailsData = z.infer<typeof AccountDetailsSchema>;
   type BillingDetailsData = z.infer<typeof BillingDetailsSchema>;
-  // TODO: This is added an a means to iterate through the project. Will need to be removed.
-  type TempAuthenticatedData = { tempAuthenticated: boolean };
 
   /**
    * Maps step names to their corresponding data types
@@ -291,11 +301,11 @@ declare global {
    * Field constraint structure for form validation
    */
   interface CheckoutContextFieldConstraint {
-    min?: number;
-    max?: number;
-    minLength?: number;
-    maxLength?: number;
-    pattern?: string;
+    min: number;
+    max: number;
+    minLength: number;
+    maxLength: number;
+    pattern: string;
   }
 
   /**
@@ -306,6 +316,32 @@ declare global {
     enterpriseSlug: CheckoutContextFieldConstraint;
   }
 
+  type CheckoutIntentState =
+    | 'created'
+    | 'paid'
+    | 'fulfilled'
+    | 'errored_stripe_checkout'
+    | 'errored_provisioning'
+    | 'expired';
+
+  interface CheckoutContextCheckoutIntent {
+    id: number;
+    state: CheckoutIntentState;
+    enterpriseName: string;
+    enterpriseSlug: string;
+    stripeCheckoutSessionId: string;
+    lastCheckoutError: string;
+    lastProvisioningError: string;
+    workflowId: string;
+    expiresAt: string;
+    adminPortalUrl: string;
+  }
+
+  interface ExtendedCheckoutContextCheckoutIntent extends CheckoutContextCheckoutIntent {
+    existingSuccessfulCheckoutIntent: boolean | null;
+    expiredCheckoutIntent: boolean | null;
+  }
+
   /**
    * Complete response structure for checkout context API
    */
@@ -313,6 +349,7 @@ declare global {
     existingCustomersForAuthenticatedUser: CheckoutContextCustomer[];
     pricing: CheckoutContextPricing;
     fieldConstraints: CheckoutContextFieldConstraints;
+    checkoutIntent: ExtendedCheckoutContextCheckoutIntent | null;
   }
 
   /**

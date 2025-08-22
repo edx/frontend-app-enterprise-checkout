@@ -1,11 +1,20 @@
-import { useNProgressLoader, UseNProgressLoaderOptions } from '../data';
+import { useEffect } from 'react';
 
-interface RouterFallbackProps {
-  loaderOptions?: UseNProgressLoaderOptions;
-}
+import { progressBegin, progressEnd } from './progress';
 
-const RouterFallback = ({ loaderOptions = {} as UseNProgressLoaderOptions }: RouterFallbackProps) => {
-  useNProgressLoader(loaderOptions);
+/**
+ * Suspense fallback for router-level lazy routes.
+ * Starts the progress indicator on mount and ends it on unmount.
+ *
+ * @returns {null} Currently renders nothing; may be replaced with a visual loader.
+ */
+const RouterFallback = (): null => {
+  useEffect(() => {
+    progressBegin();
+    return () => progressEnd();
+  }, []);
+
+  // TODO: Replace with reasonable fallback
   return null;
 };
 

@@ -1,5 +1,7 @@
+import dayjs from 'dayjs';
+
 import { CheckoutErrorMessagesByField } from '@/constants/checkout';
-import { defaultQueryClientRetryHandler, serverValidationError } from '@/utils/common';
+import { defaultQueryClientRetryHandler, isExpired, serverValidationError } from '@/utils/common';
 
 describe('defaultQueryClientRetryHandler', () => {
   it.each([
@@ -75,5 +77,33 @@ describe('serverValidationError', () => {
 
     const msg = serverValidationError('quantity', decisions, mapping as any);
     expect(msg).toBe('Failed server-side validation');
+  });
+});
+
+describe('isExpired', () => {
+  const fixedNow = new Date('2025-08-20T20:00:00.000Z');
+
+  beforeEach(() => {
+    jest.useFakeTimers({ legacyFakeTimers: false });
+    jest.setSystemTime(fixedNow);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns true for a past date', () => {
+    const past = dayjs(fixedNow).subtract(1, 'minute').toISOString();
+    expect(isExpired(past)).toBe(true);
+  });
+
+  it('returns false for a future date', () => {
+    const future = dayjs(fixedNow).add(1, 'minute').toISOString();
+    expect(isExpired(future)).toBe(false);
+  });
+
+  it('returns false for a date equal to now (boundary condition)', () => {
+    const equalToNow = dayjs(fixedNow).toISOString();
+    expect(isExpired(equalToNow)).toBe(false);
   });
 });

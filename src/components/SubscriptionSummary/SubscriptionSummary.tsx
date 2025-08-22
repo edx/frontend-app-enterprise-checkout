@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 
 import { DisplayPrice } from '@/components/DisplayPrice';
 import {
-  CheckoutPageDetails, DataStoreKey,
+  CheckoutPageRoute,
+  DataStoreKey,
   SUBSCRIPTION_PRICE_PER_USER_PER_MONTH,
 } from '@/constants/checkout';
 import {
@@ -21,7 +22,7 @@ function calculateSubscriptionCost(quantity?: number) {
 
 const SubscriptionSummary: React.FC = () => {
   const { currentStep } = useCurrentStep();
-  const quantity = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]?.quantity);
+  const quantity = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]?.quantity);
   const totalSubscriptionCost = calculateSubscriptionCost(quantity);
   return (
     <Card variant="muted">
@@ -50,13 +51,13 @@ const SubscriptionSummary: React.FC = () => {
                       defaultMessage="Number of licenses"
                       description="Label for the number of licenses"
                     />
-                    {currentStep !== DataStoreKey.PlanDetailsStoreKey && (
+                    {currentStep !== DataStoreKey.PlanDetails && (
                       <Button
                         as={Link}
                         variant="link"
                         size="inline"
                         className="ml-1"
-                        to={CheckoutPageDetails.PlanDetails.route}
+                        to={CheckoutPageRoute.PlanDetails}
                       >
                         <FormattedMessage
                           id="checkout.subscriptionSummary.editQuantity"

@@ -57,7 +57,9 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
   },
 };
 
-export const PlanDetailsLoginPageSchema = z.object({
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   adminEmail: z.string().trim()
     .email()
     .max(254)
@@ -65,17 +67,27 @@ export const PlanDetailsLoginPageSchema = z.object({
   password: z.string().trim()
     .min(2, 'Password is required')
     .max(255, 'Maximum 255 characters'),
-});
+}));
 
 // TODO: complete as part of ticket to do register page.
-export const PlanDetailsRegisterPageSchema = z.object({});
+export const PlanDetailsRegisterPageSchema = () => (z.object({}));
 
-export const PlanDetailsSchema = z.object({
+export const PlanDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   quantity: z.coerce.number()
-    .min(5, 'Minimum 5 users')
-    .max(30, 'Maximum 30 users')
+    .min(
+      constraints?.quantity.min,
+      constraints?.quantity.min
+        ? `Minimum ${constraints.quantity.min} users`
+        : undefined,
+    )
+    .max(
+      constraints?.quantity.max,
+      constraints?.quantity.max
+        ? `Maximum ${constraints.quantity.max} users`
+        : undefined,
+    )
     .superRefine(async (quantity, ctx) => {
-      // TODO: Nice to have to avoid calling this API if client side validation catches first
+    // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'quantity',
         quantity,
@@ -88,7 +100,6 @@ export const PlanDetailsSchema = z.object({
         });
       }
     }),
-  authenticated: z.boolean().optional(),
   fullName: z.string().trim()
     .min(1, 'Full name is required')
     .max(255),
@@ -96,30 +107,48 @@ export const PlanDetailsSchema = z.object({
     .max(254),
   country: z.string().trim()
     .min(1, 'Country is required'),
-});
+}));
 
-export const AccountDetailsSchema = z.object({
+export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   companyName: z.string().trim()
     .min(1, 'Company name is required')
     .max(255, 'Maximum 255 characters'),
-  // enterpriseSlug: z.string().trim()
-  //   .min(1, ' is required')
-  //   .max(30, 'Maximum 30 characters')
-  //   .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens allowed')
-  //   .refine(
-  //     (enterpriseSlug) => validateField('enterpriseSlug', enterpriseSlug),
-  //     { message: 'Failed server-side validation.' },
-  //   ),
-});
+  enterpriseSlug: z.string().trim()
+    .min(
+      constraints?.enterpriseSlug.minLength,
+      'Company Url is required',
+    )
+    .max(
+      constraints?.enterpriseSlug.maxLength,
+      constraints?.enterpriseSlug.maxLength
+        ? `Maximum ${constraints?.enterpriseSlug.maxLength} characters`
+        : undefined,
+    )
+    .regex(
+      new RegExp(constraints?.enterpriseSlug.pattern),
+      'Only lowercase letters, numbers, and hyphens allowed',
+    ),
+}));
 
-export const BillingDetailsSchema = z.object({});
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+
+export const CheckoutPageRoute = {
+  PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
+  PlanDetailsLogin: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
+  PlanDetailsRegister: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
+  AccountDetails: `/${CheckoutStepKey.AccountDetails}`,
+  BillingDetails: `/${CheckoutStepKey.BillingDetails}`,
+  BillingDetailsSuccess: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+} as const;
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
-    route: `/${CheckoutStepKey.PlanDetails}`,
     formSchema: PlanDetailsSchema,
+    route: CheckoutPageRoute.PlanDetails,
     title: defineMessages({
       id: 'checkout.planDetails.title',
       defaultMessage: 'Plan Details',
@@ -134,8 +163,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   PlanDetailsLogin: {
     step: 'PlanDetails',
     substep: 'Login',
-    route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
     formSchema: PlanDetailsLoginPageSchema,
+    route: CheckoutPageRoute.PlanDetailsLogin,
     title: defineMessages({
       id: 'checkout.planDetailsLogin.title',
       defaultMessage: 'Log in to your account',
@@ -150,8 +179,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   PlanDetailsRegister: {
     step: 'PlanDetails',
     substep: 'Register',
-    route: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
     formSchema: PlanDetailsRegisterPageSchema,
+    route: CheckoutPageRoute.PlanDetailsRegister,
     title: defineMessages({
       id: 'checkout.planDetailsRegistration.title',
       defaultMessage: 'Create your Account',
@@ -166,8 +195,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   AccountDetails: {
     step: 'AccountDetails',
     substep: undefined,
-    route: `/${CheckoutStepKey.AccountDetails}`,
     formSchema: AccountDetailsSchema,
+    route: CheckoutPageRoute.AccountDetails,
     title: defineMessages({
       id: 'checkout.accountDetails.title',
       defaultMessage: 'Account Details',
@@ -182,8 +211,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   BillingDetails: {
     step: 'BillingDetails',
     substep: undefined,
-    route: `/${CheckoutStepKey.BillingDetails}`,
     formSchema: BillingDetailsSchema,
+    route: CheckoutPageRoute.BillingDetails,
     title: defineMessages({
       id: 'checkout.billingDetails.title',
       defaultMessage: 'Billing Details',
@@ -198,8 +227,8 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   BillingDetailsSuccess: {
     step: 'BillingDetails',
     substep: 'Success',
-    route: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
     formSchema: BillingDetailsSchema,
+    route: CheckoutPageRoute.BillingDetailsSuccess,
     title: defineMessages({
       id: 'checkout.billingDetailsSuccess.title',
       defaultMessage: 'Thank you, {firstName}.',
@@ -220,13 +249,13 @@ export const authenticatedSteps = [
 ] as const;
 
 export enum DataStoreKey {
-  PlanDetailsStoreKey = 'PlanDetails',
-  AccountDetailsStoreKey = 'AccountDetails',
-  BillingDetailsStoreKey = 'BillingDetails',
+  PlanDetails = 'PlanDetails',
+  AccountDetails = 'AccountDetails',
+  BillingDetails = 'BillingDetails',
 }
 
 export enum SubmitCallbacks {
-  PlanDetailsCallback = 'PlanDetails',
-  PlanDetailsLoginCallback = 'PlanDetailsLogin',
-  PlanDetailsRegisterCallback = 'PlanDetailsRegister',
+  PlanDetails = 'PlanDetails',
+  PlanDetailsLogin = 'PlanDetailsLogin',
+  PlanDetailsRegister = 'PlanDetailsRegister',
 }

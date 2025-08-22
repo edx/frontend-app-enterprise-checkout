@@ -7,17 +7,20 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
+import { useFormValidationConstraints } from '@/components/app/data';
 import { useLoginMutation } from '@/components/app/data/hooks';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
-  CheckoutPageDetails,
-  CheckoutStepKey, DataStoreKey, SubmitCallbacks,
+  CheckoutPageRoute,
+  CheckoutStepKey,
+  DataStoreKey,
+  SubmitCallbacks,
 } from '@/constants/checkout';
 import {
   useCheckoutFormStore,
@@ -28,25 +31,27 @@ import {
 import '../Stepper/Steps/css/PriceAlert.css';
 
 const PlanDetailsPage = () => {
-  // TODO: Example usage of retrieving context data and validation
-  // const bffContext = useBFFContext();
-  // console.log(bffContext.data);
-  // const bffValidation = useBFFValidation(baseValidation);
   const intl = useIntl();
-  const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]);
+  const { data: formValidationConstraints } = useFormValidationConstraints();
+  const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
   const currentPage = useCurrentPage();
+
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
 
+  const planDetailsSchema = useMemo(() => (
+    formSchema(formValidationConstraints)
+  ), [formSchema, formValidationConstraints]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onTouched',
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(planDetailsSchema),
     defaultValues: planDetailsFormData,
   });
   const {
@@ -57,7 +62,7 @@ const PlanDetailsPage = () => {
 
   const loginMutation = useLoginMutation({
     onSuccess: () => {
-      navigate(CheckoutPageDetails.PlanDetails.route);
+      navigate(CheckoutPageRoute.PlanDetails);
     },
     onError: (errorMessage) => {
       setError('password', {
@@ -70,31 +75,30 @@ const PlanDetailsPage = () => {
   const onSubmitCallbacks: {
     [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
   } = {
-    [SubmitCallbacks.PlanDetailsCallback]: (data: PlanDetailsData) => {
-      setFormData(DataStoreKey.PlanDetailsStoreKey, data);
+    [SubmitCallbacks.PlanDetails]: (data: PlanDetailsData) => {
+      setFormData(DataStoreKey.PlanDetails, data);
 
       // TODO: replace with existing user email logic
       const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
-
       if (!authenticatedUser) {
         if (emailExists) {
-          navigate(CheckoutPageDetails.PlanDetailsLogin.route);
+          navigate(CheckoutPageRoute.PlanDetailsLogin);
         } else {
-          navigate(CheckoutPageDetails.PlanDetailsRegister.route);
+          navigate(CheckoutPageRoute.PlanDetailsRegister);
         }
       } else {
-        navigate(CheckoutPageDetails.AccountDetails.route);
+        navigate(CheckoutPageRoute.AccountDetails);
       }
     },
-    [SubmitCallbacks.PlanDetailsLoginCallback]: (data: PlanDetailsLoginPageData) => {
+    [SubmitCallbacks.PlanDetailsLogin]: (data: PlanDetailsLoginPageData) => {
       loginMutation.mutate({
         emailOrUsername: data.adminEmail,
         password: data.password,
       });
     },
-    [SubmitCallbacks.PlanDetailsRegisterCallback]: (data: PlanDetailsRegisterPageData) => {
+    [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
       // TODO: actually call registerRequest service function.
-      navigate(CheckoutPageDetails.PlanDetails.route);
+      navigate(CheckoutPageRoute.PlanDetails);
       // TODO: temporarily return data to make linter happy.
       return data;
     },

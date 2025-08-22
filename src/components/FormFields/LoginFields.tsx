@@ -14,7 +14,7 @@ interface LoginFieldsProps {
 
 const LoginFields = ({ form }: LoginFieldsProps) => {
   const intl = useIntl();
-  const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetailsStoreKey]);
+  const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const adminEmail = planDetailsData?.adminEmail;
 
   return (

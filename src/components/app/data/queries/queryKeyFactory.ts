@@ -8,10 +8,10 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
   bff: {
     queryKey: null,
     contextQueries: {
-      context: {
-        queryKey: null,
+      context: (lmsUserId) => ({
+        queryKey: [lmsUserId],
         queryFn: () => fetchCheckoutContext(),
-      },
+      }),
       validation: (fields, payload) => ({
         queryKey: [fields],
         queryFn: () => fetchCheckoutValidation(payload),

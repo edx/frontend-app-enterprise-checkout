@@ -1,0 +1,16 @@
+@use "~@openedx/paragon/styles/scss/core/core.scss" as core;
+@import "accessible-nprogress/dist/accessible-nprogress";
+
+#nprogress .bar {
+  background: core.$brand-500;
+  height: 3px;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px core.$brand-500, 0 0 5px core.$brand-500;
+}
+
+#nprogress .spinner-icon {
+  border-top-color: core.$brand-500;
+  border-left-color: core.$brand-500;
+}
