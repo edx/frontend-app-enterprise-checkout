@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -67,6 +67,17 @@ const BillingDetailsPage: React.FC = () => {
         </Stepper.Step>
         {stepperActionButtonMessage && (
           <Stepper.ActionRow eventKey={eventKey}>
+            <Button
+              variant="outline-primary"
+              onClick={() => navigate(CheckoutPageRoute.AccountDetails)}
+            >
+              <FormattedMessage
+                id="checkout.back"
+                defaultMessage="Back"
+                description="Button to go back to the previous step"
+              />
+            </Button>
+            <Stepper.ActionRow.Spacer />
             <Button
               variant="secondary"
               type="submit"

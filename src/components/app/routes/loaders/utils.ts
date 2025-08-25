@@ -1,5 +1,8 @@
-import { DataStoreKey } from '@/constants/checkout';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { AccountDetailsSchema, CheckoutPageRoute, DataStoreKey, PlanDetailsSchema } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+
 /**
  * Parameters for populateCompletedFormFields.
  */
@@ -135,8 +138,148 @@ const extractCheckoutSessionPayload = (): {
   };
 };
 
+type CheckoutPageRouteValue = (typeof CheckoutPageRoute)[keyof typeof CheckoutPageRoute];
+
+type ValidationResult = {
+  valid: boolean;
+  invalidRoute?: CheckoutPageRouteValue; // route of the first page that failed validation
+};
+
+type ResolverFn = ReturnType<typeof zodResolver>;
+
+const makeResolvers = (
+  constraints: CheckoutContextFieldConstraints,
+  stripePriceId: CheckoutContextPrice['id'],
+) => {
+  const planDetailsResolver: ResolverFn = zodResolver(PlanDetailsSchema(constraints, stripePriceId));
+
+  const accountDetailsResolver: ResolverFn = zodResolver(AccountDetailsSchema(constraints));
+
+  // const billingDetailsResolver: ResolverFn =
+  //   zodResolver(BillingDetailsSchema(constraints));
+
+  return {
+    planDetailsResolver,
+    accountDetailsResolver,
+    // billingDetailsResolver,
+  };
+};
+
+interface PrerequisiteCheck<T> {
+  pick: (formData: any) => T;
+  getResolver: (
+    constraints: CheckoutContextFieldConstraints, stripePriceId: string
+  ) => (values: T, ctx?: any, opts?: any) => Promise<any>;
+  failRoute: CheckoutPageRouteValue;
+}
+
+/**
+ * For each target route, list the prerequisite slices to validate, in order.
+ * Each entry includes which form slice to validate, how to build its resolver,
+ * and the route that should be returned if that slice is invalid.
+ */
+const prerequisiteSpec: Record<string, Array<PrerequisiteCheck<any>>> = {
+  PlanDetails: [],
+  AccountDetails: [
+    {
+      pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
+      failRoute: CheckoutPageRoute.PlanDetails,
+    },
+  ],
+  BillingDetails: [
+    {
+      pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
+      failRoute: CheckoutPageRoute.PlanDetails,
+    },
+    {
+      pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
+      failRoute: CheckoutPageRoute.AccountDetails,
+    },
+    // If you add a BillingDetails schema, include it as the last guard:
+    // {
+    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
+    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
+    //   failRoute: CheckoutPageRoute.BillingDetails,
+    // },
+  ],
+
+  BillingDetailsSuccess: [
+    {
+      pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
+      failRoute: CheckoutPageRoute.PlanDetails,
+    },
+    {
+      pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
+      failRoute: CheckoutPageRoute.AccountDetails,
+    },
+    // {
+    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
+    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
+    //   failRoute: CheckoutPageRoute.BillingDetails,
+    // },
+  ],
+};
+
+/** Helper: get route key ("PlanDetails" | "AccountDetails" | ...) from a route value string */
+const getRouteKeyFromValue = (
+  value: CheckoutPageRouteValue,
+): keyof typeof CheckoutPageRoute | undefined => (
+  Object.keys(CheckoutPageRoute) as Array<keyof typeof CheckoutPageRoute>
+)
+  .find((k) => CheckoutPageRoute[k] === value);
+
+/**
+ * Validate all prerequisites for navigating to `currentRoute`.
+ * Returns { valid: true } if all pass; otherwise { valid: false, invalidRoute }.
+ */
+const validateFormState = async ({
+  currentRoute,
+  constraints,
+  stripePriceId,
+}: {
+  currentRoute: CheckoutPageRouteValue;
+  constraints: CheckoutContextFieldConstraints | null;
+  stripePriceId: CheckoutContextPrice['id'];
+}): Promise<ValidationResult> => {
+  const routeKey = getRouteKeyFromValue(currentRoute);
+  if (!routeKey) {
+    return { valid: false, invalidRoute: CheckoutPageRoute.PlanDetails };
+  }
+
+  const { formData } = checkoutFormStore.getState();
+  if (!constraints) {
+    return { valid: false, invalidRoute: CheckoutPageRoute.PlanDetails };
+  }
+
+  const checks = prerequisiteSpec[routeKey] ?? [];
+
+  // Build all validation promises up front, check against the defined zod resolver
+  const validationPromises = checks.map(async ({ pick, getResolver, failRoute }) => {
+    const values = pick(formData);
+    const resolver = getResolver(constraints, stripePriceId);
+    const { errors } = await resolver(values, undefined, { criteriaMode: 'all' });
+    return { failRoute, hasErrors: errors && Object.keys(errors).length > 0 };
+  });
+
+  const results = await Promise.all(validationPromises);
+
+  // Find the first failing validation (preserving order)
+  const firstFail = results.find(result => result.hasErrors);
+  if (firstFail) {
+    return { valid: false, invalidRoute: firstFail.failRoute };
+  }
+
+  return { valid: true };
+};
+
 export {
   determineExistingCheckoutIntentState,
   populateCompletedFormFields,
   extractCheckoutSessionPayload,
+  validateFormState,
 };

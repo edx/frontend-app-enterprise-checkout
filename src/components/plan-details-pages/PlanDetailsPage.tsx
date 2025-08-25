@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -10,7 +10,7 @@ import {
 import { useContext, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import { useFormValidationConstraints } from '@/components/app/data';
@@ -33,6 +33,7 @@ import '../Stepper/Steps/css/PriceAlert.css';
 
 const PlanDetailsPage = () => {
   const intl = useIntl();
+  const location = useLocation();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const { data: stripePriceId } = useStripePriceId();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
@@ -124,6 +125,19 @@ const PlanDetailsPage = () => {
         </Stepper.Step>
         {stepperActionButtonMessage && (
         <Stepper.ActionRow eventKey={eventKey}>
+          {location.pathname !== CheckoutPageRoute.PlanDetails && (
+          <Button
+            variant="outline-primary"
+            onClick={() => navigate(CheckoutPageRoute.PlanDetails)}
+          >
+            <FormattedMessage
+              id="checkout.back"
+              defaultMessage="Back"
+              description="Button to go back to the previous step"
+            />
+          </Button>
+          )}
+          <Stepper.ActionRow.Spacer />
           <Button
             variant="secondary"
             type="submit"

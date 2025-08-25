@@ -2,8 +2,9 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { queryCheckoutSession } from '@/components/app/data/queries/queries';
-import { extractCheckoutSessionPayload } from '@/components/app/routes/loaders/utils';
+import { extractPriceId } from '@/components/app/data/hooks/useStripePriceId';
+import { queryBffContext, queryCheckoutSession } from '@/components/app/data/queries/queries';
+import { extractCheckoutSessionPayload, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
@@ -42,11 +43,36 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
 /**
  * Route loader for Account Details page
  */
-async function accountDetailsLoader(): Promise<Response | null> {
+async function accountDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
+
+  const { fieldConstraints, pricing } = contextMetadata;
+
+  const stripePriceId = extractPriceId(pricing);
+
+  if (!stripePriceId) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const {
+    valid,
+    invalidRoute,
+  } = await validateFormState({
+    currentRoute: CheckoutPageRoute.AccountDetails,
+    constraints: fieldConstraints,
+    stripePriceId,
+  });
+
+  if (!valid && invalidRoute) {
+    return redirect(invalidRoute);
   }
   return null;
 }
@@ -55,6 +81,36 @@ async function accountDetailsLoader(): Promise<Response | null> {
  * Route loader for Billing Details page
  */
 async function billingDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
+  const authenticatedUser = getAuthenticatedUser();
+  if (!authenticatedUser) {
+    // If the user is NOT authenticated, redirect to PlanDetails Page.
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
+
+  const { fieldConstraints, pricing } = contextMetadata;
+  const stripePriceId = extractPriceId(pricing);
+
+  if (!stripePriceId) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const {
+    valid,
+    invalidRoute,
+  } = await validateFormState({
+    currentRoute: CheckoutPageRoute.AccountDetails,
+    constraints: fieldConstraints,
+    stripePriceId,
+  });
+
+  if (!valid && invalidRoute) {
+    return redirect(invalidRoute);
+  }
+
   const {
     checkoutSessionPayload,
     isValidPayload,
@@ -102,7 +158,7 @@ const PAGE_LOADERS: Record<CheckoutPage, (queryClient: QueryClient) => Promise<R
  * and delegates to the page-specific loader (see PAGE_LOADERS). If the route is invalid, it returns null
  * so that the 404 boundary can take over.
  *
- * @param {QueryClient} _queryClient - Provided for parity with other loader factories (unused here).
+ * @param {QueryClient} queryClient - Provided for parity with other loader factories (unused here).
  * @returns {LoaderFunction} A loader that dispatches to page-specific loaders based on route params.
  */
 // @ts-ignore
