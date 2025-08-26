@@ -145,15 +145,13 @@ type ValidationResult = {
   invalidRoute?: CheckoutPageRouteValue; // route of the first page that failed validation
 };
 
-type ResolverFn = ReturnType<typeof zodResolver>;
-
 const makeResolvers = (
   constraints: CheckoutContextFieldConstraints,
   stripePriceId: CheckoutContextPrice['id'],
 ) => {
-  const planDetailsResolver: ResolverFn = zodResolver(PlanDetailsSchema(constraints, stripePriceId));
+  const planDetailsResolver = zodResolver(PlanDetailsSchema(constraints, stripePriceId));
 
-  const accountDetailsResolver: ResolverFn = zodResolver(AccountDetailsSchema(constraints));
+  const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints));
 
   // const billingDetailsResolver: ResolverFn =
   //   zodResolver(BillingDetailsSchema(constraints));
@@ -169,7 +167,7 @@ interface PrerequisiteCheck<T> {
   pick: (formData: any) => T;
   getResolver: (
     constraints: CheckoutContextFieldConstraints, stripePriceId: string
-  ) => (values: T, ctx?: any, opts?: any) => Promise<any>;
+  ) => (values: any, ctx?: any, opts?: any) => any;
   failRoute: CheckoutPageRouteValue;
 }
 

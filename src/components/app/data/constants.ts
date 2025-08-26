@@ -13,6 +13,7 @@ const snakeCaseBaseValidation: ValidationSchemaPayload = snakeCaseObject(baseVal
 
 const baseCheckoutSession: CheckoutSessionSchema = {
   adminEmail: '',
+  companyName: '',
   enterpriseSlug: '',
   quantity: 0,
   stripePriceId: '',

@@ -12,22 +12,16 @@ import { errorFieldFactory } from './validation-schema.factory';
  */
 Factory.define('checkoutSessionSchema')
   .attr('adminEmail', () => faker.internet.email())
+  .attr('companyName', () => faker.company.name())
   .attr('enterpriseSlug', () => faker.helpers.slugify(faker.company.name()).toLowerCase())
   .attr('quantity', () => faker.number.int({ min: 5, max: 100 }))
   .attr('stripePriceId', () => `price_${faker.string.alphanumeric(14)}`);
 
 /**
- * Factory for creating CheckoutSessionData objects
- */
-Factory.define('checkoutSessionData')
-  .attr('client_secret', () => `cs_test_${faker.string.alphanumeric(24)}`)
-  .attr('expires_at', () => Math.floor(Date.now() / 1000 + 3600).toString());
-
-/**
  * Factory for creating CheckoutSessionResponse objects
  */
 Factory.define('checkoutSessionResponse')
-  .attr('checkout_session', () => Factory.build('checkoutSessionData'));
+  .attr('checkout_session_client_secret', () => `cs_test_${faker.string.alphanumeric(24)}`);
 
 /**
  * Common error codes used in checkout session validation errors
@@ -51,13 +45,6 @@ export function checkoutSessionSchemaFactory(overrides = {}): CheckoutSessionSch
 export function checkoutSessionSchemaPayloadFactory(overrides = {}): CheckoutSessionSchemaPayload {
   const schema = checkoutSessionSchemaFactory(overrides);
   return snakeCaseObject(schema) as CheckoutSessionSchemaPayload;
-}
-
-/**
- * Factory function for creating CheckoutSessionData objects
- */
-export function checkoutSessionDataFactory(overrides = {}): CheckoutSessionData {
-  return Factory.build('checkoutSessionData', overrides);
 }
 
 /**

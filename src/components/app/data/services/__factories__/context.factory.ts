@@ -63,6 +63,33 @@ Factory.define('checkoutContextFieldConstraints')
   }));
 
 /**
+ * Factory for creating checkout context checkout intent objects
+ */
+Factory.define('checkoutContextCheckoutIntent')
+  .attr('id', () => faker.number.int({ min: 1, max: 100000 }))
+  .attr('state', () => faker.helpers.arrayElement<CheckoutIntentState>([
+    'created', 'paid', 'fulfilled', 'errored_stripe_checkout', 'errored_provisioning', 'expired',
+  ]))
+  .attr('enterprise_name', () => faker.company.name())
+  .attr('enterprise_slug', () => faker.helpers.slugify(faker.company.name()).toLowerCase())
+  .attr('stripe_checkout_session_id', () => `cs_test_${faker.string.alphanumeric(24)}`)
+  .attr('last_checkout_error', () => '')
+  .attr('last_provisioning_error', () => '')
+  .attr('workflow_id', () => `wf_${faker.string.alphanumeric(16)}`)
+  .attr('expires_at', () => faker.date.soon({ days: 3 }).toISOString())
+  .attr('admin_portal_url', () => faker.internet.url());
+
+/**
+ * Creates a checkout context checkout intent object with randomized values
+ *
+ * @param overrides - Optional properties to override in the generated object
+ * @returns A checkout context checkout intent payload (snake_case)
+ */
+export function checkoutContextCheckoutIntentFactory(overrides = {}): CheckoutContextResponsePayload['checkout_intent'] {
+  return Factory.build('checkoutContextCheckoutIntent', overrides);
+}
+
+/**
  * Factory for creating checkout context response objects
  */
 Factory.define('checkoutContextResponse')
@@ -71,7 +98,8 @@ Factory.define('checkoutContextResponse')
     Factory.build('checkoutContextCustomer'),
   ])
   .attr('pricing', () => Factory.build('checkoutContextPricing'))
-  .attr('field_constraints', () => Factory.build('checkoutContextFieldConstraints'));
+  .attr('field_constraints', () => Factory.build('checkoutContextFieldConstraints'))
+  .attr('checkout_intent', () => Factory.build('checkoutContextCheckoutIntent'));
 
 /**
  * Creates a checkout context customer object with randomized values

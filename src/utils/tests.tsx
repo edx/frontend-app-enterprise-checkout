@@ -115,11 +115,11 @@ export function renderWithRouterAndStepperProvider(
 }
 
 export const renderStepperRoute = (
-  route,
+  route: CheckoutPageRouteValue,
   appContextValue = {
     config: {},
     authenticatedUser: null,
-  },
+  } as { config: {}, authenticatedUser: AuthenticatedUser },
 ): RenderResult => (
   render(
     <QueryClientProvider client={queryClient()}>

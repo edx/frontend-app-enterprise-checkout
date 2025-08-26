@@ -91,7 +91,7 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     queryBffContext(authenticatedUser?.userId || null),
   );
 
-  const { fieldConstraints, pricing } = contextMetadata;
+  const { fieldConstraints, pricing, checkoutIntent } = contextMetadata;
   const stripePriceId = extractPriceId(pricing);
 
   if (!stripePriceId) {
@@ -102,13 +102,17 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     valid,
     invalidRoute,
   } = await validateFormState({
-    currentRoute: CheckoutPageRoute.AccountDetails,
+    currentRoute: CheckoutPageRoute.BillingDetails,
     constraints: fieldConstraints,
     stripePriceId,
   });
 
   if (!valid && invalidRoute) {
     return redirect(invalidRoute);
+  }
+
+  if (checkoutIntent?.stripeCheckoutSessionId) {
+    return null;
   }
 
   const {
@@ -130,12 +134,37 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
 /**
  * Route loader for Billing Details Success page
  */
-async function billingDetailsSuccessLoader(): Promise<Response | null> {
+async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
+
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
+
+  const { fieldConstraints, pricing } = contextMetadata;
+  const stripePriceId = extractPriceId(pricing);
+
+  if (!stripePriceId) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const {
+    valid,
+    invalidRoute,
+  } = await validateFormState({
+    currentRoute: CheckoutPageRoute.BillingDetails,
+    constraints: fieldConstraints,
+    stripePriceId,
+  });
+
+  if (!valid && invalidRoute) {
+    return redirect(invalidRoute);
+  }
+
   return null;
 }
 

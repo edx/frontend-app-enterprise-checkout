@@ -21,17 +21,11 @@ jest.mock('@edx/frontend-platform/config', () => ({
  * Helper function to verify the structure of a successful checkout session response
  */
 const verifySuccessfulCheckoutSessionResponse = (response: CheckoutSessionResponse): CheckoutSessionResponse => {
-  // Verify the top-level structure
-  expect(response).toHaveProperty('checkoutSession');
-
   // Verify the checkout session properties
-  const { checkoutSession } = response;
-  expect(checkoutSession).toHaveProperty('clientSecret');
-  expect(checkoutSession).toHaveProperty('expiresAt');
+  expect(response).toHaveProperty('checkoutSessionClientSecret');
 
   // Verify data types
-  expect(typeof checkoutSession.clientSecret).toBe('string');
-  expect(typeof checkoutSession.expiresAt).toBe('string');
+  expect(typeof response.checkoutSessionClientSecret).toBe('string');
 
   return response;
 };
@@ -61,7 +55,7 @@ describe('createCheckoutSession', () => {
     ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
   };
   const mockPayload = checkoutSessionSchemaPayloadFactory();
-  const baseUrl = 'https://example.com/customer-billing/create-checkout-session';
+  const baseUrl = 'https://example.com/api/v1/customer-billing/create-checkout-session/';
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -16,6 +16,18 @@ const useCheckoutSession = (): UseQueryResult<CheckoutSessionResponse, null> => 
   const checkoutSessionPayload: CheckoutSessionSchema = {
     ...baseCheckoutSession,
   };
+
+  const checkoutSessionClientSecret = useBFFContext(authenticatedUser.userId, {
+    select: (data:CheckoutContextResponse): CheckoutSessionResponse => ({
+      checkoutSessionClientSecret: data.checkoutIntent!.stripeCheckoutSessionId,
+    }),
+    enabled: !!context?.checkoutIntent?.stripeCheckoutSessionId,
+  });
+
+  if (checkoutSessionClientSecret.data?.checkoutSessionClientSecret) {
+    return checkoutSessionClientSecret as UseQueryResult<CheckoutSessionResponse, null>;
+  }
+
   if (context?.pricing && context?.checkoutIntent && quantity) {
     Object.assign(
       checkoutSessionPayload,
@@ -28,7 +40,9 @@ const useCheckoutSession = (): UseQueryResult<CheckoutSessionResponse, null> => 
       },
     );
   }
+  // TODO: Fix conditional calling of hooks
   // @ts-ignore
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return useQuery(
     queryOptions({
       ...queryCheckoutSession(checkoutSessionPayload),

@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
 import { determineExistingCheckoutIntentState, populateCompletedFormFields } from '@/components/app/routes/loaders/utils';
@@ -7,7 +8,6 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
   checkoutFormStore: { setState: jest.fn() },
 }));
-
 // Helper types for test inputs (loosely typed to avoid coupling to app types)
 type TestCheckoutIntent = {
   state: string;
@@ -41,12 +41,12 @@ describe('utils.ts', () => {
         },
       } as any;
 
-      const authenticatedUser = {
+      const authenticatedUser: AuthenticatedUser = {
         email: 'boss@acme.com',
         name: 'Alice Boss',
         username: 'aboss',
         country: 'US',
-      } as any;
+      };
 
       const checkoutIntent = {
         state: 'paid',
@@ -55,7 +55,13 @@ describe('utils.ts', () => {
         enterpriseName: 'Acme Inc',
       } satisfies TestCheckoutIntent;
 
-      populateCompletedFormFields({ checkoutIntent: checkoutIntent as any, authenticatedUser });
+      const stripePriceId = faker.string.uuid();
+
+      populateCompletedFormFields({
+        checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
+        authenticatedUser,
+        stripePriceId,
+      });
 
       // Ensure setState called with updater fn and "false" (replace action behavior flag)
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
@@ -82,7 +88,7 @@ describe('utils.ts', () => {
       expect(computed.formData[DataStoreKey.BillingDetails]).toEqual({ address1: '123 Main' });
     });
 
-    it('handles empty user and null intent, setting authenticated=false and country=null', () => {
+    it('handles empty user, null intent and stripePriceId, setting authenticated=false and country=null', () => {
       const initialState = {
         formData: {
           [DataStoreKey.PlanDetails]: {},
@@ -93,7 +99,7 @@ describe('utils.ts', () => {
 
       const emptyUser = {} as any;
 
-      populateCompletedFormFields({ checkoutIntent: null as any, authenticatedUser: emptyUser });
+      populateCompletedFormFields({ checkoutIntent: null as any, authenticatedUser: emptyUser, stripePriceId: null });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
       const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];

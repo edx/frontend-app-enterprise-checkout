@@ -17,7 +17,9 @@ const determineExistingSuccessfulCheckoutIntent = (
 ): boolean | null => (state ? paymentProcessedCheckoutIntentStates.includes(state) : null);
 
 const transformContextResponse = (contextResponse: CheckoutContextResponse) => {
-  const baseResponse = structuredClone(contextResponse);
+  const baseResponse = (globalThis as any).structuredClone
+    ? (globalThis as any).structuredClone(contextResponse)
+    : JSON.parse(JSON.stringify(contextResponse));
   const existingSuccessfulCheckoutIntent = baseResponse.checkoutIntent?.state
     ? determineExistingSuccessfulCheckoutIntent(baseResponse.checkoutIntent.state)
     : null;
