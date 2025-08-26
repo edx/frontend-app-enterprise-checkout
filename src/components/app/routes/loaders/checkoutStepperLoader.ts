@@ -53,11 +53,9 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-
   const { fieldConstraints, pricing } = contextMetadata;
 
   const stripePriceId = extractPriceId(pricing);
-
   if (!stripePriceId) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
@@ -70,10 +68,10 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
     constraints: fieldConstraints,
     stripePriceId,
   });
-
   if (!valid && invalidRoute) {
     return redirect(invalidRoute);
   }
+
   return null;
 }
 
@@ -90,10 +88,9 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-
   const { fieldConstraints, pricing } = contextMetadata;
-  const stripePriceId = extractPriceId(pricing);
 
+  const stripePriceId = extractPriceId(pricing);
   if (!stripePriceId) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
@@ -106,7 +103,6 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     constraints: fieldConstraints,
     stripePriceId,
   });
-
   if (!valid && invalidRoute) {
     return redirect(invalidRoute);
   }
@@ -115,7 +111,6 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     checkoutSessionPayload,
     isValidPayload,
   } = extractCheckoutSessionPayload();
-
   if (!isValidPayload) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
@@ -140,10 +135,9 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-
   const { fieldConstraints, pricing } = contextMetadata;
-  const stripePriceId = extractPriceId(pricing);
 
+  const stripePriceId = extractPriceId(pricing);
   if (!stripePriceId) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
@@ -156,7 +150,6 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
     constraints: fieldConstraints,
     stripePriceId,
   });
-
   if (!valid && invalidRoute) {
     return redirect(invalidRoute);
   }
@@ -172,7 +165,7 @@ const PAGE_LOADERS: Record<CheckoutPage, (queryClient: QueryClient) => Promise<R
   PlanDetailsLogin: planDetailsLoginLoader,
   PlanDetailsRegister: planDetailsRegisterLoader,
   AccountDetails: accountDetailsLoader,
-  BillingDetails: (queryClient) => billingDetailsLoader(queryClient),
+  BillingDetails: billingDetailsLoader,
   BillingDetailsSuccess: billingDetailsSuccessLoader,
 };
 

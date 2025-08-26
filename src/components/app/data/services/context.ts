@@ -58,6 +58,16 @@ const fetchCheckoutContext = async (): Promise<CheckoutContextResponse> => {
   return transformContextResponse(camelCasedResponse);
 };
 
+/**
+ * Fetches checkout context success information from the API
+ *
+ * This function retrieves information about the checkout context, including:
+ * - Existing customers for the authenticated user
+ * - Pricing information
+ * - Field constraints for form validation
+ *
+ * @returns A promise that resolves to an AxiosResponse containing the checkout context information
+ */
 const fetchCheckoutSuccess = async (): Promise<CheckoutContextResponse> => {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/bffs/checkout/success/`;

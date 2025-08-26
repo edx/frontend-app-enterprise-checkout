@@ -3,7 +3,7 @@ import { queryOptions, useQuery, UseQueryOptions, UseQueryResult } from '@tansta
 import { queryBffSuccess } from '@/components/app/data/queries/queries';
 
 /**
- * React hook: Query the BFF checkout context with strong typings.
+ * React hook: Query the BFF checkout context success with strong typings.
  *
  * TQueryFnData is fixed to CheckoutContextResponse since the underlying queryFn returns that shape.
  * TData allows callers to transform the data (e.g., via TanStack Query's `select`) into a different shape.
