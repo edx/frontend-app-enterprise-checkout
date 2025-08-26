@@ -28,8 +28,8 @@ jest.mock('@/components/app/data/services/validation', () => ({
 const makeReq = (path: string) => ({ url: `http://localhost${path}` } as any);
 
 const mapStep = (step?: string | CheckoutStepKey): CheckoutStepKey | undefined => {
-  if (!step) return undefined;
-  if (typeof step !== 'string') return step;
+  if (!step) { return undefined; }
+  if (typeof step !== 'string') { return step; }
   switch (step) {
     case 'PlanDetails': return CheckoutStepKey.PlanDetails;
     case 'AccountDetails': return CheckoutStepKey.AccountDetails;
@@ -38,8 +38,8 @@ const mapStep = (step?: string | CheckoutStepKey): CheckoutStepKey | undefined =
   }
 };
 const mapSubstep = (sub?: string | CheckoutSubstepKey): CheckoutSubstepKey | undefined => {
-  if (!sub) return undefined;
-  if (typeof sub !== 'string') return sub;
+  if (!sub) { return undefined; }
+  if (typeof sub !== 'string') { return sub; }
   switch (sub) {
     case 'Login': return CheckoutSubstepKey.Login;
     case 'Register': return CheckoutSubstepKey.Register;
