@@ -14,7 +14,7 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
   const stripePromise = loadStripe(PUBLISHABLE_STRIPE_API_KEY);
   const { data: stripeCheckoutSession } = useCheckoutSession();
 
-  if (!(stripeCheckoutSession)) {
+  if (!stripeCheckoutSession) {
     return null;
   }
 

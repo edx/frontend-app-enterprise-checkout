@@ -91,7 +91,7 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     queryBffContext(authenticatedUser?.userId || null),
   );
 
-  const { fieldConstraints, pricing, checkoutIntent } = contextMetadata;
+  const { fieldConstraints, pricing } = contextMetadata;
   const stripePriceId = extractPriceId(pricing);
 
   if (!stripePriceId) {
@@ -109,10 +109,6 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
 
   if (!valid && invalidRoute) {
     return redirect(invalidRoute);
-  }
-
-  if (checkoutIntent?.stripeCheckoutSessionId) {
-    return null;
   }
 
   const {
