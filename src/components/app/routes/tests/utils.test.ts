@@ -1,12 +1,26 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, populateCompletedFormFields } from '@/components/app/routes/loaders/utils';
-import { DataStoreKey } from '@/constants/checkout';
+import { determineExistingCheckoutIntentState, extractCheckoutSessionPayload, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
+import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
+jest.mock('@hookform/resolvers/zod', () => ({
+  zodResolver: jest.fn(() => async (values: any) => {
+    const errors: any = {};
+    if ('adminEmail' in values || 'stripePriceId' in values || 'quantity' in values) {
+      if (!values.adminEmail) { errors.adminEmail = { message: 'Required' }; }
+      if (!values.stripePriceId) { errors.stripePriceId = { message: 'Required' }; }
+    } else if ('enterpriseSlug' in values || 'companyName' in values) {
+      if (!values.enterpriseSlug) { errors.enterpriseSlug = { message: 'Required' }; }
+      if (!values.companyName) { errors.companyName = { message: 'Required' }; }
+    }
+    return { errors };
+  }),
+}));
+
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
-  checkoutFormStore: { setState: jest.fn() },
+  checkoutFormStore: { setState: jest.fn(), getState: jest.fn() },
 }));
 // Helper types for test inputs (loosely typed to avoid coupling to app types)
 type TestCheckoutIntent = {
@@ -118,6 +132,127 @@ describe('utils.ts', () => {
           companyName: undefined,
         }),
       );
+    });
+  });
+
+  describe('extractCheckoutSessionPayload', () => {
+    it('returns assembled payload and isValidPayload=true when all fields present', () => {
+      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+        formData: {
+          [DataStoreKey.PlanDetails]: {
+            quantity: 3,
+            adminEmail: 'user@example.com',
+            stripePriceId: 'price_123',
+          },
+          [DataStoreKey.AccountDetails]: {
+            enterpriseSlug: 'acme',
+            companyName: 'Acme Inc',
+          },
+        },
+      });
+
+      const { checkoutSessionPayload, isValidPayload } = extractCheckoutSessionPayload();
+      expect(isValidPayload).toBe(true);
+      expect(checkoutSessionPayload).toEqual({
+        quantity: 3,
+        adminEmail: 'user@example.com',
+        stripePriceId: 'price_123',
+        enterpriseSlug: 'acme',
+        companyName: 'Acme Inc',
+      });
+    });
+
+    it('returns isValidPayload=false when any required field is missing/empty', () => {
+      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+        formData: {
+          [DataStoreKey.PlanDetails]: {
+            quantity: 0,
+            adminEmail: '',
+            stripePriceId: null,
+          },
+          [DataStoreKey.AccountDetails]: {
+            enterpriseSlug: undefined,
+            companyName: 'Acme Inc',
+          },
+        },
+      });
+
+      const { isValidPayload } = extractCheckoutSessionPayload();
+      expect(isValidPayload).toBe(false);
+    });
+  });
+
+  describe('validateFormState', () => {
+    it('returns invalid with PlanDetails when constraints are null', async () => {
+      (checkoutFormStore.getState as jest.Mock).mockReturnValue({ formData: {} });
+      const result = await validateFormState({
+        currentRoute: CheckoutPageRoute.AccountDetails,
+        constraints: null as any,
+        stripePriceId: 'price_123' as any,
+      });
+      expect(result).toEqual({ valid: false, invalidRoute: CheckoutPageRoute.PlanDetails });
+    });
+
+    it('returns invalidRoute=PlanDetails when PlanDetails validation fails for AccountDetails navigation', async () => {
+      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+        formData: {
+          [DataStoreKey.PlanDetails]: {
+            quantity: 1,
+            adminEmail: '', // missing
+            stripePriceId: '', // missing
+          },
+        },
+      });
+      const result = await validateFormState({
+        currentRoute: CheckoutPageRoute.AccountDetails,
+        constraints: {} as any,
+        stripePriceId: 'price_123' as any,
+      });
+      expect(result).toEqual({ valid: false, invalidRoute: CheckoutPageRoute.PlanDetails });
+    });
+
+    it('returns invalidRoute=AccountDetails when AccountDetails fails for BillingDetails navigation', async () => {
+      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+        formData: {
+          [DataStoreKey.PlanDetails]: {
+            quantity: 1,
+            adminEmail: 'user@example.com',
+            stripePriceId: 'price_123',
+          },
+          [DataStoreKey.AccountDetails]: {
+            enterpriseSlug: '', // missing
+            companyName: '', // missing
+          },
+        },
+      });
+      const result = await validateFormState({
+        currentRoute: CheckoutPageRoute.BillingDetails,
+        constraints: {} as any,
+        stripePriceId: 'price_123' as any,
+      });
+      expect(result).toEqual({ valid: false, invalidRoute: CheckoutPageRoute.AccountDetails });
+    });
+
+    it('returns valid=true when all prerequisite slices pass validation', async () => {
+      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+        formData: {
+          [DataStoreKey.PlanDetails]: {
+            quantity: 2,
+            adminEmail: 'user@example.com',
+            stripePriceId: 'price_123',
+          },
+          [DataStoreKey.AccountDetails]: {
+            enterpriseSlug: 'acme',
+            companyName: 'Acme Inc',
+          },
+        },
+      });
+      const result = await validateFormState({
+        currentRoute: CheckoutPageRoute.BillingDetails,
+        constraints: {} as any,
+        stripePriceId: 'price_123' as any,
+      });
+      expect(result).toEqual({ valid: true });
     });
   });
 });

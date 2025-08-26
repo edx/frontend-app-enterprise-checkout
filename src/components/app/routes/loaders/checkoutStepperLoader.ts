@@ -9,7 +9,9 @@ import { CheckoutPageRoute } from '@/constants/checkout';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
- * Route loader for Plan Details page
+ * Route loader for Plan Details page.
+ *
+ * @returns {Promise<Response | null>} Null to continue rendering the route without redirect.
  */
 async function planDetailsLoader(): Promise<Response | null> {
   // Plan Details page doesn't require authentication
@@ -17,7 +19,9 @@ async function planDetailsLoader(): Promise<Response | null> {
 }
 
 /**
- * Route loader for Plan Details Login page
+ * Route loader for Plan Details Login page.
+ *
+ * @returns {Promise<Response | null>} Redirects to Plan Details if already authenticated; otherwise null.
  */
 async function planDetailsLoginLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
@@ -29,7 +33,9 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
 }
 
 /**
- * Route loader for Plan Details Register page
+ * Route loader for Plan Details Register page.
+ *
+ * @returns {Promise<Response | null>} Redirects to Plan Details if already authenticated; otherwise null.
  */
 async function planDetailsRegisterLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
@@ -41,7 +47,10 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
 }
 
 /**
- * Route loader for Account Details page
+ * Route loader for Account Details page.
+ *
+ * @param {QueryClient} queryClient - TanStack Query client to ensure context and session queries.
+ * @returns {Promise<Response | null>} Redirects if prerequisites fail; otherwise null to proceed.
  */
 async function accountDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
@@ -76,7 +85,10 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
 }
 
 /**
- * Route loader for Billing Details page
+ * Route loader for Billing Details page.
+ *
+ * @param {QueryClient} queryClient - TanStack Query client to ensure context and checkout session queries.
+ * @returns {Promise<Response | null>} Redirects to appropriate route if validation fails; otherwise null.
  */
 async function billingDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
@@ -123,7 +135,11 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
 }
 
 /**
- * Route loader for Billing Details Success page
+ * Route loader for Billing Details Success page.
+ *
+ * @param {QueryClient} queryClient - TanStack Query client to ensure required context.
+ * @returns {Promise<Response | null>} Redirects if prerequisites are not met;
+ * otherwise null.
  */
 async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();

@@ -32,7 +32,7 @@ interface DetermineExistingPaidCheckoutIntent {
 /**
  * Computes a compact state object from an optional checkout intent.
  *
- * @param {CheckoutContextCheckoutIntent | null} checkoutIntent - The checkout intent from the checkout context.
+ * @param {ExtendedCheckoutContextCheckoutIntent | null} checkoutIntent - The checkout intent from the checkout context.
  * @returns {DetermineExistingPaidCheckoutIntent}
  *   Object indicating if a successful intent exists and if the intent is expired.
  */
@@ -104,6 +104,13 @@ const populateCompletedFormFields = ({
   );
 };
 
+/**
+ * Build the payload for creating a checkout session from the current form state
+ * and indicate whether all required fields are present.
+ *
+ * @returns {{ checkoutSessionPayload: CheckoutSessionSchema, isValidPayload: boolean }}
+ *   The assembled payload and a flag indicating validity.
+ */
 const extractCheckoutSessionPayload = (): {
   checkoutSessionPayload: CheckoutSessionSchema,
   isValidPayload: boolean,
@@ -138,13 +145,31 @@ const extractCheckoutSessionPayload = (): {
   };
 };
 
+/**
+ * A union of all route path values defined on CheckoutPageRoute (e.g., "/plan-details").
+ */
 type CheckoutPageRouteValue = (typeof CheckoutPageRoute)[keyof typeof CheckoutPageRoute];
 
+/**
+ * Result of validating whether navigation to a given route is allowed based on form state.
+ */
 type ValidationResult = {
+  /** Whether all prerequisites passed. */
   valid: boolean;
+  /** If invalid, the first route the user should be redirected to fix validation. */
   invalidRoute?: CheckoutPageRouteValue; // route of the first page that failed validation
 };
 
+/**
+ * Build React Hook Form resolvers (zod-based) for the various checkout form slices,
+ * using the provided field constraints and Stripe price ID where required.
+ *
+ * Note: Billing Details resolver can be added later when the schema is available.
+ *
+ * @param {CheckoutContextFieldConstraints} constraints - Field-level constraints from the BFF context.
+ * @param {CheckoutContextPrice['id']} stripePriceId - Stripe price identifier used by the Plan Details schema.
+ * @returns {{ planDetailsResolver: Function, accountDetailsResolver: Function }} An object with resolvers.
+ */
 const makeResolvers = (
   constraints: CheckoutContextFieldConstraints,
   stripePriceId: CheckoutContextPrice['id'],
@@ -166,7 +191,7 @@ const makeResolvers = (
 interface PrerequisiteCheck<T> {
   pick: (formData: any) => T;
   getResolver: (
-    constraints: CheckoutContextFieldConstraints, stripePriceId: string
+    constraints: CheckoutContextFieldConstraints, stripePriceId: CheckoutContextPrice['id']
   ) => (values: any, ctx?: any, opts?: any) => any;
   failRoute: CheckoutPageRouteValue;
 }
@@ -223,7 +248,12 @@ const prerequisiteSpec: Record<string, Array<PrerequisiteCheck<any>>> = {
   ],
 };
 
-/** Helper: get route key ("PlanDetails" | "AccountDetails" | ...) from a route value string */
+/**
+ * Resolve a route enum key (e.g., "PlanDetails") from its path value string.
+ *
+ * @param {CheckoutPageRouteValue} value - A route value (path) from CheckoutPageRoute.
+ * @returns {keyof typeof CheckoutPageRoute | undefined} The matching enum key if found; otherwise undefined.
+ */
 const getRouteKeyFromValue = (
   value: CheckoutPageRouteValue,
 ): keyof typeof CheckoutPageRoute | undefined => (
@@ -232,8 +262,19 @@ const getRouteKeyFromValue = (
   .find((k) => CheckoutPageRoute[k] === value);
 
 /**
- * Validate all prerequisites for navigating to `currentRoute`.
- * Returns { valid: true } if all pass; otherwise { valid: false, invalidRoute }.
+ * Validate all prerequisites for navigating to a target route.
+ *
+ * It evaluates, in order, the prerequisite form slices defined in `prerequisiteSpec` for the
+ * provided `currentRoute`. Each slice is validated using its zod resolver (built from
+ * backend-provided `constraints` and `stripePriceId` where needed). The first failing slice
+ * determines the `invalidRoute` to redirect to.
+ *
+ * @param {Object} params - Parameters object.
+ * @param {CheckoutPageRouteValue} params.currentRoute - Route path the user is attempting to visit.
+ * @param {CheckoutContextFieldConstraints | null} params.constraints - Field constraints from BFF;
+ *   if null, validation fails to Plan Details.
+ * @param {CheckoutContextPrice['id']} params.stripePriceId - Stripe price id required by Plan Details resolver.
+ * @returns {Promise<ValidationResult>} Validation result indicating whether navigation can proceed.
  */
 const validateFormState = async ({
   currentRoute,

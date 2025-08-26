@@ -46,6 +46,12 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     const currentPath = new URL(request.url).pathname;
 
     // Helper to avoid self-redirect loops
+    /**
+     * Return a redirect Response to `to` unless it matches currentPath, in which case return null.
+     *
+     * @param {string} to - Target path to potentially redirect to.
+     * @returns {Response | null} A redirect response if different from current path; otherwise null.
+     */
     const redirectOrNull = (to: string) => (to !== currentPath ? redirect(to) : null);
 
     const protectedPaths = new Set<string>([
