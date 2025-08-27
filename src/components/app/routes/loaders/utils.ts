@@ -249,19 +249,6 @@ const prerequisiteSpec: Record<string, Array<PrerequisiteCheck<any>>> = {
 };
 
 /**
- * Resolve a route enum key (e.g., "PlanDetails") from its path value string.
- *
- * @param {CheckoutPageRouteValue} value - A route value (path) from CheckoutPageRoute.
- * @returns {keyof typeof CheckoutPageRoute | undefined} The matching enum key if found; otherwise undefined.
- */
-const getRouteKeyFromValue = (
-  value: CheckoutPageRouteValue,
-): keyof typeof CheckoutPageRoute | undefined => (
-  Object.keys(CheckoutPageRoute) as Array<keyof typeof CheckoutPageRoute>
-)
-  .find((k) => CheckoutPageRoute[k] === value);
-
-/**
  * Validate all prerequisites for navigating to a target route.
  *
  * It evaluates, in order, the prerequisite form slices defined in `prerequisiteSpec` for the
@@ -277,16 +264,15 @@ const getRouteKeyFromValue = (
  * @returns {Promise<ValidationResult>} Validation result indicating whether navigation can proceed.
  */
 const validateFormState = async ({
-  currentRoute,
+  checkoutStep,
   constraints,
   stripePriceId,
 }: {
-  currentRoute: CheckoutPageRouteValue;
+  checkoutStep: CheckoutStep;
   constraints: CheckoutContextFieldConstraints | null;
   stripePriceId: CheckoutContextPrice['id'];
 }): Promise<ValidationResult> => {
-  const routeKey = getRouteKeyFromValue(currentRoute);
-  if (!routeKey) {
+  if (!checkoutStep) {
     return { valid: false, invalidRoute: CheckoutPageRoute.PlanDetails };
   }
 
@@ -295,7 +281,7 @@ const validateFormState = async ({
     return { valid: false, invalidRoute: CheckoutPageRoute.PlanDetails };
   }
 
-  const checks = prerequisiteSpec[routeKey] ?? [];
+  const checks = prerequisiteSpec[checkoutStep] ?? [];
 
   // Build all validation promises up front, check against the defined zod resolver
   const validationPromises = checks.map(async ({ pick, getResolver, failRoute }) => {
