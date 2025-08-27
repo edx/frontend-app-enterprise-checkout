@@ -23,7 +23,6 @@ export function renderWithRouterProvider(
   { routes = [], initialEntries, customRouter }: RenderWithRouterOptions = {},
 ): RenderResult {
   const defaultRoutes: RouteObject[] = [
-    // Do we really need to hard-code these??
     { path: '/:step', element: children },
     { path: '/:step/:substep', element: children },
   ];

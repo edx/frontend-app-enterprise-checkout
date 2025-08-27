@@ -23,6 +23,7 @@ import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 const BillingDetailsPage: React.FC = () => {
   const intl = useIntl();
   const navigate = useNavigate();
+  const { fullName } = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
@@ -59,7 +60,7 @@ const BillingDetailsPage: React.FC = () => {
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Billing Details">
           <h1 className="mb-5 text-center" data-testid="stepper-title">
-            {intl.formatMessage(pageTitle, { firstName: 'Don' })}
+            {intl.formatMessage(pageTitle, { firstName: fullName })}
           </h1>
           <Stack gap={4}>
             <StepperContent form={form} />

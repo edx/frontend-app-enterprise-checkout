@@ -35,9 +35,9 @@ import type { AxiosResponse } from 'axios';
  * }
  */
 const createCheckoutSession = async (
-  payload: CheckoutSessionSchemaPayload,
+  payload: CreateCheckoutSessionSchemaPayload,
 ): Promise<CheckoutSessionResponseType> => {
-  // TODO: When this API is called, invalidate the upstream helper, queryCheckoutSession on success
+  // TODO: When this API is called, invalidate the upstream helper, queryCreateCheckoutSession on success
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/customer-billing/create-checkout-session/`;
 

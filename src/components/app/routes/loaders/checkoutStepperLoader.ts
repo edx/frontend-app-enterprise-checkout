@@ -3,7 +3,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
 import { extractPriceId } from '@/components/app/data/hooks/useStripePriceId';
-import { queryBffContext, queryCheckoutSession } from '@/components/app/data/queries/queries';
+import { queryBffContext, queryCreateCheckoutSession } from '@/components/app/data/queries/queries';
 import { extractCheckoutSessionPayload, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
@@ -128,7 +128,7 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
   }
 
   await queryClient.ensureQueryData(
-    queryCheckoutSession(checkoutSessionPayload),
+    queryCreateCheckoutSession(checkoutSessionPayload),
   );
 
   return null;

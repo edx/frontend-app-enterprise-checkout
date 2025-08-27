@@ -1,7 +1,7 @@
 import { snakeCaseObject } from '@edx/frontend-platform';
 
 import {
-  snakeCaseBaseCheckoutSession, snakeCaseBaseValidation,
+  snakeCaseBaseCreateCheckoutSession, snakeCaseBaseValidation,
 } from '@/components/app/data/constants';
 
 import queries from './queryKeyFactory';
@@ -21,7 +21,7 @@ export const queryBffContext = (lmsUserId: number | null = null) => (
 );
 
 export const queryBffValidation = (payload: ValidationSchema) => {
-  const fields = Object.keys(payload);
+  const fields = Object.keys(payload).sort();
   const snakeCasedPayload = snakeCaseObject({
     ...snakeCaseBaseValidation,
     ...payload,
@@ -34,10 +34,10 @@ export const queryBffValidation = (payload: ValidationSchema) => {
   );
 };
 
-export const queryCheckoutSession = (payload: CheckoutSessionSchema) => {
-  const fields = Object.keys(payload);
+export const queryCreateCheckoutSession = (payload: CreateCheckoutSessionSchema) => {
+  const fields = Object.keys(payload).sort();
   const snakeCasedPayload = snakeCaseObject({
-    ...snakeCaseBaseCheckoutSession,
+    ...snakeCaseBaseCreateCheckoutSession,
     ...payload,
   });
   return (

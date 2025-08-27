@@ -3,7 +3,7 @@ import { CheckoutProvider } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { ReactNode } from 'react';
 
-import { useCheckoutSession } from '@/components/app/data';
+import useCreateCheckoutSession from '@/components/app/data/hooks/useCreateCheckoutSession';
 
 type StripeProviderProps = {
   children: ReactNode;
@@ -12,7 +12,7 @@ type StripeProviderProps = {
 const StripeProvider = ({ children }: StripeProviderProps) => {
   const { PUBLISHABLE_STRIPE_API_KEY } = getConfig();
   const stripePromise = loadStripe(PUBLISHABLE_STRIPE_API_KEY);
-  const { data: stripeCheckoutSession } = useCheckoutSession();
+  const { data: stripeCheckoutSession } = useCreateCheckoutSession();
 
   if (!stripeCheckoutSession) {
     return null;

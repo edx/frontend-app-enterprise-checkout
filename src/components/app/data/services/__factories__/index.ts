@@ -10,5 +10,5 @@
  */
 
 export * from './validation-schema.factory';
-export * from './checkout-session-schema.factory';
+export * from './create-checkout-session-schema.factory';
 export * from './context.factory';

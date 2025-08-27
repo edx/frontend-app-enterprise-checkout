@@ -46,7 +46,6 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
-
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, stripePriceId)
   ), [formSchema, formValidationConstraints, stripePriceId]);
@@ -81,7 +80,7 @@ const PlanDetailsPage = () => {
       setFormData(DataStoreKey.PlanDetails, data);
 
       // TODO: replace with existing user email logic
-      const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
+      const emailExists = true;
       if (!authenticatedUser) {
         if (emailExists) {
           navigate(CheckoutPageRoute.PlanDetailsLogin);

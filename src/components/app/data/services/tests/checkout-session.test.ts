@@ -2,10 +2,10 @@ import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 
 import {
-  checkoutSessionErrorResponseFactory,
   checkoutSessionResponseFactory,
-  checkoutSessionSchemaPayloadFactory,
-} from '../__factories__/checkout-session-schema.factory';
+  createCheckoutSessionErrorResponseFactory,
+  createCheckoutSessionSchemaPayloadFactory,
+} from '../__factories__/create-checkout-session-schema.factory';
 import createCheckoutSession from '../checkout-session';
 
 // Mock setup
@@ -20,7 +20,7 @@ jest.mock('@edx/frontend-platform/config', () => ({
 /**
  * Helper function to verify the structure of a successful checkout session response
  */
-const verifySuccessfulCheckoutSessionResponse = (response: CheckoutSessionResponse): CheckoutSessionResponse => {
+const verifySuccessfulCheckoutSessionResponse = (response: CreateCheckoutSessionResponse): CreateCheckoutSessionResponse => {
   // Verify the checkout session properties
   expect(response).toHaveProperty('checkoutSessionClientSecret');
 
@@ -33,7 +33,7 @@ const verifySuccessfulCheckoutSessionResponse = (response: CheckoutSessionRespon
 /**
  * Helper function to verify the structure of an error checkout session response
  */
-const verifyErrorCheckoutSessionResponse = (response: CheckoutSessionErrorResponse): CheckoutSessionErrorResponse => {
+const verifyErrorCheckoutSessionResponse = (response: CreateCheckoutSessionErrorResponse): CreateCheckoutSessionErrorResponse => {
   // Verify we have at least one error field
   const errorFields = Object.keys(response);
   expect(errorFields.length).toBeGreaterThan(0);
@@ -54,7 +54,7 @@ describe('createCheckoutSession', () => {
   const mockConfig = {
     ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
   };
-  const mockPayload = checkoutSessionSchemaPayloadFactory();
+  const mockPayload = createCheckoutSessionSchemaPayloadFactory();
   const baseUrl = 'https://example.com/api/v1/customer-billing/create-checkout-session/';
 
   beforeEach(() => {
@@ -67,7 +67,7 @@ describe('createCheckoutSession', () => {
 
   it('should call the correct URL with the correct payload', async () => {
     // Setup
-    const mockSuccessResponse: { data: CheckoutSessionResponse } = {
+    const mockSuccessResponse: { data: CreateCheckoutSessionResponse } = {
       data: checkoutSessionResponseFactory(),
     };
     mockPost.mockResolvedValue(mockSuccessResponse);
@@ -83,13 +83,13 @@ describe('createCheckoutSession', () => {
 
   it('should return the successful response from the API', async () => {
     // Setup
-    const mockSuccessResponse: { data: CheckoutSessionResponse } = {
+    const mockSuccessResponse: { data: CreateCheckoutSessionResponse } = {
       data: checkoutSessionResponseFactory(),
     };
     mockPost.mockResolvedValue(mockSuccessResponse);
 
     // Execute
-    const result = await createCheckoutSession(mockPayload) as CheckoutSessionResponse;
+    const result = await createCheckoutSession(mockPayload) as CreateCheckoutSessionResponse;
 
     // Verify
     verifySuccessfulCheckoutSessionResponse(result);
@@ -98,18 +98,18 @@ describe('createCheckoutSession', () => {
   it('should handle validation error responses', async () => {
     // Setup - Create an error response with specific fields
     const mockErrorResponse: {
-      data: Partial<CheckoutSessionErrorResponse>;
+      data: Partial<CreateCheckoutSessionErrorResponse>;
       status: number;
       statusText: string;
     } = {
-      data: checkoutSessionErrorResponseFactory(['adminEmail', 'enterpriseSlug']),
+      data: createCheckoutSessionErrorResponseFactory(['adminEmail', 'enterpriseSlug']),
       status: 422,
       statusText: 'Unprocessable Entity',
     };
     mockPost.mockResolvedValue(mockErrorResponse);
 
     // Execute
-    const result = await createCheckoutSession(mockPayload) as CheckoutSessionErrorResponse;
+    const result = await createCheckoutSession(mockPayload) as CreateCheckoutSessionErrorResponse;
 
     // Verify
     verifyErrorCheckoutSessionResponse(result);
@@ -143,7 +143,7 @@ describe('createCheckoutSession', () => {
     });
 
     // Execute
-    const result = await createCheckoutSession(mockPayload) as CheckoutSessionErrorResponse;
+    const result = await createCheckoutSession(mockPayload) as CreateCheckoutSessionErrorResponse;
 
     // Verify
     expect(result.adminEmail.errorCode).toBe('not_registered');

@@ -108,11 +108,11 @@ const populateCompletedFormFields = ({
  * Build the payload for creating a checkout session from the current form state
  * and indicate whether all required fields are present.
  *
- * @returns {{ checkoutSessionPayload: CheckoutSessionSchema, isValidPayload: boolean }}
+ * @returns {{ checkoutSessionPayload: CreateCheckoutSessionSchema, isValidPayload: boolean }}
  *   The assembled payload and a flag indicating validity.
  */
 const extractCheckoutSessionPayload = (): {
-  checkoutSessionPayload: CheckoutSessionSchema,
+  checkoutSessionPayload: CreateCheckoutSessionSchema,
   isValidPayload: boolean,
 } => {
   const checkoutFormData = checkoutFormStore.getState().formData;
