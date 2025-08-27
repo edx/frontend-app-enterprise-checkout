@@ -20,7 +20,9 @@ jest.mock('@edx/frontend-platform/config', () => ({
 /**
  * Helper function to verify the structure of a successful checkout session response
  */
-const verifySuccessfulCheckoutSessionResponse = (response: CreateCheckoutSessionResponse): CreateCheckoutSessionResponse => {
+const verifySuccessfulCheckoutSessionResponse = (
+  response: CreateCheckoutSessionResponse,
+): CreateCheckoutSessionResponse => {
   // Verify the checkout session properties
   expect(response).toHaveProperty('checkoutSessionClientSecret');
 
@@ -33,7 +35,9 @@ const verifySuccessfulCheckoutSessionResponse = (response: CreateCheckoutSession
 /**
  * Helper function to verify the structure of an error checkout session response
  */
-const verifyErrorCheckoutSessionResponse = (response: CreateCheckoutSessionErrorResponse): CreateCheckoutSessionErrorResponse => {
+const verifyErrorCheckoutSessionResponse = (
+  response: CreateCheckoutSessionErrorResponse,
+): CreateCheckoutSessionErrorResponse => {
   // Verify we have at least one error field
   const errorFields = Object.keys(response);
   expect(errorFields.length).toBeGreaterThan(0);
