@@ -206,10 +206,8 @@ interface PrerequisiteCheck<T> {
  * Each entry includes which form slice to validate, how to build its resolver,
  * and the route that should be returned if that slice is invalid.
  */
-const prerequisiteSpec: Record<CheckoutPage, Array<PrerequisiteCheck<any>>> = {
+const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
   PlanDetails: [],
-  PlanDetailsLogin: [],
-  PlanDetailsRegister: [],
   AccountDetails: [
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
@@ -235,24 +233,6 @@ const prerequisiteSpec: Record<CheckoutPage, Array<PrerequisiteCheck<any>>> = {
     //   failRoute: CheckoutPageRoute.BillingDetails,
     // },
   ],
-
-  BillingDetailsSuccess: [
-    {
-      pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
-      failRoute: CheckoutPageRoute.PlanDetails,
-    },
-    {
-      pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
-      failRoute: CheckoutPageRoute.AccountDetails,
-    },
-    // {
-    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
-    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
-    //   failRoute: CheckoutPageRoute.BillingDetails,
-    // },
-  ],
 };
 
 /**
@@ -264,7 +244,7 @@ const prerequisiteSpec: Record<CheckoutPage, Array<PrerequisiteCheck<any>>> = {
  * determines the `invalidRoute` to redirect to.
  *
  * @param {Object} params - Parameters object.
- * @param {CheckoutSteps} params.checkoutStep - Route path the user is attempting to visit.
+ * @param {CheckoutStep} params.checkoutStep - Route path the user is attempting to visit.
  * @param {CheckoutContextFieldConstraints | null} params.constraints - Field constraints from BFF;
  *   if null, validation fails to Plan Details.
  * @param {CheckoutContextPrice['id']} params.stripePriceId - Stripe price id required by Plan Details resolver.

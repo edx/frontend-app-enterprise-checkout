@@ -4,7 +4,7 @@ import { redirect } from 'react-router-dom';
 
 import { queryBffContext, queryCreateCheckoutSession } from '@/components/app/data/queries/queries';
 import { extractCheckoutSessionPayload, validateFormState } from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute, CheckoutSteps } from '@/constants/checkout';
+import { CheckoutPageRoute } from '@/constants/checkout';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
@@ -72,7 +72,7 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
     valid,
     invalidRoute,
   } = await validateFormState({
-    checkoutStep: CheckoutSteps.AccountDetails,
+    checkoutStep: 'AccountDetails',
     constraints: fieldConstraints,
     stripePriceId,
   });
@@ -110,7 +110,7 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     valid,
     invalidRoute,
   } = await validateFormState({
-    checkoutStep: CheckoutSteps.BillingDetails,
+    checkoutStep: 'BillingDetails',
     constraints: fieldConstraints,
     stripePriceId,
   });
@@ -161,7 +161,7 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
     valid,
     invalidRoute,
   } = await validateFormState({
-    checkoutStep: CheckoutSteps.BillingDetails,
+    checkoutStep: 'BillingDetails',
     constraints: fieldConstraints,
     stripePriceId,
   });
