@@ -24,6 +24,10 @@ jest.mock('@/components/app/routes/loaders/utils', () => ({
   populateCompletedFormFields: jest.fn(),
 }));
 
+jest.mock('@/utils/checkout', () => ({
+  extractPriceId: jest.fn().mockReturnValue(null),
+}));
+
 describe('makeRootLoader (rootLoader) tests', () => {
   const makeRequest = (path: string) => ({ url: `http://localhost${path}` } as any);
 
@@ -78,6 +82,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
     expect(utilsMod.populateCompletedFormFields).toHaveBeenCalledWith({
       checkoutIntent: { state: 'paid' },
+      stripePriceId: null,
       authenticatedUser,
     });
 
@@ -116,6 +121,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
     expect(utilsMod.populateCompletedFormFields).toHaveBeenCalledWith({
       checkoutIntent: { state: 'created' },
+      stripePriceId: null,
       authenticatedUser,
     });
 
@@ -139,6 +145,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
     expect(utilsMod.populateCompletedFormFields).toHaveBeenCalledWith({
       checkoutIntent: { state: 'requires_payment' },
+      stripePriceId: null,
       authenticatedUser,
     });
     expect(result).toBeNull();

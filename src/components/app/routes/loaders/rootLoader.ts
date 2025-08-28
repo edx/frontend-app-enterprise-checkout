@@ -9,6 +9,7 @@ import { LoaderFunction, redirect } from 'react-router-dom';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { determineExistingCheckoutIntentState, populateCompletedFormFields } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
+import { extractPriceId } from '@/utils/checkout';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -45,6 +46,12 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     const currentPath = new URL(request.url).pathname;
 
     // Helper to avoid self-redirect loops
+    /**
+     * Return a redirect Response to `to` unless it matches currentPath, in which case return null.
+     *
+     * @param {string} to - Target path to potentially redirect to.
+     * @returns {Response | null} A redirect response if different from current path; otherwise null.
+     */
     const redirectOrNull = (to: string) => (to !== currentPath ? redirect(to) : null);
 
     const protectedPaths = new Set<string>([
@@ -61,13 +68,17 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       return null;
     }
 
-    const { checkoutIntent } = contextMetadata;
+    const { checkoutIntent, pricing } = contextMetadata;
+
     const {
       existingSuccessfulCheckoutIntent, expiredCheckoutIntent,
     } = determineExistingCheckoutIntentState(checkoutIntent);
 
+    const stripePriceId = extractPriceId(pricing);
+
     populateCompletedFormFields({
       checkoutIntent,
+      stripePriceId,
       authenticatedUser,
     });
 

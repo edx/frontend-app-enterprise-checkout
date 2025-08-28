@@ -23,7 +23,6 @@ export function renderWithRouterProvider(
   { routes = [], initialEntries, customRouter }: RenderWithRouterOptions = {},
 ): RenderResult {
   const defaultRoutes: RouteObject[] = [
-    // Do we really need to hard-code these??
     { path: '/:step', element: children },
     { path: '/:step/:substep', element: children },
   ];
@@ -115,11 +114,11 @@ export function renderWithRouterAndStepperProvider(
 }
 
 export const renderStepperRoute = (
-  route,
+  route: CheckoutPageRouteValue,
   appContextValue = {
     config: {},
     authenticatedUser: null,
-  },
+  } as { config: {}, authenticatedUser: AuthenticatedUser },
 ): RenderResult => (
   render(
     <QueryClientProvider client={queryClient()}>

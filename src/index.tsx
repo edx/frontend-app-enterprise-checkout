@@ -43,6 +43,7 @@ initialize({
         ENTERPRISE_ACCESS_BASE_URL: process.env.ENTERPRISE_ACCESS_BASE_URL || null,
         ENTERPRISE_ADMIN_PORTAL_URL: process.env.ENTERPRISE_ADMIN_PORTAL_URL || null,
         ENTERPRISE_LEARNER_PORTAL_URL: process.env.ENTERPRISE_LEARNER_PORTAL_URL || null,
+        PUBLISHABLE_STRIPE_API_KEY: process.env.PUBLISHABLE_STRIPE_API_KEY || null,
       });
     },
   },

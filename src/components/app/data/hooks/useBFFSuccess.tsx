@@ -1,9 +1,9 @@
 import { queryOptions, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 
-import { queryBffContext } from '@/components/app/data/queries/queries';
+import { queryBffSuccess } from '@/components/app/data/queries/queries';
 
 /**
- * React hook: Query the BFF checkout context with strong typings.
+ * React hook: Query the BFF checkout context success with strong typings.
  *
  * TQueryFnData is fixed to CheckoutContextResponse since the underlying queryFn returns that shape.
  * TData allows callers to transform the data (e.g., via TanStack Query's `select`) into a different shape.
@@ -15,14 +15,14 @@ import { queryBffContext } from '@/components/app/data/queries/queries';
  *   TanStack Query options such as `select`, `staleTime`, etc. Spread into the generated queryOptions.
  * @returns {UseQueryResult<TData, TError>} A TanStack Query result for the BFF checkout context.
  */
-const useBFFContext = <TData = CheckoutContextResponse, TError = Error>(
+const useBFFSuccess = <TData = CheckoutContextResponse, TError = Error>(
   lmsUserId: number | null = null,
   options?: Partial<UseQueryOptions<CheckoutContextResponse, TError, TData>>,
 ): UseQueryResult<TData, TError> => useQuery(
     queryOptions({
-      ...queryBffContext(lmsUserId),
+      ...queryBffSuccess(lmsUserId),
       ...options,
     }),
   );
 
-export default useBFFContext;
+export default useBFFSuccess;

@@ -51,7 +51,16 @@ function getCheckoutPageDetails(
   return null;
 }
 
+const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContextPrice['id'] | null => {
+  if (!pricing.prices.length) {
+    return null;
+  }
+  const matched = pricing.prices.find((price) => price.lookupKey.includes(pricing.defaultByLookupKey));
+  return matched?.id ?? null;
+};
+
 export {
   getStepFromParams,
   getCheckoutPageDetails,
+  extractPriceId,
 };

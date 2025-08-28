@@ -1,11 +1,16 @@
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
+import { queryBffContext, queryCreateCheckoutSession } from '@/components/app/data/queries/queries';
+import { extractCheckoutSessionPayload, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
-import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
+import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
- * Route loader for Plan Details page
+ * Route loader for Plan Details page.
+ *
+ * @returns {Promise<Response | null>} Null to continue rendering the route without redirect.
  */
 async function planDetailsLoader(): Promise<Response | null> {
   // Plan Details page doesn't require authentication
@@ -13,7 +18,9 @@ async function planDetailsLoader(): Promise<Response | null> {
 }
 
 /**
- * Route loader for Plan Details Login page
+ * Route loader for Plan Details Login page.
+ *
+ * @returns {Promise<Response | null>} Redirects to Plan Details if already authenticated; otherwise null.
  */
 async function planDetailsLoginLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
@@ -25,7 +32,9 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
 }
 
 /**
- * Route loader for Plan Details Register page
+ * Route loader for Plan Details Register page.
+ *
+ * @returns {Promise<Response | null>} Redirects to Plan Details if already authenticated; otherwise null.
  */
 async function planDetailsRegisterLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
@@ -37,45 +46,136 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
 }
 
 /**
- * Route loader for Account Details page
+ * Route loader for Account Details page.
+ *
+ * @param {QueryClient} queryClient - TanStack Query client to ensure context and session queries.
+ * @returns {Promise<Response | null>} Redirects if prerequisites fail; otherwise null to proceed.
  */
-async function accountDetailsLoader(): Promise<Response | null> {
+async function accountDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
+
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
+  const { fieldConstraints, pricing } = contextMetadata;
+
+  const stripePriceId = extractPriceId(pricing);
+  if (!stripePriceId) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const {
+    valid,
+    invalidRoute,
+  } = await validateFormState({
+    checkoutStep: 'AccountDetails',
+    constraints: fieldConstraints,
+    stripePriceId,
+  });
+  if (!valid && invalidRoute) {
+    return redirect(invalidRoute);
+  }
+
   return null;
 }
 
 /**
- * Route loader for Billing Details page
+ * Route loader for Billing Details page.
+ *
+ * @param {QueryClient} queryClient - TanStack Query client to ensure context and checkout session queries.
+ * @returns {Promise<Response | null>} Redirects to appropriate route if validation fails; otherwise null.
  */
-async function billingDetailsLoader(): Promise<Response | null> {
+async function billingDetailsLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
+
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
+  const { fieldConstraints, pricing } = contextMetadata;
+
+  const stripePriceId = extractPriceId(pricing);
+  if (!stripePriceId) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const {
+    valid,
+    invalidRoute,
+  } = await validateFormState({
+    checkoutStep: 'BillingDetails',
+    constraints: fieldConstraints,
+    stripePriceId,
+  });
+  if (!valid && invalidRoute) {
+    return redirect(invalidRoute);
+  }
+
+  const {
+    checkoutSessionPayload,
+    isValidPayload,
+  } = extractCheckoutSessionPayload();
+  if (!isValidPayload) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  await queryClient.ensureQueryData(
+    queryCreateCheckoutSession(checkoutSessionPayload),
+  );
+
   return null;
 }
 
 /**
- * Route loader for Billing Details Success page
+ * Route loader for Billing Details Success page.
+ *
+ * @param {QueryClient} queryClient - TanStack Query client to ensure required context.
+ * @returns {Promise<Response | null>} Redirects if prerequisites are not met;
+ * otherwise null.
  */
-async function billingDetailsSuccessLoader(): Promise<Response | null> {
+async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
+
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
+  const { fieldConstraints, pricing } = contextMetadata;
+
+  const stripePriceId = extractPriceId(pricing);
+  if (!stripePriceId) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  const {
+    valid,
+    invalidRoute,
+  } = await validateFormState({
+    checkoutStep: 'BillingDetails',
+    constraints: fieldConstraints,
+    stripePriceId,
+  });
+  if (!valid && invalidRoute) {
+    return redirect(invalidRoute);
+  }
+
   return null;
 }
 
 /**
  * Page-specific route loaders mapped by checkout page
  */
-const PAGE_LOADERS: Record<CheckoutPage, () => Promise<Response | null>> = {
+const PAGE_LOADERS: Record<CheckoutPage, (queryClient: QueryClient) => Promise<Response | null>> = {
   PlanDetails: planDetailsLoader,
   PlanDetailsLogin: planDetailsLoginLoader,
   PlanDetailsRegister: planDetailsRegisterLoader,
@@ -91,7 +191,7 @@ const PAGE_LOADERS: Record<CheckoutPage, () => Promise<Response | null>> = {
  * and delegates to the page-specific loader (see PAGE_LOADERS). If the route is invalid, it returns null
  * so that the 404 boundary can take over.
  *
- * @param {QueryClient} _queryClient - Provided for parity with other loader factories (unused here).
+ * @param {QueryClient} queryClient - Provided for parity with other loader factories (unused here).
  * @returns {LoaderFunction} A loader that dispatches to page-specific loaders based on route params.
  */
 // @ts-ignore
@@ -107,7 +207,7 @@ const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = functi
       return null;
     }
     const pageLoader = PAGE_LOADERS[pageDetails.name];
-    return pageLoader();
+    return pageLoader(queryClient);
   };
 };
 

@@ -156,6 +156,7 @@ declare global {
     adminEmail: string;
     enterpriseSlug: string;
     quantity: number;
+    companyName: string;
     stripePriceId: string;
   }
 
@@ -171,7 +172,6 @@ declare global {
    */
   interface ValidationSchema extends BaseCheckoutSchema {
     fullName: string;
-    companyName: string;
   }
 
   /**
@@ -211,44 +211,36 @@ declare global {
    * Schema for checkout session requests
    * Uses the base checkout schema without additional fields
    */
-  type CheckoutSessionSchema = BaseCheckoutSchema;
+  type CreateCheckoutSessionSchema = BaseCheckoutSchema;
 
   /**
-   * Snake-cased version of CheckoutSessionSchema for API communication
+   * Snake-cased version of CreateCheckoutSessionSchema for API communication
    */
-  type CheckoutSessionSchemaPayload = Payload<CheckoutSessionSchema>;
-
-  /**
-   * Data structure for successful checkout session response
-   */
-  interface CheckoutSessionData {
-    clientSecret: string;
-    expiresAt: string;
-  }
+  type CreateCheckoutSessionSchemaPayload = Payload<CreateCheckoutSessionSchema>;
 
   /**
    * Successful response structure for checkout session API
    */
-  interface CheckoutSessionResponse {
-    checkoutSession: CheckoutSessionData;
+  interface CreateCheckoutSessionResponse {
+    checkoutSessionClientSecret: string;
   }
 
   /**
    * Alias for ErrorField to maintain backward compatibility
    */
-  type CheckoutSessionErrorField = ErrorField;
+  type CreateCheckoutSessionErrorField = ErrorField;
 
   /**
    * Error response structure for checkout session API
    */
-  type CheckoutSessionErrorResponse = {
-    [K in keyof CheckoutSessionSchema]: CheckoutSessionErrorField;
+  type CreateCheckoutSessionErrorResponse = {
+    [K in keyof CreateCheckoutSessionSchema]: CreateCheckoutSessionErrorField;
   };
 
   /**
    * Union type for possible checkout session response types
    */
-  type CheckoutSessionResponseType = CheckoutSessionResponse | CheckoutSessionErrorResponse;
+  type CheckoutSessionResponseType = CreateCheckoutSessionResponse | CreateCheckoutSessionErrorResponse;
 
   /**
    * Snake-cased version of CheckoutSessionResponseType for API communication

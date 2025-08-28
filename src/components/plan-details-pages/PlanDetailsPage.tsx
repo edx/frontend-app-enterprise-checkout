@@ -1,4 +1,4 @@
-import { useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -10,7 +10,7 @@ import {
 import { useContext, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import { useFormValidationConstraints } from '@/components/app/data';
@@ -32,22 +32,21 @@ import '../Stepper/Steps/css/PriceAlert.css';
 
 const PlanDetailsPage = () => {
   const intl = useIntl();
+  const location = useLocation();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
   const currentPage = useCurrentPage();
-
   const {
     title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
-
   const planDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints)
-  ), [formSchema, formValidationConstraints]);
+    formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
+  ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onTouched',
@@ -79,7 +78,7 @@ const PlanDetailsPage = () => {
       setFormData(DataStoreKey.PlanDetails, data);
 
       // TODO: replace with existing user email logic
-      const emailExists = !!(Math.random() < 0.5 ? 0 : 1);
+      const emailExists = true;
       if (!authenticatedUser) {
         if (emailExists) {
           navigate(CheckoutPageRoute.PlanDetailsLogin);
@@ -123,6 +122,19 @@ const PlanDetailsPage = () => {
         </Stepper.Step>
         {stepperActionButtonMessage && (
         <Stepper.ActionRow eventKey={eventKey}>
+          {location.pathname !== CheckoutPageRoute.PlanDetails && (
+          <Button
+            variant="outline-primary"
+            onClick={() => navigate(CheckoutPageRoute.PlanDetails)}
+          >
+            <FormattedMessage
+              id="checkout.back"
+              defaultMessage="Back"
+              description="Button to go back to the previous step"
+            />
+          </Button>
+          )}
+          <Stepper.ActionRow.Spacer />
           <Button
             variant="secondary"
             type="submit"
