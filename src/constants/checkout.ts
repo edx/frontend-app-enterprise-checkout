@@ -149,8 +149,8 @@ export const CheckoutPageRoute = {
 
 export const CheckoutSteps = {
   PlanDetails: 'PlanDetails',
-  PlanDetailsLogin: 'PlanDetails',
-  PlanDetailsRegister: 'PlanDetails',
+  PlanDetailsLogin: 'PlanDetailsLogin',
+  PlanDetailsRegister: 'PlanDetailsRegister',
   AccountDetails: 'AccountDetails',
   BillingDetails: 'BillingDetails',
   BillingDetailsSuccess: 'BillingDetailsSuccess',

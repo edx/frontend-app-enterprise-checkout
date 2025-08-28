@@ -24,7 +24,7 @@ jest.mock('@/components/app/routes/loaders/utils', () => ({
   populateCompletedFormFields: jest.fn(),
 }));
 
-jest.mock('@/components/app/data/hooks/useStripePriceId', () => ({
+jest.mock('@/utils/checkout', () => ({
   extractPriceId: jest.fn().mockReturnValue(null),
 }));
 

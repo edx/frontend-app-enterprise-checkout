@@ -15,7 +15,6 @@ import { z } from 'zod';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import { useLoginMutation } from '@/components/app/data/hooks';
-import useStripePriceId from '@/components/app/data/hooks/useStripePriceId';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
@@ -35,7 +34,6 @@ const PlanDetailsPage = () => {
   const intl = useIntl();
   const location = useLocation();
   const { data: formValidationConstraints } = useFormValidationConstraints();
-  const { data: stripePriceId } = useStripePriceId();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
@@ -47,8 +45,8 @@ const PlanDetailsPage = () => {
     formSchema,
   } = useCurrentPageDetails();
   const planDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints, stripePriceId)
-  ), [formSchema, formValidationConstraints, stripePriceId]);
+    formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
+  ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onTouched',

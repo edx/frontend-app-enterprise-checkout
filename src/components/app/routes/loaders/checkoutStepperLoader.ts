@@ -2,11 +2,10 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { extractPriceId } from '@/components/app/data/hooks/useStripePriceId';
 import { queryBffContext, queryCreateCheckoutSession } from '@/components/app/data/queries/queries';
 import { extractCheckoutSessionPayload, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, CheckoutSteps } from '@/constants/checkout';
-import { getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
+import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
  * Route loader for Plan Details page.

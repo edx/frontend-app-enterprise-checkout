@@ -1,6 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { AccountDetailsSchema, CheckoutPageRoute, DataStoreKey, PlanDetailsSchema } from '@/constants/checkout';
+import {
+  AccountDetailsSchema,
+  CheckoutPageRoute,
+  DataStoreKey,
+  PlanDetailsSchema,
+} from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 /**
@@ -201,8 +206,10 @@ interface PrerequisiteCheck<T> {
  * Each entry includes which form slice to validate, how to build its resolver,
  * and the route that should be returned if that slice is invalid.
  */
-const prerequisiteSpec: Record<string, Array<PrerequisiteCheck<any>>> = {
+const prerequisiteSpec: Record<CheckoutPage, Array<PrerequisiteCheck<any>>> = {
   PlanDetails: [],
+  PlanDetailsLogin: [],
+  PlanDetailsRegister: [],
   AccountDetails: [
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
@@ -257,7 +264,7 @@ const prerequisiteSpec: Record<string, Array<PrerequisiteCheck<any>>> = {
  * determines the `invalidRoute` to redirect to.
  *
  * @param {Object} params - Parameters object.
- * @param {CheckoutPageRouteValue} params.currentRoute - Route path the user is attempting to visit.
+ * @param {CheckoutSteps} params.checkoutStep - Route path the user is attempting to visit.
  * @param {CheckoutContextFieldConstraints | null} params.constraints - Field constraints from BFF;
  *   if null, validation fails to Plan Details.
  * @param {CheckoutContextPrice['id']} params.stripePriceId - Stripe price id required by Plan Details resolver.

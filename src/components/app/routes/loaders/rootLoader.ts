@@ -6,10 +6,10 @@ import {
 import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunction, redirect } from 'react-router-dom';
 
-import { extractPriceId } from '@/components/app/data/hooks/useStripePriceId';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { determineExistingCheckoutIntentState, populateCompletedFormFields } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
+import { extractPriceId } from '@/utils/checkout';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
