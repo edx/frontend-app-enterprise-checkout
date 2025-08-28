@@ -147,15 +147,6 @@ export const CheckoutPageRoute = {
   BillingDetailsSuccess: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
 } as const;
 
-export const CheckoutSteps = {
-  PlanDetails: 'PlanDetails',
-  PlanDetailsLogin: 'PlanDetailsLogin',
-  PlanDetailsRegister: 'PlanDetailsRegister',
-  AccountDetails: 'AccountDetails',
-  BillingDetails: 'BillingDetails',
-  BillingDetailsSuccess: 'BillingDetailsSuccess',
-} as const;
-
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
   PlanDetails: {
     step: 'PlanDetails',

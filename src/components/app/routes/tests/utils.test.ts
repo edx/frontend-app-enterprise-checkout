@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
 import { determineExistingCheckoutIntentState, extractCheckoutSessionPayload, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute, CheckoutSteps, DataStoreKey } from '@/constants/checkout';
+import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 jest.mock('@hookform/resolvers/zod', () => ({
@@ -186,7 +186,7 @@ describe('utils.ts', () => {
     it('returns invalid with PlanDetails when constraints are null', async () => {
       (checkoutFormStore.getState as jest.Mock).mockReturnValue({ formData: {} });
       const result = await validateFormState({
-        checkoutStep: CheckoutSteps.AccountDetails,
+        checkoutStep: 'AccountDetails',
         constraints: null as any,
         stripePriceId: 'price_123' as any,
       });
@@ -204,7 +204,7 @@ describe('utils.ts', () => {
         },
       });
       const result = await validateFormState({
-        checkoutStep: CheckoutSteps.AccountDetails,
+        checkoutStep: 'AccountDetails',
         constraints: {} as any,
         stripePriceId: 'price_123' as any,
       });
@@ -226,7 +226,7 @@ describe('utils.ts', () => {
         },
       });
       const result = await validateFormState({
-        checkoutStep: CheckoutSteps.BillingDetails,
+        checkoutStep: 'BillingDetails',
         constraints: {} as any,
         stripePriceId: 'price_123' as any,
       });
@@ -248,7 +248,7 @@ describe('utils.ts', () => {
         },
       });
       const result = await validateFormState({
-        checkoutStep: CheckoutSteps.BillingDetails,
+        checkoutStep: 'BillingDetails',
         constraints: {} as any,
         stripePriceId: 'price_123' as any,
       });
