@@ -1,11 +1,10 @@
 import { FormattedNumber } from '@edx/frontend-platform/i18n';
-import PropTypes from 'prop-types';
 
 interface DisplayPriceProps {
   value: number;
   currency?: string;
 }
-const DisplayPrice: React.FC<DisplayPriceProps> = ({ value, currency = 'USD' }) => {
+const DisplayPrice = ({ value, currency = 'USD' }: DisplayPriceProps) => {
   const isInt = Number.isInteger(value);
   const formattingProps = {
     minimumFractionDigits: isInt ? 0 : 2,
@@ -22,8 +21,4 @@ const DisplayPrice: React.FC<DisplayPriceProps> = ({ value, currency = 'USD' }) 
   );
 };
 
-DisplayPrice.propTypes = {
-  value: PropTypes.number.isRequired,
-  currency: PropTypes.string,
-};
 export default DisplayPrice;
