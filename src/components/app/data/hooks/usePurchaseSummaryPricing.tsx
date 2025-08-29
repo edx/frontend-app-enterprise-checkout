@@ -6,7 +6,7 @@ import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceObject } from '@/utils/checkout';
 
-function calculateSubscriptionCost(quantity: number, unitAmount?: number | null) {
+export function calculateSubscriptionCost(quantity: number, unitAmount?: number | null) {
   if (unitAmount == null) {
     return {
       yearlyCostPerSubscriptionPerUser: null,
@@ -29,7 +29,7 @@ const usePurchaseSummaryPricing = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
   const { quantity } = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const { data: unitAmount } = useBFFContext(authenticatedUser?.userId ?? null, {
-    select: (data => {
+    select: (data): CheckoutContextPrice['unitAmount'] | null => {
       if (!data.pricing) {
         return null;
       }
@@ -38,7 +38,7 @@ const usePurchaseSummaryPricing = () => {
         return null;
       }
       return priceObject.unitAmount;
-    }),
+    },
   });
 
   // This useMemo can be extended to return different purchase options in the future
