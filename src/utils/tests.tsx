@@ -50,7 +50,8 @@ export function queryClient(defaultOptions = {}) {
     },
   });
 }
-
+// TODO: Error from test that use this in TS are GOOD. They force the user to type the input to the test parameters
+//  Make explicit in JSDocs.
 /**
  * Generates all possible permutations of an object where each key has multiple possible values.
  *
