@@ -1,23 +1,11 @@
-import {
-  Col, Container, Row, Stack,
-} from '@openedx/paragon';
+import { Container } from '@openedx/paragon';
 
-import { CheckoutStepper } from '@/components/Stepper';
-import { SubscriptionSummary } from '@/components/SubscriptionSummary';
+import { CheckoutStepperContainer } from '@/components/Stepper';
 
 const CheckoutPage: React.FC = () => (
   <main>
-    <Container size="xl" className="py-4.5">
-      <Row>
-        <Col xs={12} lg={8}>
-          <CheckoutStepper />
-        </Col>
-        <Col xl={4}>
-          <Stack gap={4}>
-            <SubscriptionSummary />
-          </Stack>
-        </Col>
-      </Row>
+    <Container size="lg" className="py-4.5">
+      <CheckoutStepperContainer />
     </Container>
   </main>
 );

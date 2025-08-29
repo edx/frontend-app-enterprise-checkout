@@ -1,12 +1,12 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
 
+import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import {
   AccountDetails,
   BillingDetails,
   PlanDetails,
 } from '@/components/Stepper/Steps';
-import { SubscriptionSummary } from '@/components/SubscriptionSummary';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
 const Steps: React.FC = () => (
@@ -17,9 +17,8 @@ const Steps: React.FC = () => (
   </>
 );
 
-const CheckoutStepper: React.FC = () => {
+const CheckoutStepperContainer: React.FC = () => {
   const { currentStepKey } = useCurrentStep();
-
   return (
     <Stepper activeKey={currentStepKey}>
       <Stack gap={3}>
@@ -36,7 +35,7 @@ const CheckoutStepper: React.FC = () => {
             <Steps />
           </Col>
           <Col md={12} lg={4}>
-            <SubscriptionSummary />
+            <PurchaseSummary />
           </Col>
         </Row>
       </Stack>
@@ -44,4 +43,4 @@ const CheckoutStepper: React.FC = () => {
   );
 };
 
-export default CheckoutStepper;
+export default CheckoutStepperContainer;

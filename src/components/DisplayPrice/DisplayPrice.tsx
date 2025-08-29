@@ -21,4 +21,5 @@ const DisplayPrice = ({ value, currency = 'USD' }: DisplayPriceProps) => {
   );
 };
 
+// @ts-ignore
 export default DisplayPrice;

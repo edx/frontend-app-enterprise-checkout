@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
 import { MemoryRouter, Route, RouteObject, Routes } from 'react-router';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
-import { CheckoutStepper } from '@/components/Stepper';
+import { CheckoutStepperContainer } from '@/components/Stepper';
 import { queryCacheOnErrorHandler } from '@/utils/common';
 
 import type { RenderResult } from '@testing-library/react';
@@ -128,11 +128,11 @@ export const renderStepperRoute = (
             <Routes>
               <Route
                 path="/:step"
-                element={<CheckoutStepper />}
+                element={<CheckoutStepperContainer />}
               />
               <Route
                 path="/:step/:substep"
-                element={<CheckoutStepper />}
+                element={<CheckoutStepperContainer />}
               />
             </Routes>
           </MemoryRouter>

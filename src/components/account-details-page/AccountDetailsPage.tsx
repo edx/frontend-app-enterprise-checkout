@@ -31,7 +31,6 @@ const AccountDetailsPage: React.FC = () => {
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
   const {
-    title: pageTitle,
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
@@ -64,9 +63,6 @@ const AccountDetailsPage: React.FC = () => {
       <Helmet title="Account Details" />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title="Account Details">
-          <h1 className="mb-5 text-center" data-testid="stepper-title">
-            {intl.formatMessage(pageTitle)}
-          </h1>
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>

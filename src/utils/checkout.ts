@@ -51,11 +51,18 @@ function getCheckoutPageDetails(
   return null;
 }
 
+const extractPriceObject = (pricing: CheckoutContextPricing): CheckoutContextPrice | null => {
+  if (!pricing.prices.length) {
+    return null;
+  }
+  return pricing.prices.find((price) => price.lookupKey.includes(pricing.defaultByLookupKey)) ?? null;
+};
+
 const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContextPrice['id'] | null => {
   if (!pricing.prices.length) {
     return null;
   }
-  const matched = pricing.prices.find((price) => price.lookupKey.includes(pricing.defaultByLookupKey));
+  const matched = extractPriceObject(pricing);
   return matched?.id ?? null;
 };
 
@@ -63,4 +70,5 @@ export {
   getStepFromParams,
   getCheckoutPageDetails,
   extractPriceId,
+  extractPriceObject,
 };

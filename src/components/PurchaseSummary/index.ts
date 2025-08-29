@@ -1,1 +1,1 @@
-export { default as SubscriptionSummary } from './SubscriptionSummary';
+export { default as PurchaseSummary } from './PurchaseSummary';

@@ -5,7 +5,7 @@ import { DisplayPrice } from '@/components/DisplayPrice';
 import { SUBSCRIPTION_PRICE_PER_USER_PER_MONTH } from '@/constants/checkout';
 
 const PriceAlert = () => (
-  <Alert className="price-alert-background">
+  <Alert className="price-alert-background m-0">
     {/* @ts-ignore */}
     <Alert.Heading className="justify-content-between">
       <h3 className="price-alert-text">
