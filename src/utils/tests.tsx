@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
 import { MemoryRouter, Route, RouteObject, Routes } from 'react-router';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
-import { CheckoutStepper } from '@/components/Stepper';
+import { CheckoutStepperContainer } from '@/components/Stepper';
 import { queryCacheOnErrorHandler } from '@/utils/common';
 
 import type { RenderResult } from '@testing-library/react';
@@ -50,7 +50,8 @@ export function queryClient(defaultOptions = {}) {
     },
   });
 }
-
+// TODO: Error from test that use this in TS are GOOD. They force the user to type the input to the test parameters
+//  Make explicit in JSDocs.
 /**
  * Generates all possible permutations of an object where each key has multiple possible values.
  *
@@ -128,11 +129,11 @@ export const renderStepperRoute = (
             <Routes>
               <Route
                 path="/:step"
-                element={<CheckoutStepper />}
+                element={<CheckoutStepperContainer />}
               />
               <Route
                 path="/:step/:substep"
-                element={<CheckoutStepper />}
+                element={<CheckoutStepperContainer />}
               />
             </Routes>
           </MemoryRouter>
