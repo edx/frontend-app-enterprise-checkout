@@ -1,5 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import React from 'react';
 
@@ -10,13 +10,13 @@ describe('LicensesRow', () => {
 
   it('renders dash when quantity is absent', () => {
     renderWithI18n(<LicensesRow quantity={undefined} />);
-    expect(screen.getByText('Number of licenses')).toBeInTheDocument();
-    expect(screen.getByText('-')).toBeInTheDocument();
+    validateText('Number of licenses');
+    validateText('-');
   });
 
   it('renders x{quantity} when quantity is provided', () => {
     renderWithI18n(<LicensesRow quantity={7} />);
-    expect(screen.getByText('Number of licenses')).toBeInTheDocument();
-    expect(screen.getByText('x7')).toBeInTheDocument();
+    validateText('Number of licenses');
+    validateText('x7');
   });
 });

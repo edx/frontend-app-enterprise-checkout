@@ -7,8 +7,8 @@ import SummaryRow from '../SummaryRow';
 describe('SummaryRow', () => {
   it('renders label and right content', () => {
     const { container } = render(<SummaryRow label="Label" right="Right" />);
-    expect(screen.getByText('Label')).toBeInTheDocument();
-    expect(screen.getByText('Right')).toBeInTheDocument();
+    validateText('Label');
+    validateText('Right');
     // Container should include justify-content-between class via Stack
     expect(container.querySelector('.justify-content-between')).toBeInTheDocument();
   });

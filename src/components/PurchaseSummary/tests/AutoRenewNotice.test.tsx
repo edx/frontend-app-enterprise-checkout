@@ -17,8 +17,8 @@ describe('AutoRenewNotice', () => {
 
   it('renders with price when quantity is provided', () => {
     renderWithI18n(<AutoRenewNotice quantity={2} totalPerYear={200} />);
-    expect(screen.getByText(/Auto-renews annually/i)).toBeInTheDocument();
-    expect(screen.getByText('$200', { exact: false })).toBeInTheDocument();
-    expect(screen.getByText(/\/yr/)).toBeInTheDocument();
+    validateText(/Auto-renews annually/i);
+    validateText('$200', { exact: false });
+    validateText(/\/yr/);
   });
 });

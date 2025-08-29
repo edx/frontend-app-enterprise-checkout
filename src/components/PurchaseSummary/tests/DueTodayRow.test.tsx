@@ -1,5 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import React from 'react';
 
@@ -10,7 +10,7 @@ describe('DueTodayRow', () => {
 
   it('renders label and formatted amount', () => {
     renderWithI18n(<DueTodayRow amountDue={123} />);
-    expect(screen.getByText('Due today')).toBeInTheDocument();
-    expect(screen.getByText('$123')).toBeInTheDocument();
+    validateText('Due today');
+    validateText('$123');
   });
 });

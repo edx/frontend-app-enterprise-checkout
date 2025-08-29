@@ -40,27 +40,27 @@ describe('PurchaseSummary', () => {
     );
 
     // Header
-    expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    expect(screen.getByText('For Acme')).toBeInTheDocument();
+    validateText('Purchase summary');
+    validateText('For Acme');
 
     // Price per user row
-    expect(screen.getByText('Team Subscription, price per user, paid yearly')).toBeInTheDocument();
-    expect(screen.getByText('$50')).toBeInTheDocument();
+    validateText('Team Subscription, price per user, paid yearly');
+    validateText('$50');
 
     // Licenses row
-    expect(screen.getByText('Number of licenses')).toBeInTheDocument();
-    expect(screen.getByText('x3')).toBeInTheDocument();
+    validateText('Number of licenses');
+    validateText('x3');
 
     // Total after trial row
-    expect(screen.getByText('Total after trial')).toBeInTheDocument();
-    expect(screen.getByText('$150')).toBeInTheDocument();
-    expect(screen.getByText('USD', { exact: false })).toBeInTheDocument();
+    validateText('Total after trial');
+    validateText('$150');
+    validateText('USD', { exact: false });
     expect(screen.getAllByText(/\/yr/).length).toBeGreaterThan(0);
 
     // Auto renew notice
-    expect(screen.getByText(/Auto-renews annually/i)).toBeInTheDocument();
+    validateText(/Auto-renews annually/i);
 
     // Due today row
-    expect(screen.getByText('Due today')).toBeInTheDocument();
+    validateText('Due today');
   });
 });
