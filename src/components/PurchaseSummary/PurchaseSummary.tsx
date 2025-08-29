@@ -20,16 +20,19 @@ const PurchaseSummary: React.FC = () => {
     yearlyCostPerSubscriptionPerUser,
   } = usePurchaseSummaryPricing();
 
+  // TODO: Fix bug, quantity should be returned as a number instead of a string, we have been assuming a number
+  const normalizedQuantity = parseInt(quantity, 10) === 0 ? null : quantity;
+
   return (
     <Card>
       <PurchaseSummaryHeader companyName={companyName} />
       <Card.Section className="pt-2">
         <Stack>
           <PricePerUserRow pricePerUser={yearlyCostPerSubscriptionPerUser} />
-          <LicensesRow quantity={quantity} />
+          <LicensesRow quantity={normalizedQuantity} />
           <hr className="w-100" />
-          <TotalAfterTrialRow quantity={quantity} totalPerYear={yearlySubscriptionCostForQuantity} />
-          <AutoRenewNotice quantity={quantity} totalPerYear={yearlySubscriptionCostForQuantity} />
+          <TotalAfterTrialRow quantity={normalizedQuantity} totalPerYear={yearlySubscriptionCostForQuantity} />
+          <AutoRenewNotice quantity={normalizedQuantity} totalPerYear={yearlySubscriptionCostForQuantity} />
           <DueTodayRow amountDue={yearlySubscriptionCostForQuantity ?? 0} />
         </Stack>
       </Card.Section>

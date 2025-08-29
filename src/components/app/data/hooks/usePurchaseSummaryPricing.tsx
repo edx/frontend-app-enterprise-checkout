@@ -15,7 +15,7 @@ export function calculateSubscriptionCost(quantity: number, unitAmount?: number 
   }
 
   const yearlyCostPerSubscriptionPerUser = unitAmount / 100;
-  const yearlySubscriptionCostForQuantity = quantity
+  const yearlySubscriptionCostForQuantity = quantity && quantity > 0
     ? yearlyCostPerSubscriptionPerUser * quantity
     : null;
 
