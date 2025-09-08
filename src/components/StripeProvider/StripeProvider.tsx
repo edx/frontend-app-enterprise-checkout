@@ -1,9 +1,10 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { CheckoutProvider } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { ReactNode } from 'react';
+import { Appearance, loadStripe } from '@stripe/stripe-js';
+import { ReactNode, useMemo } from 'react';
 
 import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
+import { createStripeAppearance } from '@/components/StripeProvider/utils';
 
 type StripeProviderProps = {
   children: ReactNode;
@@ -12,6 +13,7 @@ type StripeProviderProps = {
 const StripeProvider = ({ children }: StripeProviderProps) => {
   const { PUBLISHABLE_STRIPE_API_KEY } = getConfig();
   const stripePromise = loadStripe(PUBLISHABLE_STRIPE_API_KEY);
+  const appearance: Appearance = useMemo(() => createStripeAppearance(), []);
   const checkoutSessionClientSecret = useCheckoutSessionClientSecret();
 
   if (!checkoutSessionClientSecret) {
@@ -22,6 +24,8 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
     <CheckoutProvider
       stripe={stripePromise}
       options={{
+        // fetchClientSecret: () => Promise.resolve(stripeCheckoutSession.checkoutSessionClientSecret),
+        elementsOptions: { appearance },
         fetchClientSecret: () => Promise.resolve(checkoutSessionClientSecret),
       }}
     >
