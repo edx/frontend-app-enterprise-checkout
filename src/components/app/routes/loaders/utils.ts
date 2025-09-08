@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
-  AccountDetailsSchema,
+  AccountDetailsSchema, BillingDetailsSchema,
   CheckoutPageRoute,
   DataStoreKey,
   PlanDetailsSchema,
@@ -183,13 +183,12 @@ const makeResolvers = (
 
   const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints));
 
-  // const billingDetailsResolver: ResolverFn =
-  //   zodResolver(BillingDetailsSchema(constraints));
+  const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
 
   return {
     planDetailsResolver,
     accountDetailsResolver,
-    // billingDetailsResolver,
+    billingDetailsResolver,
   };
 };
 
@@ -206,7 +205,7 @@ interface PrerequisiteCheck<T> {
  * Each entry includes which form slice to validate, how to build its resolver,
  * and the route that should be returned if that slice is invalid.
  */
-const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
+export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
   PlanDetails: [],
   AccountDetails: [
     {
@@ -227,11 +226,11 @@ const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
       failRoute: CheckoutPageRoute.AccountDetails,
     },
     // If you add a BillingDetails schema, include it as the last guard:
-    // {
-    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
-    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
-    //   failRoute: CheckoutPageRoute.BillingDetails,
-    // },
+    {
+      pick: (formData) => formData[DataStoreKey.BillingDetails],
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
+      failRoute: CheckoutPageRoute.BillingDetails,
+    },
   ],
 };
 
