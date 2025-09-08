@@ -53,12 +53,10 @@ export const createStripeAppearance = (): Appearance => (
       spacingGridRow: getComputedStylePropertyCSSVariable('--pgn-spacing-grid-gutter-width', '16px'),
       spacingGridColumn: getComputedStylePropertyCSSVariable('--pgn-spacing-grid-gutter-width', '16px'),
       accordionItemSpacing: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-3', '12px'),
-      pickerItemSpacing: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-2', '8px'),
       tabSpacing: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-2', '8px'),
 
       // Borders
       borderRadius: getComputedStylePropertyCSSVariable('--pgn-size-border-radius-base', '4px'),
-      borderWidth: getComputedStylePropertyCSSVariable('--pgn-size-border-width', '1px'),
     },
     rules: {
       // Input field styling

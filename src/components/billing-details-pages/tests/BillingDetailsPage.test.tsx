@@ -26,7 +26,7 @@ describe('BillingDetailsPage', () => {
     validateText('Purchase Now');
   });
 
-  it('renders the DataPrivacyPolicyField component', () => {
+  it('renders the TermsAndConditions component', () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
       config: {},
       authenticatedUser: {
