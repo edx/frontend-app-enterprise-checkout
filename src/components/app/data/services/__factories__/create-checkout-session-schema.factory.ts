@@ -1,16 +1,14 @@
-import { snakeCaseObject } from '@edx/frontend-platform/utils';
 import { faker } from '@faker-js/faker';
 import { Factory } from 'rosie';
 
-import { errorFieldFactory } from './validation-schema.factory';
+import { fieldErrorSchemaFactory } from './validation-schema.factory';
 
 /**
- * Factory for creating CreateCheckoutSessionSchema objects
+ * Factory for creating CreateCheckoutSessionRequestSchema objects
  *
- * Creates a complete CreateCheckoutSessionSchema with randomized values for all fields.
- * CreateCheckoutSessionSchema extends BaseCheckoutSchema in the consolidated types.
+ * Creates a complete CreateCheckoutSessionRequestSchema with randomized values for all fields.
  */
-Factory.define('createCheckoutSessionSchema')
+Factory.define('createCheckoutSessionRequest')
   .attr('adminEmail', () => faker.internet.email())
   .attr('companyName', () => faker.company.name())
   .attr('enterpriseSlug', () => faker.helpers.slugify(faker.company.name()).toLowerCase())
@@ -18,10 +16,10 @@ Factory.define('createCheckoutSessionSchema')
   .attr('stripePriceId', () => `price_${faker.string.alphanumeric(14)}`);
 
 /**
- * Factory for creating CreateCheckoutSessionResponse objects
+ * Factory for creating CreateCheckoutSessionSuccessResponse objects
  */
-Factory.define('createCheckoutSessionResponse')
-  .attr('checkout_session_client_secret', () => `cs_test_${faker.string.alphanumeric(24)}`);
+Factory.define('createCheckoutSessionSuccessResponse')
+  .attr('checkoutSessionClientSecret', () => `cs_test_${faker.string.alphanumeric(24)}`);
 
 /**
  * Common error codes used in checkout session validation errors
@@ -33,57 +31,35 @@ const CHECKOUT_ERROR_CODES = [
 ];
 
 /**
- * Factory function for creating CreateCheckoutSessionSchema objects
+ * Factory function for creating CreateCheckoutSessionRequestSchema objects
  */
-export function createCheckoutSessionSchemaFactory(overrides = {}): CreateCheckoutSessionSchema {
-  return Factory.build('createCheckoutSessionSchema', overrides);
-}
-
-/**
- * Factory function for creating CreateCheckoutSessionSchemaPayload objects (snake_case version)
- */
-export function createCheckoutSessionSchemaPayloadFactory(overrides = {}): CreateCheckoutSessionSchemaPayload {
-  const schema = createCheckoutSessionSchemaFactory(overrides);
-  return snakeCaseObject(schema) as CreateCheckoutSessionSchemaPayload;
+export function createCheckoutSessionRequestFactory(overrides = {}): CreateCheckoutSessionRequestSchema {
+  return Factory.build('createCheckoutSessionRequest', overrides);
 }
 
 /**
  * Factory function for creating CreateCheckoutSessionResponse objects
  */
-export function checkoutSessionResponseFactory(overrides = {}): CreateCheckoutSessionResponse {
-  return Factory.build('createCheckoutSessionResponse', overrides);
+export function createCheckoutSessionSuccessResponseFactory(
+  overrides = {},
+): CreateCheckoutSessionSuccessResponseSchema {
+  return Factory.build('createCheckoutSessionSuccessResponse', overrides);
 }
 
 /**
- * Helper function to get a meaningful error message for a specific error code
- */
-function getMessageForErrorCode(errorCode: string): string {
-  switch (errorCode) {
-    case 'not_registered':
-      return 'The provided email has not yet been registered.';
-    case 'existing_enterprise_customer':
-      return 'Slug conflicts with existing customer.';
-    case 'invalid_value':
-      return 'The provided value is invalid.';
-    default:
-      return faker.lorem.sentence();
-  }
-}
-
-/**
- * Creates a CreateCheckoutSessionErrorField object with randomized error code and message
+ * Creates a CreateCheckoutSessionFieldError object with randomized error code and message
  *
- * This function uses the common errorFieldFactory but customizes it with
+ * This function uses the common fieldErrorSchemaFactory but customizes it with
  * checkout-specific error codes.
  *
  * @param overrides - Optional properties to override in the generated object
- * @returns A CreateCheckoutSessionErrorField object
+ * @returns A CreateCheckoutSessionFieldError object
  */
-export function createCheckoutSessionErrorFieldFactory(overrides = {}): CreateCheckoutSessionErrorField {
+export function createCheckoutSessionFieldErrorFactory(overrides = {}): CreateCheckoutSessionFieldError {
   const errorCode = faker.helpers.arrayElement(CHECKOUT_ERROR_CODES);
-  return errorFieldFactory({
+  return fieldErrorSchemaFactory({
     errorCode,
-    developerMessage: getMessageForErrorCode(errorCode),
+    developerMessage: 'foobar bad value.',
     ...overrides,
   });
 }
@@ -95,14 +71,14 @@ export function createCheckoutSessionErrorFieldFactory(overrides = {}): CreateCh
  * @returns A complete CreateCheckoutSessionErrorResponse object
  */
 export function createCheckoutSessionErrorResponseFactory(
-  fields: Array<keyof CreateCheckoutSessionSchema> = ['adminEmail', 'enterpriseSlug'],
-): CreateCheckoutSessionErrorResponse {
+  fields: Array<keyof CreateCheckoutSessionRequestSchema> = ['adminEmail', 'enterpriseSlug'],
+): CreateCheckoutSessionErrorResponseSchema {
   // Create an object with the correct type
-  const errorResponse = {} as CreateCheckoutSessionErrorResponse;
+  const errorResponse: CreateCheckoutSessionErrorResponseSchema = {};
 
   // Add error fields for each specified field
   fields.forEach((field) => {
-    errorResponse[field] = createCheckoutSessionErrorFieldFactory();
+    errorResponse[field] = createCheckoutSessionFieldErrorFactory();
   });
 
   return errorResponse;

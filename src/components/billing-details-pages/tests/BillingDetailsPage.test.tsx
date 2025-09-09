@@ -8,28 +8,31 @@ import { renderStepperRoute } from '@/utils/tests';
 describe('BillingDetailsPage', () => {
   it('renders the title correctly', () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
+      config: {},
       authenticatedUser: {
-        userId: 'test-id',
+        userId: 12345,
       },
-    } as any);
+    });
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Billing Details');
   });
 
   it('renders the purchase button correctly', () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
+      config: {},
       authenticatedUser: {
-        userId: 'test-id',
+        userId: 12345,
       },
-    } as any);
+    });
     validateText('Purchase Now');
   });
 
   it('renders the DataPrivacyPolicyField component', () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
+      config: {},
       authenticatedUser: {
-        userId: 'test-id',
+        userId: 12345,
       },
-    } as any);
+    });
     validateText('Data Privacy Policy and Master Service Agreement');
   });
 });
@@ -48,7 +51,12 @@ describe('BillingDetailsSuccessPage', () => {
       },
     }));
 
-    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess);
+    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
 
     // The Billing Details Success title uses the "firstName" param populated from the form state.
     // The component currently passes fullName to the "firstName" placeholder.
@@ -56,13 +64,23 @@ describe('BillingDetailsSuccessPage', () => {
   });
 
   it('renders the OrderDetails component', () => {
-    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess);
+    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
     validateText('Order Details');
     validateText('You have purchased an edX team\'s subscription.');
   });
 
   it('renders the SuccessHeading component', () => {
-    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess);
+    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
     validateText((content) => content.includes('Welcome to edX for teams!'));
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
   });

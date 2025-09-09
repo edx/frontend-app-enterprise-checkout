@@ -110,47 +110,6 @@ const populateCompletedFormFields = ({
 };
 
 /**
- * Build the payload for creating a checkout session from the current form state
- * and indicate whether all required fields are present.
- *
- * @returns {{ checkoutSessionPayload: CreateCheckoutSessionSchema, isValidPayload: boolean }}
- *   The assembled payload and a flag indicating validity.
- */
-const extractCheckoutSessionPayload = (): {
-  checkoutSessionPayload: CreateCheckoutSessionSchema,
-  isValidPayload: boolean,
-} => {
-  const checkoutFormData = checkoutFormStore.getState().formData;
-
-  const {
-    quantity,
-    adminEmail,
-    stripePriceId,
-  } = checkoutFormData[DataStoreKey.PlanDetails];
-  const {
-    enterpriseSlug,
-    companyName,
-  } = checkoutFormData[DataStoreKey.AccountDetails];
-
-  const checkoutSessionPayload = {
-    quantity,
-    adminEmail,
-    stripePriceId,
-    enterpriseSlug,
-    companyName,
-  };
-
-  const isPresent = v => v != null && v !== ''; // != null covers null and undefined
-
-  const isValidPayload = Object.values(checkoutSessionPayload).every(isPresent);
-
-  return {
-    checkoutSessionPayload,
-    isValidPayload,
-  };
-};
-
-/**
  * A union of all route path values defined on CheckoutPageRoute (e.g., "/plan-details").
  */
 type CheckoutPageRouteValue = (typeof CheckoutPageRoute)[keyof typeof CheckoutPageRoute];
@@ -289,9 +248,14 @@ const validateFormState = async ({
   return { valid: true };
 };
 
+const getCheckoutSessionClientSecret = (): string | undefined => {
+  const { checkoutSessionClientSecret } = checkoutFormStore.getState();
+  return checkoutSessionClientSecret;
+};
+
 export {
   determineExistingCheckoutIntentState,
+  getCheckoutSessionClientSecret,
   populateCompletedFormFields,
-  extractCheckoutSessionPayload,
   validateFormState,
 };
