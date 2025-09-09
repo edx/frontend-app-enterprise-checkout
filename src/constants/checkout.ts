@@ -136,7 +136,14 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (
+  z.object({
+    confirmTnC: z.literal(true, { errorMap: () => ({ message: 'Please accept the terms.' }) }),
+    confirmSubscription: z.literal(true, { errorMap: () => ({ message: 'Please confirm organization subscription.' }) }),
+  }).transform(({ confirmTnC, confirmSubscription }) => ({
+    termsAndConditionAccepted: confirmTnC && confirmSubscription,
+  }))
+);
 
 export const CheckoutPageRoute = {
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
