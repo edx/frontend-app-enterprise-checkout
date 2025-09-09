@@ -16,12 +16,12 @@ Factory.define('validationSchema')
   .attr('stripePriceId', () => `price_${faker.string.alphanumeric(14)}`);
 
 /**
- * Factory for creating ErrorField objects
+ * Factory for creating FieldErrorSchema objects
  *
- * ErrorField is a common type used for validation errors across different API responses
+ * FieldErrorSchema is a common type used for validation errors across different API responses
  * This is also used as the base for ValidationDecision objects
  */
-Factory.define('errorField')
+Factory.define('fieldErrorSchema')
   .attr('errorCode', () => faker.string.alphanumeric(8))
   .attr('developerMessage', () => faker.lorem.sentence());
 
@@ -47,26 +47,26 @@ export function validationSchemaPayloadFactory(overrides = {}): ValidationSchema
 }
 
 /**
- * Creates an ErrorField object with randomized error code and message
+ * Creates an FieldErrorSchema object with randomized error code and message
  *
  * @param overrides - Optional properties to override in the generated object
- * @returns An ErrorField object
+ * @returns A FieldErrorSchema object
  */
-export function errorFieldFactory(overrides = {}): ErrorField {
-  return Factory.build('errorField', overrides);
+export function fieldErrorSchemaFactory(overrides = {}): FieldErrorSchema {
+  return Factory.build('fieldErrorSchema', overrides);
 }
 
 /**
- * Creates a ValidationDecision object (alias for errorFieldFactory)
+ * Creates a ValidationDecision object (alias for fieldErrorSchemaFactory)
  *
- * ValidationDecision is a type alias for ErrorField, so this function
- * simply calls errorFieldFactory with the same parameters
+ * ValidationDecision is a type alias for FieldErrorSchema, so this function
+ * simply calls fieldErrorSchemaFactory with the same parameters
  *
  * @param overrides - Optional properties to override in the generated object
  * @returns A ValidationDecision object
  */
 export function validationDecisionFactory(overrides = {}): ValidationDecision {
-  return errorFieldFactory(overrides);
+  return fieldErrorSchemaFactory(overrides);
 }
 
 /**
@@ -88,7 +88,7 @@ export function validationResponseFactory(overrides = {}): ValidationResponse {
 
   const validationDecisions: Record<string, ValidationDecision> = {};
   selectedKeys.forEach(key => {
-    validationDecisions[key] = errorFieldFactory();
+    validationDecisions[key] = fieldErrorSchemaFactory();
   });
 
   return {

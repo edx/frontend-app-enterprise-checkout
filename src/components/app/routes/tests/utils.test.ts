@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, extractCheckoutSessionPayload, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -132,53 +132,6 @@ describe('utils.ts', () => {
           companyName: undefined,
         }),
       );
-    });
-  });
-
-  describe('extractCheckoutSessionPayload', () => {
-    it('returns assembled payload and isValidPayload=true when all fields present', () => {
-      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
-        formData: {
-          [DataStoreKey.PlanDetails]: {
-            quantity: 3,
-            adminEmail: 'user@example.com',
-            stripePriceId: 'price_123',
-          },
-          [DataStoreKey.AccountDetails]: {
-            enterpriseSlug: 'acme',
-            companyName: 'Acme Inc',
-          },
-        },
-      });
-
-      const { checkoutSessionPayload, isValidPayload } = extractCheckoutSessionPayload();
-      expect(isValidPayload).toBe(true);
-      expect(checkoutSessionPayload).toEqual({
-        quantity: 3,
-        adminEmail: 'user@example.com',
-        stripePriceId: 'price_123',
-        enterpriseSlug: 'acme',
-        companyName: 'Acme Inc',
-      });
-    });
-
-    it('returns isValidPayload=false when any required field is missing/empty', () => {
-      (checkoutFormStore.getState as jest.Mock).mockReturnValue({
-        formData: {
-          [DataStoreKey.PlanDetails]: {
-            quantity: 0,
-            adminEmail: '',
-            stripePriceId: null,
-          },
-          [DataStoreKey.AccountDetails]: {
-            enterpriseSlug: undefined,
-            companyName: 'Acme Inc',
-          },
-        },
-      });
-
-      const { isValidPayload } = extractCheckoutSessionPayload();
-      expect(isValidPayload).toBe(false);
     });
   });
 
