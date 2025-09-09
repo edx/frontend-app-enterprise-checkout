@@ -1,11 +1,18 @@
+/* eslint-disable react/prop-types */
 import { Stack } from '@openedx/paragon';
 
-import { StripeFormFields, TermsAndConditions } from '@/components/FormFields';
+import { TermsAndConditions } from '@/components/FormFields';
 
-const BillingDetailsContent = () => (
+import type { UseFormReturn } from 'react-hook-form';
+
+interface BillingDetailsContentProps {
+  form: UseFormReturn<BillingDetailsData>;
+}
+
+const BillingDetailsContent = ({ form }: BillingDetailsContentProps) => (
   <Stack gap={4}>
-    <StripeFormFields />
-    <TermsAndConditions />
+    {/* <StripeFormFields /> */}
+    <TermsAndConditions form={form} />
   </Stack>
 );
 

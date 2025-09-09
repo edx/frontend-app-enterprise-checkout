@@ -32,8 +32,10 @@ describe('BillingDetailsPage', () => {
       authenticatedUser: {
         userId: 12345,
       },
-    });
-    validateText('Data Privacy Policy and Master Service Agreement');
+    } as any);
+    validateText('edX Enterprise Terms');
+    validateText('I have read and accepted', { exact: false });
+    validateText('I confirm I am subscribing', { exact: false });
   });
 });
 

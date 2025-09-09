@@ -3,7 +3,13 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { FieldContainer } from '@/components/FieldContainer';
 import TermsAndConditionsCheckboxes from '@/components/FormFields/TermsAndConditionsCheckboxes';
 
-const TermsAndConditions = () => (
+import type { UseFormReturn } from 'react-hook-form';
+
+interface TermsAndConditionsProps {
+  form: UseFormReturn<BillingDetailsData>;
+}
+
+const TermsAndConditions = ({ form }: TermsAndConditionsProps) => (
   <FieldContainer>
     <div>
       <h3>
@@ -22,7 +28,7 @@ const TermsAndConditions = () => (
         />
       </h3>
     </div>
-    <TermsAndConditionsCheckboxes />
+    <TermsAndConditionsCheckboxes form={form} />
   </FieldContainer>
 );
 

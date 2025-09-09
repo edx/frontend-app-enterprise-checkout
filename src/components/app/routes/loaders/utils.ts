@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
-  AccountDetailsSchema, BillingDetailsSchema,
+  AccountDetailsSchema,
   CheckoutPageRoute,
   DataStoreKey,
   PlanDetailsSchema,
@@ -142,12 +142,12 @@ const makeResolvers = (
 
   const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints));
 
-  const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
+  // const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
 
   return {
     planDetailsResolver,
     accountDetailsResolver,
-    billingDetailsResolver,
+    // billingDetailsResolver,
   };
 };
 
@@ -185,11 +185,11 @@ export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>
       failRoute: CheckoutPageRoute.AccountDetails,
     },
     // If you add a BillingDetails schema, include it as the last guard:
-    {
-      pick: (formData) => formData[DataStoreKey.BillingDetails],
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
-      failRoute: CheckoutPageRoute.BillingDetails,
-    },
+    // {
+    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
+    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
+    //   failRoute: CheckoutPageRoute.BillingDetails,
+    // },
   ],
 };
 
