@@ -154,7 +154,7 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
     valid,
     invalidRoute,
   } = await validateFormState({
-    checkoutStep: 'BillingDetails',
+    checkoutStep: 'BillingDetailsSuccess',
     constraints: fieldConstraints,
     stripePriceId,
   });

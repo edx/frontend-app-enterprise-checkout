@@ -30,7 +30,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const confirmTnC = useWatch({ control, name: 'confirmTnC', defaultValue: billingDetailsData.confirmTnC });
   const confirmSubscription = useWatch({ control, name: 'confirmSubscription', defaultValue: billingDetailsData.confirmSubscription });
 
-  // Keep derived field in sync so your Zod/Yup resolver or submit handler can use it
+  // Keep the derived field in sync so your Zod/Yup resolver or submit handler can use it
   useEffect(() => {
     const accepted = Boolean(confirmTnC && confirmSubscription);
     setFormData(
@@ -87,7 +87,6 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
             </Form.Checkbox>
           )}
         />
-
         <Controller
           name="confirmSubscription"
           control={control}
