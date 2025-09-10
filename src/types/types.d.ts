@@ -61,7 +61,7 @@ declare global {
    * ==============================
    */
 
-  type CheckoutStep = 'PlanDetails' | 'AccountDetails' | 'BillingDetails';
+  type CheckoutStep = 'PlanDetails' | 'AccountDetails' | 'BillingDetails' | 'BillingDetailsSuccess';
 
   type CheckoutSubstep = 'Login' | 'Register' | 'Success';
 
