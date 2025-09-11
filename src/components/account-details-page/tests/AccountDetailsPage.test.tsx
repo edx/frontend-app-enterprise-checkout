@@ -25,22 +25,42 @@ describe('AccountDetailsPage', () => {
   });
 
   it('renders the title correctly', () => {
-    renderStepperRoute(CheckoutPageRoute.AccountDetails);
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Account Details');
   });
 
   it('renders the continue button correctly', () => {
-    renderStepperRoute(CheckoutPageRoute.AccountDetails);
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
     validateText('Continue');
   });
 
   it('renders the CompanyNameField component', () => {
-    renderStepperRoute(CheckoutPageRoute.AccountDetails);
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
     validateText('What is the name of your company or organization?');
   });
 
   it('renders the CustomUrlField component', () => {
-    renderStepperRoute(CheckoutPageRoute.AccountDetails);
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
     validateText('Create a custom URL for your team');
   });
 });

@@ -28,10 +28,19 @@ export const useCheckoutFormStore = create<FormStore>(
      */
     setFormData: (step, data) => set(
       (store) => ({
+        ...store,
         formData: {
           ...store.formData,
           [step]: data,
         },
+      }),
+    ),
+    /* Place to memorize the checkout session client secret. */
+    checkoutSessionClientSecret: undefined,
+    setCheckoutSessionClientSecret: (secret) => set(
+      (store) => ({
+        ...store,
+        checkoutSessionClientSecret: secret,
       }),
     ),
   }),

@@ -28,7 +28,10 @@ const HookConsumer: React.FC = () => {
   );
 };
 
-const renderWithAppContext = (ui: React.ReactElement, appCtxValue: any = { config: {}, authenticatedUser: { userId: 'test-user' } }) => (
+const renderWithAppContext = (
+  ui: React.ReactElement,
+  appCtxValue: any = { config: {}, authenticatedUser: { userId: 12345 } },
+) => (
   render(
     <AppContext.Provider value={appCtxValue}>
       {ui}
@@ -89,7 +92,7 @@ describe('usePurchaseSummaryPricing (hook)', () => {
     expect(screen.getByTestId('total')).toHaveTextContent('200');
 
     // Ensure our mock was invoked, with userId from AppContext first arg
-    expect(mockedUseBFFContext).toHaveBeenCalledWith('test-user', expect.any(Object));
+    expect(mockedUseBFFContext).toHaveBeenCalledWith(12345, expect.any(Object));
   });
 
   it('returns null pricing when useBFFContext has no price (null)', () => {

@@ -2,8 +2,8 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { queryBffContext, queryCreateCheckoutSession } from '@/components/app/data/queries/queries';
-import { extractCheckoutSessionPayload, validateFormState } from '@/components/app/routes/loaders/utils';
+import { queryBffContext } from '@/components/app/data/queries/queries';
+import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
@@ -118,17 +118,10 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     return redirect(invalidRoute);
   }
 
-  const {
-    checkoutSessionPayload,
-    isValidPayload,
-  } = extractCheckoutSessionPayload();
-  if (!isValidPayload) {
+  // TODO: check state for a stored checkout session ID.  If it does NOT exist, redirect:
+  if (!getCheckoutSessionClientSecret()) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
-
-  await queryClient.ensureQueryData(
-    queryCreateCheckoutSession(checkoutSessionPayload),
-  );
 
   return null;
 }

@@ -117,6 +117,8 @@ declare global {
       step: K,
       data: Partial<FormData<K>>,
     ): void;
+    checkoutSessionClientSecret: string | undefined;
+    setCheckoutSessionClientSecret(checkoutSessionClientSecret: string): void;
   }
 
   /**
@@ -133,7 +135,7 @@ declare global {
   /**
    * Common error field type used across different API responses
    */
-  interface ErrorField {
+  interface FieldErrorSchema {
     errorCode: string;
     developerMessage: string;
   }
@@ -180,9 +182,9 @@ declare global {
   type ValidationSchemaPayload = Payload<ValidationSchema>;
 
   /**
-   * Alias for ErrorField to maintain backward compatibility
+   * Alias for FieldErrorSchema to maintain backward compatibility
    */
-  type ValidationDecision = ErrorField;
+  type ValidationDecision = FieldErrorSchema;
 
   /**
    * Response structure for validation API
@@ -200,52 +202,6 @@ declare global {
    * Snake-cased version of ValidationResponse for API communication
    */
   type ValidationResponsePayload = Payload<ValidationResponse>;
-
-  /**
-   * ==============================
-   * Checkout Session Types
-   * ==============================
-   */
-
-  /**
-   * Schema for checkout session requests
-   * Uses the base checkout schema without additional fields
-   */
-  type CreateCheckoutSessionSchema = BaseCheckoutSchema;
-
-  /**
-   * Snake-cased version of CreateCheckoutSessionSchema for API communication
-   */
-  type CreateCheckoutSessionSchemaPayload = Payload<CreateCheckoutSessionSchema>;
-
-  /**
-   * Successful response structure for checkout session API
-   */
-  interface CreateCheckoutSessionResponse {
-    checkoutSessionClientSecret: string;
-  }
-
-  /**
-   * Alias for ErrorField to maintain backward compatibility
-   */
-  type CreateCheckoutSessionErrorField = ErrorField;
-
-  /**
-   * Error response structure for checkout session API
-   */
-  type CreateCheckoutSessionErrorResponse = {
-    [K in keyof CreateCheckoutSessionSchema]: CreateCheckoutSessionErrorField;
-  };
-
-  /**
-   * Union type for possible checkout session response types
-   */
-  type CheckoutSessionResponseType = CreateCheckoutSessionResponse | CreateCheckoutSessionErrorResponse;
-
-  /**
-   * Snake-cased version of CheckoutSessionResponseType for API communication
-   */
-  type CheckoutSessionResponseTypePayload = Payload<CheckoutSessionResponseType>;
 
   /**
    * ==============================
