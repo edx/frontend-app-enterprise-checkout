@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
-  AccountDetailsSchema,
+  AccountDetailsSchema, BillingDetailsSchema,
   CheckoutPageRoute,
   DataStoreKey,
   PlanDetailsSchema,
@@ -103,6 +103,11 @@ const populateCompletedFormFields = ({
           companyName: s.formData[DataStoreKey.AccountDetails]?.companyName
             ?? checkoutIntent?.enterpriseName,
         },
+        [DataStoreKey.BillingDetails]: {
+          ...s.formData[DataStoreKey.BillingDetails],
+          confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnc ?? false,
+          confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmPrivacyPolicy ?? false,
+        },
       },
     }),
     false,
@@ -183,13 +188,12 @@ const makeResolvers = (
 
   const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints));
 
-  // const billingDetailsResolver: ResolverFn =
-  //   zodResolver(BillingDetailsSchema(constraints));
+  const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
 
   return {
     planDetailsResolver,
     accountDetailsResolver,
-    // billingDetailsResolver,
+    billingDetailsResolver,
   };
 };
 
@@ -206,7 +210,7 @@ interface PrerequisiteCheck<T> {
  * Each entry includes which form slice to validate, how to build its resolver,
  * and the route that should be returned if that slice is invalid.
  */
-const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
+export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
   PlanDetails: [],
   AccountDetails: [
     {
@@ -226,12 +230,24 @@ const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
       getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
       failRoute: CheckoutPageRoute.AccountDetails,
     },
+  ],
+  BillingDetailsSuccess: [
+    {
+      pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
+      failRoute: CheckoutPageRoute.PlanDetails,
+    },
+    {
+      pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
+      failRoute: CheckoutPageRoute.AccountDetails,
+    },
     // If you add a BillingDetails schema, include it as the last guard:
-    // {
-    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
-    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
-    //   failRoute: CheckoutPageRoute.BillingDetails,
-    // },
+    {
+      pick: (formData) => formData[DataStoreKey.BillingDetails],
+      getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
+      failRoute: CheckoutPageRoute.BillingDetails,
+    },
   ],
 };
 

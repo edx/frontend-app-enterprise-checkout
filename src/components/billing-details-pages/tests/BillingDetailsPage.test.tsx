@@ -21,16 +21,18 @@ describe('BillingDetailsPage', () => {
         userId: 'test-id',
       },
     } as any);
-    validateText('Purchase Now');
+    validateText('Subscribe');
   });
 
-  it('renders the DataPrivacyPolicyField component', () => {
+  it('renders the TermsAndConditions component', () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
       authenticatedUser: {
         userId: 'test-id',
       },
     } as any);
-    validateText('Data Privacy Policy and Master Service Agreement');
+    validateText('edX Enterprise Terms');
+    validateText('I have read and accepted', { exact: false });
+    validateText('I confirm I am subscribing', { exact: false });
   });
 });
 

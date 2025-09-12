@@ -2,7 +2,7 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
 
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
-import { PriceAlert } from '@/components/PriceAlert';
+import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
 
 import type { UseFormReturn } from 'react-hook-form';
 
