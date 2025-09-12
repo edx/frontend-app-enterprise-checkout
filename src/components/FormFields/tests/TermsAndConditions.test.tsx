@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/extend-expect';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-import TermsAndConditions from '../TermsAndConditions';
+import TermsAndConditions from '../../billing-details-pages/TermsAndConditions';
 
 const TestWrapper: React.FC = () => {
   const form = useForm<BillingDetailsData>({

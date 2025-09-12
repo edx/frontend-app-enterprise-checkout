@@ -49,75 +49,71 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   }, [confirmTnC, confirmSubscription, setValue, setFormData]);
 
   return (
-    <div>
-      {/* keep RHF aware of the derived field (no UI) */}
-      <input type="hidden" {...form.register('termsAndConditionAccepted')} />
-
-      <Form.CheckboxSet
-        name="termsAndConditions"
-        isInvalid={!isEmpty(errors)}
-        aria-describedby={!isEmpty(errors) ? 'terms-and-conditions-feedback' : undefined}
-      >
-        <Controller
-          name="confirmTnC"
-          control={control}
-          render={({ field: { onChange, onBlur, ref } }) => (
-            <Form.Checkbox
-              inputRef={ref}
-              checked={billingDetailsData.confirmTnC}
-              onBlur={onBlur}
-              onChange={(e) => {
-                onChange(e.currentTarget.checked);
-                setFormData(
-                  DataStoreKey.BillingDetails,
-                  {
-                    ...billingDetailsData,
-                    confirmTnC,
-                  },
-                );
-              }}
-              value="confirmTnC"
-              isInvalid={!!errors.confirmTnC}
-            >
-              <FormattedMessage
-                id="checkout.termsAndConditionsCheckboxes.confirmTnC"
-                defaultMessage="I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions."
-                description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
-              />
-            </Form.Checkbox>
-          )}
-        />
-        <Controller
-          name="confirmSubscription"
-          control={control}
-          render={({ field: { onChange, onBlur, ref } }) => (
-            <Form.Checkbox
-              inputRef={ref}
-              checked={billingDetailsData.confirmSubscription}
-              onBlur={onBlur}
-              onChange={(e) => {
-                onChange(e.currentTarget.checked);
-                setFormData(
-                  DataStoreKey.BillingDetails,
-                  {
-                    ...billingDetailsData,
-                    confirmSubscription,
-                  },
-                );
-              }}
-              value="confirmSubscription"
-              isInvalid={!!errors.confirmSubscription}
-            >
-              <FormattedMessage
-                id="checkout.termsAndConditionsCheckboxes.confirmSubscription"
-                defaultMessage="I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution's employees, students and/or other sponsored learners."
-                description="Checkbox label to confirm the subscription is on behalf of an organization for use by its employees, students, or other sponsored learners"
-              />
-            </Form.Checkbox>
-          )}
-        />
-      </Form.CheckboxSet>
-    </div>
+    <Form.CheckboxSet
+      name="termsAndConditions"
+      isInvalid={!isEmpty(errors)}
+      aria-describedby={!isEmpty(errors) ? 'terms-and-conditions-feedback' : undefined}
+      className="mt-2"
+    >
+      <Controller
+        name="confirmTnC"
+        control={control}
+        render={({ field: { onChange, onBlur, ref } }) => (
+          <Form.Checkbox
+            inputRef={ref}
+            checked={billingDetailsData.confirmTnC}
+            onBlur={onBlur}
+            onChange={(e) => {
+              onChange(e.currentTarget.checked);
+              setFormData(
+                DataStoreKey.BillingDetails,
+                {
+                  ...billingDetailsData,
+                  confirmTnC,
+                },
+              );
+            }}
+            value="confirmTnC"
+            isInvalid={!!errors.confirmTnC}
+          >
+            <FormattedMessage
+              id="checkout.termsAndConditionsCheckboxes.confirmTnC"
+              defaultMessage="I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions."
+              description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
+            />
+          </Form.Checkbox>
+        )}
+      />
+      <Controller
+        name="confirmSubscription"
+        control={control}
+        render={({ field: { onChange, onBlur, ref } }) => (
+          <Form.Checkbox
+            inputRef={ref}
+            checked={billingDetailsData.confirmSubscription}
+            onBlur={onBlur}
+            onChange={(e) => {
+              onChange(e.currentTarget.checked);
+              setFormData(
+                DataStoreKey.BillingDetails,
+                {
+                  ...billingDetailsData,
+                  confirmSubscription,
+                },
+              );
+            }}
+            value="confirmSubscription"
+            isInvalid={!!errors.confirmSubscription}
+          >
+            <FormattedMessage
+              id="checkout.termsAndConditionsCheckboxes.confirmSubscription"
+              defaultMessage="I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution's employees, students and/or other sponsored learners."
+              description="Checkbox label to confirm the subscription is on behalf of an organization for use by its employees, students, or other sponsored learners"
+            />
+          </Form.Checkbox>
+        )}
+      />
+    </Form.CheckboxSet>
   );
 };
 
