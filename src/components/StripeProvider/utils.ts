@@ -237,9 +237,11 @@ export const createStripeAppearance = (): Appearance => (
         borderBottom: `${getComputedStylePropertyCSSVariable('--pgn-size-border-width', '1px')} solid ${getComputedStylePropertyCSSVariable('--pgn-color-light', '#e9e9e9')}`,
         padding: getComputedStylePropertyCSSVariable('--pgn-spacing-accordion-item-padding', '0.75rem'),
         transition: getComputedStylePropertyCSSVariable('--pgn-transition-base', 'all 0.2s ease-in-out'),
+        border: '0',
       },
       '.AccordionItem--selected': {
-        backgroundColor: getComputedStylePropertyCSSVariable('--pgn-color-light-hover', '#d2d2d2'),
+        // Background color for stripe card item
+        backgroundColor: getComputedStylePropertyCSSVariable('--pgn-color-light-300', '#f0eeed'),
       },
 
       // Radio icon styling

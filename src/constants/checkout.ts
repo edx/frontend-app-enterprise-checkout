@@ -233,7 +233,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     }),
     buttonMessage: defineMessages({
       id: 'checkout.billingDetails.purchaseNow',
-      defaultMessage: 'Purchase Now',
+      defaultMessage: 'Subscribe',
       description: 'Button to purchase the subscription product',
     }),
   },

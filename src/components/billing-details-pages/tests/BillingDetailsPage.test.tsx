@@ -21,7 +21,7 @@ describe('BillingDetailsPage', () => {
         userId: 'test-id',
       },
     } as any);
-    validateText('Purchase Now');
+    validateText('Subscribe');
   });
 
   it('renders the TermsAndConditions component', () => {
