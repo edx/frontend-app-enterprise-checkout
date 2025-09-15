@@ -51,7 +51,7 @@ describe('utils.ts', () => {
         formData: {
           [DataStoreKey.PlanDetails]: { quantity: 5 },
           [DataStoreKey.AccountDetails]: { enterpriseSlug: undefined, companyName: undefined },
-          [DataStoreKey.BillingDetails]: { address1: '123 Main' },
+          [DataStoreKey.BillingDetails]: {},
         },
       } as any;
 
@@ -99,7 +99,10 @@ describe('utils.ts', () => {
         }),
       );
       // Ensure other step data remain intact
-      expect(computed.formData[DataStoreKey.BillingDetails]).toEqual({ address1: '123 Main' });
+      expect(computed.formData[DataStoreKey.BillingDetails]).toEqual({
+        confirmTnC: false,
+        confirmSubscription: false,
+      });
     });
 
     it('handles empty user, null intent and stripePriceId, setting authenticated=false and country=null', () => {

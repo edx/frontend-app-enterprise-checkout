@@ -43,7 +43,6 @@ export const createStripeAppearance = (): Appearance => (
       fontWeightBold: getComputedStylePropertyCSSVariable('--pgn-typography-font-weight-bold', '600'),
       fontLineHeight: getComputedStylePropertyCSSVariable('--pgn-typography-line-height-base', '1.5'),
       fontSizeXl: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-xl', '1.25rem'),
-      fontSizeLg: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-lg', '1.125rem'),
       fontSizeSm: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-sm', '0.875rem'),
       fontSizeXs: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-xs', '0.75rem'),
       fontSmooth: 'auto',
@@ -53,7 +52,6 @@ export const createStripeAppearance = (): Appearance => (
       spacingGridRow: getComputedStylePropertyCSSVariable('--pgn-spacing-grid-gutter-width', '16px'),
       spacingGridColumn: getComputedStylePropertyCSSVariable('--pgn-spacing-grid-gutter-width', '16px'),
       accordionItemSpacing: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-3', '12px'),
-      tabSpacing: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-2', '8px'),
 
       // Borders
       borderRadius: getComputedStylePropertyCSSVariable('--pgn-size-border-radius-base', '4px'),
@@ -65,7 +63,6 @@ export const createStripeAppearance = (): Appearance => (
         boxShadow: getComputedStylePropertyCSSVariable('--pgn-elevation-form-input-base', '0 1px 3px 0 rgba(0, 0, 0, 0.1)'),
         transition: getComputedStylePropertyCSSVariable('--pgn-transition-form-input', 'border-color 0.2s ease, box-shadow 0.2s ease'),
         padding: `${getComputedStylePropertyCSSVariable('--pgn-spacing-form-input-padding-y-base', '0.5625rem')} ${getComputedStylePropertyCSSVariable('--pgn-spacing-form-input-padding-x-base', '1rem')}`,
-        height: getComputedStylePropertyCSSVariable('--pgn-size-form-input-height-base', 'calc(1.5em + 1.125rem + 2px)'),
         fontSize: getComputedStylePropertyCSSVariable('--pgn-typography-form-input-font-size-base', '1rem'),
         lineHeight: getComputedStylePropertyCSSVariable('--pgn-typography-form-input-line-height-base', '1.5'),
         borderRadius: getComputedStylePropertyCSSVariable('--pgn-size-form-input-radius-border-base', '0.25rem'),
@@ -80,11 +77,6 @@ export const createStripeAppearance = (): Appearance => (
         outline: '0',
       },
 
-      // Input hover state
-      '.Input:hover:not(:focus)': {
-        border: `solid ${getComputedStylePropertyCSSVariable('--pgn-size-form-input-width-hover', '1px')} ${getComputedStylePropertyCSSVariable('--pgn-color-dark-700', '#454545')}`,
-      },
-
       // Input placeholder
       '.Input::placeholder': {
         color: getComputedStylePropertyCSSVariable('--pgn-color-text-muted', '#767676'),
@@ -94,12 +86,6 @@ export const createStripeAppearance = (): Appearance => (
       '.Input--invalid': {
         borderColor: getComputedStylePropertyCSSVariable('--pgn-color-danger-base', '#d23c50'),
         boxShadow: `0 0 0 1px ${getComputedStylePropertyCSSVariable('--pgn-color-danger-base', '#d23c50')}`,
-      },
-
-      // Complete input state
-      '.Input--complete': {
-        borderColor: getComputedStylePropertyCSSVariable('--pgn-color-success-base', '#008100'),
-        boxShadow: `0 0 0 1px ${getComputedStylePropertyCSSVariable('--pgn-color-success-base', '#008100')}`,
       },
 
       // Label styling
@@ -114,7 +100,6 @@ export const createStripeAppearance = (): Appearance => (
       '.Error': {
         color: getComputedStylePropertyCSSVariable('--pgn-color-danger-base', '#d23c50'),
         fontSize: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-sm', '14px'),
-        marginTop: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-2', '8px'),
       },
 
       // Tab styling
@@ -131,7 +116,6 @@ export const createStripeAppearance = (): Appearance => (
         color: getComputedStylePropertyCSSVariable('--pgn-color-primary-hover', '#065683'),
       },
       '.TabIcon': {
-        marginRight: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-2', '8px'),
         fill: getComputedStylePropertyCSSVariable('--pgn-color-text-primary', '#333333'),
       },
       '.TabIcon--selected': {
@@ -139,9 +123,6 @@ export const createStripeAppearance = (): Appearance => (
       },
 
       // Checkbox styling
-      '.Checkbox': {
-        transition: getComputedStylePropertyCSSVariable('--pgn-transition-base', 'all 0.2s ease-in-out'),
-      },
       '.CheckboxInput': {
         borderRadius: getComputedStylePropertyCSSVariable('--pgn-size-border-radius-sm', '0.125rem'),
         border: `${getComputedStylePropertyCSSVariable('--pgn-size-border-width', '1px')} solid ${getComputedStylePropertyCSSVariable('--pgn-color-form-input-border', '#d2d2d2')}`,
@@ -154,7 +135,6 @@ export const createStripeAppearance = (): Appearance => (
       '.CheckboxLabel': {
         fontSize: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-base', '1rem'),
         color: getComputedStylePropertyCSSVariable('--pgn-color-text-primary', '#333333'),
-        marginLeft: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-2', '8px'),
       },
 
       // Switch styling
@@ -162,12 +142,8 @@ export const createStripeAppearance = (): Appearance => (
         transition: getComputedStylePropertyCSSVariable('--pgn-transition-base', 'all 0.2s ease-in-out'),
       },
       '.SwitchControl': {
-        backgroundColor: getComputedStylePropertyCSSVariable('--pgn-color-light', '#e9e9e9'),
         borderRadius: '1rem',
         transition: getComputedStylePropertyCSSVariable('--pgn-transition-base', 'all 0.2s ease-in-out'),
-      },
-      '.Switch--active .SwitchControl': {
-        backgroundColor: getComputedStylePropertyCSSVariable('--pgn-color-primary-base', '#0075b4'),
       },
 
       // Block styling
@@ -192,7 +168,6 @@ export const createStripeAppearance = (): Appearance => (
       '.Dropdown': {
         border: `${getComputedStylePropertyCSSVariable('--pgn-size-border-width', '1px')} solid ${getComputedStylePropertyCSSVariable('--pgn-color-form-input-border', '#d2d2d2')}`,
         borderRadius: getComputedStylePropertyCSSVariable('--pgn-size-border-radius-base', '0.25rem'),
-        backgroundColor: getComputedStylePropertyCSSVariable('--pgn-color-white', '#ffffff'),
       },
       '.DropdownItem': {
         padding: `${getComputedStylePropertyCSSVariable('--pgn-spacing-dropdown-item-padding-y', '0.5rem')} ${getComputedStylePropertyCSSVariable('--pgn-spacing-dropdown-item-padding-x', '0.75rem')}`,
@@ -228,7 +203,6 @@ export const createStripeAppearance = (): Appearance => (
         borderRadius: getComputedStylePropertyCSSVariable('--pgn-size-border-radius-base', '0.25rem'),
         padding: getComputedStylePropertyCSSVariable('--pgn-spacing-code-input-padding', '0.75rem'),
         fontSize: getComputedStylePropertyCSSVariable('--pgn-typography-font-size-lg', '1.125rem'),
-        textAlign: 'center',
         backgroundColor: getComputedStylePropertyCSSVariable('--pgn-color-white', '#ffffff'),
       },
 
@@ -236,7 +210,6 @@ export const createStripeAppearance = (): Appearance => (
       '.AccordionItem': {
         borderBottom: `${getComputedStylePropertyCSSVariable('--pgn-size-border-width', '1px')} solid ${getComputedStylePropertyCSSVariable('--pgn-color-light', '#e9e9e9')}`,
         padding: getComputedStylePropertyCSSVariable('--pgn-spacing-accordion-item-padding', '0.75rem'),
-        transition: getComputedStylePropertyCSSVariable('--pgn-transition-base', 'all 0.2s ease-in-out'),
         border: '0',
       },
       '.AccordionItem--selected': {

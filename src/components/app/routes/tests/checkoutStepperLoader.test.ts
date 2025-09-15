@@ -117,6 +117,18 @@ const populateValidAccountDetails = (constraints: CheckoutContextFieldConstraint
   }), false);
 };
 
+const populateValidBillingDetails = () => {
+  checkoutFormStore.setState(s => ({
+    formData: {
+      ...s.formData,
+      [DataStoreKey.BillingDetails]: {
+        confirmTnC: true,
+        confirmSubscription: true,
+      },
+    },
+  }));
+};
+
 describe('makeCheckoutStepperLoader (stepper loaders)', () => {
   let queryClient: QueryClient;
   let ensureSpy: jest.SpyInstance;
@@ -354,6 +366,7 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       const { fieldConstraints, pricing } = ctx;
       populateValidPlanDetails(fieldConstraints, pricing.prices[0].id as string);
       populateValidAccountDetails(fieldConstraints);
+      populateValidBillingDetails();
 
       const loader = makeCheckoutStepperLoader(queryClient);
       const r = await loader(

@@ -12,7 +12,7 @@ type StripeProviderProps = {
 
 const StripeProvider = ({ children }: StripeProviderProps) => {
   const { PUBLISHABLE_STRIPE_API_KEY } = getConfig();
-  const stripePromise = loadStripe(PUBLISHABLE_STRIPE_API_KEY);
+  const stripePromise = useMemo(() => loadStripe(PUBLISHABLE_STRIPE_API_KEY), [PUBLISHABLE_STRIPE_API_KEY]);
   const { data: stripeCheckoutSession } = useCreateCheckoutSession();
   const appearance: Appearance = useMemo(() => createStripeAppearance(), []);
 
