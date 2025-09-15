@@ -33,5 +33,4 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
   );
 };
 
-// @ts-ignore
 export default StripeProvider;

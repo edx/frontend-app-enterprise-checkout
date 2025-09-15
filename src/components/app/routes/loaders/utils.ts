@@ -52,10 +52,8 @@ const determineExistingCheckoutIntentState = (
   }
 
   return {
-    // @ts-ignore
-    existingSuccessfulCheckoutIntent: checkoutIntent.existingSuccessfulCheckoutIntent,
-    // @ts-ignore
-    expiredCheckoutIntent: checkoutIntent.expiredCheckoutIntent,
+    existingSuccessfulCheckoutIntent: checkoutIntent.existingSuccessfulCheckoutIntent!,
+    expiredCheckoutIntent: checkoutIntent.expiredCheckoutIntent!,
   };
 };
 

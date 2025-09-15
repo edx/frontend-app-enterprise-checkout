@@ -146,5 +146,4 @@ const PlanDetailsPage = () => {
   );
 };
 
-// @ts-ignore
 export default PlanDetailsPage;

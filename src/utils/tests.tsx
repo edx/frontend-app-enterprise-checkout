@@ -35,7 +35,9 @@ export function renderWithRouterProvider(
   return render(<RouterProvider router={router} />);
 }
 
-export function queryClient(defaultOptions = {}) {
+export function queryClient(defaultOptions = {
+  queries: {},
+}) {
   return new QueryClient({
     queryCache: new QueryCache({
       onError: queryCacheOnErrorHandler,
@@ -44,7 +46,6 @@ export function queryClient(defaultOptions = {}) {
       ...defaultOptions,
       queries: {
         retry: false,
-        // @ts-ignore
         ...defaultOptions.queries,
       },
     },
