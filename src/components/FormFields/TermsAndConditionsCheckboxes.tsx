@@ -69,7 +69,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
                 DataStoreKey.BillingDetails,
                 {
                   ...billingDetailsData,
-                  confirmTnC,
+                  confirmTnC: e.currentTarget.checked,
                 },
               );
             }}
@@ -102,7 +102,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
                 DataStoreKey.BillingDetails,
                 {
                   ...billingDetailsData,
-                  confirmSubscription,
+                  confirmSubscription: e.currentTarget.checked,
                 },
               );
             }}
