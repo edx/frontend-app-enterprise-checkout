@@ -1,4 +1,3 @@
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
@@ -11,8 +10,9 @@ import { queryClient } from '@/utils/tests';
 
 import TermsAndConditions from '../TermsAndConditions';
 
-jest.mock('@edx/frontend-enterprise-utils', () => ({
-  sendEnterpriseTrackEvent: jest.fn(),
+jest.mock('@/utils/common', () => ({
+  __esModule: true,
+  sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
 const TestWrapper: React.FC = () => {
@@ -25,6 +25,8 @@ const TestWrapper: React.FC = () => {
   });
   return <TermsAndConditions form={form} />;
 };
+
+const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 
 describe('TermsAndConditions', () => {
   const renderComponent = () => render(
@@ -51,7 +53,7 @@ describe('TermsAndConditions', () => {
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     expect(checkboxes.length).toEqual(2);
     validateText('I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions.');
-    validateText('I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions.');
+    validateText('I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution\'s employees, students and/or other sponsored learners.');
     const [checkbox1, checkbox2] = checkboxes;
     expect(checkbox1).not.toBeChecked();
     expect(checkbox2).not.toBeChecked();
@@ -69,10 +71,10 @@ describe('TermsAndConditions', () => {
 
     await user.click(checkbox1);
     expect(checkbox1).toBeChecked();
-    expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(1);
 
     await user.click(checkbox2);
     expect(checkbox2).toBeChecked();
-    expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(2);
   });
 });

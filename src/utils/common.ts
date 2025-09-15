@@ -1,3 +1,4 @@
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { logError } from '@edx/frontend-platform/logging';
 import dayjs from 'dayjs';
 
@@ -90,6 +91,16 @@ const formatPrice = (price: number, options = {}) => {
 
 const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
 
+const sendEnterpriseCheckoutTrackingEvent = (checkoutIntentId: string, eventName: string, properties = {}) => {
+  sendTrackEvent(
+    eventName,
+    {
+      checkoutIntentId,
+      ...properties,
+    },
+  );
+};
+
 export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
@@ -97,4 +108,5 @@ export {
   queryCacheOnErrorHandler,
   serverValidationError,
   isExpired,
+  sendEnterpriseCheckoutTrackingEvent,
 };
