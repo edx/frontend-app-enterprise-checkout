@@ -1,4 +1,3 @@
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
@@ -8,6 +7,7 @@ import { useCheckoutIntent } from '@/components/app/data';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 interface TermsAndConditionsCheckboxesProps {
   form: UseFormReturn<BillingDetailsData>;
@@ -31,8 +31,8 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const { data: checkoutIntent } = useCheckoutIntent();
 
   const sendCheckBoxEvent = (event: string, value: boolean) => {
-    const eventId = checkoutIntent?.id || 'empty_checkout_intent_id';
-    sendEnterpriseTrackEvent(
+    const eventId = checkoutIntent?.id.toString(10) || 'empty_checkout_intent_id';
+    sendEnterpriseCheckoutTrackingEvent(
       eventId,
       event,
       {

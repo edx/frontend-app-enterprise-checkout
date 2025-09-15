@@ -11,9 +11,10 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import TermsAndConditionsCheckboxes from '../TermsAndConditionsCheckboxes';
 
-// Mock Segment tracking util
-jest.mock('@edx/frontend-enterprise-utils', () => ({
-  sendEnterpriseTrackEvent: jest.fn(),
+// Mock internal tracking util
+jest.mock('@/utils/common', () => ({
+  __esModule: true,
+  sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
 // Mock checkout intent hook via app data barrel
@@ -22,7 +23,7 @@ jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(() => ({ data: { id: 'chk_intent_123', foo: 'bar' } })),
 }));
 
-const { sendEnterpriseTrackEvent } = jest.requireMock('@edx/frontend-enterprise-utils');
+const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 const { useCheckoutIntent } = jest.requireMock('@/components/app/data');
 
 describe('TermsAndConditionsCheckboxes', () => {
@@ -71,7 +72,7 @@ describe('TermsAndConditionsCheckboxes', () => {
     const tncCheckbox = screen.getByLabelText(/I have read and accepted/i);
     await userEvent.click(tncCheckbox);
 
-    expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
       'chk_intent_123',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       expect.objectContaining({
@@ -87,7 +88,7 @@ describe('TermsAndConditionsCheckboxes', () => {
     const subCheckbox = screen.getByLabelText(/I confirm I am subscribing/i);
     await userEvent.click(subCheckbox);
 
-    expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
       'chk_intent_123',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
       expect.objectContaining({
@@ -106,7 +107,7 @@ describe('TermsAndConditionsCheckboxes', () => {
     const tncCheckbox = screen.getByLabelText(/I have read and accepted/i);
     await userEvent.click(tncCheckbox);
 
-    expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
       'empty_checkout_intent_id',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       expect.objectContaining({
