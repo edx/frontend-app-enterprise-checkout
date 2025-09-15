@@ -46,7 +46,7 @@ export function queryClient(defaultOptions = {
       ...defaultOptions,
       queries: {
         retry: false,
-        ...defaultOptions.queries,
+        ...(defaultOptions.queries || {}),
       },
     },
   });

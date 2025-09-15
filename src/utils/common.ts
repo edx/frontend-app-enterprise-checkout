@@ -36,7 +36,7 @@ function queryCacheOnErrorHandler(query) {
 /**
  * Given a CSS variable name, returns the computed value of the CSS variable.
  * @param {string} cssVariableName A string representing a CSS variable.
- * @param fallback
+ * @param {string} fallback A fallback value to return if the CSS variable is not found or window is undefined.
  * @returns {string} The computed value of the CSS variable.
  */
 function getComputedStylePropertyCSSVariable(cssVariableName: string, fallback: string = '') {
