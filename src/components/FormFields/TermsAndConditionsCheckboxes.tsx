@@ -1,10 +1,12 @@
+import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
-import { useEffect } from 'react';
 import { Controller, type UseFormReturn, useWatch } from 'react-hook-form';
 
+import { useCheckoutIntent } from '@/components/app/data';
 import { DataStoreKey } from '@/constants/checkout';
+import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 interface TermsAndConditionsCheckboxesProps {
@@ -15,12 +17,11 @@ interface TermsAndConditionsCheckboxesProps {
  * BillingDetailsData should include:
  *  - confirmTnC: boolean
  *  - confirmSubscription: boolean
- *  - termsAndConditionAccepted?: boolean  // derived
+ *  - termsAndConditionAccepted?: boolean // derived
  */
 const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProps) => {
   const {
     control,
-    setValue,
     formState: { errors },
   } = form;
 
@@ -29,28 +30,23 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const setFormData = useCheckoutFormStore(state => state.setFormData);
   const confirmTnC = useWatch({ control, name: 'confirmTnC', defaultValue: billingDetailsData.confirmTnC });
   const confirmSubscription = useWatch({ control, name: 'confirmSubscription', defaultValue: billingDetailsData.confirmSubscription });
+  const { data: checkoutIntent } = useCheckoutIntent();
 
-  // Keep the derived field in sync so your Zod/Yup resolver or submit handler can use it
-  useEffect(() => {
-    const accepted = Boolean(confirmTnC && confirmSubscription);
-    setFormData(
-      DataStoreKey.BillingDetails,
+  const sendCheckBoxEvent = (event: string, value: boolean) => {
+    const eventId = checkoutIntent?.id || 'empty_checkout_intent_id';
+    sendEnterpriseTrackEvent(
+      eventId,
+      event,
       {
-        confirmTnC,
-        confirmSubscription,
-        termsAndConditionAccepted: accepted,
+        checkbox_checked: value,
+        checkoutIntent,
       },
     );
-    setValue('termsAndConditionAccepted', accepted, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-  }, [confirmTnC, confirmSubscription, setValue, setFormData]);
+  };
 
   return (
     <Form.CheckboxSet
-      name="termsAndConditions"
+      name="userDisclosureAndConsent"
       isInvalid={!isEmpty(errors)}
       aria-describedby={!isEmpty(errors) ? 'terms-and-conditions-feedback' : undefined}
       className="mt-2"
@@ -65,6 +61,10 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
             onBlur={onBlur}
             onChange={(e) => {
               onChange(e.currentTarget.checked);
+              sendCheckBoxEvent(
+                EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
+                e.currentTarget.checked,
+              );
               setFormData(
                 DataStoreKey.BillingDetails,
                 {
@@ -94,6 +94,10 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
             onBlur={onBlur}
             onChange={(e) => {
               onChange(e.currentTarget.checked);
+              sendCheckBoxEvent(
+                EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
+                e.currentTarget.checked,
+              );
               setFormData(
                 DataStoreKey.BillingDetails,
                 {
