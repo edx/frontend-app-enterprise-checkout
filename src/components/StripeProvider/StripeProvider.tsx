@@ -12,7 +12,7 @@ type StripeProviderProps = {
 
 const StripeProvider = ({ children }: StripeProviderProps) => {
   const { PUBLISHABLE_STRIPE_API_KEY } = getConfig();
-  const stripePromise = loadStripe(PUBLISHABLE_STRIPE_API_KEY);
+  const stripePromise = useMemo(() => loadStripe(PUBLISHABLE_STRIPE_API_KEY), [PUBLISHABLE_STRIPE_API_KEY]);
   const appearance: Appearance = useMemo(() => createStripeAppearance(), []);
   const checkoutSessionClientSecret = useCheckoutSessionClientSecret();
 
@@ -24,9 +24,8 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
     <CheckoutProvider
       stripe={stripePromise}
       options={{
-        // fetchClientSecret: () => Promise.resolve(stripeCheckoutSession.checkoutSessionClientSecret),
-        elementsOptions: { appearance },
         fetchClientSecret: () => Promise.resolve(checkoutSessionClientSecret),
+        elementsOptions: { appearance },
       }}
     >
       {children}
