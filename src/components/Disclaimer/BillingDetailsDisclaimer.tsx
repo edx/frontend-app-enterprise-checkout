@@ -34,5 +34,4 @@ const BillingDetailsDisclaimer = () => {
   );
 };
 
-// @ts-ignore
 export default BillingDetailsDisclaimer;

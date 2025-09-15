@@ -50,5 +50,4 @@ const StripeFormFields = () => (
   </StripeProvider>
 );
 
-// @ts-ignore
 export default StripeFormFields;

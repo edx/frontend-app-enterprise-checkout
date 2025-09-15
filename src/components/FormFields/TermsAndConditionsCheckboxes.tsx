@@ -2,7 +2,7 @@ import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
-import { Controller, type UseFormReturn, useWatch } from 'react-hook-form';
+import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent } from '@/components/app/data';
 import { DataStoreKey } from '@/constants/checkout';
@@ -28,8 +28,6 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   // Watch both source fields
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore(state => state.setFormData);
-  const confirmTnC = useWatch({ control, name: 'confirmTnC', defaultValue: billingDetailsData.confirmTnC });
-  const confirmSubscription = useWatch({ control, name: 'confirmSubscription', defaultValue: billingDetailsData.confirmSubscription });
   const { data: checkoutIntent } = useCheckoutIntent();
 
   const sendCheckBoxEvent = (event: string, value: boolean) => {

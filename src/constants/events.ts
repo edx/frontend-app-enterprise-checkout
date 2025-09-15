@@ -1,7 +1,7 @@
 /**
  * @file Documents event tracking name space
  *
- * Event names should fallow the convention of:
+ * Event names should follow the convention of:
  * <project name>.<product name>.<location>.<action>
  *
  * @example edx.ui.admin_portal. (project) subscriptions. (product) table. (location) clicked (action)

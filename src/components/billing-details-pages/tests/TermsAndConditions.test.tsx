@@ -1,3 +1,4 @@
+import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
@@ -9,8 +10,6 @@ import { useForm } from 'react-hook-form';
 import { queryClient } from '@/utils/tests';
 
 import TermsAndConditions from '../TermsAndConditions';
-
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 
 jest.mock('@edx/frontend-enterprise-utils', () => ({
   sendEnterpriseTrackEvent: jest.fn(),
