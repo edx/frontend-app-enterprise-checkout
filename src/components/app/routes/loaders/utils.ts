@@ -103,7 +103,7 @@ const populateCompletedFormFields = ({
         },
         [DataStoreKey.BillingDetails]: {
           ...s.formData[DataStoreKey.BillingDetails],
-          confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnc ?? false,
+          confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnC ?? false,
           confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmPrivacyPolicy ?? false,
         },
       },
