@@ -93,6 +93,8 @@ const populateCompletedFormFields = ({
           stripePriceId: s.formData[DataStoreKey.PlanDetails]?.stripePriceId
             ?? stripePriceId
             ?? null,
+          quantity: s.formData[DataStoreKey.PlanDetails]?.quantity
+            ?? checkoutIntent?.quantity,
         },
         [DataStoreKey.AccountDetails]: {
           ...s.formData[DataStoreKey.AccountDetails],
@@ -104,7 +106,7 @@ const populateCompletedFormFields = ({
         [DataStoreKey.BillingDetails]: {
           ...s.formData[DataStoreKey.BillingDetails],
           confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnC ?? false,
-          confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmPrivacyPolicy ?? false,
+          confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmSubscription ?? false,
         },
       },
     }),
@@ -293,9 +295,9 @@ const validateFormState = async ({
   });
 
   const results = await Promise.all(validationPromises);
-
   // Find the first failing validation (preserving order)
   const firstFail = results.find(result => result.hasErrors);
+
   if (firstFail) {
     return { valid: false, invalidRoute: firstFail.failRoute };
   }

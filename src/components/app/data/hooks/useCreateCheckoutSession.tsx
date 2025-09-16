@@ -30,6 +30,7 @@ const useCreateCheckoutSession = (): UseQueryResult<CreateCheckoutSessionRespons
   return useQuery(
     queryOptions({
       ...queryCreateCheckoutSession(checkoutSessionPayload),
+      retry: false,
     }),
   ) as UseQueryResult<CreateCheckoutSessionResponse, null>;
 };

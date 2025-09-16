@@ -122,6 +122,7 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     checkoutSessionPayload,
     isValidPayload,
   } = extractCheckoutSessionPayload();
+
   if (!isValidPayload) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
@@ -165,6 +166,7 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
     constraints: fieldConstraints,
     stripePriceId,
   });
+
   if (!valid && invalidRoute) {
     return redirect(invalidRoute);
   }

@@ -2,7 +2,6 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AddressElement, PaymentElement } from '@stripe/react-stripe-js';
 
 import { FieldContainer } from '@/components/FieldContainer';
-import { StripeProvider } from '@/components/StripeProvider';
 
 const StripeAddressTitle = () => (
   <h3 className="mb-3">
@@ -34,7 +33,7 @@ const StripePaymentTitle = () => (
 );
 
 const StripeFormFields = () => (
-  <StripeProvider>
+  <>
     <FieldContainer>
       <StripeAddressTitle />
       <AddressElement
@@ -47,7 +46,7 @@ const StripeFormFields = () => (
       <StripePaymentTitle />
       <PaymentElement />
     </FieldContainer>
-  </StripeProvider>
+  </>
 );
 
 export default StripeFormFields;
