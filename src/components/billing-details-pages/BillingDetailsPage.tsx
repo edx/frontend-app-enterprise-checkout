@@ -6,16 +6,18 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
-import { useMemo } from 'react';
+import { useCheckout } from '@stripe/react-stripe-js';
+import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
+import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
-  CheckoutStepKey,
+  CheckoutStepKey, CheckoutSubstepKey,
   DataStoreKey,
 } from '@/constants/checkout';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
@@ -25,7 +27,8 @@ const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-
+  const { confirm } = useCheckout();
+  const [erroredResponse, setErroredResponse] = useState(null);
   const StepperContent = useStepperContent();
   const { data: formValidationConstraints } = useFormValidationConstraints();
 
@@ -45,10 +48,17 @@ const BillingDetailsPage: React.FC = () => {
   const {
     handleSubmit,
   } = form;
-
-  const onSubmit = (data: BillingDetailsData) => {
+  const onSubmit = async (data: BillingDetailsData) => {
     setFormData(DataStoreKey.BillingDetails, data);
-    navigate(CheckoutPageRoute.BillingDetailsSuccess);
+    try {
+      await confirm({
+        redirect: 'if_required',
+        returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
+      });
+    } catch (error) {
+      console.log(error);
+      setErroredResponse(error);
+    }
   };
 
   const eventKey = CheckoutStepKey.BillingDetails;
@@ -74,12 +84,7 @@ const BillingDetailsPage: React.FC = () => {
               />
             </Button>
             <Stepper.ActionRow.Spacer />
-            <Button
-              variant="secondary"
-              type="submit"
-            >
-              {intl.formatMessage(stepperActionButtonMessage)}
-            </Button>
+            <StatefulSubscribeButton />
           </Stepper.ActionRow>
         )}
       </Stack>

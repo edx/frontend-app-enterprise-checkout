@@ -24,7 +24,6 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
     control,
     formState: { errors },
   } = form;
-
   // Watch both source fields
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore(state => state.setFormData);
@@ -45,7 +44,6 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   return (
     <Form.CheckboxSet
       name="userDisclosureAndConsent"
-      isInvalid={!isEmpty(errors)}
       aria-describedby={!isEmpty(errors) ? 'terms-and-conditions-feedback' : undefined}
       className="mt-2"
     >

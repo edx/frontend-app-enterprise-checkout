@@ -1,6 +1,8 @@
 import { Container, Image, Navbar } from '@openedx/paragon';
 import { Link } from 'react-router-dom';
 
+import edxLogo from '@/assets/images/edx_enterprise.svg';
+
 const Header: React.FC = () => (
   <header>
     <Navbar bg="dark" variant="dark" expand="lg">
@@ -8,7 +10,7 @@ const Header: React.FC = () => (
         <div className="navbar__brand">
           <Link to="/">
             <Image
-              src="https://business.edx.org/wp-content/uploads/2023/09/edX-For-Business_logo_horizontal_white_337%E2%80%8A%C3%97%E2%80%8A64_x2-2.png"
+              src={edxLogo}
               alt="edX for Business logo"
               style={{ maxWidth: 200 }}
               fluid
