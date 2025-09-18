@@ -29,10 +29,10 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const setFormData = useCheckoutFormStore(state => state.setFormData);
   const { data: checkoutIntent } = useCheckoutIntent();
 
-  const sendCheckBoxEvent = (event: string, value: boolean) => {
+  const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     sendEnterpriseCheckoutTrackingEvent(
       checkoutIntent!.id,
-      event,
+      eventName,
       {
         checkbox_checked: value,
         checkoutIntent,

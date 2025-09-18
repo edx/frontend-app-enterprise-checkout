@@ -6,13 +6,22 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useCheckoutIntent } from '@/components/app/data';
 import { queryClient } from '@/utils/tests';
 
 import TermsAndConditions from '../TermsAndConditions/TermsAndConditions';
 
+import MockableFunction = jest.MockableFunction;
+import MockResultReturn = jest.MockResultReturn;
+
 jest.mock('@/utils/common', () => ({
   __esModule: true,
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
+}));
+
+jest.mock('@/components/app/data', () => ({
+  ...jest.requireActual('@/components/app/data'),
+  useCheckoutIntent: jest.fn(),
 }));
 
 const TestWrapper: React.FC = () => {
@@ -29,6 +38,15 @@ const TestWrapper: React.FC = () => {
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 
 describe('TermsAndConditions', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 1,
+      },
+    });
+  });
+
   const renderComponent = () => render(
     <QueryClientProvider client={queryClient()}>
       <IntlProvider locale="en">
