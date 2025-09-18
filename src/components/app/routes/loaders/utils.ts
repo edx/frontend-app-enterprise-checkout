@@ -78,6 +78,7 @@ const populateCompletedFormFields = ({
 }: PopulateCompletedFormFieldsProps): void => {
   checkoutFormStore.setState(
     (s) => ({
+      ...s,
       formData: {
         ...s.formData,
         [DataStoreKey.PlanDetails]: {

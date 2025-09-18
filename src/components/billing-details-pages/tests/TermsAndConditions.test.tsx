@@ -27,7 +27,7 @@ const TestWrapper: React.FC = () => {
     defaultValues: {
       confirmTnC: false,
       confirmSubscription: false,
-    } as any,
+    } as Partial<BillingDetailsData>,
   });
   return <TermsAndConditions form={form} />;
 };

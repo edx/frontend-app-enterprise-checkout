@@ -104,6 +104,7 @@ const populateCheckoutSessionClientSecret = () => {
 
 const populateValidBillingDetails = () => {
   checkoutFormStore.setState(s => ({
+    ...s,
     formData: {
       ...s.formData,
       [DataStoreKey.BillingDetails]: {

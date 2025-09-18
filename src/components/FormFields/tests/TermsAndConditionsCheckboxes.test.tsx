@@ -13,14 +13,14 @@ import TermsAndConditionsCheckboxes from '../TermsAndConditionsCheckboxes';
 
 // Mock internal tracking util
 jest.mock('@/utils/common', () => ({
-  __esModule: true,
+  ...jest.requireActual('@/utils/common'),
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
 // Mock checkout intent hook via app data barrel
 jest.mock('@/components/app/data', () => ({
-  __esModule: true,
-  useCheckoutIntent: jest.fn(() => ({ data: { id: 'chk_intent_123', foo: 'bar' } })),
+  ...jest.requireActual('@/components/app/data'),
+  useCheckoutIntent: jest.fn(),
 }));
 
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
@@ -44,7 +44,12 @@ describe('TermsAndConditionsCheckboxes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Seed the Zustand store with initial Billing Details values
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 1,
+        foo: 'bar',
+      },
+    });
     checkoutFormStore.setState((s) => ({
       ...s,
       formData: {
@@ -73,11 +78,11 @@ describe('TermsAndConditionsCheckboxes', () => {
     await userEvent.click(tncCheckbox);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
-      'chk_intent_123',
+      1,
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       expect.objectContaining({
         checkbox_checked: true,
-        checkoutIntent: { id: 'chk_intent_123', foo: 'bar' },
+        checkoutIntent: { id: 1, foo: 'bar' },
       }),
     );
   });
@@ -89,11 +94,11 @@ describe('TermsAndConditionsCheckboxes', () => {
     await userEvent.click(subCheckbox);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
-      'chk_intent_123',
+      1,
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
       expect.objectContaining({
         checkbox_checked: true,
-        checkoutIntent: { id: 'chk_intent_123', foo: 'bar' },
+        checkoutIntent: { id: 1, foo: 'bar' },
       }),
     );
   });
@@ -108,7 +113,7 @@ describe('TermsAndConditionsCheckboxes', () => {
     await userEvent.click(tncCheckbox);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
-      'empty_checkout_intent_id',
+      null,
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       expect.objectContaining({
         checkbox_checked: true,
