@@ -1,5 +1,6 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AddressElement, PaymentElement } from '@stripe/react-stripe-js';
+import { StripeAddressElementOptions } from '@stripe/stripe-js';
 
 import { FieldContainer } from '@/components/FieldContainer';
 import { StripeProvider } from '@/components/StripeProvider';
@@ -33,21 +34,32 @@ const StripePaymentTitle = () => (
   </>
 );
 
-const StripeFormFields = () => (
-  <StripeProvider>
-    <FieldContainer>
-      <StripeAddressTitle />
-      <AddressElement
-        options={{
-          mode: 'billing',
-        }}
-      />
-    </FieldContainer>
-    <FieldContainer>
-      <StripePaymentTitle />
-      <PaymentElement />
-    </FieldContainer>
-  </StripeProvider>
-);
+const StripeFormFields = () => {
+  /**
+   * Stripe AddressElement configured for collecting the cardholder’s billing address.
+   *
+   * The `mode: "billing"` option ensures the address is tied to the payment method
+   * and used for fraud checks and payment authorization.
+   *
+   * Docs: https://docs.stripe.com/elements/address-element
+   */
+  const addressElementOptions: StripeAddressElementOptions = {
+    mode: 'billing',
+  };
+  return (
+    <StripeProvider>
+      <FieldContainer>
+        <StripeAddressTitle />
+        <AddressElement
+          options={addressElementOptions}
+        />
+      </FieldContainer>
+      <FieldContainer>
+        <StripePaymentTitle />
+        <PaymentElement />
+      </FieldContainer>
+    </StripeProvider>
+  );
+};
 
 export default StripeFormFields;

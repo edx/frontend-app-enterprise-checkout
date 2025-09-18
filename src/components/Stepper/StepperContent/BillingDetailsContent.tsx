@@ -1,7 +1,8 @@
 import { Stack } from '@openedx/paragon';
 
+import { TermsAndConditions } from '@/components/billing-details-pages/TermsAndConditions';
 import { BillingDetailsDisclaimer } from '@/components/Disclaimer';
-import { StripeFormFields, TermsAndConditions } from '@/components/FormFields';
+import { StripeFormFields } from '@/components/FormFields';
 
 import type { UseFormReturn } from 'react-hook-form';
 

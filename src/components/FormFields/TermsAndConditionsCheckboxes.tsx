@@ -17,7 +17,6 @@ interface TermsAndConditionsCheckboxesProps {
  * BillingDetailsData should include:
  *  - confirmTnC: boolean
  *  - confirmSubscription: boolean
- *  - termsAndConditionAccepted?: boolean // derived
  */
 const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProps) => {
   const {
@@ -31,9 +30,8 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const { data: checkoutIntent } = useCheckoutIntent();
 
   const sendCheckBoxEvent = (event: string, value: boolean) => {
-    const eventId = checkoutIntent?.id.toString(10) || 'empty_checkout_intent_id';
     sendEnterpriseCheckoutTrackingEvent(
-      eventId,
+      checkoutIntent!.id,
       event,
       {
         checkbox_checked: value,

@@ -71,7 +71,8 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     const { checkoutIntent, pricing } = contextMetadata;
 
     const {
-      existingSuccessfulCheckoutIntent, expiredCheckoutIntent,
+      existingSuccessfulCheckoutIntent,
+      expiredCheckoutIntent,
     } = determineExistingCheckoutIntentState(checkoutIntent);
 
     const stripePriceId = extractPriceId(pricing);

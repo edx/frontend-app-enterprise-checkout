@@ -5,18 +5,12 @@ import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 
 const useCheckoutIntent = () => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
-  const checkoutIntent = useBFFContext<CheckoutContextCheckoutIntent | null>(
+  return useBFFContext<CheckoutContextCheckoutIntent | null>(
     authenticatedUser?.userId ?? null,
     {
-      select: (data: CheckoutContextResponse): CheckoutContextCheckoutIntent | null => {
-        if (data.checkoutIntent) {
-          return data.checkoutIntent;
-        }
-        return null;
-      },
+      select: (data: CheckoutContextResponse): CheckoutContextCheckoutIntent | null => data.checkoutIntent || null,
     },
   );
-  return checkoutIntent;
 };
 
 export default useCheckoutIntent;

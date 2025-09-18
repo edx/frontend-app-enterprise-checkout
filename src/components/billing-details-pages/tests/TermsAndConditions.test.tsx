@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 
 import { queryClient } from '@/utils/tests';
 
-import TermsAndConditions from '../TermsAndConditions';
+import TermsAndConditions from '../TermsAndConditions/TermsAndConditions';
 
 jest.mock('@/utils/common', () => ({
   __esModule: true,

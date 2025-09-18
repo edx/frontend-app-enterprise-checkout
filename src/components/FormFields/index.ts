@@ -1,7 +1,6 @@
 export { default as Field } from './Field';
 export { default as AuthenticatedUserField } from './AuthenticatedUserField';
 export { default as CustomUrlField } from './CustomUrlField';
-export { default as TermsAndConditions } from '../billing-details-pages/TermsAndConditions';
 export { default as LicensesField } from './LicensesField';
 export { default as LoginFields } from './LoginFields';
 export { default as NameAndEmailFields } from './NameAndEmailFields';

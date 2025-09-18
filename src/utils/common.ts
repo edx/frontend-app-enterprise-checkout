@@ -91,11 +91,11 @@ const formatPrice = (price: number, options = {}) => {
 
 const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
 
-const sendEnterpriseCheckoutTrackingEvent = (checkoutIntentId: string, eventName: string, properties = {}) => {
+const sendEnterpriseCheckoutTrackingEvent = (checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null, eventName: string, properties = {}) => {
   sendTrackEvent(
     eventName,
     {
-      checkoutIntentId,
+      checkoutIntentId: checkoutIntentId ? checkoutIntentId.toString(10) : null,
       ...properties,
     },
   );
