@@ -11,11 +11,8 @@ import { queryClient } from '@/utils/tests';
 
 import TermsAndConditions from '../TermsAndConditions/TermsAndConditions';
 
-import MockableFunction = jest.MockableFunction;
-import MockResultReturn = jest.MockResultReturn;
-
 jest.mock('@/utils/common', () => ({
-  __esModule: true,
+  ...jest.requireActual('@/utils/common'),
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
