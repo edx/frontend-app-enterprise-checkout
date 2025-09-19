@@ -136,7 +136,16 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (
+  z.object({
+    confirmTnC: z.boolean().refine((value) => value, {
+      message: 'Please accept the terms.',
+    }),
+    confirmSubscription: z.boolean().refine((value) => value, {
+      message: 'Please confirm organization subscription.',
+    }),
+  })
+);
 
 export const CheckoutPageRoute = {
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
@@ -224,7 +233,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     }),
     buttonMessage: defineMessages({
       id: 'checkout.billingDetails.purchaseNow',
-      defaultMessage: 'Purchase Now',
+      defaultMessage: 'Subscribe',
       description: 'Button to purchase the subscription product',
     }),
   },

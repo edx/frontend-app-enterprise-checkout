@@ -1,3 +1,4 @@
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { logError } from '@edx/frontend-platform/logging';
 import dayjs from 'dayjs';
 
@@ -36,10 +37,15 @@ function queryCacheOnErrorHandler(query) {
 /**
  * Given a CSS variable name, returns the computed value of the CSS variable.
  * @param {string} cssVariableName A string representing a CSS variable.
+ * @param {string} fallback A fallback value to return if the CSS variable is not found or window is undefined.
  * @returns {string} The computed value of the CSS variable.
  */
-function getComputedStylePropertyCSSVariable(cssVariableName: string) {
-  return getComputedStyle(document.documentElement).getPropertyValue(cssVariableName);
+function getComputedStylePropertyCSSVariable(cssVariableName: string, fallback: string = '') {
+  if (typeof window === 'undefined') {
+    return fallback;
+  }
+  const value = getComputedStyle(document.documentElement).getPropertyValue(cssVariableName).trim();
+  return value || fallback;
 }
 
 /**
@@ -85,6 +91,24 @@ const formatPrice = (price: number, options = {}) => {
 
 const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
 
+const sendEnterpriseCheckoutTrackingEvent = ({
+  checkoutIntentId,
+  eventName,
+  properties = {},
+}: {
+  checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null;
+  eventName: string;
+  properties?: Record<string, any>;
+}) => {
+  sendTrackEvent(
+    eventName,
+    {
+      checkoutIntentId,
+      ...properties,
+    },
+  );
+};
+
 export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
@@ -92,4 +116,5 @@ export {
   queryCacheOnErrorHandler,
   serverValidationError,
   isExpired,
+  sendEnterpriseCheckoutTrackingEvent,
 };

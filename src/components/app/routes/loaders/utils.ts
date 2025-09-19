@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
   AccountDetailsSchema,
+  BillingDetailsSchema,
   CheckoutPageRoute,
   DataStoreKey,
   PlanDetailsSchema,
@@ -52,10 +53,8 @@ const determineExistingCheckoutIntentState = (
   }
 
   return {
-    // @ts-ignore
-    existingSuccessfulCheckoutIntent: checkoutIntent.existingSuccessfulCheckoutIntent,
-    // @ts-ignore
-    expiredCheckoutIntent: checkoutIntent.expiredCheckoutIntent,
+    existingSuccessfulCheckoutIntent: checkoutIntent.existingSuccessfulCheckoutIntent!,
+    expiredCheckoutIntent: checkoutIntent.expiredCheckoutIntent!,
   };
 };
 
@@ -80,6 +79,7 @@ const populateCompletedFormFields = ({
 }: PopulateCompletedFormFieldsProps): void => {
   checkoutFormStore.setState(
     (s) => ({
+      ...s,
       formData: {
         ...s.formData,
         [DataStoreKey.PlanDetails]: {
@@ -102,6 +102,11 @@ const populateCompletedFormFields = ({
             ?? checkoutIntent?.enterpriseSlug,
           companyName: s.formData[DataStoreKey.AccountDetails]?.companyName
             ?? checkoutIntent?.enterpriseName,
+        },
+        [DataStoreKey.BillingDetails]: {
+          ...s.formData[DataStoreKey.BillingDetails],
+          confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnC ?? false,
+          confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmSubscription ?? false,
         },
       },
     }),
@@ -142,13 +147,12 @@ const makeResolvers = (
 
   const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints));
 
-  // const billingDetailsResolver: ResolverFn =
-  //   zodResolver(BillingDetailsSchema(constraints));
+  const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
 
   return {
     planDetailsResolver,
     accountDetailsResolver,
-    // billingDetailsResolver,
+    billingDetailsResolver,
   };
 };
 
@@ -165,7 +169,7 @@ interface PrerequisiteCheck<T> {
  * Each entry includes which form slice to validate, how to build its resolver,
  * and the route that should be returned if that slice is invalid.
  */
-const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
+export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
   PlanDetails: [],
   AccountDetails: [
     {
@@ -185,12 +189,6 @@ const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
       getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
       failRoute: CheckoutPageRoute.AccountDetails,
     },
-    // If you add a BillingDetails schema, include it as the last guard:
-    // {
-    //   pick: (formData) => formData[DataStoreKey.BillingDetails],
-    //   getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
-    //   failRoute: CheckoutPageRoute.BillingDetails,
-    // },
   ],
 };
 

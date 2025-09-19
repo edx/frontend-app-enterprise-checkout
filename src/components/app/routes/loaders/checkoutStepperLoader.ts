@@ -143,23 +143,10 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-  const { fieldConstraints, pricing } = contextMetadata;
+  const { checkoutIntent } = contextMetadata;
 
-  const stripePriceId = extractPriceId(pricing);
-  if (!stripePriceId) {
+  if (!checkoutIntent?.existingSuccessfulCheckoutIntent) {
     return redirect(CheckoutPageRoute.PlanDetails);
-  }
-
-  const {
-    valid,
-    invalidRoute,
-  } = await validateFormState({
-    checkoutStep: 'BillingDetails',
-    constraints: fieldConstraints,
-    stripePriceId,
-  });
-  if (!valid && invalidRoute) {
-    return redirect(invalidRoute);
   }
 
   return null;
@@ -187,12 +174,8 @@ const PAGE_LOADERS: Record<CheckoutPage, (queryClient: QueryClient) => Promise<R
  * @param {QueryClient} queryClient - Provided for parity with other loader factories (unused here).
  * @returns {LoaderFunction} A loader that dispatches to page-specific loaders based on route params.
  */
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRootLoader(queryClient) {
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return async function checkoutStepperLoader({ params = {}, request }) {
+  return async function checkoutStepperLoader({ params = {} }) {
     const { currentStep, currentSubstep } = getStepFromParams(params);
     const pageDetails = getCheckoutPageDetails({ step: currentStep, substep: currentSubstep });
     if (!pageDetails) {
