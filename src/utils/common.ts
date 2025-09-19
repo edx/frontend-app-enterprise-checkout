@@ -91,7 +91,15 @@ const formatPrice = (price: number, options = {}) => {
 
 const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
 
-const sendEnterpriseCheckoutTrackingEvent = (checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null, eventName: string, properties = {}) => {
+const sendEnterpriseCheckoutTrackingEvent = ({
+  checkoutIntentId,
+  eventName,
+  properties = {},
+}: {
+  checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null;
+  eventName: string;
+  properties?: Record<string, any>;
+}) => {
   sendTrackEvent(
     eventName,
     {

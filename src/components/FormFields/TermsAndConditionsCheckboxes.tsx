@@ -31,14 +31,15 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
 
   const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     const checkoutIntentId = checkoutIntent?.id ?? null;
-    sendEnterpriseCheckoutTrackingEvent(
+    sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId,
       eventName,
-      {
+      properties: {
         checkbox_checked: value,
         checkoutIntent,
-      },
-    );
+      }
+      ,
+    });
   };
 
   return (

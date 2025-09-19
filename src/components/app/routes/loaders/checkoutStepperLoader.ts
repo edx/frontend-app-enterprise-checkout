@@ -143,23 +143,10 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-  const { fieldConstraints, pricing } = contextMetadata;
+  const { checkoutIntent } = contextMetadata;
 
-  const stripePriceId = extractPriceId(pricing);
-  if (!stripePriceId) {
+  if (!checkoutIntent?.existingSuccessfulCheckoutIntent) {
     return redirect(CheckoutPageRoute.PlanDetails);
-  }
-
-  const {
-    valid,
-    invalidRoute,
-  } = await validateFormState({
-    checkoutStep: 'BillingDetailsSuccess',
-    constraints: fieldConstraints,
-    stripePriceId,
-  });
-  if (!valid && invalidRoute) {
-    return redirect(invalidRoute);
   }
 
   return null;

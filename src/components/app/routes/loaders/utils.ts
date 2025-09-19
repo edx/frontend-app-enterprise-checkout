@@ -189,24 +189,6 @@ export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>
       failRoute: CheckoutPageRoute.AccountDetails,
     },
   ],
-  BillingDetailsSuccess: [
-    {
-      pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
-      failRoute: CheckoutPageRoute.PlanDetails,
-    },
-    {
-      pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
-      failRoute: CheckoutPageRoute.AccountDetails,
-    },
-    // If you add a BillingDetails schema, include it as the last guard:
-    {
-      pick: (formData) => formData[DataStoreKey.BillingDetails],
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).billingDetailsResolver,
-      failRoute: CheckoutPageRoute.BillingDetails,
-    },
-  ],
 };
 
 /**

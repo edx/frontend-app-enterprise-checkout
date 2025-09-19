@@ -5,7 +5,7 @@ import { StripeAddressElementOptions } from '@stripe/stripe-js';
 import { FieldContainer } from '@/components/FieldContainer';
 import { StripeProvider } from '@/components/StripeProvider';
 
-const StripeAddressTitle = () => (
+const BillingAddressTitle = () => (
   <h3 className="mb-3">
     <FormattedMessage
       id="billingDetailsPage.stripeFormFields.billingAddress.title"
@@ -15,7 +15,7 @@ const StripeAddressTitle = () => (
   </h3>
 );
 
-const StripePaymentTitle = () => (
+const BillingPaymentTitle = () => (
   <>
     <h3>
       <FormattedMessage
@@ -34,7 +34,7 @@ const StripePaymentTitle = () => (
   </>
 );
 
-const StripeFormFields = () => {
+const BillingFormFields = () => {
   /**
    * Stripe AddressElement configured for collecting the cardholder’s billing address.
    *
@@ -49,17 +49,17 @@ const StripeFormFields = () => {
   return (
     <StripeProvider>
       <FieldContainer>
-        <StripeAddressTitle />
+        <BillingAddressTitle />
         <AddressElement
           options={addressElementOptions}
         />
       </FieldContainer>
       <FieldContainer>
-        <StripePaymentTitle />
+        <BillingPaymentTitle />
         <PaymentElement />
       </FieldContainer>
     </StripeProvider>
   );
 };
 
-export default StripeFormFields;
+export default BillingFormFields;
