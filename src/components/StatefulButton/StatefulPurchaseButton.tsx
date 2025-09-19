@@ -1,13 +1,12 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { StatefulButton } from '@openedx/paragon';
 import { Lock } from '@openedx/paragon/icons';
-import PropTypes from 'prop-types';
 
 interface StatefulPurchaseButtonProps {
   isFormValid: boolean;
 }
 
-const StatefulPurchaseButton: React.FC<StatefulPurchaseButtonProps> = ({ isFormValid }) => {
+const StatefulPurchaseButton = ({ isFormValid }: StatefulPurchaseButtonProps) => {
   const intl = useIntl();
   const labels = {
     default: intl.formatMessage({
@@ -47,10 +46,6 @@ const StatefulPurchaseButton: React.FC<StatefulPurchaseButtonProps> = ({ isFormV
       </span>
     </div>
   );
-};
-
-StatefulPurchaseButton.propTypes = {
-  isFormValid: PropTypes.bool.isRequired,
 };
 
 export default StatefulPurchaseButton;

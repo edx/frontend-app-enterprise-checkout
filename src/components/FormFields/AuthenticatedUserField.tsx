@@ -1,5 +1,4 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import PropTypes from 'prop-types';
 
 import { FieldContainer } from '@/components/FieldContainer';
 
@@ -8,7 +7,7 @@ interface AuthenticatedUserFieldProps {
   adminEmail: string;
 }
 
-const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullName, adminEmail }) => (
+const AuthenticatedUserField = ({ fullName, adminEmail }: AuthenticatedUserFieldProps) => (
   <FieldContainer>
     <div>
       <h3>
@@ -31,10 +30,5 @@ const AuthenticatedUserField: React.FC<AuthenticatedUserFieldProps> = ({ fullNam
     </div>
   </FieldContainer>
 );
-
-AuthenticatedUserField.propTypes = {
-  fullName: PropTypes.string.isRequired,
-  adminEmail: PropTypes.string.isRequired,
-};
 
 export default AuthenticatedUserField;
