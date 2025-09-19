@@ -77,14 +77,14 @@ describe('TermsAndConditionsCheckboxes', () => {
     const tncCheckbox = screen.getByLabelText(/I have read and accepted/i);
     await userEvent.click(tncCheckbox);
 
-    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
-      1,
-      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
-      expect.objectContaining({
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
+      checkoutIntentId: 1,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
+      properties: expect.objectContaining({
         checkbox_checked: true,
         checkoutIntent: { id: 1, foo: 'bar' },
       }),
-    );
+    });
   });
 
   it('sends Segment event with expected payload when toggling subscription confirmation checkbox', async () => {
@@ -93,14 +93,14 @@ describe('TermsAndConditionsCheckboxes', () => {
     const subCheckbox = screen.getByLabelText(/I confirm I am subscribing/i);
     await userEvent.click(subCheckbox);
 
-    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
-      1,
-      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
-      expect.objectContaining({
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
+      checkoutIntentId: 1,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
+      properties: expect.objectContaining({
         checkbox_checked: true,
         checkoutIntent: { id: 1, foo: 'bar' },
       }),
-    );
+    });
   });
 
   it('falls back to empty checkout intent id when checkoutIntent is missing', async () => {
@@ -112,13 +112,13 @@ describe('TermsAndConditionsCheckboxes', () => {
     const tncCheckbox = screen.getByLabelText(/I have read and accepted/i);
     await userEvent.click(tncCheckbox);
 
-    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
-      null,
-      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
-      expect.objectContaining({
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
+      checkoutIntentId: null,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
+      properties: expect.objectContaining({
         checkbox_checked: true,
         checkoutIntent: null,
       }),
-    );
+    });
   });
 });

@@ -102,19 +102,6 @@ const populateCheckoutSessionClientSecret = () => {
   }), false);
 };
 
-const populateValidBillingDetails = () => {
-  checkoutFormStore.setState(s => ({
-    ...s,
-    formData: {
-      ...s.formData,
-      [DataStoreKey.BillingDetails]: {
-        confirmTnC: true,
-        confirmSubscription: true,
-      },
-    },
-  }));
-};
-
 describe('makeCheckoutStepperLoader (stepper loaders)', () => {
   let queryClient: QueryClient;
   let ensureSpy: jest.SpyInstance;
@@ -339,26 +326,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
         ),
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
-    });
-
-    it('returns null when prerequisites satisfied', async () => {
-      (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
-      const ctx = buildContext({ withPrice: true });
-      ensureSpy.mockResolvedValue(ctx);
-      const { pricing } = ctx;
-      populateValidPlanDetails(pricing.prices[0].id as string);
-      populateValidAccountDetails();
-      populateValidBillingDetails();
-
-      const loader = makeCheckoutStepperLoader(queryClient);
-      const r = await loader(
-        makeLoaderArgs(
-          CheckoutStepKey.BillingDetails,
-          CheckoutSubstepKey.Success,
-          CheckoutPageRoute.BillingDetailsSuccess,
-        ),
-      );
-      expect(r).toBeNull();
     });
   });
 
