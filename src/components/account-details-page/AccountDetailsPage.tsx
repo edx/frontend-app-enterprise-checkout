@@ -13,7 +13,7 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { useFormValidationConstraints } from '@/components/app/data';
+import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
@@ -22,10 +22,12 @@ import {
   CheckoutStepKey,
   DataStoreKey,
 } from '@/constants/checkout';
+import EVENT_NAMES from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPageDetails,
 } from '@/hooks/index';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 
@@ -36,6 +38,7 @@ const AccountDetailsPage: React.FC = () => {
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
+  const { data: checkoutIntent } = useCheckoutIntent();
   const queryClient = useQueryClient();
   // AppContext is not typed upstream.
   // @ts-ignore
@@ -110,7 +113,16 @@ const AccountDetailsPage: React.FC = () => {
     // Update form state with new field values.
     setFormData(DataStoreKey.AccountDetails, data);
 
-    // TODO: Emit Segment event representing the account details page continue button was clicked.
+    // Emit Segment event representing the account details page continue button was clicked.
+    sendEnterpriseCheckoutTrackingEvent({
+      checkoutIntentId: checkoutIntent?.id ?? null,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED,
+      properties: {
+        checkoutIntent,
+        planDetailsFormData,
+        accountDetailsFormData,
+      },
+    });
 
     // Create a new checkout session needed for the billing details page (next).
     const { companyName, enterpriseSlug } = data;
