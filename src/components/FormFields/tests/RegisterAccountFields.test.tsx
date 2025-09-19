@@ -1,15 +1,34 @@
+import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { IntlProvider } from '@edx/frontend-platform/i18n';
 
 import { PlanDetailsRegisterPageSchema } from '@/constants/checkout';
+
 import RegisterAccountFields from '../RegisterAccountFields';
+
+// Mock constraints for testing
+const mockConstraints: CheckoutContextFieldConstraints = {
+  quantity: {
+    min: 1,
+    max: 1000,
+    minLength: 1,
+    maxLength: 10,
+    pattern: '^[0-9]+$',
+  },
+  enterpriseSlug: {
+    min: 1,
+    max: 50,
+    minLength: 2,
+    maxLength: 50,
+    pattern: '^[a-z0-9-]+$',
+  },
+};
 
 // Create a test wrapper component
 const TestWrapper = () => {
   const form = useForm({
-    resolver: zodResolver(PlanDetailsRegisterPageSchema({})),
+    resolver: zodResolver(PlanDetailsRegisterPageSchema(mockConstraints)),
     defaultValues: {
       adminEmail: '',
       fullName: '',

@@ -8,8 +8,26 @@ jest.mock('@/components/app/data/services/registration', () => ({
   }),
 }));
 
+// Mock constraints for testing
+const mockConstraints: CheckoutContextFieldConstraints = {
+  quantity: {
+    min: 1,
+    max: 1000,
+    minLength: 1,
+    maxLength: 10,
+    pattern: '^[0-9]+$',
+  },
+  enterpriseSlug: {
+    min: 1,
+    max: 50,
+    minLength: 2,
+    maxLength: 50,
+    pattern: '^[a-z0-9-]+$',
+  },
+};
+
 describe('PlanDetailsRegisterPageSchema', () => {
-  const schema = PlanDetailsRegisterPageSchema({});
+  const schema = PlanDetailsRegisterPageSchema(mockConstraints);
 
   it('validates valid registration data', async () => {
     const validData = {
