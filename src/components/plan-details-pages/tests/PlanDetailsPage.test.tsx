@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import { CheckoutPageRoute } from '@/constants/checkout';
