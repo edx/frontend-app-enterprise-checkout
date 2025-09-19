@@ -8,7 +8,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +37,7 @@ const AccountDetailsPage: React.FC = () => {
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
+  const checkoutSessionClientSecret = useCheckoutFormStore((state) => state.checkoutSessionClientSecret);
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
   const { data: checkoutIntent } = useCheckoutIntent();
   const queryClient = useQueryClient();
@@ -62,8 +63,9 @@ const AccountDetailsPage: React.FC = () => {
 
   const {
     handleSubmit,
-    formState: { isValid },
+    formState: { isDirty: formIsDirty, isValid: formIsValid },
     setError,
+    reset: formReset,
   } = form;
 
   const createCheckoutSessionMutation = useCreateCheckoutSessionMutation({
@@ -109,9 +111,38 @@ const AccountDetailsPage: React.FC = () => {
     },
   });
 
+  // Reset the mutation when form fields change AFTER a mutation has run once
+  // already but the user revisited this page via the back button.
+  //
+  // This causes the Continue button to change appearance by removing the
+  // success checkmark, and it unlocks the onSubmit callback to perform
+  // side-effects again.
+  const { isSuccess: mutationIsSuccess, reset: resetMutation } = createCheckoutSessionMutation;
+  useEffect(() => {
+    // Only allow resetting if the last call was successful.
+    if (!mutationIsSuccess) {
+      return;
+    }
+    // Only reset the mutation when the form has changed since the last submission attempt
+    // (formIsDirty), OR when something cleared the checkoutSessionClientSecret which could happen if
+    // prior pages want to invalidate it.
+    if (formIsDirty || checkoutSessionClientSecret === undefined) {
+      resetMutation();
+    }
+  }, [
+    formIsDirty,
+    mutationIsSuccess,
+    resetMutation,
+    checkoutSessionClientSecret,
+  ]);
+
+  // Handle whenever the Continue button is clicked.
   const onSubmit = (data: AccountDetailsData) => {
-    // Update form state with new field values.
+    // Update persisted form state with new field values.
     setFormData(DataStoreKey.AccountDetails, data);
+
+    // Also reset the form itself to make formIsDirty=false again.
+    formReset(data);
 
     // Emit Segment event representing the account details page continue button was clicked.
     sendEnterpriseCheckoutTrackingEvent({
@@ -124,16 +155,22 @@ const AccountDetailsPage: React.FC = () => {
       },
     });
 
-    // Create a new checkout session needed for the billing details page (next).
-    const { companyName, enterpriseSlug } = data;
-    const { quantity, adminEmail, stripePriceId } = planDetailsFormData;
-    createCheckoutSessionMutation.mutate({
-      stripePriceId,
-      adminEmail,
-      enterpriseSlug,
-      companyName,
-      quantity,
-    });
+    // Don't perform side-effect when the mutation has already succeeded.
+    if (!createCheckoutSessionMutation.isSuccess) {
+      // Create a new checkout session needed for the billing details page (next).
+      const { companyName, enterpriseSlug } = data;
+      const { quantity, adminEmail, stripePriceId } = planDetailsFormData;
+      createCheckoutSessionMutation.mutate({
+        stripePriceId,
+        adminEmail,
+        enterpriseSlug,
+        companyName,
+        quantity,
+      });
+    } else {
+      // We won't perform side-effect, so just proceed to next page.
+      navigate(CheckoutPageRoute.BillingDetails);
+    }
   };
 
   const StepperContent = useStepperContent();
@@ -162,9 +199,10 @@ const AccountDetailsPage: React.FC = () => {
           </Button>
           <Stepper.ActionRow.Spacer />
           <AccountDetailsSubmitButton
-            formIsValid={isValid}
+            formIsValid={formIsValid}
             submissionIsPending={createCheckoutSessionMutation.isPending}
             submissionIsSuccess={createCheckoutSessionMutation.isSuccess}
+            submissionIsError={createCheckoutSessionMutation.isError}
           />
         </Stepper.ActionRow>
         )}
