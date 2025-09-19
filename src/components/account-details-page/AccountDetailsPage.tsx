@@ -1,4 +1,4 @@
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -27,8 +27,9 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 
+import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
+
 const AccountDetailsPage: React.FC = () => {
-  const intl = useIntl();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
@@ -106,7 +107,10 @@ const AccountDetailsPage: React.FC = () => {
   });
 
   const onSubmit = (data: AccountDetailsData) => {
+    // Update form state with new field values.
     setFormData(DataStoreKey.AccountDetails, data);
+
+    // TODO: Emit Segment event representing the account details page continue button was clicked.
 
     // Create a new checkout session needed for the billing details page (next).
     const { companyName, enterpriseSlug } = data;
@@ -145,14 +149,11 @@ const AccountDetailsPage: React.FC = () => {
             />
           </Button>
           <Stepper.ActionRow.Spacer />
-          <Button
-            variant="secondary"
-            type="submit"
-            disabled={!isValid}
-            data-testid="stepper-submit-button"
-          >
-            {intl.formatMessage(stepperActionButtonMessage)}
-          </Button>
+          <AccountDetailsSubmitButton
+            formIsValid={isValid}
+            submissionIsPending={createCheckoutSessionMutation.isPending}
+            submissionIsSuccess={createCheckoutSessionMutation.isSuccess}
+          />
         </Stepper.ActionRow>
         )}
       </Stack>
