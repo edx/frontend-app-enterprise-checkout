@@ -103,7 +103,7 @@ const sendEnterpriseCheckoutTrackingEvent = ({
   sendTrackEvent(
     eventName,
     {
-      checkoutIntentId: checkoutIntentId ? checkoutIntentId.toString(10) : null,
+      checkoutIntentId,
       ...properties,
     },
   );

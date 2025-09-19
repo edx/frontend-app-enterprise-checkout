@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
-  AccountDetailsSchema, BillingDetailsSchema,
+  AccountDetailsSchema,
+  BillingDetailsSchema,
   CheckoutPageRoute,
   DataStoreKey,
   PlanDetailsSchema,
