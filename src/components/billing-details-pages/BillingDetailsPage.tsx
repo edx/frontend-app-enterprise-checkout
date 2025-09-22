@@ -1,4 +1,4 @@
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -6,25 +6,28 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
+import { useCheckout } from '@stripe/react-stripe-js';
 import { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
+import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
   CheckoutStepKey,
+  CheckoutSubstepKey,
   DataStoreKey,
 } from '@/constants/checkout';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 
 const BillingDetailsPage: React.FC = () => {
-  const intl = useIntl();
   const navigate = useNavigate();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
+  const { confirm } = useCheckout();
 
   const StepperContent = useStepperContent();
   const { data: formValidationConstraints } = useFormValidationConstraints();
@@ -46,8 +49,12 @@ const BillingDetailsPage: React.FC = () => {
     handleSubmit,
   } = form;
 
-  const onSubmit = (data: BillingDetailsData) => {
+  const onSubmit = async (data: BillingDetailsData) => {
     setFormData(DataStoreKey.BillingDetails, data);
+    await confirm({
+      redirect: 'if_required',
+      returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
+    });
     navigate(CheckoutPageRoute.BillingDetailsSuccess);
   };
 
@@ -74,12 +81,7 @@ const BillingDetailsPage: React.FC = () => {
               />
             </Button>
             <Stepper.ActionRow.Spacer />
-            <Button
-              variant="secondary"
-              type="submit"
-            >
-              {intl.formatMessage(stepperActionButtonMessage)}
-            </Button>
+            <StatefulSubscribeButton />
           </Stepper.ActionRow>
         )}
       </Stack>

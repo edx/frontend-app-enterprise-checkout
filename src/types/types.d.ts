@@ -277,6 +277,7 @@ declare global {
     state: CheckoutIntentState;
     enterpriseName: string;
     enterpriseSlug: string;
+    quantity: number;
     stripeCheckoutSessionId: string;
     lastCheckoutError: string;
     lastProvisioningError: string;
