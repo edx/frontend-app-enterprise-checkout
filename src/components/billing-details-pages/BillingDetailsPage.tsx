@@ -55,7 +55,6 @@ const BillingDetailsPage: React.FC = () => {
       redirect: 'if_required',
       returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
     });
-    navigate(CheckoutPageRoute.BillingDetailsSuccess);
   };
 
   const eventKey = CheckoutStepKey.BillingDetails;

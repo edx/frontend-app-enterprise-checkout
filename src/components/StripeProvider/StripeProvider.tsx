@@ -5,6 +5,7 @@ import { ReactNode, useMemo } from 'react';
 
 import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
 import { createStripeAppearance } from '@/components/StripeProvider/utils';
+import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 type StripeProviderProps = {
   children: ReactNode;
@@ -15,6 +16,12 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
   const stripePromise = useMemo(() => loadStripe(PUBLISHABLE_STRIPE_API_KEY), [PUBLISHABLE_STRIPE_API_KEY]);
   const appearance: Appearance = useMemo(() => createStripeAppearance(), []);
   const checkoutSessionClientSecret = useCheckoutSessionClientSecret();
+  const checkoutSessionStatus = useCheckoutFormStore(state => state.checkoutSessionStatus);
+  // Approach #1: Use react useEffect to check state of client secret updates
+  //
+  // if (checkoutSessionStatus.type === 'complete') {
+  //   return null;
+  // }
 
   if (!checkoutSessionClientSecret) {
     return null;

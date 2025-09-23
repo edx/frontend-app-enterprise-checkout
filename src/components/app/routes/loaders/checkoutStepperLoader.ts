@@ -5,6 +5,7 @@ import { redirect } from 'react-router-dom';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
 /**
@@ -143,9 +144,12 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
+
   const { checkoutIntent } = contextMetadata;
 
-  if (!checkoutIntent?.existingSuccessfulCheckoutIntent) {
+  const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+
+  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 

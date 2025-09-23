@@ -37,10 +37,20 @@ export const useCheckoutFormStore = create<FormStore>(
     ),
     /* Place to memorize the checkout session client secret. */
     checkoutSessionClientSecret: undefined,
+    checkoutSessionStatus: {
+      type: null,
+      paymentStatus: null,
+    },
     setCheckoutSessionClientSecret: (secret) => set(
       (store) => ({
         ...store,
         checkoutSessionClientSecret: secret,
+      }),
+    ),
+    setCheckoutSessionStatus: (status) => set(
+      (store) => ({
+        ...store,
+        checkoutSessionStatus: status,
       }),
     ),
   }),
