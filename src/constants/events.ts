@@ -20,6 +20,7 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   // PlanDetailsLogin
   // PlanDetailsRegistration
   // AccountDetails
+  ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.account_details_continue_button.clicked`,
   // BillingDetails
   TOGGLE_TNC_TERMS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.terms_and_conditions_checkbox.toggled`,
   TOGGLE_SUBSCRIPTION_TERMS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.subscription_terms_checkbox.toggled`,

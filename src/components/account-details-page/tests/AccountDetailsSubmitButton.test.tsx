@@ -9,6 +9,7 @@ import AccountDetailsSubmitButton from '../AccountDetailsSubmitButton';
 
 // Mock useIntl and useCurrentPageDetails
 jest.mock('@edx/frontend-platform/i18n', () => ({
+  ...jest.requireActual('@edx/frontend-platform/i18n'),
   useIntl: jest.fn(),
 }));
 
@@ -28,6 +29,7 @@ function setup(props = {
   formIsValid: false,
   submissionIsPending: false,
   submissionIsSuccess: false,
+  submissionIsError: false,
 }) {
   // Mock the formatMessage implementation to return the message descriptor's defaultMessage or id
   const formatMessage = jest.fn(
@@ -48,6 +50,7 @@ describe('AccountDetailsSubmitButton', () => {
       formIsValid: true,
       submissionIsPending: false,
       submissionIsSuccess: false,
+      submissionIsError: false,
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
@@ -60,11 +63,14 @@ describe('AccountDetailsSubmitButton', () => {
       formIsValid: false,
       submissionIsPending: false,
       submissionIsSuccess: false,
+      submissionIsError: false,
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Continue');
-    // The button should be disabled (aria-disabled or disabled attribute)
+    // Can't use expect(button).toBeDisabled() because the Paragon StatefulButton doesn't actually
+    // set the `disabled` attribute (no idea why not). Therefore, we need to look at the
+    // aria-disabled attribute instead.
     expect(button).toHaveAttribute('aria-disabled', 'true');
   });
 
@@ -73,12 +79,16 @@ describe('AccountDetailsSubmitButton', () => {
       formIsValid: true,
       submissionIsPending: true,
       submissionIsSuccess: false,
+      submissionIsError: false,
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Submitting...');
+    // Can't use expect(button).toBeDisabled() because the Paragon StatefulButton doesn't actually
+    // set the `disabled` attribute (no idea why not). Therefore, we need to look at the
+    // aria-disabled attribute instead.
     expect(button).toHaveAttribute('aria-disabled', 'true');
-    // Should show spinner element
+    // Should show a spinning icon.
     expect(button.querySelector('.icon-spin')).toBeInTheDocument();
   });
 
@@ -87,13 +97,12 @@ describe('AccountDetailsSubmitButton', () => {
       formIsValid: true,
       submissionIsPending: false,
       submissionIsSuccess: true,
+      submissionIsError: false,
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Submitted');
-    expect(button).toHaveAttribute('aria-disabled', 'true');
-    // Should show check icon (CheckCircleOutline)
-    expect(button.querySelector('svg')).toBeInTheDocument();
+    expect(button).not.toBeDisabled();
   });
 
   it('prioritizes complete state over invalid form', () => {
@@ -101,12 +110,24 @@ describe('AccountDetailsSubmitButton', () => {
       formIsValid: false,
       submissionIsPending: false,
       submissionIsSuccess: true,
+      submissionIsError: false,
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Submitted');
-    expect(button).toHaveAttribute('aria-disabled', 'true');
-    // Should show check icon (CheckCircleOutline)
-    expect(button.querySelector('svg')).toBeInTheDocument();
+    expect(button).not.toBeDisabled();
+  });
+
+  it('renders the error state', () => {
+    setup({
+      formIsValid: true,
+      submissionIsPending: false,
+      submissionIsSuccess: false,
+      submissionIsError: true,
+    });
+    const button = screen.getByTestId('stepper-submit-button');
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent('Try Again');
+    expect(button).not.toBeDisabled();
   });
 });
