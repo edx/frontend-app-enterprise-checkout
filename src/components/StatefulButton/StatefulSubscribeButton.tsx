@@ -1,14 +1,16 @@
+import { defineMessages, useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { StatefulButton } from '@openedx/paragon';
-import { useCheckout } from '@stripe/react-stripe-js';
+import { CheckoutContextValue, useCheckout } from '@stripe/react-stripe-js';
+import { StripeCheckoutStatus } from '@stripe/stripe-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useCreateCheckoutSessionMutation } from '@/components/app/data';
-import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
-import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { useCheckoutIntent } from '@/components/app/data';
+import { queryBffContext } from '@/components/app/data/queries/queries';
+import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 const variants = {
@@ -18,86 +20,115 @@ const variants = {
   success: 'success',
 };
 
+const buttonMessages = defineMessages({
+  default: {
+    id: 'checkout.billingDetails.statefulSubscribeButton.subscribe',
+    defaultMessage: 'Subscribe',
+    description: 'Button label for subscription',
+  },
+  pending: {
+    id: 'checkout.billingDetails.statefulSubscribeButton.processing',
+    defaultMessage: 'Processing...',
+    description: 'Button label when processing subscription',
+  },
+  error: {
+    paymentFailed: {
+      id: 'checkout.billingDetails.statefulSubscribeButton.declined_card.error',
+      defaultMessage: 'Error, card declined.',
+      description: 'Button label when subscription error on declined card',
+    },
+    fallback: {
+      id: 'checkout.billingDetails.statefulSubscribeButton.generic.error',
+      defaultMessage: 'Error, try again later.',
+      description: 'Button label when subscription error occurs',
+    },
+  },
+  success: {
+    id: 'checkout.billingDetails.statefulSubscribeButton.success',
+    defaultMessage: 'Success',
+    description: 'Button label when subscription is successful',
+  },
+});
+
 const StatefulSubscribeButton = () => {
   const [statefulButtonState, setStatefulButtonState] = useState('default');
+  const [errorMessageKey, setErrorMessageKey] = useState('fallback');
+  const { data: checkoutIntent } = useCheckoutIntent();
+  const intl = useIntl();
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { authenticatedUser }: AuthenticatedUser = useContext(AppContext);
-  const { canConfirm, status } = useCheckout();
-
+  const {
+    canConfirm,
+    status,
+    confirm,
+  }: {
+    canConfirm: CheckoutContextValue['canConfirm'],
+    status: StripeCheckoutStatus,
+    confirm: CheckoutContextValue['confirm'],
+  } = useCheckout();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setCheckoutSessionStatus = useCheckoutFormStore((state) => state.setCheckoutSessionStatus);
-  const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
-  const accountDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
-  const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
 
   const hasInvalidTerms = Object.values(billingDetailsData).some((value) => !value);
   const isFormValid = canConfirm && !hasInvalidTerms;
-  const lmsUserId: number | undefined = authenticatedUser?.userId;
 
-  const createCheckoutSessionMutation = useCreateCheckoutSessionMutation({
-    onSuccess: (responseData) => {
-      // Store the checkout session so that it can be recalled using useCheckoutSession() on subsequent pages.
-      setCheckoutSessionClientSecret(responseData.checkoutSessionClientSecret);
+  const onClickHandler = async () => {
+    // Sets the button to pending state and then calls confirm()
+    setStatefulButtonState('pending');
 
-      // Invalidate any queries that might be impacted by the creation of a checkout session.
-      const queryKeysToInvalidate = [
-        queryBffContext(lmsUserId).queryKey, // Includes a serialized CheckoutIntent with checkout session ID.
-        queryBffSuccess(lmsUserId).queryKey, // Includes a serialized CheckoutIntent with checkout session ID.
-      ];
-      queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
-    },
-    onError: (errors) => {
-      logError(errors);
-    },
-  });
-
-  const clickHandler = () => {
-    if (status.type === 'open') {
-      // The checkout form is open and ready to be confirmed.
-      setStatefulButtonState('pending');
+    // Calls confirm() to start the Stripe checkout flow.
+    const response = await confirm({
+      redirect: 'if_required',
+      returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
+    }).then(resp => resp).catch(error => error);
+    // Set the button to the appropriate state based on the response.
+    // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
+    setStatefulButtonState(response.type || 'default');
+    if (response.type === 'error') {
+      setErrorMessageKey(buttonMessages.error[response.error.code] ? response.error.code : 'fallback');
+      logError(
+        `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${checkoutIntent}, ${response.error}`,
+      );
     }
   };
 
   useEffect(() => {
-    if (statefulButtonState === 'pending' && (status.type === 'complete' && status.paymentStatus === 'paid')) {
-      setStatefulButtonState('success');
-      setCheckoutSessionStatus(status);
-      queryClient.invalidateQueries(
-        // @ts-ignore
-        queryBffContext(
-          authenticatedUser.id,
-        ).queryKey,
-      )
-        .then(data => data)
-        .catch(error => logError(error));
-      navigate(CheckoutPageRoute.BillingDetailsSuccess);
+    if (statefulButtonState === 'success') {
+      // If the payment succeeded, update the checkout session status.
+      if (status.type === 'complete' && status.paymentStatus === 'paid') {
+        setCheckoutSessionStatus(status);
+        queryClient.invalidateQueries(
+          // @ts-ignore
+          queryBffContext(
+            authenticatedUser.id,
+          ).queryKey,
+        )
+          .then(data => data)
+          .catch(error => logError(error));
+        navigate(CheckoutPageRoute.BillingDetailsSuccess);
+      } else {
+        // Fallback if the payment succeeded but the intent
+        // status is not complete or paymentStatus is not paid. from Stripe.
+        setStatefulButtonState('error');
+        setErrorMessageKey('fallback');
+      }
     }
-  }, [
-    accountDetailsData,
-    authenticatedUser.id,
-    createCheckoutSessionMutation,
-    navigate,
-    planDetailsData,
-    queryClient,
-    setCheckoutSessionStatus,
-    statefulButtonState,
-    status,
-  ]);
+  }, [statefulButtonState, status, setCheckoutSessionStatus, queryClient, authenticatedUser, navigate]);
 
   const props = {
     labels: {
-      default: 'Subscribe',
-      pending: 'Processing...',
-      error: 'Error, try again later.',
-      success: 'Success',
+      default: intl.formatMessage(buttonMessages.default),
+      pending: intl.formatMessage(buttonMessages.pending),
+      error: intl.formatMessage(buttonMessages.error[errorMessageKey]),
+      success: intl.formatMessage(buttonMessages.success),
     },
     type: 'submit',
     variant: variants[statefulButtonState],
     disabled: !isFormValid,
     disabledStates: ['pending'],
-    onClick: clickHandler,
+    onClick: onClickHandler,
     state: statefulButtonState,
   };
 

@@ -55,7 +55,11 @@ const BillingFormFields = () => {
       </FieldContainer>
       <FieldContainer>
         <BillingPaymentTitle />
-        <PaymentElement />
+        <PaymentElement
+          options={{
+            layout: 'tabs', // or 'accordion'
+          }}
+        />
       </FieldContainer>
     </>
   );
