@@ -1,10 +1,10 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
+import { useCheckout } from '@stripe/react-stripe-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import '@testing-library/jest-dom';
-import { useCheckout } from '@stripe/react-stripe-js';
-import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
