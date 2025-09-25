@@ -94,7 +94,7 @@ const StatefulSubscribeButton = () => {
     if (response.type === 'error') {
       setErrorMessageKey(buttonMessages.error[response.error.code] ? response.error.code : 'fallback');
       logError(
-        `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${checkoutIntent}, ${response.error}`,
+        `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${JSON.stringify(checkoutIntent)}, ${JSON.stringify(response.error)}`,
       );
     }
   };
