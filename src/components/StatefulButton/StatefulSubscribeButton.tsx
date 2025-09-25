@@ -79,10 +79,15 @@ const StatefulSubscribeButton = () => {
     setStatefulButtonState('pending');
 
     // Calls confirm() to start the Stripe checkout flow.
-    const response = await confirm({
-      redirect: 'if_required',
-      returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
-    }).then(resp => resp).catch(error => error);
+    let response;
+    try {
+      response = await confirm({
+        redirect: 'if_required',
+        returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
+      });
+    } catch (error) {
+      response = error;
+    }
     // Set the button to the appropriate state based on the response.
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
     setStatefulButtonState(response.type || 'default');
