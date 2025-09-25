@@ -2,7 +2,7 @@ import { useCheckout } from '@stripe/react-stripe-js';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
+import useCheckoutSessionClientSecret from '@/components/app/data/hooks';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';

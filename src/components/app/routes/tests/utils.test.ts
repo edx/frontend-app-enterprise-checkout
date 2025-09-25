@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -45,7 +45,7 @@ describe('utils.ts', () => {
     });
   });
 
-  describe('populateCompletedFormFields', () => {
+  describe('populateInitialApplicationState', () => {
     it('merges user details and intent details into the store while preserving existing fields', () => {
       const initialState = {
         formData: {
@@ -71,7 +71,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
@@ -116,7 +116,7 @@ describe('utils.ts', () => {
 
       const emptyUser = {} as any;
 
-      populateCompletedFormFields({ checkoutIntent: null as any, authenticatedUser: emptyUser, stripePriceId: null });
+      populateInitialApplicationState({ checkoutIntent: null as any, authenticatedUser: emptyUser, stripePriceId: null });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
       const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];
