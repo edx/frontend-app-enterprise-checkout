@@ -58,7 +58,7 @@ const StatefulSubscribeButton = () => {
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { authenticatedUser }: AuthenticatedUser = useContext(AppContext);
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const {
     canConfirm,
     status,
@@ -92,7 +92,7 @@ const StatefulSubscribeButton = () => {
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
     setStatefulButtonState(response.type || 'default');
     if (response.type === 'error') {
-      setErrorMessageKey(buttonMessages.error[response.error.code] ? response.error.code : 'fallback');
+      setErrorMessageKey(buttonMessages.error[response.error?.code] ? response.error?.code : 'fallback');
       logError(
         `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${JSON.stringify(checkoutIntent)}, ${JSON.stringify(response.error)}`,
       );
@@ -104,12 +104,11 @@ const StatefulSubscribeButton = () => {
       // If the payment succeeded, update the checkout session status.
       if (status.type === 'complete' && status.paymentStatus === 'paid') {
         setCheckoutSessionStatus(status);
-        queryClient.invalidateQueries(
-          // @ts-ignore
-          queryBffContext(
+        queryClient.invalidateQueries({
+          queryKey: queryBffContext(
             authenticatedUser.id,
           ).queryKey,
-        )
+        })
           .then(data => data)
           .catch(error => logError(error));
         navigate(CheckoutPageRoute.BillingDetailsSuccess);
