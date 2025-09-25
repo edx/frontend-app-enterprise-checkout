@@ -41,9 +41,7 @@ const AccountDetailsPage: React.FC = () => {
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
   const { data: checkoutIntent } = useCheckoutIntent();
   const queryClient = useQueryClient();
-  // AppContext is not typed upstream.
-  // @ts-ignore
-  const { authenticatedUser } = useContext(AppContext);
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const lmsUserId: number | undefined = authenticatedUser?.userId;
 
   const {

@@ -1,4 +1,5 @@
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { StripeCheckoutStatus } from '@stripe/stripe-js';
 import { SnakeCasedPropertiesDeep } from 'type-fest';
 import { z } from 'zod';
 
@@ -118,7 +119,12 @@ declare global {
       data: Partial<FormData<K>>,
     ): void;
     checkoutSessionClientSecret: string | undefined;
+    checkoutSessionStatus: {
+      type: StripeCheckoutStatus['type'] | null,
+      paymentStatus: StripeCheckoutStatus['paymentStatus'] | null,
+    };
     setCheckoutSessionClientSecret(checkoutSessionClientSecret: string): void;
+    setCheckoutSessionStatus(status: any): void;
   }
 
   /**
@@ -277,6 +283,7 @@ declare global {
     state: CheckoutIntentState;
     enterpriseName: string;
     enterpriseSlug: string;
+    quantity: number;
     stripeCheckoutSessionId: string;
     lastCheckoutError: string;
     lastProvisioningError: string;

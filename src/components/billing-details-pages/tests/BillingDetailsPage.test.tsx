@@ -1,11 +1,34 @@
-import { screen } from '@testing-library/react';
+import { useCheckout } from '@stripe/react-stripe-js';
+import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
+jest.mock('@/components/app/data/hooks/useCheckoutSessionClientSecret');
+
+jest.mock('@stripe/react-stripe-js', () => ({
+  ...jest.requireActual('@stripe/react-stripe-js'),
+  CheckoutProvider: jest.fn().mockImplementation(({ children }) => <div>{children}</div>),
+  AddressElement: jest.fn().mockImplementation(() => <div>AddressElement</div>),
+  PaymentElement: jest.fn().mockImplementation(() => <div>PaymentElement</div>),
+  useCheckout: jest.fn(),
+}));
+
 describe('BillingDetailsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
+    (useCheckout as jest.Mock).mockReturnValue({
+      canConfirm: true,
+      confirm: jest.fn(),
+      status: {
+        type: 'open',
+      },
+    });
+  });
   it('renders the title correctly', () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
       config: {},
@@ -16,14 +39,14 @@ describe('BillingDetailsPage', () => {
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Billing Details');
   });
 
-  it('renders the purchase button correctly', () => {
+  it('renders the purchase button correctly', async () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetails, {
       config: {},
       authenticatedUser: {
         userId: 12345,
       },
     } as any);
-    validateText('Subscribe');
+    await waitFor(() => validateText('Subscribe'));
   });
 
   it('renders the TermsAndConditions component', () => {
@@ -40,6 +63,18 @@ describe('BillingDetailsPage', () => {
 });
 
 describe('BillingDetailsSuccessPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
+    (useCheckout as jest.Mock).mockReturnValue({
+      canConfirm: true,
+      confirm: jest.fn(),
+      status: {
+        type: 'complete',
+        paymentStatus: 'paid',
+      },
+    });
+  });
   it('renders the title correctly based on form state (first name from Plan Details)', () => {
     // Seed the form store with a full name as entered/derived in Plan Details
     checkoutFormStore.setState((s) => ({

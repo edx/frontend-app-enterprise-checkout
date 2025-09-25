@@ -3,7 +3,6 @@ import { AddressElement, PaymentElement } from '@stripe/react-stripe-js';
 import { StripeAddressElementOptions } from '@stripe/stripe-js';
 
 import { FieldContainer } from '@/components/FieldContainer';
-import { StripeProvider } from '@/components/StripeProvider';
 
 const BillingAddressTitle = () => (
   <h3 className="mb-3">
@@ -47,7 +46,7 @@ const BillingFormFields = () => {
     mode: 'billing',
   };
   return (
-    <StripeProvider>
+    <>
       <FieldContainer>
         <BillingAddressTitle />
         <AddressElement
@@ -56,9 +55,13 @@ const BillingFormFields = () => {
       </FieldContainer>
       <FieldContainer>
         <BillingPaymentTitle />
-        <PaymentElement />
+        <PaymentElement
+          options={{
+            layout: 'tabs', // or 'accordion'
+          }}
+        />
       </FieldContainer>
-    </StripeProvider>
+    </>
   );
 };
 
