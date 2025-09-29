@@ -292,7 +292,26 @@ declare global {
     adminPortalUrl: string;
   }
 
-  interface ExtendedCheckoutContextCheckoutIntent extends CheckoutContextCheckoutIntent {
+  // TODO: to be updated with defined structure
+  type firstBillableInvoice = {
+    startTime: string;
+    endTime: string;
+    last4: number | null;
+    quantity: number;
+    unitAmountDecimal: number | null;
+    customerPhone: string | null;
+    customerName: string;
+    billingAddress: string | null;
+  };
+
+  // TODO: to be updated with defined structure
+  interface CheckoutContextCheckoutIntentSuccess extends CheckoutContextCheckoutIntent {
+    firstBillableInvoice: firstBillableInvoice | null;
+  }
+
+  interface ExtendedCheckoutContextCheckoutIntent extends
+    CheckoutContextCheckoutIntent,
+    CheckoutContextCheckoutIntentSuccess {
     existingSuccessfulCheckoutIntent: boolean | null;
     expiredCheckoutIntent: boolean | null;
   }

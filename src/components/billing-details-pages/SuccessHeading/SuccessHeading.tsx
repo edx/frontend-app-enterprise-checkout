@@ -15,8 +15,16 @@ const SuccessHeading = () => (
     <h3 className="font-weight-light text-center">
       <FormattedMessage
         id="checkout.success.description"
-        defaultMessage="Welcome to edX for teams! Go to your administrator dashboard to onboard and invite your team members to start learning."
+        defaultMessage="Welcome to edX for Teams! We're working on building your administrator dashboard. If it doesn't load in a few seconds, {link} for assistance. "
         description="Description text explaining the data privacy field purpose"
+        values={{
+          link: (
+            // TODO: Add URL to contact ECS
+            <a href="https://google.com" target="_blank" rel="noopener noreferrer">
+              reach out to us
+            </a>
+          ),
+        }}
       />
     </h3>
   </Stack>

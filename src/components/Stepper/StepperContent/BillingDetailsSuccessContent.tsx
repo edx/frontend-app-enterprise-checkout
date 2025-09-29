@@ -1,14 +1,14 @@
 import { Stack } from '@openedx/paragon';
 
 import { OrderDetails } from '@/components/billing-details-pages/OrderDetails';
+import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
 import { SuccessHeading } from '@/components/billing-details-pages/SuccessHeading';
-import { SuccessNotification } from '@/components/billing-details-pages/SuccessNotification';
 
 const BillingDetailsSuccessContent = () => (
   <>
     <SuccessHeading />
     <Stack gap={4}>
-      <SuccessNotification />
+      <SubscriptionStartMessage />
       <OrderDetails />
     </Stack>
   </>
