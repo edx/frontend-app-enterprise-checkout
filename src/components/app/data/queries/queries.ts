@@ -33,9 +33,3 @@ export const queryBffValidation = (payload: ValidationSchema) => {
       ._ctx.validation(fields, snakeCasedPayload)
   );
 };
-
-export const queryCustomerBillingPortal = (lmsUserId: number | null = null) => (
-  queries
-    .customerBilling
-    .portalSession(lmsUserId)
-);

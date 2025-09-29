@@ -2,12 +2,15 @@ import { useCheckout } from '@stripe/react-stripe-js';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import useCheckoutSessionClientSecret from '@/components/app/data/hooks';
+import { useCheckoutSessionClientSecret } from '@/components/app/data';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
-jest.mock('@/components/app/data/hooks/useCheckoutSessionClientSecret');
+jest.mock('@/components/app/data', () => ({
+  ...jest.requireActual('@/components/app/data'),
+  useCheckoutSessionClientSecret: jest.fn(),
+}));
 
 jest.mock('@stripe/react-stripe-js', () => ({
   ...jest.requireActual('@stripe/react-stripe-js'),
