@@ -33,3 +33,9 @@ export const queryBffValidation = (payload: ValidationSchema) => {
       ._ctx.validation(fields, snakeCasedPayload)
   );
 };
+
+export const queryCheckoutIntent = (id: number) => (
+  queries
+    .enterpriseCheckout
+    .checkoutIntent(id)
+);

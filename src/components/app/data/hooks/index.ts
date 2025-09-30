@@ -7,3 +7,4 @@ export { default as usePurchaseSummaryPricing } from './usePurchaseSummaryPricin
 export { default as useCheckoutIntent } from './useCheckoutIntent';
 export { default as useCheckoutSessionClientSecret } from './useCheckoutSessionClientSecret';
 export { default as useFirstBillableInvoice } from './useFirstBillableInvoice';
+export { default as usePolledCheckoutIntent } from './usePolledCheckoutIntent';

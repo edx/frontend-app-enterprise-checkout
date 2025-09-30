@@ -2,11 +2,12 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import dayjs from 'dayjs';
 
 import { useFirstBillableInvoice } from '@/components/app/data';
+import { LONG_MONTH_DATE_FORMAT } from '@/components/app/data/constants';
 import { FieldContainer } from '@/components/FieldContainer';
 
 const freeTrialDateRangeText = (
   { startTime, endTime }: { startTime: firstBillableInvoice['startTime'], endTime: firstBillableInvoice['endTime'] },
-) => `${dayjs(startTime).format('MMMM D, YYYY')} - ${dayjs(endTime).format('MMMM D, YYYY')}`;
+) => `${dayjs(startTime).format(LONG_MONTH_DATE_FORMAT)} - ${dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}`;
 
 const SubscriptionStartMessage = () => {
   const { data: firstBillableInvoice } = useFirstBillableInvoice();
@@ -32,7 +33,7 @@ const SubscriptionStartMessage = () => {
             defaultMessage="Your trial expires on {boldDate}. Cancel anytime from the {link} page."
             description="Description text explaining the subscription details"
             values={{
-              boldDate: <span className="font-weight-bold">{dayjs(endTime).format('MMMM D, YYYY')}</span>,
+              boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
                 // TODO: Add URL to Subs Management Page
                 <a href="https://google.com" target="_blank" rel="noopener noreferrer">
