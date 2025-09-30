@@ -3,6 +3,7 @@ import { Icon, StatefulButton } from '@openedx/paragon';
 import { ArrowForward, SpinnerSimple } from '@openedx/paragon/icons';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { usePolledCheckoutIntent } from '@/components/app/data';
 
@@ -14,14 +15,9 @@ const variants = {
 };
 
 const buttonMessages = defineMessages({
-  default: {
-    id: 'checkout.billingDetailsSuccess.statefulProvisioningButton.creating_account.',
-    defaultMessage: 'Loading...',
-    description: 'Button label when processing subscription',
-  },
   pending: {
     id: 'checkout.billingDetailsSuccess.statefulProvisioningButton.creating_account.',
-    defaultMessage: 'Creating your account...',
+    defaultMessage: 'Creating your account',
     description: 'Button label when processing subscription',
   },
   error: {
@@ -38,8 +34,15 @@ const buttonMessages = defineMessages({
 
 const StatefulProvisioningButton = () => {
   const { data: polledCheckoutIntent } = usePolledCheckoutIntent();
-  const [statefulButtonState, setStatefulButtonState] = useState('default');
+  const [statefulButtonState, setStatefulButtonState] = useState('pending');
   const intl = useIntl();
+  const navigate = useNavigate();
+
+  const onClickHandler = () => {
+    if (statefulButtonState === 'success') {
+      navigate('https://google.com');
+    }
+  };
 
   useEffect(() => {
     if (polledCheckoutIntent) {
@@ -55,25 +58,26 @@ const StatefulProvisioningButton = () => {
 
   const props = {
     labels: {
-      default: intl.formatMessage(buttonMessages.default),
       pending: intl.formatMessage(buttonMessages.pending),
       error: intl.formatMessage(buttonMessages.error),
       success: intl.formatMessage(buttonMessages.success),
     },
     icons: {
-      pending: <Icon src={SpinnerSimple} />,
+      pending: <Icon src={SpinnerSimple} className="icon-spin" />,
       success: <Icon src={ArrowForward} className="ml-2" />,
     },
     type: 'submit',
     variant: variants[statefulButtonState],
-    disabledStates: ['pending'],
+    disabledStates: ['default', 'pending'],
     state: statefulButtonState,
+    onClick: onClickHandler,
   };
 
   return (
     <StatefulButton
       className={classNames('mx-auto d-block w-auto', {
         'reverse-stateful-provisioning-success': statefulButtonState === 'success',
+        'disabled-opacity': statefulButtonState === 'pending',
       })}
       {...props}
     />

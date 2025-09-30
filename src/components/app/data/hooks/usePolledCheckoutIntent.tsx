@@ -1,27 +1,21 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { useCheckoutIntent } from '@/components/app/data';
+import useCheckoutIntent from '@/components/app/data/hooks/useCheckoutIntent';
 import { queryCheckoutIntent } from '@/components/app/data/queries/queries';
 
 const usePolledCheckoutIntent = () => {
   const { data: checkoutIntent } = useCheckoutIntent();
-  const options = {
-    refetchInterval: (data, query) => {
-      console.log('data', data);
-      console.log('query', query);
-      if (data?.status === 'pending') {
-        return 1000;
-      }
-      return false;
-    },
-  };
+
   const polledCheckoutIntent = useQuery(
     queryOptions({
       ...queryCheckoutIntent(checkoutIntent!.id),
-      refetchInterval: (data) => {
-        console.log('data', data);
-        return 30000;
+      refetchInterval: (queryMetadata) => {
+        if (queryMetadata.state.data?.state === 'fulfilled') {
+          return false;
+        }
+        return 5000;
       },
+      enabled: !!checkoutIntent!.id,
     }),
   );
   return polledCheckoutIntent;
