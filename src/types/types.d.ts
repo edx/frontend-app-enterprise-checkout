@@ -292,7 +292,15 @@ declare global {
     adminPortalUrl: string;
   }
 
-  interface ExtendedCheckoutContextCheckoutIntent extends CheckoutContextCheckoutIntent {
+  // TODO: will need to be modified further to include missing fields from the API response
+  interface CheckoutContextCheckoutIntentSuccess extends CheckoutContextCheckoutIntent {
+    stripeCustomerId: string;
+    enterpriseCustomerUuid: string | null;
+  }
+
+  interface ExtendedCheckoutContextCheckoutIntent extends
+    CheckoutContextCheckoutIntent,
+    CheckoutContextCheckoutIntentSuccess {
     existingSuccessfulCheckoutIntent: boolean | null;
     expiredCheckoutIntent: boolean | null;
   }
