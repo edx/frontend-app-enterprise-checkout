@@ -1,17 +1,13 @@
-import { AppContext } from '@edx/frontend-platform/react';
 import { Button } from '@openedx/paragon';
-import { useContext } from 'react';
 
-import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
+import { useCreateBillingPortalSession } from '@/components/app/data';
 
 const ReceiptButton = () => {
-  const { authenticatedUser }: AppContextValue = useContext(AppContext);
-  const { data: contextData } = useBFFSuccess(authenticatedUser.userId);
-  const { checkoutIntent } = contextData ?? {};
+  const { data: billingPortalSession } = useCreateBillingPortalSession();
 
   // TODO: Stub button
   return (
-    <Button className="w-100" variant="secondary" size="lg" disabled={!checkoutIntent?.stripeCustomerId}>
+    <Button className="w-100" variant="secondary" size="lg" disabled={!billingPortalSession?.url} href={billingPortalSession?.url} target="_blank" rel="noopener noreferrer">
       View Receipt
     </Button>
   );

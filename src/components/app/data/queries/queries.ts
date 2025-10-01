@@ -33,3 +33,9 @@ export const queryBffValidation = (payload: ValidationSchema) => {
       ._ctx.validation(fields, snakeCasedPayload)
   );
 };
+
+export const queryCreateBillingPortalSession = (checkout_intent_id?: number) => (
+  queries
+    .enterpriseCheckout
+    .createBillingPortalSession(checkout_intent_id)
+);
