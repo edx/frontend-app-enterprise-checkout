@@ -182,7 +182,7 @@ describe('fetchCheckoutValidation', () => {
     // Setup
     const invalidSlugError: ValidationDecision = validationDecisionFactory({
       errorCode: 'invalid_format',
-      developerMessage: 'Enterprise slug can only contain lowercase letters, numbers, and hyphens.',
+      developerMessage: 'Only alphanumeric lowercase characters and hyphens are allowed.',
     });
 
     const invalidQuantityError: ValidationDecision = validationDecisionFactory({
@@ -207,7 +207,7 @@ describe('fetchCheckoutValidation', () => {
     verifyValidationDecision(
       result.validationDecisions.enterpriseSlug as ValidationDecision,
       'invalid_format',
-      /lowercase letters, numbers, and hyphens/i,
+      /Only alphanumeric lowercase characters and hyphens are allowed./i,
     );
 
     expect(result.validationDecisions).toHaveProperty('quantity');
@@ -227,7 +227,7 @@ describe('fetchCheckoutValidation', () => {
       }),
       enterpriseSlug: validationDecisionFactory({
         errorCode: 'invalid_format',
-        developerMessage: 'Enterprise slug can only contain lowercase letters, numbers, and hyphens.',
+        developerMessage: 'Only alphanumeric lowercase characters and hyphens are allowed.',
       }),
       quantity: validationDecisionFactory({
         errorCode: 'invalid_range',
@@ -260,7 +260,7 @@ describe('fetchCheckoutValidation', () => {
     verifyValidationDecision(
       result.validationDecisions.enterpriseSlug as ValidationDecision,
       'invalid_format',
-      /lowercase letters, numbers, and hyphens/i,
+      /Only alphanumeric lowercase characters and hyphens/i,
     );
 
     verifyValidationDecision(
