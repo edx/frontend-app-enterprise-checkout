@@ -43,7 +43,7 @@ interface DetermineExistingPaidCheckoutIntent {
  *   Object indicating if a successful intent exists and if the intent is expired.
  */
 const determineExistingCheckoutIntentState = (
-  checkoutIntent: ExtendedCheckoutContextCheckoutIntent | null,
+  checkoutIntent: CheckoutContextCheckoutIntent & CheckoutContextCheckoutIntentSuccess | null,
 ): DetermineExistingPaidCheckoutIntent => {
   if (!checkoutIntent) {
     return {

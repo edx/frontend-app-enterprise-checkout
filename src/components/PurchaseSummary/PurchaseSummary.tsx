@@ -2,6 +2,7 @@ import { Card, Stack } from '@openedx/paragon';
 import React from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
+import ReceiptButton from '@/components/PurchaseSummary/ReceiptButton';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
@@ -36,6 +37,9 @@ const PurchaseSummary: React.FC = () => {
           <DueTodayRow amountDue={yearlySubscriptionCostForQuantity ?? 0} />
         </Stack>
       </Card.Section>
+      <Card.Footer>
+        <ReceiptButton />
+      </Card.Footer>
     </Card>
   );
 };
