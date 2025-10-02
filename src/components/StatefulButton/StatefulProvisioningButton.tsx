@@ -9,7 +9,7 @@ import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
 const variants = {
   default: 'secondary',
   pending: 'secondary',
-  error: 'danger',
+  error: 'secondary',
   success: 'secondary',
 };
 
@@ -20,9 +20,9 @@ const buttonMessages = defineMessages({
     description: 'Button label when processing subscription',
   },
   error: {
-    id: 'checkout.billingDetailsSuccess.statefulProvisioningButton.error_provisioning',
-    defaultMessage: 'Error, try again.',
-    description: 'Button label when system errors creating an account',
+    id: 'checkout.billingDetailsSuccess.statefulProvisioningButton.still_provisioning',
+    defaultMessage: 'Still provisioning…',
+    description: 'Button label when a transient error occurred but the system is still attempting to provision',
   },
   success: {
     id: 'checkout.billingDetails.statefulProvisioningButton.success',
@@ -67,7 +67,7 @@ const StatefulProvisioningButton = () => {
     },
     type: 'submit',
     variant: variants[statefulButtonState],
-    disabledStates: ['default', 'pending'],
+    disabledStates: ['default', 'pending', 'error'],
     state: statefulButtonState,
     onClick: onClickHandler,
   };
@@ -76,7 +76,7 @@ const StatefulProvisioningButton = () => {
     <StatefulButton
       className={classNames('mx-auto d-block w-auto', {
         'reverse-stateful-provisioning-success': statefulButtonState === 'success',
-        'disabled-opacity': statefulButtonState === 'pending',
+        'disabled-opacity': ['default', 'pending', 'error'].includes(statefulButtonState),
       })}
       {...props}
     />
