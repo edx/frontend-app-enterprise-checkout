@@ -2,12 +2,14 @@ import { useCheckout } from '@stripe/react-stripe-js';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+import useCheckoutIntent from '@/components/app/data/hooks/useCheckoutIntent';
 import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@/components/app/data/hooks/useCheckoutSessionClientSecret');
+jest.mock('@/components/app/data/hooks/useCheckoutIntent');
 
 jest.mock('@stripe/react-stripe-js', () => ({
   ...jest.requireActual('@stripe/react-stripe-js'),
@@ -21,6 +23,9 @@ describe('BillingDetailsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: { state: 'success' },
+    });
     (useCheckout as jest.Mock).mockReturnValue({
       canConfirm: true,
       confirm: jest.fn(),
@@ -66,6 +71,9 @@ describe('BillingDetailsSuccessPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: { state: 'success' },
+    });
     (useCheckout as jest.Mock).mockReturnValue({
       canConfirm: true,
       confirm: jest.fn(),
@@ -120,5 +128,21 @@ describe('BillingDetailsSuccessPage', () => {
     });
     validateText((content) => content.includes('Welcome to edX for teams!'));
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
+  });
+
+  it('renders the AccountProvisioningError component when checkout intent has errored_provisioning state', () => {
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: { state: 'errored_provisioning' },
+    });
+
+    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    expect(screen.getByText("We're sorry, something went wrong")).toBeInTheDocument();
+    expect(screen.getByText(/An unexpected error occurred while setting up your account/)).toBeInTheDocument();
   });
 });
