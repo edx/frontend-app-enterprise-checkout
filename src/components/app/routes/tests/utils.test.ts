@@ -25,6 +25,7 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
 // Helper types for test inputs (loosely typed to avoid coupling to app types)
 type TestCheckoutIntent = {
   state: string;
+  quantity?: number;
   expiresAt?: string;
   enterpriseSlug?: string;
   enterpriseName?: string;
