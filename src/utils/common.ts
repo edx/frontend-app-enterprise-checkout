@@ -1,4 +1,5 @@
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 import dayjs from 'dayjs';
 
@@ -91,6 +92,28 @@ const formatPrice = (price: number, options = {}) => {
 
 const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
 
+/**
+ * Validates and constructs the dashboard URL safely.
+ * Returns the dashboard URL if LMS_BASE_URL is properly configured, null otherwise.
+ * @returns {string | null} The dashboard URL or null if invalid
+ */
+const getDashboardUrl = (): string | null => {
+  try {
+    const baseUrl = getConfig().LMS_BASE_URL;
+    const url = new URL(baseUrl);
+
+    if (!url.protocol.startsWith('http')) {
+      logError('LMS_BASE_URL must use HTTP or HTTPS protocol');
+      return null;
+    }
+
+    return `${baseUrl}/dashboard`;
+  } catch (error) {
+    logError('Invalid LMS_BASE_URL configuration:', error);
+    return null;
+  }
+};
+
 const sendEnterpriseCheckoutTrackingEvent = ({
   checkoutIntentId,
   eventName,
@@ -113,6 +136,7 @@ export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
   formatPrice,
+  getDashboardUrl,
   queryCacheOnErrorHandler,
   serverValidationError,
   isExpired,
