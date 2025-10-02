@@ -1,9 +1,9 @@
-import { AppContext } from '@edx/frontend-platform/react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { useBFFSuccess, usePolledCheckoutIntent, useFirstBillableInvoice } from '@/components/app/data';
+import { useBFFSuccess, useFirstBillableInvoice, usePolledCheckoutIntent } from '@/components/app/data';
 import { BillingDetailsSuccessContent } from '@/components/Stepper/StepperContent';
 
 // Mock only the hooks used by child components
@@ -31,22 +31,21 @@ describe('BillingDetailsSuccessContent', () => {
     config: {},
   };
 
-  const renderComponent = (appContextValue = mockAppContextValue) =>
-    render(
-      <IntlProvider locale="en">
-        <AppContext.Provider value={appContextValue}>
-          <BillingDetailsSuccessContent />
-        </AppContext.Provider>
-      </IntlProvider>,
-    );
+  const renderComponent = (appContextValue = mockAppContextValue) => render(
+    <IntlProvider locale="en">
+      <AppContext.Provider value={appContextValue}>
+        <BillingDetailsSuccessContent />
+      </AppContext.Provider>
+    </IntlProvider>,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Set default mock values for all hooks
-    mockUseBFFSuccess.mockReturnValue({ data: null });
-    mockUsePolledCheckoutIntent.mockReturnValue({ data: null });
-    mockUseFirstBillableInvoice.mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
+    (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({ data: null });
   });
 
   it('renders StatefulProvisioningButton and OrderDetails by default', () => {
@@ -60,7 +59,7 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('renders SuccessHeading when checkout intent state is "paid"', () => {
-    mockUseBFFSuccess.mockReturnValue({
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: { state: 'paid' },
       },
@@ -74,7 +73,7 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('renders SuccessHeading when checkout intent state is "fulfilled"', () => {
-    mockUseBFFSuccess.mockReturnValue({
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: { state: 'fulfilled' },
       },
@@ -88,7 +87,7 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('renders ErrorHeading when checkout intent state is "errored_provisioning"', () => {
-    mockUseBFFSuccess.mockReturnValue({
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: { state: 'errored_provisioning' },
       },
@@ -102,7 +101,7 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('renders ErrorHeading when checkout intent state is "errored_stripe_checkout"', () => {
-    mockUseBFFSuccess.mockReturnValue({
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: { state: 'errored_stripe_checkout' },
       },
@@ -116,7 +115,7 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('does not render SuccessHeading or ErrorHeading for other states', () => {
-    mockUseBFFSuccess.mockReturnValue({
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: { state: 'processing' },
       },
@@ -140,6 +139,7 @@ describe('BillingDetailsSuccessContent', () => {
       config: {},
     };
 
+    // @ts-ignore
     renderComponent(appContextWithoutUser);
 
     expect(mockUseBFFSuccess).toHaveBeenCalledWith(undefined);
@@ -155,7 +155,7 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('handles null checkout intent', () => {
-    mockUseBFFSuccess.mockReturnValue({
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: { checkoutIntent: null },
     });
 

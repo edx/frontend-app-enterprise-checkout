@@ -2,8 +2,8 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
 import { useFirstBillableInvoice } from '@/components/app/data';
+import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
 
 // Mock the useFirstBillableInvoice hook
 jest.mock('@/components/app/data', () => ({
@@ -12,12 +12,17 @@ jest.mock('@/components/app/data', () => ({
 
 const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
 
-
 describe('SubscriptionStartMessage', () => {
   beforeEach(() => {
     // Mock the hook to return data that will render "June 9th, 2025"
-    mockUseFirstBillableInvoice.mockReturnValue({
+    (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
       data: {
+        customerName: 'Bob dole',
+        billingAddress: null,
+        last4: null,
+        quantity: 5,
+        unitAmountDecimal: 198000,
+        customerPhone: null,
         startTime: '2025-05-10T00:00:00Z', // Start of trial
         endTime: '2025-06-09T00:00:00Z', // End date that formats to "June 9th, 2025"
       },
