@@ -11,7 +11,7 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { useFormValidationConstraints } from '@/components/app/data';
+import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
@@ -19,7 +19,9 @@ import {
   CheckoutStepKey,
   DataStoreKey,
 } from '@/constants/checkout';
+import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -28,11 +30,13 @@ const BillingDetailsPage: React.FC = () => {
 
   const StepperContent = useStepperContent();
   const { data: formValidationConstraints } = useFormValidationConstraints();
+  const { data: checkoutIntent } = useCheckoutIntent();
 
   const {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+
   const billingDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints)
   ), [formSchema, formValidationConstraints]);
@@ -47,6 +51,11 @@ const BillingDetailsPage: React.FC = () => {
   } = form;
 
   const onSubmit = async (data: BillingDetailsData) => {
+    sendEnterpriseCheckoutTrackingEvent({
+      checkoutIntentId: checkoutIntent?.id ?? null,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED,
+    });
+
     setFormData(DataStoreKey.BillingDetails, data);
   };
 

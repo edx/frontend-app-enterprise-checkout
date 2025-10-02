@@ -36,7 +36,6 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
       eventName,
       properties: {
         checkbox_checked: value,
-        checkoutIntent,
       },
     });
   };

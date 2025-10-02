@@ -146,11 +146,6 @@ const AccountDetailsPage: React.FC = () => {
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId: checkoutIntent?.id ?? null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED,
-      properties: {
-        checkoutIntent,
-        planDetailsFormData,
-        accountDetailsFormData,
-      },
     });
 
     // Don't perform side-effect when the mutation has already succeeded.
