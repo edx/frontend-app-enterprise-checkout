@@ -2,7 +2,7 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
 import { useContext, useMemo } from 'react';
 
-import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
+import { useBFFSuccess } from '@/components/app/data';
 import { ErrorHeading } from '@/components/billing-details-pages/ErrorHeading';
 import { OrderDetails } from '@/components/billing-details-pages/OrderDetails';
 import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';

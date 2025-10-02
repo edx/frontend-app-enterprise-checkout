@@ -4,8 +4,7 @@ import { ArrowForward, SpinnerSimple } from '@openedx/paragon/icons';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 
-import { usePolledCheckoutIntent } from '@/components/app/data';
-import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
+import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
 
 const variants = {
   default: 'secondary',

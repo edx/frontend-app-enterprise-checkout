@@ -3,6 +3,14 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
+import { useFirstBillableInvoice } from '@/components/app/data';
+
+// Mock the useFirstBillableInvoice hook
+jest.mock('@/components/app/data', () => ({
+  useFirstBillableInvoice: jest.fn(),
+}));
+
+const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
 
 // Helper function to validate text content
 const validateText = (matcher: string | ((content: string | string[]) => boolean)) => {
@@ -17,6 +25,16 @@ const validateText = (matcher: string | ((content: string | string[]) => boolean
 };
 
 describe('SubscriptionStartMessage', () => {
+  beforeEach(() => {
+    // Mock the hook to return data that will render "June 9th, 2025"
+    mockUseFirstBillableInvoice.mockReturnValue({
+      data: {
+        startTime: '2025-05-10T00:00:00Z', // Start of trial
+        endTime: '2025-06-09T00:00:00Z', // End date that formats to "June 9th, 2025"
+      },
+    });
+  });
+
   const renderComponent = () => render(
     <IntlProvider locale="en">
       <SubscriptionStartMessage />
@@ -32,16 +50,16 @@ describe('SubscriptionStartMessage', () => {
     renderComponent();
     // Check for specific text parts in the rendered component
     expect(screen.getByText(/Your trial expires on/i)).toBeInTheDocument();
-    expect(screen.getByText('June 9th, 2025')).toBeInTheDocument();
+    expect(screen.getByText('June 9, 2025')).toBeInTheDocument();
     expect(screen.getByText(/Cancel anytime from the/i)).toBeInTheDocument();
     expect(screen.getByText('Subscription Management')).toBeInTheDocument();
   });
 
   it('renders the bold text correctly', () => {
     renderComponent();
-    const boldElement = screen.getByText('June 9th, 2025');
+    const boldElement = screen.getByText('June 9, 2025');
     expect(boldElement).toBeInTheDocument();
-    expect(boldElement.tagName).toBe('B');
+    expect(boldElement.tagName).toBe('SPAN');
   });
 
   it('renders the link correctly', () => {

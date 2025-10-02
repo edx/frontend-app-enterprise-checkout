@@ -53,6 +53,7 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: { enterpriseSlug: undefined, companyName: undefined },
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {},
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -112,6 +113,7 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {},
       } as any;
 
       const emptyUser = {} as any;

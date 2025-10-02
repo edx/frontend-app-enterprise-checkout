@@ -21,7 +21,7 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 jest.mock('@/components/app/routes/loaders/utils', () => ({
   determineExistingCheckoutIntentState: jest.fn(),
-  populateCompletedFormFields: jest.fn(),
+  populateInitialApplicationState: jest.fn(),
 }));
 
 jest.mock('@/utils/checkout', () => ({
