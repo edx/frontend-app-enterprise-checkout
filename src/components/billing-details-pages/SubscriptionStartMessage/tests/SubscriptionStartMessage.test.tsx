@@ -12,17 +12,6 @@ jest.mock('@/components/app/data', () => ({
 
 const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
 
-// Helper function to validate text content
-const validateText = (matcher: string | ((content: string | string[]) => boolean)) => {
-  if (typeof matcher === 'string') {
-    expect(screen.getByText(matcher)).toBeInTheDocument();
-  } else {
-    expect(screen.getByText((_, element) => {
-      const hasText = element?.textContent && matcher(element.textContent);
-      return hasText === true;
-    })).toBeInTheDocument();
-  }
-};
 
 describe('SubscriptionStartMessage', () => {
   beforeEach(() => {
@@ -49,10 +38,10 @@ describe('SubscriptionStartMessage', () => {
   it('renders the description message correctly', () => {
     renderComponent();
     // Check for specific text parts in the rendered component
-    expect(screen.getByText(/Your trial expires on/i)).toBeInTheDocument();
-    expect(screen.getByText('June 9, 2025')).toBeInTheDocument();
-    expect(screen.getByText(/Cancel anytime from the/i)).toBeInTheDocument();
-    expect(screen.getByText('Subscription Management')).toBeInTheDocument();
+    validateText(/Your trial expires on/i);
+    validateText('June 9, 2025');
+    validateText(/Cancel anytime from the/i);
+    validateText('Subscription Management');
   });
 
   it('renders the bold text correctly', () => {

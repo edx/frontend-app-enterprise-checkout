@@ -285,6 +285,7 @@ const getCheckoutSessionClientSecret = (): string | undefined => {
 export {
   determineExistingCheckoutIntentState,
   getCheckoutSessionClientSecret,
+  mapCheckoutIntentStateToSessionStatus,
   populateInitialApplicationState,
   validateFormState,
 };

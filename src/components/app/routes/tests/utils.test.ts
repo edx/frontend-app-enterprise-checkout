@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, mapCheckoutIntentStateToSessionStatus, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -141,6 +141,60 @@ describe('utils.ts', () => {
           companyName: undefined,
         }),
       );
+    });
+  });
+
+  describe('mapCheckoutIntentStateToSessionStatus', () => {
+    it('returns null type and paymentStatus when checkoutIntentState is undefined', () => {
+      const result = mapCheckoutIntentStateToSessionStatus(undefined);
+      expect(result).toEqual({
+        type: null,
+        paymentStatus: null,
+      });
+    });
+
+    it('returns null type and paymentStatus when checkoutIntentState is null', () => {
+      const result = mapCheckoutIntentStateToSessionStatus(null as any);
+      expect(result).toEqual({
+        type: null,
+        paymentStatus: null,
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "paid" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('paid' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "fulfilled" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('fulfilled' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "errored_provisioning" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('errored_provisioning' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns open type and null paymentStatus for other states', () => {
+      const testStates = ['created', 'requires_payment', 'processing', 'cancelled'];
+
+      testStates.forEach(state => {
+        const result = mapCheckoutIntentStateToSessionStatus(state as any);
+        expect(result).toEqual({
+          type: 'open',
+          paymentStatus: null,
+        });
+      });
     });
   });
 
