@@ -3,9 +3,9 @@ import { Icon, StatefulButton } from '@openedx/paragon';
 import { ArrowForward, SpinnerSimple } from '@openedx/paragon/icons';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { usePolledCheckoutIntent } from '@/components/app/data';
+import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
 
 const variants = {
   default: 'secondary',
@@ -34,13 +34,13 @@ const buttonMessages = defineMessages({
 
 const StatefulProvisioningButton = () => {
   const { data: polledCheckoutIntent } = usePolledCheckoutIntent();
+  const { data: successContext } = useBFFSuccess();
+  const { checkoutIntent } = successContext || {};
   const [statefulButtonState, setStatefulButtonState] = useState('pending');
   const intl = useIntl();
-  const navigate = useNavigate();
-
   const onClickHandler = () => {
-    if (statefulButtonState === 'success') {
-      navigate('https://google.com');
+    if (statefulButtonState === 'success' && checkoutIntent?.adminPortalUrl) {
+      window.location.href = checkoutIntent?.adminPortalUrl;
     }
   };
 
