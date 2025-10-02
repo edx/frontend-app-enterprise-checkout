@@ -1,5 +1,9 @@
+import { AppContext } from '@edx/frontend-platform/react';
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
+import { useContext, useMemo } from 'react';
 
+import { useBFFSuccess } from '@/components/app/data';
+import ErrorHeadingSimplified from '@/components/billing-details-pages/ErrorHeading/ErrorHeadingSimplified';
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import {
@@ -19,6 +23,16 @@ const Steps: React.FC = () => (
 
 const CheckoutStepperContainer: React.FC = () => {
   const { currentStepKey } = useCurrentStep();
+  const { authenticatedUser }:AppContextValue = useContext(AppContext);
+
+  const { data: successBFFContext } = useBFFSuccess(authenticatedUser?.id);
+  const { checkoutIntent } = successBFFContext || {};
+
+  const { displaySuccessBanner, displayErrorAlert } = useMemo(() => ({
+    displaySuccessBanner: checkoutIntent?.state === 'paid' || checkoutIntent?.state === 'fulfilled',
+    displayErrorAlert: checkoutIntent?.state === 'errored_provisioning' || checkoutIntent?.state === 'errored_stripe_checkout',
+  }), [checkoutIntent?.state]);
+
   return (
     <Stepper activeKey={currentStepKey}>
       <Stack gap={3}>
@@ -29,6 +43,7 @@ const CheckoutStepperContainer: React.FC = () => {
         </Row>
         <Row>
           <Col md={12} lg={8}>
+            {displayErrorAlert && <ErrorHeadingSimplified />}
             <StepperTitle />
           </Col>
           <Col md={12} lg={8}>
