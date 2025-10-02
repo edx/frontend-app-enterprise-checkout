@@ -50,7 +50,7 @@ const StatefulProvisioningButton = () => {
       if (polledCheckoutIntent?.state === 'fulfilled') {
         setStatefulButtonState('success');
       }
-      if (polledCheckoutIntent?.state === 'errored_provisioning') {
+      if (['errored_provisioning', 'errored_stripe_checkout'].includes(polledCheckoutIntent?.state)) {
         setStatefulButtonState('error');
       }
     }

@@ -14,15 +14,15 @@ const usePolledCheckoutIntent = () => {
     queryOptions({
       ...queryCheckoutIntent(checkoutIntent!.id),
       refetchInterval: (queryMetadata) => {
+        Promise.all(
+          [queryClient.invalidateQueries({
+            queryKey: queryBffContext(authenticatedUser.id).queryKey,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: queryBffSuccess(authenticatedUser.id).queryKey,
+          })],
+        );
         if (queryMetadata.state.data?.state === 'fulfilled') {
-          Promise.all(
-            [queryClient.invalidateQueries({
-              queryKey: queryBffContext(authenticatedUser.id).queryKey,
-            }),
-            queryClient.invalidateQueries({
-              queryKey: queryBffSuccess(authenticatedUser.id).queryKey,
-            })],
-          );
           return false;
         }
         return 5000;

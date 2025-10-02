@@ -9,7 +9,7 @@ const validateText = (matcher: string | ((content: string | string[]) => boolean
   if (typeof matcher === 'string') {
     expect(screen.getByText(matcher)).toBeInTheDocument();
   } else {
-    expect(screen.getByText((content, element) => {
+    expect(screen.getByText((_, element) => {
       const hasText = element?.textContent && matcher(element.textContent);
       return hasText === true;
     })).toBeInTheDocument();

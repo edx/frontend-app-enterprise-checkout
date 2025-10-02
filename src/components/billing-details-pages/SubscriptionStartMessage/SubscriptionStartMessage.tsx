@@ -6,7 +6,7 @@ import { LONG_MONTH_DATE_FORMAT } from '@/components/app/data/constants';
 import { FieldContainer } from '@/components/FieldContainer';
 
 const freeTrialDateRangeText = (
-  { startTime, endTime }: { startTime: firstBillableInvoice['startTime'], endTime: firstBillableInvoice['endTime'] },
+  { startTime, endTime }: { startTime: FirstBillableInvoice['startTime'], endTime: FirstBillableInvoice['endTime'] },
 ) => `${dayjs(startTime).format(LONG_MONTH_DATE_FORMAT)} - ${dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}`;
 
 const SubscriptionStartMessage = () => {

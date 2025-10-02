@@ -1,6 +1,6 @@
 import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 
 import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
 import { ErrorHeading } from '@/components/billing-details-pages/ErrorHeading';
@@ -13,8 +13,11 @@ const BillingDetailsSuccessContent = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
   const { data: successBFFContext } = useBFFSuccess(authenticatedUser?.id);
   const { checkoutIntent } = successBFFContext || {};
-  const displaySuccessBanner = checkoutIntent?.state === 'paid' || checkoutIntent?.state === 'fulfilled';
-  const displayErrorAlert = checkoutIntent?.state === 'errored_provisioning' || checkoutIntent?.state === 'errored_stripe_checkout';
+  const { displaySuccessBanner, displayErrorAlert } = useMemo(() => ({
+    displaySuccessBanner: checkoutIntent?.state === 'paid' || checkoutIntent?.state === 'fulfilled',
+    displayErrorAlert: checkoutIntent?.state === 'errored_provisioning' || checkoutIntent?.state === 'errored_stripe_checkout',
+  }), [checkoutIntent?.state]);
+
   return (
     <>
       {displayErrorAlert && <ErrorHeading />}

@@ -116,7 +116,11 @@ describe('utils.ts', () => {
 
       const emptyUser = {} as any;
 
-      populateInitialApplicationState({ checkoutIntent: null as any, authenticatedUser: emptyUser, stripePriceId: null });
+      populateInitialApplicationState({
+        checkoutIntent: null as any,
+        authenticatedUser: emptyUser,
+        stripePriceId: null,
+      });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
       const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];

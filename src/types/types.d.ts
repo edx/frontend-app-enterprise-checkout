@@ -293,7 +293,7 @@ declare global {
   }
 
   // TODO: to be updated with defined structure
-  type firstBillableInvoice = {
+  type FirstBillableInvoice = {
     startTime: string;
     endTime: string;
     last4: number | null;
@@ -306,7 +306,7 @@ declare global {
 
   // TODO: to be updated with defined structure
   interface CheckoutContextCheckoutIntentSuccess extends CheckoutContextCheckoutIntent {
-    firstBillableInvoice: firstBillableInvoice | null;
+    firstBillableInvoice: FirstBillableInvoice | null;
   }
 
   interface ExtendedCheckoutContextCheckoutIntent extends
