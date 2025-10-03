@@ -32,7 +32,11 @@ describe('StatefulProvisioningButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
+      data: null,
+      refetch: jest.fn(),
+    });
+    window.location.href = '';
   });
 
   const renderComponent = () => render(
@@ -45,14 +49,12 @@ describe('StatefulProvisioningButton', () => {
     </QueryClientProvider>,
   );
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    window.location.href = '';
-  });
-
   it('renders with pending state by default', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
+      refetch: jest.fn(),
+      isLoading: false,
+    });
 
     renderComponent();
 
@@ -87,7 +89,7 @@ describe('StatefulProvisioningButton', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
       data: { state: 'errored_provisioning' },
     });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
 
     renderComponent();
 
@@ -102,7 +104,7 @@ describe('StatefulProvisioningButton', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
       data: { state: 'errored_stripe_checkout' },
     });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
 
     renderComponent();
 
@@ -140,6 +142,7 @@ describe('StatefulProvisioningButton', () => {
       data: {
         checkoutIntent: { adminPortalUrl: null },
       },
+      refetch: jest.fn(),
     });
 
     renderComponent();
@@ -154,7 +157,7 @@ describe('StatefulProvisioningButton', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
       data: { state: 'pending' },
     });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
 
     renderComponent();
 
@@ -164,7 +167,7 @@ describe('StatefulProvisioningButton', () => {
 
   it('has correct button type attribute', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
 
     renderComponent();
 

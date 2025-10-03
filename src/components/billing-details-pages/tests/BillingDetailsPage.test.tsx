@@ -89,6 +89,7 @@ describe('BillingDetailsSuccessPage', () => {
           state: 'paid',
         },
       },
+      refetch: jest.fn(),
     });
   });
   it('renders the title correctly based on form state (first name from Plan Details)', () => {

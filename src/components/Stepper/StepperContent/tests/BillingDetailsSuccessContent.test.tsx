@@ -47,9 +47,13 @@ describe('BillingDetailsSuccessContent', () => {
     jest.clearAllMocks();
 
     // Set default mock values for all hooks
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
-    (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({ data: null });
+    (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
+      data: null,
+      refetch: jest.fn(),
+      isLoading: false,
+    });
   });
 
   it('renders StatefulProvisioningButton and OrderDetails by default', () => {
@@ -67,6 +71,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'paid' },
       },
+      refetch: jest.fn(),
     });
 
     renderComponent();
@@ -81,6 +86,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'fulfilled' },
       },
+      refetch: jest.fn(),
     });
 
     renderComponent();
@@ -95,6 +101,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'errored_provisioning' },
       },
+      refetch: jest.fn(),
     });
 
     renderComponent();
@@ -109,6 +116,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'errored_stripe_checkout' },
       },
+      refetch: jest.fn(),
     });
 
     renderComponent();
@@ -123,6 +131,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'processing' },
       },
+      refetch: jest.fn(),
     });
 
     renderComponent();

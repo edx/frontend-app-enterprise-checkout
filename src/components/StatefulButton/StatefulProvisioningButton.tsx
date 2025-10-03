@@ -2,12 +2,11 @@ import { defineMessages, useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { Icon, StatefulButton } from '@openedx/paragon';
 import { ArrowForward, SpinnerSimple } from '@openedx/paragon/icons';
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { useContext, useEffect, useState } from 'react';
 
 import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
-import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 
 const variants = {
   default: 'secondary',
@@ -34,21 +33,11 @@ const buttonMessages = defineMessages({
   },
 });
 
-const invalidateBFFContextQueries = async (queryClient: QueryClient, userId: AuthenticatedUser['userId']) => {
-  await Promise.all([
-    queryClient.invalidateQueries({
-      queryKey: queryBffContext(userId).queryKey,
-    }),
-    queryClient.invalidateQueries({
-      queryKey: queryBffSuccess(userId).queryKey,
-    }),
-  ]);
-};
-
 const StatefulProvisioningButton = () => {
+  const queryClient = useQueryClient();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: polledCheckoutIntent } = usePolledCheckoutIntent();
-  const { data: successContext } = useBFFSuccess();
+  const { data: successContext, refetch } = useBFFSuccess();
   const { checkoutIntent } = successContext || {};
   const [statefulButtonState, setStatefulButtonState] = useState('pending');
   const intl = useIntl();
@@ -58,13 +47,19 @@ const StatefulProvisioningButton = () => {
       window.location.href = checkoutIntent.adminPortalUrl;
     }
   };
-  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (polledCheckoutIntent?.state !== successContext?.checkoutIntent?.state) {
-      invalidateBFFContextQueries(queryClient, authenticatedUser?.userId);
+    if (polledCheckoutIntent?.state !== successContext?.checkoutIntent?.state && !checkoutIntent?.adminPortalUrl) {
+      refetch();
     }
-  }, [authenticatedUser?.userId, polledCheckoutIntent?.state, queryClient, successContext?.checkoutIntent?.state]);
+  }, [
+    authenticatedUser?.userId,
+    checkoutIntent?.adminPortalUrl,
+    polledCheckoutIntent?.state,
+    queryClient,
+    refetch,
+    successContext?.checkoutIntent?.state,
+  ]);
 
   useEffect(() => {
     if (polledCheckoutIntent) {
