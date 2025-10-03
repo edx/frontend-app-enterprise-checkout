@@ -9,3 +9,4 @@ export { default as useCheckoutIntent } from './useCheckoutIntent';
 export { default as useCheckoutSessionClientSecret } from './useCheckoutSessionClientSecret';
 export { default as useFirstBillableInvoice } from './useFirstBillableInvoice';
 export { default as usePolledCheckoutIntent } from './usePolledCheckoutIntent';
+export { default as useCreateBillingPortalSession } from './useCreateBillingPortalSession';

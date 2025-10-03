@@ -9,6 +9,7 @@ import AutoRenewNotice from './AutoRenewNotice';
 import DueTodayRow from './DueTodayRow';
 import LicensesRow from './LicensesRow';
 import PricePerUserRow from './PricePerUserRow';
+import PurchaseSummaryCardButton from './PurchaseSummaryCardButton';
 import PurchaseSummaryHeader from './PurchaseSummaryHeader';
 import TotalAfterTrialRow from './TotalAfterTrialRow';
 
@@ -36,6 +37,9 @@ const PurchaseSummary: React.FC = () => {
           <DueTodayRow amountDue={yearlySubscriptionCostForQuantity ?? 0} />
         </Stack>
       </Card.Section>
+      <Card.Footer>
+        <PurchaseSummaryCardButton />
+      </Card.Footer>
     </Card>
   );
 };
