@@ -2,12 +2,17 @@ import { useCheckout } from '@stripe/react-stripe-js';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
+import { useBFFSuccess, useCheckoutSessionClientSecret, usePolledCheckoutIntent } from '@/components/app/data';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
-jest.mock('@/components/app/data/hooks/useCheckoutSessionClientSecret');
+jest.mock('@/components/app/data', () => ({
+  ...jest.requireActual('@/components/app/data'),
+  useCheckoutSessionClientSecret: jest.fn(),
+  usePolledCheckoutIntent: jest.fn(),
+  useBFFSuccess: jest.fn(),
+}));
 
 jest.mock('@stripe/react-stripe-js', () => ({
   ...jest.requireActual('@stripe/react-stripe-js'),
@@ -65,7 +70,6 @@ describe('BillingDetailsPage', () => {
 describe('BillingDetailsSuccessPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
     (useCheckout as jest.Mock).mockReturnValue({
       canConfirm: true,
       confirm: jest.fn(),
@@ -73,6 +77,19 @@ describe('BillingDetailsSuccessPage', () => {
         type: 'complete',
         paymentStatus: 'paid',
       },
+    });
+    (usePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 1,
+      },
+    });
+    (useBFFSuccess as jest.Mock).mockReturnValue({
+      data: {
+        checkoutIntent: {
+          state: 'paid',
+        },
+      },
+      refetch: jest.fn(),
     });
   });
   it('renders the title correctly based on form state (first name from Plan Details)', () => {
@@ -111,14 +128,14 @@ describe('BillingDetailsSuccessPage', () => {
     validateText('You have purchased an edX team\'s subscription.');
   });
 
-  it('renders the SuccessHeading component', () => {
+  it('renders the SuccessHeading component', async () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
       config: {},
       authenticatedUser: {
         userId: 12345,
       },
     });
-    validateText((content) => content.includes('Welcome to edX for teams!'));
+    await waitFor(() => validateText((content) => content.includes('Welcome to edX for Teams!')));
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
   });
 });

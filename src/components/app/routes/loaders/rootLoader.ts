@@ -7,7 +7,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunction, redirect } from 'react-router-dom';
 
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import { determineExistingCheckoutIntentState, populateCompletedFormFields } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { extractPriceId } from '@/utils/checkout';
 
@@ -77,7 +77,7 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
 
     const stripePriceId = extractPriceId(pricing);
 
-    populateCompletedFormFields({
+    populateInitialApplicationState({
       checkoutIntent,
       stripePriceId,
       authenticatedUser,

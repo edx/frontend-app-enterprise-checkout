@@ -3,7 +3,7 @@ import { CheckoutProvider } from '@stripe/react-stripe-js';
 import { Appearance, loadStripe } from '@stripe/stripe-js';
 import { ReactNode, useMemo } from 'react';
 
-import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
+import { useCheckoutSessionClientSecret } from '@/components/app/data';
 import { createStripeAppearance } from '@/components/StripeProvider/utils';
 
 type StripeProviderProps = {

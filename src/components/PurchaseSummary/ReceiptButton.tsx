@@ -8,6 +8,7 @@ import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 const ReceiptButton: React.FC = () => {
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
+
   return (
     <Button
       className="w-100 text-primary-500"
@@ -21,7 +22,6 @@ const ReceiptButton: React.FC = () => {
           checkoutIntentId: checkoutIntent?.id ?? null,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.VIEW_RECEIPT_BUTTON_CLICKED,
           properties: {
-            checkoutIntent,
             billingPortalSessionUrl: billingPortalSession?.url,
           },
         });
