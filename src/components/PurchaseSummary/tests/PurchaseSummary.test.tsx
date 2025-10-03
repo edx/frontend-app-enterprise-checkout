@@ -1,7 +1,7 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
-import React from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { DataStoreKey } from '@/constants/checkout';
@@ -12,6 +12,8 @@ import PurchaseSummary from '../PurchaseSummary';
 jest.mock('@/components/app/data', () => ({
   __esModule: true,
   usePurchaseSummaryPricing: jest.fn(),
+  useCreateBillingPortalSession: jest.fn(() => ({ data: { url: null } })),
+  useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
 }));
 
 describe('PurchaseSummary', () => {
@@ -35,7 +37,9 @@ describe('PurchaseSummary', () => {
   it('renders header and rows with computed values', () => {
     render(
       <IntlProvider locale="en">
-        <PurchaseSummary />
+        <MemoryRouter>
+          <PurchaseSummary />
+        </MemoryRouter>
       </IntlProvider>,
     );
 
