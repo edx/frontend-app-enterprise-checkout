@@ -1,10 +1,12 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useBFFSuccess, useFirstBillableInvoice, usePolledCheckoutIntent } from '@/components/app/data';
 import { BillingDetailsSuccessContent } from '@/components/Stepper/StepperContent';
+import { queryClient } from '@/utils/tests';
 
 // Mock only the hooks used by child components
 jest.mock('@/components/app/data', () => ({
@@ -32,11 +34,13 @@ describe('BillingDetailsSuccessContent', () => {
   };
 
   const renderComponent = (appContextValue = mockAppContextValue) => render(
-    <IntlProvider locale="en">
-      <AppContext.Provider value={appContextValue}>
-        <BillingDetailsSuccessContent />
-      </AppContext.Provider>
-    </IntlProvider>,
+    <QueryClientProvider client={queryClient()}>
+      <IntlProvider locale="en">
+        <AppContext.Provider value={appContextValue}>
+          <BillingDetailsSuccessContent />
+        </AppContext.Provider>
+      </IntlProvider>
+    </QueryClientProvider>,
   );
 
   beforeEach(() => {

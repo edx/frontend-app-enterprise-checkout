@@ -152,7 +152,6 @@ describe('PurchaseSummaryCardButton', () => {
         checkoutIntentId: 123,
         eventName: 'edx.ui.enterprise.checkout.self_service_subscription_checkout.billing_details_success.view_receipt_button.clicked',
         properties: {
-          checkoutIntent: { id: 123 },
           billingPortalSessionUrl: 'https://billing.example.com/portal',
         },
       });

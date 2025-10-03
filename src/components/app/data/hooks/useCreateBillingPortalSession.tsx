@@ -14,6 +14,7 @@ const useCreateBillingPortalSession = (options = {}) => {
     queryOptions({
       ...queryCreateBillingPortalSession(checkoutIntent?.id),
       ...options,
+      enabled: !!checkoutIntent?.id,
     }),
   );
 };

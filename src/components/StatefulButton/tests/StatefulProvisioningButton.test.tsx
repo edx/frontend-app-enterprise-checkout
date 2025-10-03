@@ -1,9 +1,12 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
 import { StatefulProvisioningButton } from '@/components/StatefulButton';
+import { queryClient } from '@/utils/tests';
 
 // Mock the data hooks
 jest.mock('@/components/app/data', () => ({
@@ -31,10 +34,15 @@ describe('StatefulProvisioningButton', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null });
   });
+
   const renderComponent = () => render(
-    <IntlProvider locale="en">
-      <StatefulProvisioningButton />
-    </IntlProvider>,
+    <QueryClientProvider client={queryClient()}>
+      <IntlProvider locale="en">
+        <AppContext.Provider value={{ authenticatedUser: { userId: 1 } as any, config: {} }}>
+          <StatefulProvisioningButton />
+        </AppContext.Provider>
+      </IntlProvider>
+    </QueryClientProvider>,
   );
 
   beforeEach(() => {

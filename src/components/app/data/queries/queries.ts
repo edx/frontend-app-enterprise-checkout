@@ -40,8 +40,8 @@ export const queryCheckoutIntent = (id: number) => (
     .checkoutIntent(id)
 );
 
-export const queryCreateBillingPortalSession = (checkout_intent_id?: number) => (
+export const queryCreateBillingPortalSession = (checkoutIntentId?: number) => (
   queries
     .enterpriseCheckout
-    .createBillingPortalSession(checkout_intent_id)
+    .createBillingPortalSession(checkoutIntentId)
 );
