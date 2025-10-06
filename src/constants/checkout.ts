@@ -39,7 +39,7 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
     incomplete_data: 'Not enough parameters were given.',
   },
   enterpriseSlug: {
-    invalid_format: 'Invalid format for given slug.',
+    invalid_format: 'Only alphanumeric lowercase characters and hyphens are allowed.',
     // EXISTING_ENTERPRISE_CUSTOMER_FOR_ADMIN uses the same error code on the backend
     existing_enterprise_customer: 'The slug conflicts with an existing customer.',
     slug_reserved: 'The slug is currently reserved by another user.',
@@ -130,7 +130,7 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     )
     .regex(
       new RegExp(constraints?.enterpriseSlug?.pattern),
-      'Only lowercase letters, numbers, and hyphens allowed',
+      'Only alphanumeric lowercase characters and hyphens are allowed.',
     ),
 }));
 
