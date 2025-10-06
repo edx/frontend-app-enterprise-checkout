@@ -151,6 +151,10 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {
+          type: null,
+          paymentStatus: null,
+        },
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -169,7 +173,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
@@ -196,6 +200,10 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {
+          type: null,
+          paymentStatus: null,
+        },
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -214,7 +222,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
