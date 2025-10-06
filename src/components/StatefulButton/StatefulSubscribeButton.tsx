@@ -125,7 +125,15 @@ const StatefulSubscribeButton = () => {
         setErrorMessageKey('fallback');
       }
     }
-  }, [statefulButtonState, status, setCheckoutSessionStatus, queryClient, authenticatedUser, navigate, checkoutIntent?.id]);
+  }, [
+    statefulButtonState,
+    status,
+    setCheckoutSessionStatus,
+    queryClient,
+    authenticatedUser,
+    navigate,
+    checkoutIntent?.id,
+  ]);
 
   const props = {
     labels: {
