@@ -1,17 +1,23 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 
 import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
 import { StatefulProvisioningButton } from '@/components/StatefulButton';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { queryClient } from '@/utils/tests';
 
 // Mock the data hooks
 jest.mock('@/components/app/data', () => ({
   useBFFSuccess: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
+}));
+
+jest.mock('@/utils/common', () => ({
+  sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
@@ -49,20 +55,28 @@ describe('StatefulProvisioningButton', () => {
     </QueryClientProvider>,
   );
 
-  it('renders with pending state by default', () => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
+  it.each([
+    'paid',
+    'errored_provisioning',
+    'errored_stripe_checkout',
+    'fulfilled',
+  ])('button does not render except on fulfilled checkout intent state', (state) => {
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: { state } });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
+      data: {
+        checkoutIntent: { adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com' : null },
+      },
       refetch: jest.fn(),
       isLoading: false,
     });
 
     renderComponent();
-
-    validateText('Creating your account');
-
-    const button = screen.getByRole('button');
-    expect(button).toHaveAttribute('aria-disabled', 'true');
-    expect(button).toHaveClass('btn-secondary');
+    const button = screen.queryByTestId('stateful-provisioning-button');
+    if (state !== 'fulfilled') {
+      expect(button).toBeNull();
+    } else {
+      expect(button).toBeTruthy();
+    }
   });
 
   it('renders with success state when checkout intent is fulfilled', () => {
@@ -85,36 +99,8 @@ describe('StatefulProvisioningButton', () => {
     expect(button).toHaveClass('reverse-stateful-provisioning-success');
   });
 
-  it('renders with error state when checkout intent has error', () => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: { state: 'errored_provisioning' },
-    });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
-
-    renderComponent();
-
-    validateText('Error, try again.');
-
-    const button = screen.getByRole('button');
-    expect(button).not.toBeDisabled();
-    expect(button).toHaveClass('btn-danger');
-  });
-
-  it('renders with error state when checkout intent has stripe error', () => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: { state: 'errored_stripe_checkout' },
-    });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
-
-    renderComponent();
-
-    validateText('Error, try again.');
-
-    const button = screen.getByRole('button');
-    expect(button).toHaveClass('btn-danger');
-  });
-
-  it('redirects to admin portal URL when success button is clicked', () => {
+  it('redirects to admin portal URL when success button is clicked', async () => {
+    const user = userEvent.setup();
     const adminPortalUrl = 'https://admin.example.com/dashboard';
 
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
@@ -129,49 +115,9 @@ describe('StatefulProvisioningButton', () => {
     renderComponent();
 
     const button = screen.getByRole('button');
-    fireEvent.click(button);
+    await user.click(button);
 
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
     expect(window.location.href).toBe(adminPortalUrl);
-  });
-
-  it('does not redirect when success button is clicked but no admin portal URL', () => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: { state: 'fulfilled' },
-    });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
-      data: {
-        checkoutIntent: { adminPortalUrl: null },
-      },
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(window.location.href).toBe('');
-  });
-
-  it('applies correct CSS classes based on state', () => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: { state: 'pending' },
-    });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
-
-    renderComponent();
-
-    const button = screen.getByRole('button');
-    expect(button).toHaveClass('mx-auto', 'd-block', 'w-auto', 'disabled-opacity');
-  });
-
-  it('has correct button type attribute', () => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
-
-    renderComponent();
-
-    const button = screen.getByRole('button');
-    expect(button).toHaveAttribute('type', 'submit');
   });
 });

@@ -11,44 +11,26 @@ describe('ErrorHeading', () => {
     </IntlProvider>,
   );
 
-  it('renders the error alert with danger variant', () => {
+  it('renders the main heading correctly', () => {
     renderComponent();
-    const alert = screen.getByRole('alert');
-    expect(alert).toBeInTheDocument();
-    expect(alert).toHaveClass('alert-danger');
+    const heading = screen.getByRole('heading', { level: 2 });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent('Account Setup is Taking Longer Than Expected');
+    expect(heading).toHaveClass('text-center', 'font-weight-normal', 'mb-0');
   });
 
-  it('renders the error alert with icon', () => {
+  it('renders the description heading correctly', () => {
     renderComponent();
-    const alert = screen.getByRole('alert');
-    expect(alert).toBeInTheDocument();
-    // Icon is rendered internally by Paragon Alert component
+    const subheading = screen.getByRole('heading', { level: 3 });
+    expect(subheading).toBeInTheDocument();
+    expect(subheading).toHaveTextContent(/We're experiencing a brief delay in setting up your edX Teams account/);
+    expect(subheading).toHaveClass('font-weight-light', 'text-center');
   });
 
-  it('renders the error heading correctly', () => {
+  it('renders the complete description message', () => {
     renderComponent();
-    validateText('We\'re sorry, something went wrong');
-  });
-
-  it('renders the error description message', () => {
-    renderComponent();
-    validateText(/An unexpected error occurred while setting up your account/i);
-    validateText(/We're actively working to resolve this issue/i);
-    validateText(/If you require immediate assistance, please/i);
-  });
-
-  it('renders the contact support link correctly', () => {
-    renderComponent();
-    const supportLink = screen.getByRole('link', { name: 'contact our support team' });
-    expect(supportLink).toBeInTheDocument();
-    expect(supportLink).toHaveAttribute('href', 'https://google.com');
-    expect(supportLink).toHaveAttribute('target', '_blank');
-    expect(supportLink).toHaveAttribute('rel', 'noopener noreferrer');
-  });
-
-  it('has proper accessibility attributes', () => {
-    renderComponent();
-    const alert = screen.getByRole('alert');
-    expect(alert).toBeInTheDocument();
+    expect(screen.getByText(/We're experiencing a brief delay in setting up your edX Teams account/)).toBeInTheDocument();
+    expect(screen.getByText(/We'll send you a confirmation email immediately once your account is fully operational/)).toBeInTheDocument();
+    expect(screen.getByText(/Thank you for your patience!/)).toBeInTheDocument();
   });
 });

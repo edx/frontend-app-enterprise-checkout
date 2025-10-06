@@ -1,13 +1,21 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 
-import { useFirstBillableInvoice } from '@/components/app/data';
+import { useCheckoutIntent, useCreateBillingPortalSession, useFirstBillableInvoice } from '@/components/app/data';
 import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 // Mock the useFirstBillableInvoice hook
 jest.mock('@/components/app/data', () => ({
   useFirstBillableInvoice: jest.fn(),
+  useCreateBillingPortalSession: jest.fn(),
+  useCheckoutIntent: jest.fn(),
+}));
+
+jest.mock('@/utils/common', () => ({
+  sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
 const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
@@ -25,6 +33,16 @@ describe('SubscriptionStartMessage', () => {
         customerPhone: null,
         startTime: '2025-05-10T00:00:00Z', // Start of trial
         endTime: '2025-06-09T00:00:00Z', // End date that formats to "June 9th, 2025"
+      },
+    });
+    (useCreateBillingPortalSession as jest.Mock).mockReturnValue({
+      data: {
+        url: 'https://stripe-billing.example.com/session',
+      },
+    });
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 7,
       },
     });
   });
@@ -56,12 +74,17 @@ describe('SubscriptionStartMessage', () => {
     expect(boldElement.tagName).toBe('SPAN');
   });
 
-  it('renders the link correctly', () => {
+  it('renders the link correctly', async () => {
+    const user = userEvent.setup();
     renderComponent();
     const link = screen.getByRole('link', { name: 'Subscription Management' });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', 'https://google.com');
+    expect(link).toHaveAttribute('href', 'https://stripe-billing.example.com/session');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+
+    await user.click(link);
+
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
   });
 });

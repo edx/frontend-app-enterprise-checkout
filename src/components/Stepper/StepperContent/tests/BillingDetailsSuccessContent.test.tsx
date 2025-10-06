@@ -4,7 +4,12 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { useBFFSuccess, useFirstBillableInvoice, usePolledCheckoutIntent } from '@/components/app/data';
+import {
+  useBFFSuccess, useCheckoutIntent,
+  useCreateBillingPortalSession,
+  useFirstBillableInvoice,
+  usePolledCheckoutIntent,
+} from '@/components/app/data';
 import { BillingDetailsSuccessContent } from '@/components/Stepper/StepperContent';
 import { queryClient } from '@/utils/tests';
 
@@ -13,11 +18,16 @@ jest.mock('@/components/app/data', () => ({
   useBFFSuccess: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
   useFirstBillableInvoice: jest.fn(),
+  useCreateBillingPortalSession: jest.fn(),
+  useCheckoutIntent: jest.fn(),
 }));
 
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
 const mockUsePolledCheckoutIntent = usePolledCheckoutIntent as jest.MockedFunction<typeof usePolledCheckoutIntent>;
 const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
+const mockCreateBillingPortalSession = useCreateBillingPortalSession as
+  jest.MockedFunction<typeof useCreateBillingPortalSession>;
+const mockUseCheckoutIntent = useCheckoutIntent as jest.MockedFunction<typeof useCheckoutIntent>;
 
 describe('BillingDetailsSuccessContent', () => {
   const mockAuthenticatedUser = {
@@ -54,19 +64,29 @@ describe('BillingDetailsSuccessContent', () => {
       refetch: jest.fn(),
       isLoading: false,
     });
+    (mockCreateBillingPortalSession as jest.Mock).mockReturnValue({
+      data: {
+        url: 'https://billing-portal.example.com/session',
+      },
+    });
+    (mockUseCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 7,
+      },
+    });
   });
 
-  it('renders StatefulProvisioningButton and OrderDetails by default', () => {
+  it('renders BillingDetailsHeadingMessage, StatefulProvisioningButton and OrderDetails by default', () => {
     renderComponent();
 
-    // StatefulProvisioningButton renders with pending state by default
-    validateText('Creating your account');
+    // BillingDetailsHeadingMessage renders with celebration image
+    expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
     // OrderDetails renders its content
     validateText('Order Details');
     validateText('You have purchased an edX team\'s subscription.');
   });
 
-  it('renders SuccessHeading when checkout intent state is "paid"', () => {
+  it('renders PendingHeading when checkout intent state is "paid"', () => {
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: { state: 'paid' },
@@ -76,7 +96,7 @@ describe('BillingDetailsSuccessContent', () => {
 
     renderComponent();
 
-    validateText(/Welcome to edX for Teams!/);
+    validateText(/Welcome to edX for Teams! Your account is currently being configured/);
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
     expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
   });
@@ -96,86 +116,23 @@ describe('BillingDetailsSuccessContent', () => {
     expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
   });
 
-  it('renders ErrorHeading when checkout intent state is "errored_provisioning"', () => {
+  it.each([
+    'errored_provisioning',
+    'errored_stripe_checkout',
+  ])('renders ErrorHeading when checkout intent state is (%s)', (
+    state: 'errored_provisioning' | 'errored_stripe_checkout',
+  ) => {
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
-        checkoutIntent: { state: 'errored_provisioning' },
+        checkoutIntent: { state },
       },
       refetch: jest.fn(),
     });
 
     renderComponent();
 
-    validateText('We\'re sorry, something went wrong');
-    validateText('contact our support team');
+    validateText('Account Setup is Taking Longer Than Expected');
+    validateText("We're experiencing a brief delay in setting up your edX Teams account. We'll send you a confirmation email immediately once your account is fully operational. Thank you for your patience!");
     expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
-  });
-
-  it('renders ErrorHeading when checkout intent state is "errored_stripe_checkout"', () => {
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
-      data: {
-        checkoutIntent: { state: 'errored_stripe_checkout' },
-      },
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    validateText('We\'re sorry, something went wrong');
-    validateText('contact our support team');
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
-  });
-
-  it('does not render SuccessHeading or ErrorHeading for other states', () => {
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
-      data: {
-        checkoutIntent: { state: 'processing' },
-      },
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
-    expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
-  });
-
-  it('calls useBFFSuccess with authenticated user id', () => {
-    renderComponent();
-
-    expect(mockUseBFFSuccess).toHaveBeenCalledWith(mockAuthenticatedUser.id);
-  });
-
-  it('handles null authenticated user', () => {
-    const appContextWithoutUser = {
-      authenticatedUser: null,
-      config: {},
-    };
-
-    // @ts-ignore
-    renderComponent(appContextWithoutUser);
-
-    expect(mockUseBFFSuccess).toHaveBeenCalledWith(undefined);
-    validateText('Creating your account');
-  });
-
-  it('handles null success BFF context data', () => {
-    renderComponent();
-
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
-    expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
-    validateText('Creating your account');
-  });
-
-  it('handles null checkout intent', () => {
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
-      data: { checkoutIntent: null },
-    });
-
-    renderComponent();
-
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
-    expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
-    validateText('Creating your account');
   });
 });
