@@ -22,9 +22,11 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   // AccountDetails
   ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.account_details_continue_button.clicked`,
   // BillingDetails
+  BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_subscribe_button.clicked`,
   TOGGLE_TNC_TERMS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.terms_and_conditions_checkbox.toggled`,
   TOGGLE_SUBSCRIPTION_TERMS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.subscription_terms_checkbox.toggled`,
   // BillingDetailsSuccess
+  PAYMENT_PROCESSED_SUCCESSFULLY: `${SUBSCRIPTION_CHECKOUT_PREFIX}.payment_processed_successfully.viewed`,
   VIEW_RECEIPT_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.view_receipt_button.clicked`,
 };
 

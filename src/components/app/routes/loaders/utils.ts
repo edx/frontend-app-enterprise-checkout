@@ -108,6 +108,9 @@ const populateInitialApplicationState = ({
         ...s.formData,
         [DataStoreKey.PlanDetails]: {
           ...s.formData[DataStoreKey.PlanDetails],
+          quantity: s.formData[DataStoreKey.PlanDetails]?.quantity
+            ?? checkoutIntent?.quantity
+            ?? 0,
           fullName: s.formData[DataStoreKey.PlanDetails]?.fullName
             ?? authenticatedUser.name
             ?? authenticatedUser.username,

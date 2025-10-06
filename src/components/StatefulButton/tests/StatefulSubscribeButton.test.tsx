@@ -7,7 +7,9 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { useNavigate } from 'react-router-dom';
 
+import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import StatefulSubscribeButton from '../StatefulSubscribeButton';
 
@@ -39,11 +41,15 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@/components/app/data', () => ({
-  useCheckoutIntent: jest.fn(() => ({ data: 'test-intent' })),
+  useCheckoutIntent: jest.fn(() => ({ data: { id: 'test-intent' } })),
 }));
 
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
   useCheckoutFormStore: jest.fn(),
+}));
+
+jest.mock('@/utils/common', () => ({
+  sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
 // Mock functions that we'll reuse across tests
@@ -328,6 +334,10 @@ describe('StatefulSubscribeButton', () => {
       await waitFor(() => {
         expect(mockSetCheckoutSessionStatus).toHaveBeenCalledWith({ type: 'complete', paymentStatus: 'paid' });
         expect(mockInvalidateQueries).toHaveBeenCalled();
+        expect(jest.mocked(sendEnterpriseCheckoutTrackingEvent)).toHaveBeenCalledWith({
+          checkoutIntentId: 'test-intent',
+          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
+        });
         expect(mockNavigate).toHaveBeenCalledWith('/billing-details/success');
       });
     });
