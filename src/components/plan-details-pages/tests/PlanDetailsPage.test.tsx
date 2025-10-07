@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
 
@@ -9,6 +10,10 @@ jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useFormValidationConstraints: jest.fn(),
 }));
+
+jest.mock('@/components/app/data/hooks/useBFFContext');
+
+const mockedUseBFFContext = useBFFContext as unknown as jest.Mock;
 
 describe('PlanDetailsPage', () => {
   beforeEach(() => {
@@ -21,6 +26,38 @@ describe('PlanDetailsPage', () => {
         },
       },
     });
+    // Mock useBFFContext to call the select function with raw BFF data
+    mockedUseBFFContext.mockImplementation((_userId, options) => {
+      const rawData = {
+        pricing: {
+          defaultByLookupKey: 'test-subscription',
+          prices: [
+            {
+              id: 'price_test123',
+              product: 'prod_test123',
+              lookupKey: 'test-subscription',
+              recurring: {
+                interval: 'year',
+              },
+              currency: 'usd',
+              unitAmount: 99900,
+              unitAmountDecimal: '999.00',
+            },
+          ],
+        },
+      };
+
+      // Call the select function if provided to test the transformation logic
+      const transformedData = options?.select ? options.select(rawData) : rawData;
+
+      return { data: transformedData };
+    });
+  });
+
+  it('renders the price alert', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetails);
+    expect(screen.getByTestId('price-alert')).toHaveTextContent('Teams subscription');
+    expect(screen.getByTestId('price-alert')).toHaveTextContent('999/yr');
   });
 
   it('renders the title correctly', () => {
