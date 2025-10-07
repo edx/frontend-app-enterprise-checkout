@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, mapCheckoutIntentStateToSessionStatus, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -46,7 +46,7 @@ describe('utils.ts', () => {
     });
   });
 
-  describe('populateCompletedFormFields', () => {
+  describe('populateInitialApplicationState', () => {
     it('merges user details and intent details into the store while preserving existing fields', () => {
       const initialState = {
         formData: {
@@ -54,6 +54,7 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: { enterpriseSlug: undefined, companyName: undefined },
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {},
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -72,7 +73,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
@@ -113,11 +114,16 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {},
       } as any;
 
       const emptyUser = {} as any;
 
-      populateCompletedFormFields({ checkoutIntent: null as any, authenticatedUser: emptyUser, stripePriceId: null });
+      populateInitialApplicationState({
+        checkoutIntent: null as any,
+        authenticatedUser: emptyUser,
+        stripePriceId: null,
+      });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
       const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];
@@ -145,6 +151,10 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {
+          type: null,
+          paymentStatus: null,
+        },
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -163,7 +173,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
@@ -190,6 +200,10 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {
+          type: null,
+          paymentStatus: null,
+        },
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -208,7 +222,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
@@ -226,6 +240,60 @@ describe('utils.ts', () => {
           country: 'US',
         }),
       );
+    });
+  });
+
+  describe('mapCheckoutIntentStateToSessionStatus', () => {
+    it('returns null type and paymentStatus when checkoutIntentState is undefined', () => {
+      const result = mapCheckoutIntentStateToSessionStatus(undefined);
+      expect(result).toEqual({
+        type: null,
+        paymentStatus: null,
+      });
+    });
+
+    it('returns null type and paymentStatus when checkoutIntentState is null', () => {
+      const result = mapCheckoutIntentStateToSessionStatus(null as any);
+      expect(result).toEqual({
+        type: null,
+        paymentStatus: null,
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "paid" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('paid' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "fulfilled" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('fulfilled' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "errored_provisioning" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('errored_provisioning' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns open type and null paymentStatus for other states', () => {
+      const testStates = ['created', 'requires_payment', 'processing', 'cancelled'];
+
+      testStates.forEach(state => {
+        const result = mapCheckoutIntentStateToSessionStatus(state as any);
+        expect(result).toEqual({
+          type: 'open',
+          paymentStatus: null,
+        });
+      });
     });
   });
 

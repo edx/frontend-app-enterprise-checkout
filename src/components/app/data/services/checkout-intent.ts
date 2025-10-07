@@ -56,7 +56,7 @@ const camelCaseResponse = (
  *
  * Only callable for an authenticated user.
  */
-export default async function createCheckoutIntent(
+async function createCheckoutIntent(
   requestData: CreateCheckoutIntentRequestSchema,
 ): Promise<AxiosResponse<CreateCheckoutIntentSuccessResponseSchema>> {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
@@ -74,3 +74,15 @@ export default async function createCheckoutIntent(
 
   return response;
 }
+
+const fetchCheckoutIntent = async (id) => {
+  const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${id}/`;
+  const response = await getAuthenticatedHttpClient().get(url);
+  return camelCaseObject(response.data);
+};
+
+export {
+  createCheckoutIntent,
+  fetchCheckoutIntent,
+};

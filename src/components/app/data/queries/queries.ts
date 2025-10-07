@@ -34,8 +34,14 @@ export const queryBffValidation = (payload: ValidationSchema) => {
   );
 };
 
-export const queryCreateBillingPortalSession = (checkout_intent_id?: number) => (
+export const queryCheckoutIntent = (id: number) => (
   queries
     .enterpriseCheckout
-    .createBillingPortalSession(checkout_intent_id)
+    .checkoutIntent(id)
+);
+
+export const queryCreateBillingPortalSession = (checkoutIntentId?: number) => (
+  queries
+    .enterpriseCheckout
+    .createBillingPortalSession(checkoutIntentId)
 );

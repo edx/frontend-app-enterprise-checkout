@@ -28,14 +28,16 @@ const VALIDATION_DEBOUNCE_MS = 500;
 const SUBSCRIPTION_TRIAL_LENGTH_DAYS = 14;
 
 /**
- * Date format for displaying dates in the UI.
+ * Date formats for displaying dates in the UI.
  */
-const DATE_FORMAT = 'MMM D, YYYY';
+const SHORT_MONTH_DATE_FORMAT = 'MMM D, YYYY';
+const LONG_MONTH_DATE_FORMAT = 'MMMM D, YYYY';
 
 export {
   baseValidation,
   snakeCaseBaseValidation,
   VALIDATION_DEBOUNCE_MS,
   SUBSCRIPTION_TRIAL_LENGTH_DAYS,
-  DATE_FORMAT,
+  SHORT_MONTH_DATE_FORMAT,
+  LONG_MONTH_DATE_FORMAT,
 };

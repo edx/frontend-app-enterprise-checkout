@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import useCheckoutSessionClientSecret from '@/components/app/data/hooks/useCheckoutSessionClientSecret';
+import { useBFFSuccess, useCheckoutSessionClientSecret, usePolledCheckoutIntent } from '@/components/app/data';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -19,12 +19,13 @@ jest.mock('@/utils/common', () => ({
 jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useCheckoutIntent: jest.fn(),
+  useCheckoutSessionClientSecret: jest.fn(),
+  usePolledCheckoutIntent: jest.fn(),
+  useBFFSuccess: jest.fn(),
 }));
 
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 const { useCheckoutIntent } = jest.requireMock('@/components/app/data');
-
-jest.mock('@/components/app/data/hooks/useCheckoutSessionClientSecret');
 
 jest.mock('@stripe/react-stripe-js', () => ({
   ...jest.requireActual('@stripe/react-stripe-js'),
@@ -110,7 +111,6 @@ describe('BillingDetailsPage', () => {
 describe('BillingDetailsSuccessPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
     (useCheckout as jest.Mock).mockReturnValue({
       canConfirm: true,
       confirm: jest.fn(),
@@ -118,6 +118,19 @@ describe('BillingDetailsSuccessPage', () => {
         type: 'complete',
         paymentStatus: 'paid',
       },
+    });
+    (usePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 1,
+      },
+    });
+    (useBFFSuccess as jest.Mock).mockReturnValue({
+      data: {
+        checkoutIntent: {
+          state: 'paid',
+        },
+      },
+      refetch: jest.fn(),
     });
   });
 
@@ -157,14 +170,14 @@ describe('BillingDetailsSuccessPage', () => {
     validateText('You have purchased an edX team\'s subscription.');
   });
 
-  it('renders the SuccessHeading component', () => {
+  it('renders the SuccessHeading component', async () => {
     renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
       config: {},
       authenticatedUser: {
         userId: 12345,
       },
     });
-    validateText((content) => content.includes('Welcome to edX for teams!'));
+    await waitFor(() => validateText((content) => content.includes('Welcome to edX for Teams!')));
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
   });
 });

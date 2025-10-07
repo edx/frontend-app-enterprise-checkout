@@ -1,6 +1,6 @@
 import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
-import createCheckoutIntent from '@/components/app/data/services/checkout-intent';
+import { createCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 
 import type { AxiosError, AxiosResponse } from 'axios';
 
