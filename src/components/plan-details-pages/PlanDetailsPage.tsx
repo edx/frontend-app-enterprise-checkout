@@ -1,4 +1,4 @@
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -7,6 +7,7 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
+import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
@@ -14,7 +15,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import { useFormValidationConstraints } from '@/components/app/data';
-import { useLoginMutation } from '@/components/app/data/hooks';
+import {
+  useCreateCheckoutIntentMutation,
+  useLoginMutation,
+} from '@/components/app/data/hooks';
+import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
@@ -28,11 +33,12 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 
+import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 import '../Stepper/Steps/css/PriceAlert.css';
 
 const PlanDetailsPage = () => {
-  const intl = useIntl();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -70,23 +76,68 @@ const PlanDetailsPage = () => {
     },
   });
 
+  // Use existing checkout intent if already created (avoid duplicate POST)
+  async function queryClientInvalidate(userId?: number) {
+    if (!userId) {
+      return;
+    }
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryBffContext(userId).queryKey }),
+      queryClient.invalidateQueries({ queryKey: queryBffSuccess(userId).queryKey }),
+    ]);
+  }
+
+  const createCheckoutIntentMutation = useCreateCheckoutIntentMutation({
+    onSuccess: () => {
+      // Invalidate BFF context queries so downstream pages see the new intent.
+      queryClientInvalidate(authenticatedUser?.userId);
+      navigate(CheckoutPageRoute.AccountDetails);
+    },
+    onError: (errorData) => {
+      // Basic field-level mapping if backend returns validation-like structure.
+      if (errorData && typeof errorData === 'object') {
+        Object.entries(errorData).forEach(([fieldKey, fieldVal]) => {
+          if (fieldKey === 'quantity' && (fieldVal as any)?.errorCode) {
+            setError('quantity', {
+              type: 'manual',
+              message: (fieldVal as any).errorCode,
+            });
+          }
+        });
+      } else {
+        setError('root.serverError', {
+          type: 'manual',
+          message: 'Server Error',
+        });
+      }
+    },
+  });
+
   const onSubmitCallbacks: {
     [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
   } = {
     [SubmitCallbacks.PlanDetails]: (data: PlanDetailsData) => {
+      // Always persist plan details first.
       setFormData(DataStoreKey.PlanDetails, data);
 
-      // TODO: replace with existing user email logic
-      const emailExists = true;
+      // Determine if user is authenticated; if not, proceed to logistration flows.
       if (!authenticatedUser) {
+        // TODO: replace with existing user email logic
+        const emailExists = true;
         if (emailExists) {
           navigate(CheckoutPageRoute.PlanDetailsLogin);
         } else {
           navigate(CheckoutPageRoute.PlanDetailsRegister);
         }
-      } else {
-        navigate(CheckoutPageRoute.AccountDetails);
+        return;
       }
+
+      // Trigger mutation (spinner state handled by button component)
+      createCheckoutIntentMutation.mutate({
+        quantity: planDetailsFormData.quantity,
+        country: planDetailsFormData.country,
+        // TODO: Record terms metadata too.
+      });
     },
     [SubmitCallbacks.PlanDetailsLogin]: (data: PlanDetailsLoginPageData) => {
       loginMutation.mutate({
@@ -95,14 +146,27 @@ const PlanDetailsPage = () => {
       });
     },
     [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
-      // TODO: actually call registerRequest service function.
+      // Placeholder for a future register API call.
       navigate(CheckoutPageRoute.PlanDetails);
-      // TODO: temporarily return data to make linter happy.
       return data;
     },
   };
 
-  const onSubmit = (data: PlanDetailsData) => onSubmitCallbacks[currentPage!](data);
+  const onSubmit = (
+    data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData,
+  ) => onSubmitCallbacks[currentPage!](data);
+
+  // Determine which mutation states to surface to the button
+  const isPlanDetailsMain = currentPage === SubmitCallbacks.PlanDetails;
+  const submissionIsPending = isPlanDetailsMain
+    ? createCheckoutIntentMutation.isPending
+    : loginMutation.isPending;
+  const submissionIsSuccess = isPlanDetailsMain
+    ? createCheckoutIntentMutation.isSuccess
+    : loginMutation.isSuccess;
+  const submissionIsError = isPlanDetailsMain
+    ? createCheckoutIntentMutation.isError
+    : loginMutation.isError;
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;
@@ -117,29 +181,27 @@ const PlanDetailsPage = () => {
           </Stack>
         </Stepper.Step>
         {stepperActionButtonMessage && (
-        <Stepper.ActionRow eventKey={eventKey}>
-          {location.pathname !== CheckoutPageRoute.PlanDetails && (
-          <Button
-            variant="outline-primary"
-            onClick={() => navigate(CheckoutPageRoute.PlanDetails)}
-          >
-            <FormattedMessage
-              id="checkout.back"
-              defaultMessage="Back"
-              description="Button to go back to the previous step"
+          <Stepper.ActionRow eventKey={eventKey}>
+            {location.pathname !== CheckoutPageRoute.PlanDetails && (
+              <Button
+                variant="outline-primary"
+                onClick={() => navigate(CheckoutPageRoute.PlanDetails)}
+              >
+                <FormattedMessage
+                  id="checkout.back"
+                  defaultMessage="Back"
+                  description="Button to go back to the previous step"
+                />
+              </Button>
+            )}
+            <Stepper.ActionRow.Spacer />
+            <PlanDetailsSubmitButton
+              formIsValid={isValid}
+              submissionIsPending={submissionIsPending}
+              submissionIsSuccess={submissionIsSuccess}
+              submissionIsError={submissionIsError}
             />
-          </Button>
-          )}
-          <Stepper.ActionRow.Spacer />
-          <Button
-            variant="secondary"
-            type="submit"
-            disabled={!isValid}
-            data-testid="stepper-submit-button"
-          >
-            {intl.formatMessage(stepperActionButtonMessage)}
-          </Button>
-        </Stepper.ActionRow>
+          </Stepper.ActionRow>
         )}
       </Stack>
     </Form>
