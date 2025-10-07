@@ -84,7 +84,5 @@ const fetchCheckoutIntent = async (id) => {
 
 export {
   createCheckoutIntent,
-  fetchCheckoutIntent
-}
-
-
+  fetchCheckoutIntent,
+};

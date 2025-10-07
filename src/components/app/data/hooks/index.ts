@@ -6,7 +6,6 @@ export { default as useLoginMutation } from './useLoginMutation';
 export { default as useCreateCheckoutSessionMutation } from './useCreateCheckoutSessionMutation';
 export { default as usePurchaseSummaryPricing } from './usePurchaseSummaryPricing';
 export { default as useCheckoutIntent } from './useCheckoutIntent';
-export { default as useCheckoutSessionClientSecret } from './useCheckoutSessionClientSecret';
 export { default as useFirstBillableInvoice } from './useFirstBillableInvoice';
 export { default as usePolledCheckoutIntent } from './usePolledCheckoutIntent';
 export { default as useCreateBillingPortalSession } from './useCreateBillingPortalSession';
