@@ -134,6 +134,7 @@ const populateInitialApplicationState = ({
           ...s.formData[DataStoreKey.BillingDetails],
           confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnC ?? false,
           confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmSubscription ?? false,
+          confirmRecurringSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmRecurringSubscription ?? false,
         },
       },
       checkoutSessionStatus: {

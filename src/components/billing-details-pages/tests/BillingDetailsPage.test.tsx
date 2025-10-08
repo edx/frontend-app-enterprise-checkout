@@ -27,6 +27,10 @@ jest.mock('@/components/app/data', () => ({
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 const { useCheckoutIntent } = jest.requireMock('@/components/app/data');
 
+jest.mock('@/components/app/data/services/checkout-intent', () => ({
+  patchCheckoutIntent: jest.fn(),
+}));
+
 jest.mock('@stripe/react-stripe-js', () => ({
   ...jest.requireActual('@stripe/react-stripe-js'),
   CheckoutProvider: jest.fn().mockImplementation(({ children }) => <div>{children}</div>),

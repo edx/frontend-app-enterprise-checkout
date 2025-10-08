@@ -41,7 +41,10 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@/components/app/data', () => ({
-  useCheckoutIntent: jest.fn(() => ({ data: { id: 'test-intent' } })),
+  useCheckoutIntent: jest.fn(() => ({
+    data:
+      { id: 'test-intent', country: 'US', state: 'created' },
+  })),
 }));
 
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
@@ -50,6 +53,11 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
 
 jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
+}));
+
+jest.mock('@/components/app/data/services/checkout-intent', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 // Mock functions that we'll reuse across tests
