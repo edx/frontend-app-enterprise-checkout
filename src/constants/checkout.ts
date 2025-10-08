@@ -1,6 +1,7 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
+import { validateRegistrationFields } from '@/components/app/data/services/registration';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { serverValidationError } from '@/utils/common';
 
@@ -69,8 +70,52 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
     .max(255, 'Maximum 255 characters'),
 }));
 
-// TODO: complete as part of ticket to do register page.
-export const PlanDetailsRegisterPageSchema = () => (z.object({}));
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const PlanDetailsRegisterPageSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
+  adminEmail: z.string().trim()
+    .email('Please enter a valid email address')
+    .max(254, 'Maximum 254 characters'),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255, 'Maximum 255 characters'),
+  username: z.string().trim()
+    .min(2, 'Username must be at least 2 characters')
+    .max(30, 'Maximum 30 characters')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, hyphens, and underscores'),
+  password: z.string().trim()
+    .min(8, 'Password must be at least 8 characters')
+    .max(255, 'Maximum 255 characters'),
+  confirmPassword: z.string().trim()
+    .min(1, 'Please confirm your password'),
+  country: z.string().trim()
+    .min(1, 'Country is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+}).superRefine(async (data, ctx) => {
+  // Only validate with LMS if basic client-side validation passes
+  if (data.password === data.confirmPassword) {
+    const { isValid, errors } = await validateRegistrationFields({
+      email: data.adminEmail,
+      name: data.fullName,
+      username: data.username,
+      password: data.password,
+      country: data.country,
+    });
+
+    if (!isValid) {
+      // Map LMS errors back to Zod issues
+      Object.entries(errors).forEach(([field, message]) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message,
+          path: [field === 'root' ? [] : [field]].flat(),
+        });
+      });
+    }
+  }
+}));
 
 export const PlanDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,
