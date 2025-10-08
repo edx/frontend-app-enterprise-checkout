@@ -88,9 +88,9 @@ const PlanDetailsPage = () => {
   }
 
   const createCheckoutIntentMutation = useCreateCheckoutIntentMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       // Invalidate BFF context queries so downstream pages see the new intent.
-      queryClientInvalidate(authenticatedUser?.userId);
+      await queryClientInvalidate(authenticatedUser?.userId);
       navigate(CheckoutPageRoute.AccountDetails);
     },
     onError: (errorData) => {
