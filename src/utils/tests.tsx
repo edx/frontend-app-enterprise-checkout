@@ -1,7 +1,7 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { Stepper } from '@openedx/paragon';
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryCache, QueryClient, QueryClientProvider, QueryObserverOptions } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { ReactElement } from 'react';
 import { MemoryRouter, Route, RouteObject, Routes } from 'react-router';
@@ -35,7 +35,9 @@ export function renderWithRouterProvider(
   return render(<RouterProvider router={router} />);
 }
 
-export function queryClient(defaultOptions = {}) {
+export function queryClient(defaultOptions = {
+  queries: {} as Partial<QueryObserverOptions>,
+}) {
   return new QueryClient({
     queryCache: new QueryCache({
       onError: queryCacheOnErrorHandler,
@@ -44,8 +46,7 @@ export function queryClient(defaultOptions = {}) {
       ...defaultOptions,
       queries: {
         retry: false,
-        // @ts-ignore
-        ...defaultOptions.queries,
+        ...(defaultOptions.queries || {}),
       },
     },
   });

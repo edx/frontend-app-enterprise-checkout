@@ -1,4 +1,5 @@
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { StripeCheckoutStatus } from '@stripe/stripe-js';
 import { SnakeCasedPropertiesDeep } from 'type-fest';
 import { z } from 'zod';
 
@@ -118,7 +119,12 @@ declare global {
       data: Partial<FormData<K>>,
     ): void;
     checkoutSessionClientSecret: string | undefined;
+    checkoutSessionStatus: {
+      type: StripeCheckoutStatus['type'] | null,
+      paymentStatus: StripeCheckoutStatus['paymentStatus'] | null,
+    };
     setCheckoutSessionClientSecret(checkoutSessionClientSecret: string): void;
+    setCheckoutSessionStatus(status: any): void;
   }
 
   /**
@@ -277,6 +283,7 @@ declare global {
     state: CheckoutIntentState;
     enterpriseName: string;
     enterpriseSlug: string;
+    quantity: number;
     stripeCheckoutSessionId: string;
     lastCheckoutError: string;
     lastProvisioningError: string;
@@ -285,7 +292,26 @@ declare global {
     adminPortalUrl: string;
   }
 
-  interface ExtendedCheckoutContextCheckoutIntent extends CheckoutContextCheckoutIntent {
+  // TODO: to be updated with defined structure
+  type FirstBillableInvoice = {
+    startTime: string;
+    endTime: string;
+    last4: number | null;
+    quantity: number;
+    unitAmountDecimal: number | null;
+    customerPhone: string | null;
+    customerName: string;
+    billingAddress: string | null;
+  };
+
+  // TODO: to be updated with defined structure
+  interface CheckoutContextCheckoutIntentSuccess extends CheckoutContextCheckoutIntent {
+    firstBillableInvoice: FirstBillableInvoice | null;
+  }
+
+  interface ExtendedCheckoutContextCheckoutIntent extends
+    CheckoutContextCheckoutIntent,
+    CheckoutContextCheckoutIntentSuccess {
     existingSuccessfulCheckoutIntent: boolean | null;
     expiredCheckoutIntent: boolean | null;
   }

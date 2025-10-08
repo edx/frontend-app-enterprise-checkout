@@ -2,7 +2,8 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
 
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
-import { PriceAlert } from '@/components/PriceAlert';
+import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
+import { TermsAndConditionsText } from '@/components/TermsAndConditionsText';
 
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -37,6 +38,8 @@ const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
           />
         )
         : (<NameAndEmailFields form={form} />)}
+
+      <TermsAndConditionsText />
     </>
   );
 };

@@ -40,7 +40,7 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
     incomplete_data: 'Not enough parameters were given.',
   },
   enterpriseSlug: {
-    invalid_format: 'Invalid format for given slug.',
+    invalid_format: 'Only alphanumeric lowercase characters and hyphens are allowed.',
     // EXISTING_ENTERPRISE_CUSTOMER_FOR_ADMIN uses the same error code on the backend
     existing_enterprise_customer: 'The slug conflicts with an existing customer.',
     slug_reserved: 'The slug is currently reserved by another user.',
@@ -175,13 +175,22 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     )
     .regex(
       new RegExp(constraints?.enterpriseSlug?.pattern),
-      'Only lowercase letters, numbers, and hyphens allowed',
+      'Only alphanumeric lowercase characters and hyphens are allowed.',
     ),
 }));
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (
+  z.object({
+    confirmTnC: z.boolean().refine((value) => value, {
+      message: 'Please accept the terms.',
+    }),
+    confirmSubscription: z.boolean().refine((value) => value, {
+      message: 'Please confirm organization subscription.',
+    }),
+  })
+);
 
 export const CheckoutPageRoute = {
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
@@ -269,7 +278,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     }),
     buttonMessage: defineMessages({
       id: 'checkout.billingDetails.purchaseNow',
-      defaultMessage: 'Purchase Now',
+      defaultMessage: 'Subscribe',
       description: 'Button to purchase the subscription product',
     }),
   },

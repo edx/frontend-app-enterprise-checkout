@@ -1,11 +1,20 @@
 import { Stack } from '@openedx/paragon';
 
-import { DataPrivacyPolicyField, StripeFormFields } from '@/components/FormFields';
+import { TermsAndConditions } from '@/components/billing-details-pages/TermsAndConditions';
+import { BillingDetailsDisclaimer } from '@/components/Disclaimer';
+import { BillingFormFields } from '@/components/FormFields';
 
-const BillingDetailsContent = () => (
+import type { UseFormReturn } from 'react-hook-form';
+
+interface BillingDetailsContentProps {
+  form: UseFormReturn<BillingDetailsData>;
+}
+
+const BillingDetailsContent = ({ form }: BillingDetailsContentProps) => (
   <Stack gap={4}>
-    <StripeFormFields />
-    <DataPrivacyPolicyField />
+    <BillingFormFields />
+    <TermsAndConditions form={form} />
+    <BillingDetailsDisclaimer />
   </Stack>
 );
 

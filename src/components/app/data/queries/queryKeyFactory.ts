@@ -1,7 +1,9 @@
 import { createQueryKeys, mergeQueryKeys } from '@lukemorales/query-key-factory';
 
+import { fetchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 import createCheckoutSession from '@/components/app/data/services/checkout-session';
 import { fetchCheckoutContext, fetchCheckoutSuccess } from '@/components/app/data/services/context';
+import createBillingPortalSession from '@/components/app/data/services/create-billing-portal';
 import fetchCheckoutValidation from '@/components/app/data/services/validation';
 
 const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
@@ -25,6 +27,14 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
   createCheckoutSession: (fields, payload) => ({
     queryKey: [fields],
     queryFn: () => createCheckoutSession(payload),
+  }),
+  checkoutIntent: (id) => ({
+    queryKey: [id],
+    queryFn: () => fetchCheckoutIntent(id),
+  }),
+  createBillingPortalSession: (checkoutIntentId) => ({
+    queryKey: [checkoutIntentId],
+    queryFn: () => createBillingPortalSession(checkoutIntentId),
   }),
 });
 

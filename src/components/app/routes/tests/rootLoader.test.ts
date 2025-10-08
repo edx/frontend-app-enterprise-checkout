@@ -21,7 +21,7 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 jest.mock('@/components/app/routes/loaders/utils', () => ({
   determineExistingCheckoutIntentState: jest.fn(),
-  populateCompletedFormFields: jest.fn(),
+  populateInitialApplicationState: jest.fn(),
 }));
 
 jest.mock('@/utils/checkout', () => ({
@@ -80,7 +80,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const loader = makeRootLoader(queryClient);
     const result = await loader({ request: makeRequest('/account-details') } as any);
 
-    expect(utilsMod.populateCompletedFormFields).toHaveBeenCalledWith({
+    expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'paid' },
       stripePriceId: null,
       authenticatedUser,
@@ -119,7 +119,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const loader = makeRootLoader(queryClient);
     const result = await loader({ request: makeRequest('/billing-details') } as any);
 
-    expect(utilsMod.populateCompletedFormFields).toHaveBeenCalledWith({
+    expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'created' },
       stripePriceId: null,
       authenticatedUser,
@@ -143,7 +143,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const loader = makeRootLoader(queryClient);
     const result = await loader({ request: makeRequest('/billing-details') } as any);
 
-    expect(utilsMod.populateCompletedFormFields).toHaveBeenCalledWith({
+    expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'requires_payment' },
       stripePriceId: null,
       authenticatedUser,

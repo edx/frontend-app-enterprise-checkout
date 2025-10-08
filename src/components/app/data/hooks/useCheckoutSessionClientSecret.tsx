@@ -1,8 +1,5 @@
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
-const useCheckoutSessionClientSecret = () => {
-  const checkoutSessionClientSecret = useCheckoutFormStore((state) => state.checkoutSessionClientSecret);
-  return checkoutSessionClientSecret;
-};
+const useCheckoutSessionClientSecret = () => useCheckoutFormStore((state) => state.checkoutSessionClientSecret);
 
 export default useCheckoutSessionClientSecret;

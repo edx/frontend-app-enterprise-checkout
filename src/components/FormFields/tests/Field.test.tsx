@@ -1,7 +1,7 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 
 import Field, { getTrailingElement } from '../Field';
 

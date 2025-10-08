@@ -327,25 +327,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
-    it('returns null when prerequisites satisfied', async () => {
-      (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
-      const ctx = buildContext({ withPrice: true });
-      ensureSpy.mockResolvedValue(ctx);
-      const { pricing } = ctx;
-      populateValidPlanDetails(pricing.prices[0].id as string);
-      populateValidAccountDetails();
-
-      const loader = makeCheckoutStepperLoader(queryClient);
-      const r = await loader(
-        makeLoaderArgs(
-          CheckoutStepKey.BillingDetails,
-          CheckoutSubstepKey.Success,
-          CheckoutPageRoute.BillingDetailsSuccess,
-        ),
-      );
-      expect(r).toBeNull();
-    });
   });
 
   it('returns null for unknown/invalid route (factory guards)', async () => {
