@@ -3,7 +3,6 @@ import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
 import { queryBffContext, queryBffSuccess, queryCheckoutIntent } from '@/components/app/data/queries/queries';
-import { determineExistingSuccessfulCheckoutIntent } from '@/components/app/data/services/context';
 import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -160,15 +159,14 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
     );
   }
 
-  const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+  const stripeCheckoutSessionType = checkoutFormStore.getState().checkoutSessionStatus?.type;
 
   // Explicitly check that the intent is in a successful state
   // If the intent is successful but the type is not 'complete',
   // or if there is no existingSuccessfulCheckoutIntent flag,
   // redirect to Plan Details to restart the process.
   if (
-    !determineExistingSuccessfulCheckoutIntent(checkoutIntent.state)
-    && checkoutIntentType !== 'complete'
+    stripeCheckoutSessionType !== 'complete'
     && !checkoutIntent.existingSuccessfulCheckoutIntent
   ) {
     return redirect(CheckoutPageRoute.PlanDetails);

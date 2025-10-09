@@ -100,7 +100,7 @@ const StatefulSubscribeButton = () => {
     }
   };
 
-  // Refetch the checkout intent if the polled intent state changes.
+  // Visually alter the Subscribe button to a "successful" appearance if the polled intent state becomes successful.
   useEffect(() => {
     if (statefulButtonState === 'pending' && determineExistingSuccessfulCheckoutIntent(polledCheckoutIntent?.state)) {
       setStatefulButtonState('success');
