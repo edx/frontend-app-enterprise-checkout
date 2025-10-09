@@ -45,8 +45,8 @@ const StatefulProvisioningButton = () => {
     if (polledCheckoutIntent?.state !== successContext?.checkoutIntent?.state && !checkoutIntent?.adminPortalUrl) {
       queryClient.invalidateQueries({
         queryKey: queryBffSuccess(authenticatedUser?.userId).queryKey,
-      });
-      refetch();
+      }).catch(() => { /* Do nothing */ });
+      refetch().catch(() => { /* Do nothing */ });
     }
   }, [
     authenticatedUser?.userId,

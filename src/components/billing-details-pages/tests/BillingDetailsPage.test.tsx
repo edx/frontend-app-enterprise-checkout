@@ -130,7 +130,7 @@ describe('BillingDetailsSuccessPage', () => {
           state: 'paid',
         },
       },
-      refetch: jest.fn(),
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
   });
 

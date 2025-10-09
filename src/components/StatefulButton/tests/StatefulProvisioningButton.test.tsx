@@ -40,7 +40,7 @@ describe('StatefulProvisioningButton', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: null,
-      refetch: jest.fn(),
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
     window.location.href = '';
   });
@@ -66,7 +66,7 @@ describe('StatefulProvisioningButton', () => {
       data: {
         checkoutIntent: { adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com' : null },
       },
-      refetch: jest.fn(),
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
       isLoading: false,
     });
 
