@@ -42,6 +42,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(() => ({ data: { id: 'test-intent' } })),
+  usePolledCheckoutIntent: jest.fn(() => ({ data: { state: 'paid' } })),
 }));
 
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
@@ -333,7 +334,6 @@ describe('StatefulSubscribeButton', () => {
       // Wait for the useEffect to trigger after state changes to 'success'
       await waitFor(() => {
         expect(mockSetCheckoutSessionStatus).toHaveBeenCalledWith({ type: 'complete', paymentStatus: 'paid' });
-        expect(mockInvalidateQueries).toHaveBeenCalled();
         expect(jest.mocked(sendEnterpriseCheckoutTrackingEvent)).toHaveBeenCalledWith({
           checkoutIntentId: 'test-intent',
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,

@@ -2,7 +2,8 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { queryBffContext } from '@/components/app/data/queries/queries';
+import { queryBffContext, queryBffSuccess, queryCheckoutIntent } from '@/components/app/data/queries/queries';
+import { determineExistingSuccessfulCheckoutIntent } from '@/components/app/data/services/context';
 import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -144,12 +145,32 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-
   const { checkoutIntent } = contextMetadata;
+
+  if (!checkoutIntent) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  await queryClient.ensureQueryData(
+    queryBffSuccess(authenticatedUser?.userId || null),
+  );
+  if (checkoutIntent.id) {
+    await queryClient.ensureQueryData(
+      queryCheckoutIntent(checkoutIntent.id),
+    );
+  }
 
   const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
 
-  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent) {
+  // Explicitly check that the intent is in a successful state
+  // If the intent is successful but the type is not 'complete',
+  // or if there is no existingSuccessfulCheckoutIntent flag,
+  // redirect to Plan Details to restart the process.
+  if (
+    !determineExistingSuccessfulCheckoutIntent(checkoutIntent.state)
+    && checkoutIntentType !== 'complete'
+    && !checkoutIntent.existingSuccessfulCheckoutIntent
+  ) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 

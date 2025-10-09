@@ -80,5 +80,6 @@ const fetchCheckoutSuccess = async (): Promise<CheckoutContextResponse> => {
 export {
   fetchCheckoutContext,
   fetchCheckoutSuccess,
+  determineExistingSuccessfulCheckoutIntent,
   paymentProcessedCheckoutIntentStates,
 };
