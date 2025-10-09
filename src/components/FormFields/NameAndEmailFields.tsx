@@ -1,6 +1,7 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Stack } from '@openedx/paragon';
 
+import { useCountryOptions } from '@/components/app/data/hooks';
 import { FieldContainer } from '@/components/FieldContainer';
 
 import Field from './Field';
@@ -13,6 +14,8 @@ interface NameAndEmailFieldsProps {
 
 const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
   const intl = useIntl();
+  const countryOptions = useCountryOptions();
+
   return (
     <FieldContainer>
       <div className="mb-3">
@@ -70,40 +73,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           form={form}
           name="country"
           type="select"
-          options={[
-            {
-              value: 'US',
-              label: 'United States',
-            },
-            {
-              value: 'CA',
-              label: 'Canada',
-            },
-            {
-              value: 'GB',
-              label: 'United Kingdom',
-            },
-            {
-              value: 'AU',
-              label: 'Australia',
-            },
-            {
-              value: 'DE',
-              label: 'Germany',
-            },
-            {
-              value: 'FR',
-              label: 'France',
-            },
-            {
-              value: 'IN',
-              label: 'India',
-            },
-            {
-              value: 'JP',
-              label: 'Japan',
-            },
-          ]}
+          options={countryOptions}
           floatingLabel={intl.formatMessage({
             id: 'checkout.nameAndEmailFields.country.floatingLabel',
             defaultMessage: 'Country of Residence',
