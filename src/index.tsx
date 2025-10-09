@@ -18,11 +18,6 @@ subscribe(APP_READY, () => {
   root.render(
     <StrictMode>
       <App />
-      {/* <IntlProvider>
-        <BrowserRouter>
-          <ErrorPage message="404 :(" />
-        </BrowserRouter>
-      </IntlProvider> */}
     </StrictMode>,
   );
 });
