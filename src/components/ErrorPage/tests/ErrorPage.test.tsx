@@ -1,5 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 
 import '@testing-library/jest-dom';
@@ -20,7 +20,7 @@ describe('ErrorPage', () => {
 
   it('Renders the error correctly', () => {
     renderComponent();
-    expect(screen.getByText("We're sorry, something went wrong")).toBeInTheDocument();
+    validateText("We're sorry, something went wrong");
   });
 
   it('Renders in a message when supplied', () => {
@@ -28,6 +28,6 @@ describe('ErrorPage', () => {
       message: '420: Chill out dude',
     };
     renderComponent(props);
-    expect(screen.getByText(props.message)).toBeInTheDocument();
+    validateText(props.message);
   });
 });
