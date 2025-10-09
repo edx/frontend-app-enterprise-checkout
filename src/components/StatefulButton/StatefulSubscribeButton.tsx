@@ -93,7 +93,7 @@ const StatefulSubscribeButton = () => {
           state,
           termsMetadata: termsAndConditions,
         };
-        patchCheckoutIntent(tncCheckoutUpdateRequest);
+        await patchCheckoutIntent(tncCheckoutUpdateRequest);
       }
       response = await confirm({
         redirect: 'if_required',
