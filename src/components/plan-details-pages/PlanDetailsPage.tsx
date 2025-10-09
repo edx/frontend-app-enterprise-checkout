@@ -20,6 +20,7 @@ import {
   useLoginMutation,
 } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
+import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
@@ -36,7 +37,6 @@ import {
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
 import '../Stepper/Steps/css/PriceAlert.css';
-import { validateFieldDetailed } from '@/components/app/data/services/validation';
 
 const PlanDetailsPage = () => {
   const location = useLocation();

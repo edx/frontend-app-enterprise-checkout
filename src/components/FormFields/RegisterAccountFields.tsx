@@ -9,8 +9,6 @@ interface RegisterAccountFieldsProps {
   form: UseFormReturn<PlanDetailsData>;
 }
 
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
   const intl = useIntl();
   return (
@@ -37,9 +35,9 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
         name="adminEmail"
         type="email"
         floatingLabel={intl.formatMessage({
-          id: 'checkout.nameAndEmailFields.companyName.floatingLabel',
+          id: 'checkout.registerAccountFields.adminEmail.floatingLabel',
           defaultMessage: 'Company Name',
-          description: 'Floating label for the company name input field',
+          description: 'Floating label for the admin email input field',
         })}
       />
 

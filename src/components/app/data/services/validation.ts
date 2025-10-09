@@ -148,7 +148,7 @@ export function validateFieldDetailed<K extends FieldKey>(
   field: K,
   value: ValidationSchema[K],
   extras?: Partial<ValidationSchema>,
-  overridePrevious: Boolean = false,
+  overridePrevious: boolean = false,
 ): Promise<{ isValid: boolean; validationDecisions: ValidationResponse['validationDecisions'] | null }> {
   const current = { value, extras: extras ?? {} };
   if (!overridePrevious && isEqual(previousValues.get(field), current)) {
