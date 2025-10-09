@@ -9,13 +9,13 @@ import axios, { AxiosResponse } from 'axios';
  * Extend as needed if additional writable fields are later required.
  */
 declare global {
-  
+
   type TermsMetadata = {
     readAndAcceptProductDescriptionsMessage: string,
     confirmSubscribingMessage: string,
     agreeToRecurringSubscriptionMessage: string,
   };
-  
+
   /**
    * Writable request subset for creating a CheckoutIntent.
    * (Backend serializer may accept additional fields; include as needed.)
@@ -118,7 +118,6 @@ async function createCheckoutIntent(
   return response;
 }
 
-
 const fetchCheckoutIntent = async (id) => {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${id}/`;
@@ -139,13 +138,14 @@ const fetchCheckoutIntent = async (id) => {
     "country": "US",
     "state": "created",
     "terms_metadata": {
-      "read_and_accept_product_descriptions_message": "I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions.",
-      "confirm_subscribing_message": "I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution's employees, students and/or other sponsored learners.",
-      "agree_to_recurring_subscription_message": "I agree to enroll in a recurring annual subscription for {price}/year USD."
+      "read_and_accept_product_descriptions_message": "I have read and accepted the edX Enterprise Product...",
+      "confirm_subscribing_message": "I confirm I am subscribing on behalf of my employer, school or other...",
+      "agree_to_recurring_subscription_message": "I agree to enroll in a recurring annual subscription for $/year USD."
     }
   }
  */
-export default async function patchCheckoutIntent(
+
+async function patchCheckoutIntent(
   requestData: CheckoutIntentPatchRequestSchema,
 ): Promise<AxiosResponse<CheckoutIntentPatchResponseSchema>> {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();

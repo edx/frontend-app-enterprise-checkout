@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCheckoutIntent } from '@/components/app/data';
 import { termsAndConditions } from '@/components/app/data/constants';
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import patchCheckoutIntent from '@/components/app/data/services/checkout-intent';
+import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -93,7 +93,6 @@ const StatefulSubscribeButton = () => {
           state,
           termsMetadata: termsAndConditions,
         };
-
         patchCheckoutIntent(tncCheckoutUpdateRequest);
       }
       response = await confirm({

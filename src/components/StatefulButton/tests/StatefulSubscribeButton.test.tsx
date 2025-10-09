@@ -56,8 +56,7 @@ jest.mock('@/utils/common', () => ({
 }));
 
 jest.mock('@/components/app/data/services/checkout-intent', () => ({
-  __esModule: true,
-  default: jest.fn(),
+  patchCheckoutIntent: jest.fn(),
 }));
 
 // Mock functions that we'll reuse across tests
