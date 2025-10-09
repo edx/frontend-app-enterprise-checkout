@@ -36,7 +36,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
         type="email"
         floatingLabel={intl.formatMessage({
           id: 'checkout.registerAccountFields.adminEmail.floatingLabel',
-          defaultMessage: 'Company Name',
+          defaultMessage: 'Work email',
           description: 'Floating label for the admin email input field',
         })}
       />

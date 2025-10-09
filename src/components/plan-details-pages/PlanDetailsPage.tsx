@@ -131,9 +131,8 @@ const PlanDetailsPage = () => {
       // Determine if user is authenticated; if not, proceed to logistration flows.
       if (!authenticatedUser) {
         // Check if the adminEmail validation returned 'not_registered'
-        const adminEmailDecision = validationDecisions?.adminEmail;
-        // @ts-ignore
-        if (!isValidAdminEmailField && adminEmailDecision.errorCode === 'not_registered') {
+        const adminEmailDecision = validationDecisions?.adminEmail as ValidationDecision;
+        if (!isValidAdminEmailField && adminEmailDecision?.errorCode === 'not_registered') {
           // User is not registered, navigate to registration page
           navigate(CheckoutPageRoute.PlanDetailsRegister);
         } else {
