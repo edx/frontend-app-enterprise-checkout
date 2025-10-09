@@ -34,12 +34,16 @@ module.exports = createConfig('eslint', {
       },
     ],
     'object-curly-spacing': ['error', 'always'],
-    'unused-imports/no-unused-imports': 'error',
+
     // Note: To fully enforce each destructured import on its own line,
     // a custom plugin like 'eslint-plugin-import-newlines' would be ideal.
     // This configuration achieves alphabetizing but may not fully enforce
     // the one-import-per-line requirement for all cases.
+    'unused-imports/no-unused-imports': 'error',
 
+    // Disallow calling functions that return promises without `await`ing it,
+    // or something else to handle potential promise errors.
+    '@typescript-eslint/no-floating-promises': 'error',
   },
   overrides: [
     {
