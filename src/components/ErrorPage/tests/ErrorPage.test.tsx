@@ -20,7 +20,7 @@ describe('ErrorPage', () => {
 
   it('Renders the error correctly', () => {
     renderComponent();
-    expect(screen.getByText('We\'re sorry, something went wrong')).toBeInTheDocument();
+    expect(screen.getByText("We're sorry, something went wrong")).toBeInTheDocument();
   });
 
   it('Renders in a message when supplied', () => {
