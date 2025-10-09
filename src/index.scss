@@ -19,3 +19,17 @@ main {
   flex-direction: column;
   flex: 1;
 }
+
+.centered-body {
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  flex-direction: column;
+  height: 75vh;
+}
+
+.footer {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}

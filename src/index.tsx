@@ -1,18 +1,12 @@
-import {
-  APP_INIT_ERROR,
-  APP_READY,
-  initialize,
-  mergeConfig,
-  subscribe,
-} from '@edx/frontend-platform';
-import {
-  ErrorPage,
-} from '@edx/frontend-platform/react';
+import { APP_INIT_ERROR, APP_READY, initialize, mergeConfig, subscribe } from '@edx/frontend-platform';
+import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 
 import App from '@/components/app/App';
 
+import { ErrorPage } from './components/ErrorPage';
 import './index.scss';
 import messages from './i18n';
 
@@ -24,6 +18,11 @@ subscribe(APP_READY, () => {
   root.render(
     <StrictMode>
       <App />
+      {/* <IntlProvider>
+        <BrowserRouter>
+          <ErrorPage message="404 :(" />
+        </BrowserRouter>
+      </IntlProvider> */}
     </StrictMode>,
   );
 });
@@ -31,7 +30,11 @@ subscribe(APP_READY, () => {
 subscribe(APP_INIT_ERROR, (error) => {
   root.render(
     <StrictMode>
-      <ErrorPage message={error.message} />
+      <IntlProvider>
+        <BrowserRouter>
+          <ErrorPage message={error.message} />
+        </BrowserRouter>
+      </IntlProvider>
     </StrictMode>,
   );
 });
