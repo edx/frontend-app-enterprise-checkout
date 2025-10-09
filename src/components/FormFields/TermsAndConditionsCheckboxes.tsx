@@ -3,7 +3,8 @@ import { Form } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
-import { useCheckoutIntent } from '@/components/app/data';
+import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
+import { DisplayPrice } from '@/components/DisplayPrice';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -17,6 +18,7 @@ interface TermsAndConditionsCheckboxesProps {
  * BillingDetailsData should include:
  *  - confirmTnC: boolean
  *  - confirmSubscription: boolean
+ *  - confirmRecurringSubscription: boolean
  */
 const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProps) => {
   const {
@@ -28,6 +30,9 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore(state => state.setFormData);
   const { data: checkoutIntent } = useCheckoutIntent();
+  const {
+    yearlySubscriptionCostForQuantity,
+  } = usePurchaseSummaryPricing();
 
   const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     const checkoutIntentId = checkoutIntent?.id ?? null;
@@ -74,7 +79,10 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmTnC"
-              defaultMessage="I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions."
+              defaultMessage={
+                'I have read and accepted the edX Enterprise Product Descriptions'
+                + ' and Terms and edX Enterprise Sales Terms and Conditions.'
+              }
               description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
             />
           </Form.Checkbox>
@@ -107,8 +115,47 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmSubscription"
-              defaultMessage="I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution's employees, students and/or other sponsored learners."
+              defaultMessage={
+                'I confirm I am subscribing on behalf of my employer, school or other professional'
+                + ' organization for use by my institution\'s employees, students and/or other sponsored learners.'
+              }
               description="Checkbox label to confirm the subscription is on behalf of an organization for use by its employees, students, or other sponsored learners"
+            />
+          </Form.Checkbox>
+        )}
+      />
+      <Controller
+        name="confirmRecurringSubscription"
+        control={control}
+        render={({ field: { onChange, onBlur, ref } }) => (
+          <Form.Checkbox
+            inputRef={ref}
+            checked={billingDetailsData.confirmRecurringSubscription}
+            onBlur={onBlur}
+            onChange={(e) => {
+              onChange(e.currentTarget.checked);
+              sendCheckBoxEvent(
+                EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
+                e.currentTarget.checked,
+              );
+              setFormData(
+                DataStoreKey.BillingDetails,
+                {
+                  ...billingDetailsData,
+                  confirmRecurringSubscription: e.currentTarget.checked,
+                },
+              );
+            }}
+            value="confirmRecurringSubscription"
+            isInvalid={!!errors.confirmRecurringSubscription}
+          >
+            <FormattedMessage
+              id="checkout.termsAndConditionsCheckboxes.confirmRecurringSubscription"
+              defaultMessage="I agree to enroll in a recurring annual subscription for {price}/year USD."
+              description="Checkbox label to confirm the recurring subscription with price"
+              values={{
+                price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
+              }}
             />
           </Form.Checkbox>
         )}

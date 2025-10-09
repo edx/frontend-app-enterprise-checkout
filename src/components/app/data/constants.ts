@@ -33,6 +33,18 @@ const SUBSCRIPTION_TRIAL_LENGTH_DAYS = 14;
 const SHORT_MONTH_DATE_FORMAT = 'MMM D, YYYY';
 const LONG_MONTH_DATE_FORMAT = 'MMMM D, YYYY';
 
+const readAndAcceptProductDescriptionsMessage = 'I have read and accepted the edX Enterprise Product Descriptions'
+  + ' and Terms and edX Enterprise Sales Terms and Conditions.';
+const confirmSubscribingMessage = 'I confirm I am subscribing on behalf of my employer, school or other professional'
+  + ' organization for use by my institution\'s employees, students and/or other sponsored learners.';
+const agreeToRecurringSubscriptionMessage = 'I agree to enroll in a recurring annual subscription for {price}/year USD.';
+
+const termsAndConditions = {
+  readAndAcceptProductDescriptionsMessage,
+  confirmSubscribingMessage,
+  agreeToRecurringSubscriptionMessage,
+};
+
 export {
   baseValidation,
   snakeCaseBaseValidation,
@@ -40,4 +52,5 @@ export {
   SUBSCRIPTION_TRIAL_LENGTH_DAYS,
   SHORT_MONTH_DATE_FORMAT,
   LONG_MONTH_DATE_FORMAT,
+  termsAndConditions,
 };
