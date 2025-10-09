@@ -14,7 +14,7 @@ const footerMessages: Record<string, MessageDescriptor> = defineMessages({
   },
   privacy: {
     id: 'footer.privacy',
-    defaultMessage: 'Privacy policy',
+    defaultMessage: 'Privacy Policy',
     description: 'Link to edX privacy policy.',
   },
   support: {

@@ -15,7 +15,7 @@ interface ErrorPageProps {
 const errorPageMessages: Record<string, MessageDescriptor> = defineMessages({
   errorHeader: {
     id: 'errorPage.header',
-    defaultMessage: 'We\'re sorry, something went wrong',
+    defaultMessage: "We're sorry, something went wrong",
     description: 'Header text for the error page.',
   },
   errorSubtitle: {
