@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, populateCompletedFormFields, validateFormState } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, mapCheckoutIntentStateToSessionStatus, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -25,6 +25,7 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
 // Helper types for test inputs (loosely typed to avoid coupling to app types)
 type TestCheckoutIntent = {
   state: string;
+  quantity?: number;
   expiresAt?: string;
   enterpriseSlug?: string;
   enterpriseName?: string;
@@ -45,7 +46,7 @@ describe('utils.ts', () => {
     });
   });
 
-  describe('populateCompletedFormFields', () => {
+  describe('populateInitialApplicationState', () => {
     it('merges user details and intent details into the store while preserving existing fields', () => {
       const initialState = {
         formData: {
@@ -53,6 +54,7 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: { enterpriseSlug: undefined, companyName: undefined },
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {},
       } as any;
 
       const authenticatedUser: AuthenticatedUser = {
@@ -71,7 +73,7 @@ describe('utils.ts', () => {
 
       const stripePriceId = faker.string.uuid();
 
-      populateCompletedFormFields({
+      populateInitialApplicationState({
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
@@ -112,11 +114,16 @@ describe('utils.ts', () => {
           [DataStoreKey.AccountDetails]: {},
           [DataStoreKey.BillingDetails]: {},
         },
+        checkoutSessionStatus: {},
       } as any;
 
       const emptyUser = {} as any;
 
-      populateCompletedFormFields({ checkoutIntent: null as any, authenticatedUser: emptyUser, stripePriceId: null });
+      populateInitialApplicationState({
+        checkoutIntent: null as any,
+        authenticatedUser: emptyUser,
+        stripePriceId: null,
+      });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
       const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];
@@ -135,6 +142,158 @@ describe('utils.ts', () => {
           companyName: undefined,
         }),
       );
+    });
+
+    it('uses quantity from checkoutIntent when no existing form data quantity exists', () => {
+      const initialState = {
+        formData: {
+          [DataStoreKey.PlanDetails]: {}, // no quantity in existing form data
+          [DataStoreKey.AccountDetails]: {},
+          [DataStoreKey.BillingDetails]: {},
+        },
+        checkoutSessionStatus: {
+          type: null,
+          paymentStatus: null,
+        },
+      } as any;
+
+      const authenticatedUser: AuthenticatedUser = {
+        email: 'user@example.com',
+        name: 'Test User',
+        username: 'testuser',
+        country: 'US',
+      };
+
+      const checkoutIntent = {
+        state: 'created',
+        quantity: 25, // quantity should come from here
+        enterpriseSlug: 'test-company',
+        enterpriseName: 'Test Company Inc',
+      } satisfies TestCheckoutIntent;
+
+      const stripePriceId = faker.string.uuid();
+
+      populateInitialApplicationState({
+        checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
+        authenticatedUser,
+        stripePriceId,
+      });
+
+      expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
+      const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];
+      const computed = updater(initialState);
+
+      expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
+        expect.objectContaining({
+          quantity: 25, // should come from checkoutIntent
+          fullName: 'Test User',
+          adminEmail: 'user@example.com',
+          country: 'US',
+        }),
+      );
+    });
+
+    it('defaults quantity to 0 when neither form data nor checkoutIntent have quantity', () => {
+      const initialState = {
+        formData: {
+          [DataStoreKey.PlanDetails]: {}, // no quantity in existing form data
+          [DataStoreKey.AccountDetails]: {},
+          [DataStoreKey.BillingDetails]: {},
+        },
+        checkoutSessionStatus: {
+          type: null,
+          paymentStatus: null,
+        },
+      } as any;
+
+      const authenticatedUser: AuthenticatedUser = {
+        email: 'user@example.com',
+        name: 'Test User',
+        username: 'testuser',
+        country: 'US',
+      };
+
+      const checkoutIntent = {
+        state: 'created',
+        // no quantity in checkoutIntent
+        enterpriseSlug: 'test-company',
+        enterpriseName: 'Test Company Inc',
+      } satisfies TestCheckoutIntent;
+
+      const stripePriceId = faker.string.uuid();
+
+      populateInitialApplicationState({
+        checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
+        authenticatedUser,
+        stripePriceId,
+      });
+
+      expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
+      const [updater] = (checkoutFormStore.setState as jest.Mock).mock.calls[0];
+      const computed = updater(initialState);
+
+      expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
+        expect.objectContaining({
+          quantity: 0, // should default to 0
+          fullName: 'Test User',
+          adminEmail: 'user@example.com',
+          country: 'US',
+        }),
+      );
+    });
+  });
+
+  describe('mapCheckoutIntentStateToSessionStatus', () => {
+    it('returns null type and paymentStatus when checkoutIntentState is undefined', () => {
+      const result = mapCheckoutIntentStateToSessionStatus(undefined);
+      expect(result).toEqual({
+        type: null,
+        paymentStatus: null,
+      });
+    });
+
+    it('returns null type and paymentStatus when checkoutIntentState is null', () => {
+      const result = mapCheckoutIntentStateToSessionStatus(null as any);
+      expect(result).toEqual({
+        type: null,
+        paymentStatus: null,
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "paid" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('paid' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "fulfilled" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('fulfilled' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns complete type and paid paymentStatus for "errored_provisioning" state', () => {
+      const result = mapCheckoutIntentStateToSessionStatus('errored_provisioning' as any);
+      expect(result).toEqual({
+        type: 'complete',
+        paymentStatus: 'paid',
+      });
+    });
+
+    it('returns open type and null paymentStatus for other states', () => {
+      const testStates = ['created', 'requires_payment', 'processing', 'cancelled'];
+
+      testStates.forEach(state => {
+        const result = mapCheckoutIntentStateToSessionStatus(state as any);
+        expect(result).toEqual({
+          type: 'open',
+          paymentStatus: null,
+        });
+      });
     });
   });
 

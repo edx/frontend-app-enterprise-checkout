@@ -11,7 +11,9 @@ import { useNavigate } from 'react-router-dom';
 import { useCheckoutIntent } from '@/components/app/data';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
+import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const variants = {
   default: 'secondary',
@@ -111,6 +113,10 @@ const StatefulSubscribeButton = () => {
         })
           .then(data => data)
           .catch(error => logError(error));
+        sendEnterpriseCheckoutTrackingEvent({
+          checkoutIntentId: checkoutIntent?.id ?? null,
+          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
+        });
         navigate(CheckoutPageRoute.BillingDetailsSuccess);
       } else {
         // Fallback if the payment succeeded but the intent
@@ -119,7 +125,15 @@ const StatefulSubscribeButton = () => {
         setErrorMessageKey('fallback');
       }
     }
-  }, [statefulButtonState, status, setCheckoutSessionStatus, queryClient, authenticatedUser, navigate]);
+  }, [
+    statefulButtonState,
+    status,
+    setCheckoutSessionStatus,
+    queryClient,
+    authenticatedUser,
+    navigate,
+    checkoutIntent?.id,
+  ]);
 
   const props = {
     labels: {

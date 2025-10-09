@@ -22,9 +22,15 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   // AccountDetails
   ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.account_details_continue_button.clicked`,
   // BillingDetails
+  BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_subscribe_button.clicked`,
   TOGGLE_TNC_TERMS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.terms_and_conditions_checkbox.toggled`,
   TOGGLE_SUBSCRIPTION_TERMS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.subscription_terms_checkbox.toggled`,
   // BillingDetailsSuccess
+  PAYMENT_PROCESSED_SUCCESSFULLY: `${SUBSCRIPTION_CHECKOUT_PREFIX}.payment_processed_successfully.viewed`,
+  SUBSCRIPTION_MANAGEMENT_LINK_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.subscription_management_link.clicked`,
+  VIEW_RECEIPT_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.view_receipt_button.clicked`,
+  REACH_OUT_LINK_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.reach_out_link.clicked`,
+  GO_TO_DASHBOARD_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.go_to_dashboard_button.clicked`,
 };
 
 const EVENT_NAMES = {

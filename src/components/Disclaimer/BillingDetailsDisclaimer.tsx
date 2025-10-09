@@ -2,12 +2,12 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import dayjs from 'dayjs';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
-import { DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
+import { SHORT_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
 import { DisplayPrice } from '@/components/DisplayPrice';
 
 const BillingDetailsDisclaimer = () => {
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
-  const trialEndDate = dayjs().add(SUBSCRIPTION_TRIAL_LENGTH_DAYS, 'days').format(DATE_FORMAT);
+  const trialEndDate = dayjs().add(SUBSCRIPTION_TRIAL_LENGTH_DAYS, 'days').format(SHORT_MONTH_DATE_FORMAT);
   return (
     <p className="font-weight-light">
       <FormattedMessage

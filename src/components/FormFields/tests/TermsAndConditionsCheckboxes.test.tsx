@@ -82,7 +82,6 @@ describe('TermsAndConditionsCheckboxes', () => {
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       properties: expect.objectContaining({
         checkbox_checked: true,
-        checkoutIntent: { id: 1, foo: 'bar' },
       }),
     });
   });
@@ -98,7 +97,6 @@ describe('TermsAndConditionsCheckboxes', () => {
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
       properties: expect.objectContaining({
         checkbox_checked: true,
-        checkoutIntent: { id: 1, foo: 'bar' },
       }),
     });
   });
@@ -117,7 +115,6 @@ describe('TermsAndConditionsCheckboxes', () => {
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       properties: expect.objectContaining({
         checkbox_checked: true,
-        checkoutIntent: null,
       }),
     });
   });

@@ -33,3 +33,10 @@ main {
   bottom: 0;
   width: 100%;
 }
+
+.reverse-stateful-provisioning-success {
+  direction: rtl;
+}
+
+
+.disabled-opacity { opacity: 0.5 !important; }

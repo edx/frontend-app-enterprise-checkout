@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { StripeCheckoutStatus } from '@stripe/stripe-js';
 
+import { paymentProcessedCheckoutIntentStates } from '@/components/app/data/services/context';
 import {
   AccountDetailsSchema,
   BillingDetailsSchema,
@@ -10,7 +12,7 @@ import {
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 /**
- * Parameters for populateCompletedFormFields.
+ * Parameters for populateInitialApplicationState.
  */
 type PopulateCompletedFormFieldsProps = {
   /** The checkout intent from the backend context, if any. */
@@ -58,6 +60,28 @@ const determineExistingCheckoutIntentState = (
   };
 };
 
+const mapCheckoutIntentStateToSessionStatus = (checkoutIntentState?: CheckoutIntentState): {
+  type: StripeCheckoutStatus['type'] | null;
+  paymentStatus: Extract<StripeCheckoutStatus, { type: 'complete' }>['paymentStatus'] | null
+} => {
+  if (!checkoutIntentState) {
+    return {
+      type: null,
+      paymentStatus: null,
+    };
+  }
+  if (paymentProcessedCheckoutIntentStates.includes(checkoutIntentState)) {
+    return {
+      type: 'complete',
+      paymentStatus: 'paid',
+    };
+  }
+  return {
+    type: 'open',
+    paymentStatus: null,
+  };
+};
+
 /**
  * Populates relevant steps in the local checkout form store using information
  * from the authenticated user and (optionally) an existing checkout intent.
@@ -72,7 +96,7 @@ const determineExistingCheckoutIntentState = (
  * @param {PopulateCompletedFormFieldsProps} params - Function parameters.
  * @returns {void}
  */
-const populateCompletedFormFields = ({
+const populateInitialApplicationState = ({
   checkoutIntent,
   stripePriceId,
   authenticatedUser,
@@ -84,6 +108,9 @@ const populateCompletedFormFields = ({
         ...s.formData,
         [DataStoreKey.PlanDetails]: {
           ...s.formData[DataStoreKey.PlanDetails],
+          quantity: s.formData[DataStoreKey.PlanDetails]?.quantity
+            ?? checkoutIntent?.quantity
+            ?? 0,
           fullName: s.formData[DataStoreKey.PlanDetails]?.fullName
             ?? authenticatedUser.name
             ?? authenticatedUser.username,
@@ -108,6 +135,13 @@ const populateCompletedFormFields = ({
           confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnC ?? false,
           confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmSubscription ?? false,
         },
+      },
+      checkoutSessionStatus: {
+        ...s.checkoutSessionStatus,
+        type: s.checkoutSessionStatus.type || mapCheckoutIntentStateToSessionStatus(checkoutIntent?.state).type,
+        paymentStatus: s.checkoutSessionStatus.paymentStatus || mapCheckoutIntentStateToSessionStatus(
+          checkoutIntent?.state,
+        ).paymentStatus,
       },
     }),
     false,
@@ -254,6 +288,7 @@ const getCheckoutSessionClientSecret = (): string | undefined => {
 export {
   determineExistingCheckoutIntentState,
   getCheckoutSessionClientSecret,
-  populateCompletedFormFields,
+  mapCheckoutIntentStateToSessionStatus,
+  populateInitialApplicationState,
   validateFormState,
 };
