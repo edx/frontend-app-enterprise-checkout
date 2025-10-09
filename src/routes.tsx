@@ -12,6 +12,8 @@ import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
 import { authenticatedSteps, CheckoutStepKey } from '@/constants/checkout';
 
+import { ErrorPage } from './components/ErrorPage';
+
 /**
  * Returns the route loader function if a queryClient is available; otherwise, returns null.
  */
@@ -112,11 +114,11 @@ export function getRoutes(queryClient: QueryClient) {
           </PageWrap>
         ),
         children: rootChildRoutes,
-        errorElement: (<div>Error Boundary</div>),
+        errorElement: (<ErrorPage message="Error Boundary" />),
       },
       {
         path: '*',
-        element: (<div>Not Found</div>),
+        element: (<ErrorPage message="Not Found" />),
       }],
     },
   ];
