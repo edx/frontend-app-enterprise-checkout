@@ -57,7 +57,10 @@ describe('BillingDetailsSuccessContent', () => {
     jest.clearAllMocks();
 
     // Set default mock values for all hooks
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({ data: null, refetch: jest.fn() });
+    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
+      data: null,
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+    });
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
     (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
       data: null,
@@ -91,7 +94,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'paid' },
       },
-      refetch: jest.fn(),
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
 
     renderComponent();
@@ -106,7 +109,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state: 'fulfilled' },
       },
-      refetch: jest.fn(),
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
 
     renderComponent();
@@ -126,7 +129,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: {
         checkoutIntent: { state },
       },
-      refetch: jest.fn(),
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
 
     renderComponent();
