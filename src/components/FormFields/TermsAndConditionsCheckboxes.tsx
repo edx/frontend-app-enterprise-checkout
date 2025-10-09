@@ -4,7 +4,6 @@ import { isEmpty } from 'lodash-es';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
-import { termsAndConditions } from '@/components/app/data/constants';
 import { DisplayPrice } from '@/components/DisplayPrice';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
@@ -80,7 +79,10 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmTnC"
-              defaultMessage={termsAndConditions.readAndAcceptProductDescriptionsMessage}
+              defaultMessage={
+                'I have read and accepted the edX Enterprise Product Descriptions'
+                + ' and Terms and edX Enterprise Sales Terms and Conditions.'
+              }
               description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
             />
           </Form.Checkbox>
@@ -113,7 +115,10 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmSubscription"
-              defaultMessage={termsAndConditions.confirmSubscribingMessage}
+              defaultMessage={
+                'I confirm I am subscribing on behalf of my employer, school or other professional'
+                + ' organization for use by my institution\'s employees, students and/or other sponsored learners.'
+              }
               description="Checkbox label to confirm the subscription is on behalf of an organization for use by its employees, students, or other sponsored learners"
             />
           </Form.Checkbox>
@@ -146,7 +151,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmRecurringSubscription"
-              defaultMessage={termsAndConditions.agreeToRecurringSubscriptionMessage}
+              defaultMessage="I agree to enroll in a recurring annual subscription for {price}/year USD."
               description="Checkbox label to confirm the recurring subscription with price"
               values={{
                 price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
