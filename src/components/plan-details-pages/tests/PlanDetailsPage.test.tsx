@@ -170,7 +170,7 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     // Fill in required form fields using proper user interaction
     const fullNameInput = screen.getByLabelText(/full name/i);
     const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
+    const quantityInput = screen.getByLabelText(/number of licenses/i);
     const countrySelect = screen.getByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
@@ -222,7 +222,7 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     // Fill in required form fields using proper user interaction
     const fullNameInput = screen.getByLabelText(/full name/i);
     const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
+    const quantityInput = screen.getByLabelText(/number of licenses/i);
     const countrySelect = screen.getByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
@@ -271,7 +271,7 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     // Fill in required form fields using proper user interaction
     const fullNameInput = screen.getByLabelText(/full name/i);
     const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
+    const quantityInput = screen.getByLabelText(/number of licenses/i);
     const countrySelect = screen.getByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');

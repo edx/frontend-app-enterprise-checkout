@@ -8,10 +8,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useCheckoutIntent } from '@/components/app/data';
+import { useCheckoutIntent, usePolledCheckoutIntent } from '@/components/app/data';
 import { termsAndConditions } from '@/components/app/data/constants';
-import { queryBffContext } from '@/components/app/data/queries/queries';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
+import { determineExistingSuccessfulCheckoutIntent } from '@/components/app/data/services/context';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -59,7 +59,7 @@ const StatefulSubscribeButton = () => {
   const [errorMessageKey, setErrorMessageKey] = useState('fallback');
   const { data: checkoutIntent } = useCheckoutIntent();
   const intl = useIntl();
-
+  const { data: polledCheckoutIntent } = usePolledCheckoutIntent();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
@@ -104,7 +104,6 @@ const StatefulSubscribeButton = () => {
     }
     // Set the button to the appropriate state based on the response.
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
-    setStatefulButtonState(response.type || 'default');
     if (response.type === 'error') {
       setErrorMessageKey(buttonMessages.error[response.error?.code] ? response.error?.code : 'fallback');
       logError(
@@ -113,18 +112,18 @@ const StatefulSubscribeButton = () => {
     }
   };
 
+  // Visually alter the Subscribe button to a "successful" appearance if the polled intent state becomes successful.
+  useEffect(() => {
+    if (statefulButtonState === 'pending' && determineExistingSuccessfulCheckoutIntent(polledCheckoutIntent?.state)) {
+      setStatefulButtonState('success');
+    }
+  }, [polledCheckoutIntent?.state, navigate, statefulButtonState]);
+
   useEffect(() => {
     if (statefulButtonState === 'success') {
-      // If the payment succeeded, update the checkout session status.
+      // If the payment succeeded from the stripe API, update the checkout session status.
       if (status.type === 'complete' && status.paymentStatus === 'paid') {
         setCheckoutSessionStatus(status);
-        queryClient.invalidateQueries({
-          queryKey: queryBffContext(
-            authenticatedUser.id,
-          ).queryKey,
-        })
-          .then(data => data)
-          .catch(error => logError(error));
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId: checkoutIntent?.id ?? null,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,

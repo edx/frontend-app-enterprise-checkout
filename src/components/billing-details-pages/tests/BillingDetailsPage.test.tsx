@@ -49,6 +49,12 @@ describe('BillingDetailsPage', () => {
       },
     });
     (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
+    (usePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 1,
+        state: 'pending',
+      },
+    });
     (useCheckout as jest.Mock).mockReturnValue({
       canConfirm: true,
       confirm: jest.fn().mockResolvedValue({ type: 'success' }),
