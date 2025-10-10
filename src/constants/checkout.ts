@@ -114,10 +114,9 @@ export const PlanDetailsSchema = (
         'adminEmail',
         adminEmail,
       );
-      if (!isValid) {
+      if (!isValid && validationDecisions?.adminEmail) {
         // Check if the validation error is 'not_registered'
         const adminEmailDecision = validationDecisions?.adminEmail;
-        // @ts-ignore
         if (adminEmailDecision.errorCode !== 'not_registered') {
           // Only throw validation error for other error codes, not 'not_registered'
           ctx.addIssue({
