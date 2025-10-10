@@ -23,7 +23,7 @@ const StatefulProvisioningButton = () => {
   const queryClient = useQueryClient();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: polledCheckoutIntent } = usePolledCheckoutIntent();
-  const { data: successContext, refetch } = useBFFSuccess();
+  const { data: successContext, refetch } = useBFFSuccess(authenticatedUser.userId ?? null);
   const { checkoutIntent } = successContext || {};
   const [buttonState, setButtonState] = useState('pending');
   const intl = useIntl();
