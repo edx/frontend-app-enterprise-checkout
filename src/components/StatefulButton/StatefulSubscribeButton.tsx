@@ -8,11 +8,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { determineExistingSuccessfulCheckoutIntent } from '@/components/app/data/services/context';
 import { useCheckoutIntent, usePolledCheckoutIntent } from '@/components/app/data';
 import { termsAndConditions } from '@/components/app/data/constants';
-import { queryBffContext } from '@/components/app/data/queries/queries';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
+import { determineExistingSuccessfulCheckoutIntent } from '@/components/app/data/services/context';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
