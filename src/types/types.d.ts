@@ -268,6 +268,7 @@ declare global {
   interface CheckoutContextFieldConstraints {
     quantity: CheckoutContextFieldConstraint;
     enterpriseSlug: CheckoutContextFieldConstraint;
+    embargoedCountries?: string[];
   }
 
   type CheckoutIntentState =
