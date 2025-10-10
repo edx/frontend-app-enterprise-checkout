@@ -104,6 +104,7 @@ describe('utils.ts', () => {
       expect(computed.formData[DataStoreKey.BillingDetails]).toEqual({
         confirmTnC: false,
         confirmSubscription: false,
+        confirmRecurringSubscription: false,
       });
     });
 

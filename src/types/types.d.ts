@@ -290,6 +290,7 @@ declare global {
     workflowId: string;
     expiresAt: string;
     adminPortalUrl: string;
+    country: string;
   }
 
   // TODO: to be updated with defined structure

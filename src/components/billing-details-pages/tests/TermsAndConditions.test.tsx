@@ -27,6 +27,7 @@ const TestWrapper: React.FC = () => {
     defaultValues: {
       confirmTnC: false,
       confirmSubscription: false,
+      confirmRecurringSubscription: false,
     } as Partial<BillingDetailsData>,
   });
   return <TermsAndConditions form={form} />;
@@ -66,12 +67,13 @@ describe('TermsAndConditions', () => {
   it('renders the checkbox correctly', () => {
     renderComponent();
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    expect(checkboxes.length).toEqual(2);
+    expect(checkboxes.length).toEqual(3);
     validateText('I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions.');
     validateText('I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution\'s employees, students and/or other sponsored learners.');
-    const [checkbox1, checkbox2] = checkboxes;
+    const [checkbox1, checkbox2, checkbox3] = checkboxes;
     expect(checkbox1).not.toBeChecked();
     expect(checkbox2).not.toBeChecked();
+    expect(checkbox3).not.toBeChecked();
   });
 
   it('checks the checkbox when clicked', async () => {
@@ -79,10 +81,11 @@ describe('TermsAndConditions', () => {
     renderComponent();
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
-    expect(checkboxes.length).toEqual(2);
-    const [checkbox1, checkbox2] = checkboxes;
+    expect(checkboxes.length).toEqual(3);
+    const [checkbox1, checkbox2, checkbox3] = checkboxes;
     expect(checkbox1).not.toBeChecked();
     expect(checkbox2).not.toBeChecked();
+    expect(checkbox3).not.toBeChecked();
 
     await user.click(checkbox1);
     expect(checkbox1).toBeChecked();
@@ -91,5 +94,9 @@ describe('TermsAndConditions', () => {
     await user.click(checkbox2);
     expect(checkbox2).toBeChecked();
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(2);
+
+    await user.click(checkbox3);
+    expect(checkbox3).toBeChecked();
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(3);
   });
 });
