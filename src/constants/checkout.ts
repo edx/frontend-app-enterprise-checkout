@@ -86,7 +86,7 @@ export const PlanDetailsSchema = (
     .max(
       constraints?.quantity?.max,
       constraints?.quantity?.max
-        ? `Maximum ${constraints.quantity.max} users`
+        ? `You can only have up to ${constraints.quantity.max} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
     )
     .superRefine(async (quantity, ctx) => {
