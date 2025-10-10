@@ -166,8 +166,8 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   // or if there is no existingSuccessfulCheckoutIntent flag,
   // redirect to Plan Details to restart the process.
   if (
-    stripeCheckoutSessionType !== 'complete'
-    && !checkoutIntent.existingSuccessfulCheckoutIntent
+    !checkoutIntent.existingSuccessfulCheckoutIntent
+    || stripeCheckoutSessionType !== 'complete'
   ) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
