@@ -2,7 +2,7 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { queryBffContext } from '@/components/app/data/queries/queries';
+import { queryBffContext, queryBffSuccess, queryCheckoutIntent } from '@/components/app/data/queries/queries';
 import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -144,12 +144,31 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
-
   const { checkoutIntent } = contextMetadata;
 
-  const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+  if (!checkoutIntent) {
+    return redirect(CheckoutPageRoute.PlanDetails);
+  }
 
-  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent) {
+  await queryClient.ensureQueryData(
+    queryBffSuccess(authenticatedUser?.userId || null),
+  );
+  if (checkoutIntent.id) {
+    await queryClient.ensureQueryData(
+      queryCheckoutIntent(checkoutIntent.id),
+    );
+  }
+
+  const stripeCheckoutSessionType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+
+  // Explicitly check that the intent is in a successful state
+  // If the intent is successful but the type is not 'complete',
+  // or if there is no existingSuccessfulCheckoutIntent flag,
+  // redirect to Plan Details to restart the process.
+  if (
+    !checkoutIntent.existingSuccessfulCheckoutIntent
+    || stripeCheckoutSessionType !== 'complete'
+  ) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 
