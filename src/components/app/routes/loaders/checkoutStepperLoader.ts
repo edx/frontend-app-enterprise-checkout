@@ -142,7 +142,7 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
   }
 
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
-    queryBffContext(authenticatedUser?.userId || null),
+    queryBffSuccess(authenticatedUser?.userId || null),
   );
   const { checkoutIntent } = contextMetadata;
 

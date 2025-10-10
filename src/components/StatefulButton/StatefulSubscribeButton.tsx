@@ -5,11 +5,12 @@ import { StatefulButton } from '@openedx/paragon';
 import { CheckoutContextValue, useCheckout } from '@stripe/react-stripe-js';
 import { StripeCheckoutStatus } from '@stripe/stripe-js';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, usePolledCheckoutIntent } from '@/components/app/data';
 import { termsAndConditions } from '@/components/app/data/constants';
+import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 import { determineExistingSuccessfulCheckoutIntent } from '@/components/app/data/services/context';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
@@ -73,17 +74,12 @@ const StatefulSubscribeButton = () => {
     confirm: CheckoutContextValue['confirm'],
   } = useCheckout();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
-  const setCheckoutSessionStatus = useCheckoutFormStore((state) => state.setCheckoutSessionStatus);
+  const { setCheckoutSessionStatus, setCheckoutSessionClientSecret } = useCheckoutFormStore((state) => state);
 
   const hasInvalidTerms = Object.values(billingDetailsData).some((value) => !value);
   const isFormValid = canConfirm && !hasInvalidTerms;
 
-  const onClickHandler = async () => {
-    // Sets the button to pending state and then calls confirm()
-    setStatefulButtonState('pending');
-
-    // Calls confirm() to start the Stripe checkout flow.
-    let response;
+  const patchCheckoutIntentCallback = useCallback(async () => {
     try {
       if (checkoutIntent) {
         const { id, country, state } = checkoutIntent;
@@ -95,12 +91,20 @@ const StatefulSubscribeButton = () => {
         };
         await patchCheckoutIntent(tncCheckoutUpdateRequest);
       }
+    } catch (patchError) {
+      logError(patchError);
+    }
+  }, [checkoutIntent]);
+
+  const purchaseStripeCheckout = useCallback(async () => {
+    let response;
+    try {
       response = await confirm({
         redirect: 'if_required',
         returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
       });
-    } catch (error) {
-      response = error;
+    } catch (stripeError) {
+      response = stripeError;
     }
     // Set the button to the appropriate state based on the response.
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
@@ -110,7 +114,16 @@ const StatefulSubscribeButton = () => {
         `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${JSON.stringify(checkoutIntent)}, ${JSON.stringify(response.error)}`,
       );
     }
-  };
+  }, [checkoutIntent, confirm]);
+
+  const onClickHandler = useCallback(async () => {
+    // Sets the button to pending state and then calls confirm()
+    setStatefulButtonState('pending');
+
+    // Calls confirm() to start the Stripe checkout flow.
+    await patchCheckoutIntentCallback();
+    await purchaseStripeCheckout();
+  }, [patchCheckoutIntentCallback, purchaseStripeCheckout]);
 
   // Visually alter the Subscribe button to a "successful" appearance if the polled intent state becomes successful.
   useEffect(() => {
@@ -124,6 +137,13 @@ const StatefulSubscribeButton = () => {
       // If the payment succeeded from the stripe API, update the checkout session status.
       if (status.type === 'complete' && status.paymentStatus === 'paid') {
         setCheckoutSessionStatus(status);
+        setCheckoutSessionClientSecret('');
+        queryClient.invalidateQueries({
+          queryKey: queryBffSuccess(authenticatedUser.userId ?? null).queryKey,
+        }).then(data => data).catch(error => logError(error));
+        queryClient.invalidateQueries({
+          queryKey: queryBffContext(authenticatedUser.userId ?? null).queryKey,
+        }).then(data => data).catch(error => logError(error));
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId: checkoutIntent?.id ?? null,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
@@ -140,10 +160,10 @@ const StatefulSubscribeButton = () => {
     statefulButtonState,
     status,
     setCheckoutSessionStatus,
-    queryClient,
-    authenticatedUser,
     navigate,
     checkoutIntent?.id,
+    queryClient,
+    authenticatedUser.userId,
   ]);
 
   const props = {
