@@ -7,6 +7,8 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { useNavigate } from 'react-router-dom';
 
+import { termsAndConditions } from '@/components/app/data/constants';
+import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
@@ -41,7 +43,10 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@/components/app/data', () => ({
-  useCheckoutIntent: jest.fn(() => ({ data: { id: 'test-intent' } })),
+  useCheckoutIntent: jest.fn(() => ({
+    data:
+      { id: 'test-intent', country: 'US', state: 'created' },
+  })),
   usePolledCheckoutIntent: jest.fn(() => ({ data: { state: 'paid' } })),
 }));
 
@@ -51,6 +56,10 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
 
 jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
+}));
+
+jest.mock('@/components/app/data/services/checkout-intent', () => ({
+  patchCheckoutIntent: jest.fn(),
 }));
 
 // Mock functions that we'll reuse across tests
@@ -384,6 +393,25 @@ describe('StatefulSubscribeButton', () => {
       await waitFor(() => {
         expect(mockNavigate).not.toHaveBeenCalled();
       }, { timeout: 1000 });
+    });
+
+    it('calls patchCheckoutIntent with checked terms and conditions', async () => {
+      mockConfirm.mockResolvedValue({ type: 'success' });
+      setup();
+
+      const button = screen.getByRole('button');
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      const expectedPatch = {
+        country: 'US',
+        id: 'test-intent',
+        state: 'created',
+        termsMetadata: termsAndConditions,
+      };
+
+      expect(patchCheckoutIntent).toHaveBeenCalledWith(expectedPatch);
     });
   });
 

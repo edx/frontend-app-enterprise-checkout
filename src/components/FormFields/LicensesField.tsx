@@ -25,7 +25,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         <h3 className="font-weight-light">
           <FormattedMessage
             id="checkout.licensesField.description"
-            defaultMessage="Enter in the number of licenses you want to purchase."
+            defaultMessage="Enter in the number of licenses you want to purchase. As an administrator, you can issue and swap licenses between employees."
             description="Description text explaining the licenses field purpose"
           />
         </h3>
@@ -36,13 +36,13 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         type="number"
         floatingLabel={intl.formatMessage({
           id: 'checkout.licensesField.floatingLabel',
-          defaultMessage: 'How many users?',
-          description: 'Floating label for the number of users input field',
+          defaultMessage: 'Number of licenses',
+          description: 'Floating label for the number of licenses input field',
         })}
         placeholder={intl.formatMessage({
           id: 'checkout.licensesField.placeholder',
           defaultMessage: 'eg. 10',
-          description: 'Placeholder example for the number of users input field',
+          description: 'Placeholder example for the number of licenses input field',
         })}
         min="0"
         className="mr-0 mt-3"

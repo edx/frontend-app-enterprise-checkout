@@ -20,6 +20,7 @@ import {
   useLoginMutation,
 } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
+import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
@@ -34,6 +35,7 @@ import {
 } from '@/hooks/index';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
+
 import '../Stepper/Steps/css/PriceAlert.css';
 
 const PlanDetailsPage = () => {
@@ -116,18 +118,26 @@ const PlanDetailsPage = () => {
   const onSubmitCallbacks: {
     [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
   } = {
-    [SubmitCallbacks.PlanDetails]: (data: PlanDetailsData) => {
+    [SubmitCallbacks.PlanDetails]: async (data: PlanDetailsData) => {
+      const { validationDecisions, isValid: isValidAdminEmailField } = await validateFieldDetailed(
+        'adminEmail',
+        data.adminEmail,
+        {},
+        true,
+      );
       // Always persist plan details first.
       setFormData(DataStoreKey.PlanDetails, data);
 
       // Determine if user is authenticated; if not, proceed to logistration flows.
       if (!authenticatedUser) {
-        // TODO: replace with existing user email logic
-        const emailExists = true;
-        if (emailExists) {
-          navigate(CheckoutPageRoute.PlanDetailsLogin);
-        } else {
+        // Check if the adminEmail validation returned 'not_registered'
+        const adminEmailDecision = validationDecisions?.adminEmail;
+        if (!isValidAdminEmailField && adminEmailDecision?.errorCode === 'not_registered') {
+          // User is not registered, navigate to registration page
           navigate(CheckoutPageRoute.PlanDetailsRegister);
+        } else {
+          // User is registered (or other validation state), navigate to login page
+          navigate(CheckoutPageRoute.PlanDetailsLogin);
         }
         return;
       }

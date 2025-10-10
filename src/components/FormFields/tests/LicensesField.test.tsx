@@ -32,17 +32,17 @@ describe('LicensesField', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    validateText('Number of licenses');
+    validateText('Number of licenses', { selector: 'h3' });
   });
 
   it('renders the description correctly', () => {
     renderComponent();
-    validateText('Enter in the number of licenses you want to purchase.');
+    validateText('Enter in the number of licenses you want to purchase. As an administrator, you can issue and swap licenses between employees.');
   });
 
   it('renders the field with correct labels', () => {
     renderComponent();
-    expect(screen.getByTestId('floating-label')).toHaveTextContent('How many users?');
+    expect(screen.getByTestId('floating-label')).toHaveTextContent('Number of licenses');
     expect(screen.getByTestId('placeholder')).toHaveTextContent('eg. 10');
   });
 });

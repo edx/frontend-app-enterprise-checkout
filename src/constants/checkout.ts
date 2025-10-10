@@ -86,7 +86,7 @@ export const PlanDetailsSchema = (
     .max(
       constraints?.quantity?.max,
       constraints?.quantity?.max
-        ? `Maximum ${constraints.quantity.max} users`
+        ? `You can only have up to ${constraints.quantity.max} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
     )
     .superRefine(async (quantity, ctx) => {
@@ -107,7 +107,26 @@ export const PlanDetailsSchema = (
     .min(1, 'Full name is required')
     .max(255),
   adminEmail: z.string().trim()
-    .max(254),
+    .max(254)
+    .superRefine(async (adminEmail, ctx) => {
+      // TODO: Nice to have to avoid calling this API if client side validation catches first
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'adminEmail',
+        adminEmail,
+      );
+      if (!isValid && validationDecisions?.adminEmail) {
+        // Check if the validation error is 'not_registered'
+        const adminEmailDecision = validationDecisions?.adminEmail;
+        if (adminEmailDecision.errorCode !== 'not_registered') {
+          // Only throw validation error for other error codes, not 'not_registered'
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: serverValidationError('adminEmail', validationDecisions, CheckoutErrorMessagesByField),
+          });
+        }
+        // For 'not_registered', we allow the form to submit and handle navigation in the submit callback
+      }
+    }),
   country: z.string().trim()
     .min(1, 'Country is required'),
   stripePriceId: z.string().trim().optional().nullable(),
