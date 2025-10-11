@@ -1,8 +1,6 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
-import {
-  CheckCircle, Error as ErrorIcon,
-} from '@openedx/paragon/icons';
+import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
 import {
   forwardRef,
   useCallback,
@@ -50,6 +48,10 @@ interface FieldProps<T extends FieldValues> {
   controlClassName?: string;
   options?: { value: string; label: string }[]; // New: For select fields
   manageState?: boolean;
+  locked?: boolean;
+  lockTooltip: string;
+  rightIcon?: React.ReactNode;
+  validationPlacement?: 'left' | 'overlay'
   // Allow any additional props to be passed to the Form.Control component
   [key: string]: any;
 }
@@ -78,16 +80,33 @@ export function useIsFieldInvalid<T extends FieldValues>(form: UseFormReturn<T>)
 interface TrailingElementProps {
   isValid: boolean;
   isInvalid: boolean;
+  rightIcon?: React.ReactNode;
 }
 
-export const getTrailingElement = ({ isValid, isInvalid }: TrailingElementProps) => {
-  if (isValid) {
-    return <CheckCircle className="text-success" />;
+export const getTrailingElement = ({ isValid, isInvalid, rightIcon }: TrailingElementProps) => {
+  const validationIcon = isValid ? (
+    <CheckCircle className="text-success" />
+  ) : isInvalid ? (
+    <ErrorIcon className="text-danger" />
+  ) : null;
+
+  // If there's no rightIcon, return just the validation icon
+  if (!rightIcon) {
+    return validationIcon;
   }
-  if (isInvalid) {
-    return <ErrorIcon className="text-danger" />;
+
+  // If there's a rightIcon but no validation icon, return just the rightIcon
+  if (!validationIcon) {
+    return rightIcon;
   }
-  return null;
+
+  // If both icons exist, return them as an array with rightIcon first, then validation icon
+  return (
+    <div className="d-flex align-items-center" style={{ gap: '8px' }}>
+      {rightIcon}
+      {validationIcon}
+    </div>
+  );
 };
 
 const DefaultFormControlBase = <T extends FieldValues>(
@@ -218,14 +237,21 @@ const FieldBase = <T extends FieldValues>(
     manageState = true,
     className,
     controlClassName,
+    locked,
+    lockTooltip,
+    rightIcon,
+    validationPlacement = 'left',
     ...rest
   }: FieldProps<T>,
   ref: React.Ref<FormControlElement>,
 ) => {
   const isValid = useIsFieldValid(form)(name);
   const isInvalid = useIsFieldInvalid(form)(name);
-  const trailingElement = getTrailingElement({ isValid,
-    isInvalid });
+  const trailingElement = getTrailingElement({
+    isValid,
+    isInvalid,
+    rightIcon,
+  });
   const errorMessage = form.formState.errors[name]?.message as string | undefined;
 
   const renderDefaultControl = () => (
