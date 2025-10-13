@@ -120,7 +120,7 @@ const StatefulSubscribeButton = () => {
         setCheckoutSessionStatus(status);
         queryClient.invalidateQueries({
           queryKey: queryBffContext(
-            authenticatedUser.id,
+            authenticatedUser.userId ?? null,
           ).queryKey,
         })
           .then(data => data)

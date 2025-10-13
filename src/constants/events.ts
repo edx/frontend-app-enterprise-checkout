@@ -31,6 +31,7 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   VIEW_RECEIPT_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.view_receipt_button.clicked`,
   REACH_OUT_LINK_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.reach_out_link.clicked`,
   GO_TO_DASHBOARD_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.go_to_dashboard_button.clicked`,
+  CONTACT_SUPPORT_LINK_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.contact_support_link.clicked`,
 };
 
 const EVENT_NAMES = {
