@@ -1,8 +1,9 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
-import {
+import React, {
   forwardRef,
+  ReactNode,
   useCallback,
   useImperativeHandle,
   useRef,
@@ -23,10 +24,10 @@ import type {
 interface FieldChildrenProps {
   isValid: boolean;
   isInvalid: boolean;
-  trailingElement: React.ReactNode;
+  trailingElement: ReactNode;
   errorMessage: string | undefined;
-  defaultControl: React.ReactNode;
-  defaultErrorFeedback: React.ReactNode;
+  defaultControl: ReactNode;
+  defaultErrorFeedback: ReactNode;
 }
 
 interface ControlFooterNodeProps {
@@ -40,17 +41,15 @@ interface FieldProps<T extends FieldValues> {
   name: Path<T>;
   form: UseFormReturn<T>;
   registerOptions?: RegisterOptions<T, Path<T>>;
-  controlFooterNode?: React.ReactNode | ((props: ControlFooterNodeProps) => React.ReactNode);
-  children?: React.ReactNode | ((props: FieldChildrenProps) => React.ReactNode);
+  controlFooterNode?: ReactNode | ((props: ControlFooterNodeProps) => ReactNode);
+  children?: ReactNode | ((props: FieldChildrenProps) => ReactNode);
   type?: FieldType;
   defaultValue?: string | number;
   className?: string;
   controlClassName?: string;
   options?: { value: string; label: string }[]; // New: For select fields
   manageState?: boolean;
-  locked?: boolean;
-  lockTooltip: string;
-  rightIcon?: React.ReactNode;
+  rightIcon?: ReactNode;
   // Allow any additional props to be passed to the Form.Control component
   [key: string]: any;
 }
@@ -79,11 +78,11 @@ export function useIsFieldInvalid<T extends FieldValues>(form: UseFormReturn<T>)
 interface TrailingElementProps {
   isValid: boolean;
   isInvalid: boolean;
-  rightIcon?: React.ReactNode;
+  rightIcon?: ReactNode;
 }
 
 export const getTrailingElement = ({ isValid, isInvalid, rightIcon }: TrailingElementProps) => {
-  let validationIcon = null;
+  let validationIcon: ReactNode | null = null;
   if (isValid) {
     validationIcon = <CheckCircle className="text-success" />;
   } else if (isInvalid) {
@@ -237,8 +236,6 @@ const FieldBase = <T extends FieldValues>(
     manageState = true,
     className,
     controlClassName,
-    locked,
-    lockTooltip,
     rightIcon,
     ...rest
   }: FieldProps<T>,
