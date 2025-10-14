@@ -34,7 +34,9 @@ jest.mock('@openedx/paragon/icons', () => ({
 }));
 
 // Test component wrapper that provides form context
-const TestWrapper = ({ children, formProps = {} }: { children: React.ReactNode | ((form: any) => React.ReactNode); formProps?: any }) => {
+const TestWrapper = (
+  { children, formProps = {} }: { children: React.ReactNode | ((form: any) => React.ReactNode); formProps?: any },
+) => {
   const form = useForm({
     mode: 'onChange',
     defaultValues: {

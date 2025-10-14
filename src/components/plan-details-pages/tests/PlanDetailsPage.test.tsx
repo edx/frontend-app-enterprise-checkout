@@ -22,6 +22,13 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn().mockReturnValue({
+    TERMS_OF_SERVICE_URL: 'https://example.com/terms',
+    PRIVACY_POLICY_URL: 'https://example.com/privacy',
+  }),
+}));
+
 describe('PlanDetailsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -68,6 +75,18 @@ describe('PlanDetailsLoginPage', () => {
 });
 
 describe('PlanDetailsRegistrationPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: {
+        quantity: {
+          min: 5,
+          max: 30,
+        },
+      },
+    });
+  });
+
   it('renders the title correctly', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Create your Account');
@@ -76,6 +95,63 @@ describe('PlanDetailsRegistrationPage', () => {
   it('renders a button', async () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
     expect(screen.getByTestId('stepper-submit-button')).toHaveTextContent('Register');
+  });
+
+  it('renders registration form fields correctly', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    // Check that registration form title and description are present
+    validateText('Register your edX account', { exact: false });
+    validateText('administrator access', { exact: false });
+
+    // Check that all required form fields are present
+    expect(screen.getByLabelText(/work email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/public username/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/country\/region/i)).toBeInTheDocument();
+  });
+
+  it('renders registration disclaimer component', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    // Check that disclaimer text is present - use more flexible matching
+    expect(screen.getByText(/creating an account/i)).toBeInTheDocument();
+    expect(screen.getByText(/terms of service/i)).toBeInTheDocument();
+    expect(screen.getByText(/honor code/i)).toBeInTheDocument();
+    expect(screen.getByText(/privacy policy/i)).toBeInTheDocument();
+  });
+
+  it('renders disclaimer links with correct destinations', () => {
+    // getConfig is mocked at module level to provide test URLs
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    // Check that links exist and have correct attributes
+    const links = screen.getAllByRole('link');
+    expect(links.length).toBeGreaterThan(0);
+
+    // At least one link should point to terms URL
+    const termsLinks = links.filter(link => link.getAttribute('href') === 'https://example.com/terms');
+    expect(termsLinks.length).toBeGreaterThan(0);
+
+    // At least one link should point to privacy URL
+    const privacyLinks = links.filter(link => link.getAttribute('href') === 'https://example.com/privacy');
+    expect(privacyLinks.length).toBeGreaterThan(0);
+  });
+
+  it('displays registration form with all required fields', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    // Check that form fields are present and accessible
+    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/confirm/i)).toBeInTheDocument();
+
+    // Check that submit button is present
+    expect(screen.getByTestId('stepper-submit-button')).toBeInTheDocument();
   });
 });
 
@@ -170,7 +246,7 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     // Fill in required form fields using proper user interaction
     const fullNameInput = screen.getByLabelText(/full name/i);
     const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
+    const quantityInput = screen.getByLabelText(/number of licenses/i);
     const countrySelect = screen.getByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
@@ -222,7 +298,7 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     // Fill in required form fields using proper user interaction
     const fullNameInput = screen.getByLabelText(/full name/i);
     const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
+    const quantityInput = screen.getByLabelText(/number of licenses/i);
     const countrySelect = screen.getByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
@@ -271,7 +347,7 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     // Fill in required form fields using proper user interaction
     const fullNameInput = screen.getByLabelText(/full name/i);
     const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
+    const quantityInput = screen.getByLabelText(/number of licenses/i);
     const countrySelect = screen.getByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');

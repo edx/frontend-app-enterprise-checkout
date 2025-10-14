@@ -38,7 +38,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
           />
         </h3>
       </div>
-      <Stack>
+      <Stack gap={3}>
         <Field
           form={form}
           name="adminEmail"

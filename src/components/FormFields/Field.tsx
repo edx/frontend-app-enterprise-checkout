@@ -51,7 +51,6 @@ interface FieldProps<T extends FieldValues> {
   locked?: boolean;
   lockTooltip: string;
   rightIcon?: React.ReactNode;
-  validationPlacement?: 'left' | 'overlay'
   // Allow any additional props to be passed to the Form.Control component
   [key: string]: any;
 }
@@ -84,11 +83,12 @@ interface TrailingElementProps {
 }
 
 export const getTrailingElement = ({ isValid, isInvalid, rightIcon }: TrailingElementProps) => {
-  const validationIcon = isValid ? (
-    <CheckCircle className="text-success" />
-  ) : isInvalid ? (
-    <ErrorIcon className="text-danger" />
-  ) : null;
+  let validationIcon = null;
+  if (isValid) {
+    validationIcon = <CheckCircle className="text-success" />;
+  } else if (isInvalid) {
+    validationIcon = <ErrorIcon className="text-danger" />;
+  }
 
   // If there's no rightIcon, return just the validation icon
   if (!rightIcon) {
@@ -240,7 +240,6 @@ const FieldBase = <T extends FieldValues>(
     locked,
     lockTooltip,
     rightIcon,
-    validationPlacement = 'left',
     ...rest
   }: FieldProps<T>,
   ref: React.Ref<FormControlElement>,

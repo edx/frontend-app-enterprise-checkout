@@ -31,7 +31,7 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           />
         </h3>
       </div>
-      <Stack>
+      <Stack gap={1}>
         <Field
           form={form}
           name="fullName"

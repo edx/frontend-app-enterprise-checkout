@@ -120,7 +120,7 @@ export const renderStepperRoute = (
   appContextValue = {
     config: {},
     authenticatedUser: null,
-  } as { config: {}, authenticatedUser: AuthenticatedUser | null },
+  } as { config: any, authenticatedUser: AuthenticatedUser | null },
 ): RenderResult => (
   render(
     <QueryClientProvider client={queryClient()}>
