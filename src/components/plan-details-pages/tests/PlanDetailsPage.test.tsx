@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
@@ -22,6 +24,41 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+jest.mock('@/components/app/data/hooks/useBFFContext');
+
+const mockedUseBFFContext = useBFFContext as unknown as jest.Mock;
+
+// Mock BFF context response data for testing
+const mockBFFContextData = camelCasedCheckoutContextResponseFactory({
+  pricing: {
+    default_by_lookup_key: 'test-subscription',
+    prices: [
+      {
+        id: 'price_test123',
+        product: 'prod_test123',
+        lookup_key: 'test-subscription',
+        recurring: {
+          interval: 'year',
+        },
+        currency: 'usd',
+        unit_amount: 99900,
+        unit_amount_decimal: '999.00',
+      },
+    ],
+  },
+});
+
+/**
+ * Helper function to setup useBFFContext mock with test data
+ * This mock simulates the BFF API response and tests the select function transformation
+ */
+const setupBFFContextMock = () => {
+  mockedUseBFFContext.mockImplementation((_userId, options) => {
+    const transformedData = options?.select ? options.select(mockBFFContextData) : mockBFFContextData;
+    return { data: transformedData };
+  });
+};
+
 describe('PlanDetailsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,6 +74,14 @@ describe('PlanDetailsPage', () => {
       isValid: true,
       validationDecisions: {},
     });
+    // Mock useBFFContext to call the select function with raw BFF data
+    setupBFFContextMock();
+  });
+
+  it('renders the price alert', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetails);
+    expect(screen.getByTestId('price-alert')).toHaveTextContent('Teams subscription');
+    expect(screen.getByTestId('price-alert')).toHaveTextContent('999/yr');
   });
 
   it('renders the title correctly', () => {
@@ -94,6 +139,8 @@ describe('PlanDetailsPage - authenticated user', () => {
       isValid: true,
       validationDecisions: {},
     });
+    // Mock useBFFContext
+    setupBFFContextMock();
   });
 
   it('renders authenticated user info when authenticatedUser exists', () => {
@@ -140,6 +187,9 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
       isValid: true,
       validationDecisions: {},
     });
+
+    // Mock useBFFContext to call the select function with raw BFF data
+    setupBFFContextMock();
   });
 
   it('navigates to registration page for unregistered user', async () => {
@@ -168,10 +218,11 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
 
     // Fill in required form fields using proper user interaction
-    const fullNameInput = screen.getByLabelText(/full name/i);
-    const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
-    const countrySelect = screen.getByLabelText(/country of residence/i);
+    // Use findBy to wait for elements to be rendered
+    const fullNameInput = await screen.findByLabelText(/full name/i);
+    const adminEmailInput = await screen.findByLabelText(/work email/i);
+    const quantityInput = await screen.findByLabelText(/number of licenses/i);
+    const countrySelect = await screen.findByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
     await user.type(adminEmailInput, 'unregistered@example.com');
@@ -220,10 +271,11 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
 
     // Fill in required form fields using proper user interaction
-    const fullNameInput = screen.getByLabelText(/full name/i);
-    const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
-    const countrySelect = screen.getByLabelText(/country of residence/i);
+    // Use findBy to wait for elements to be rendered
+    const fullNameInput = await screen.findByLabelText(/full name/i);
+    const adminEmailInput = await screen.findByLabelText(/work email/i);
+    const quantityInput = await screen.findByLabelText(/number of licenses/i);
+    const countrySelect = await screen.findByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
     await user.clear(adminEmailInput);
@@ -269,10 +321,11 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
 
     // Fill in required form fields using proper user interaction
-    const fullNameInput = screen.getByLabelText(/full name/i);
-    const adminEmailInput = screen.getByLabelText(/work email/i);
-    const quantityInput = screen.getByLabelText(/how many users/i);
-    const countrySelect = screen.getByLabelText(/country of residence/i);
+    // Use findBy to wait for elements to be rendered
+    const fullNameInput = await screen.findByLabelText(/full name/i);
+    const adminEmailInput = await screen.findByLabelText(/work email/i);
+    const quantityInput = await screen.findByLabelText(/number of licenses/i);
+    const countrySelect = await screen.findByLabelText(/country of residence/i);
 
     await user.type(fullNameInput, 'John Doe');
     await user.clear(adminEmailInput);
