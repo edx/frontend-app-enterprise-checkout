@@ -270,10 +270,6 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
   },
 };
 
-// TODO: these should be fetched from the Stripe, likely via
-// an exposed REST API endpoint on the server.
-export const SUBSCRIPTION_PRICE_PER_USER_PER_MONTH = 33;
-
 // Constants specific to the Stepper component
 export const authenticatedSteps = [
   'account-details',
