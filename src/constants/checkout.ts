@@ -69,8 +69,30 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
     .max(255, 'Maximum 255 characters'),
 }));
 
-// TODO: complete as part of ticket to do register page.
-export const PlanDetailsRegisterPageSchema = () => (z.object({}));
+export const PlanDetailsRegisterPageSchema = () => (z.object({
+  adminEmail: z.string().trim()
+    .email()
+    .max(254)
+    .optional(),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255),
+  username: z.string().trim()
+    .min(1, 'Username is required')
+    .max(255),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(255),
+  confirmPassword: z.string()
+    .min(1, 'Please confirm your password')
+    .max(255),
+  country: z.string().trim()
+    .min(1, 'Country is required')
+    .optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+}));
 
 export const PlanDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,
