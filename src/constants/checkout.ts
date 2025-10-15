@@ -72,8 +72,8 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
 export const PlanDetailsRegisterPageSchema = () => (z.object({
   adminEmail: z.string().trim()
     .email()
-    .max(254)
-    .optional(),
+    .min(1, 'Email is required')
+    .max(254),
   fullName: z.string().trim()
     .min(1, 'Full name is required')
     .max(255),
@@ -84,11 +84,10 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({
     .min(8, 'Password must be at least 8 characters')
     .max(255),
   confirmPassword: z.string()
-    .min(1, 'Please confirm your password')
+    .min(8, 'Please confirm your password')
     .max(255),
   country: z.string().trim()
-    .min(1, 'Country is required')
-    .optional(),
+    .min(1, 'Country is required'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
