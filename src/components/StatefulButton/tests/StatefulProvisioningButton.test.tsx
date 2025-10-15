@@ -64,7 +64,10 @@ describe('StatefulProvisioningButton', () => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: { state } });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
-        checkoutIntent: { adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com' : null },
+        checkoutIntent: {
+          adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com' : null,
+          enterpriseSlug: state === 'fulfilled' ? 'test-enterprise' : null,
+        },
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
       isLoading: false,
@@ -85,7 +88,10 @@ describe('StatefulProvisioningButton', () => {
     });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
-        checkoutIntent: { adminPortalUrl: 'https://admin.example.com' },
+        checkoutIntent: {
+          adminPortalUrl: 'https://admin.example.com',
+          enterpriseSlug: 'test-enterprise',
+        },
       },
     });
 
@@ -99,16 +105,18 @@ describe('StatefulProvisioningButton', () => {
     expect(button).toHaveClass('reverse-stateful-provisioning-success');
   });
 
-  it('redirects to admin portal URL when success button is clicked', async () => {
+  it('redirects to admin portal URL with enterprise slug and admin/register path when success button is clicked', async () => {
     const user = userEvent.setup();
-    const adminPortalUrl = 'https://admin.example.com/dashboard';
+    const adminPortalUrl = 'https://admin.example.com';
+    const enterpriseSlug = 'test-enterprise';
+    const expectedUrl = `${adminPortalUrl}/${enterpriseSlug}/admin/register`;
 
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
       data: { state: 'fulfilled' },
     });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
-        checkoutIntent: { adminPortalUrl },
+        checkoutIntent: { adminPortalUrl, enterpriseSlug },
       },
     });
 
@@ -118,6 +126,6 @@ describe('StatefulProvisioningButton', () => {
     await user.click(button);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
-    expect(window.location.href).toBe(adminPortalUrl);
+    expect(window.location.href).toBe(expectedUrl);
   });
 });
