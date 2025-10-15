@@ -1,6 +1,7 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
+import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { serverValidationError } from '@/utils/common';
 
@@ -91,6 +92,27 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
+}).superRefine(async (data, ctx) => {
+  if (data.password === data.confirmPassword) {
+    const { isValid, errors } = await validateRegistrationFieldsDebounced({
+      email: data.adminEmail,
+      name: data.fullName,
+      username: data.username,
+      password: data.password,
+      country: data.country,
+    });
+
+    if (!isValid) {
+      // Map LMS errors back to Zod issues
+      Object.entries(errors).forEach(([field, message]) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message,
+          path: [field === 'root' ? [] : [field]].flat(),
+        });
+      });
+    }
+  }
 }));
 
 export const PlanDetailsSchema = (
