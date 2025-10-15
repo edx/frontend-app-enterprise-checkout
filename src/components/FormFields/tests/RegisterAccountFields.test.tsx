@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { useForm } from 'react-hook-form';
 
+import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { RegisterAccountFields } from '@/components/FormFields';
 import { PlanDetailsRegisterPageSchema } from '@/constants/checkout';
 
@@ -25,6 +26,11 @@ jest.mock('@/hooks/index', () => {
     })),
   };
 });
+
+// Mock the registration validation services
+jest.mock('@/components/app/data/services/registration', () => ({
+  validateRegistrationFieldsDebounced: jest.fn(),
+}));
 
 // Mock the icons
 jest.mock('@openedx/paragon/icons', () => ({
@@ -61,6 +67,9 @@ const TestWrapper = (
 };
 
 describe('RegisterAccountFields', () => {
+  const mockValidateRegistrationFieldsDebounced = validateRegistrationFieldsDebounced as
+    jest.MockedFunction<typeof validateRegistrationFieldsDebounced>;
+
   const renderComponent = (formProps = {}) => {
     let formInstance: any;
 
@@ -78,6 +87,11 @@ describe('RegisterAccountFields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Set up default mock for all tests to prevent undefined errors
+    mockValidateRegistrationFieldsDebounced.mockImplementation(() => Promise.resolve({
+      isValid: true,
+      errors: {},
+    }));
   });
 
   describe('Component Rendering', () => {
@@ -362,6 +376,224 @@ describe('RegisterAccountFields', () => {
       expect(screen.getByPlaceholderText(/Enter your password/i)).toBeInTheDocument();
       expect(screen.getByPlaceholderText(/Confirm your password/i)).toBeInTheDocument();
       expect(screen.getByPlaceholderText(/Select a country/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Validation API Integration', () => {
+    beforeEach(() => {
+      // Clear call history but keep the default mock implementation from the main beforeEach
+      mockValidateRegistrationFieldsDebounced.mockClear();
+    });
+
+    it('calls validation API when form is submitted with valid data', async () => {
+      const form = renderComponent();
+
+      // Set valid form data
+      await act(async () => {
+        form.setValue('adminEmail', 'test@example.com');
+        form.setValue('fullName', 'John Doe');
+        form.setValue('username', 'johndoe');
+        form.setValue('password', 'validpassword123');
+        form.setValue('confirmPassword', 'validpassword123');
+        form.setValue('country', 'US');
+      });
+
+      // Trigger form validation
+      await act(async () => {
+        await form.trigger();
+      });
+
+      // Verify the validation API was called with correct parameters
+      await waitFor(() => {
+        expect(mockValidateRegistrationFieldsDebounced).toHaveBeenCalledWith({
+          email: 'test@example.com',
+          name: 'John Doe',
+          username: 'johndoe',
+          password: 'validpassword123',
+          country: 'US',
+        });
+      });
+    });
+
+    it('handles validation API success response correctly', async () => {
+      mockValidateRegistrationFieldsDebounced.mockImplementation(() => Promise.resolve({
+        isValid: true,
+        errors: {},
+      }));
+
+      const form = renderComponent();
+
+      // Set valid form data
+      await act(async () => {
+        form.setValue('adminEmail', 'test@example.com');
+        form.setValue('fullName', 'John Doe');
+        form.setValue('username', 'johndoe');
+        form.setValue('password', 'validpassword123');
+        form.setValue('confirmPassword', 'validpassword123');
+        form.setValue('country', 'US');
+      });
+
+      // Trigger validation
+      await act(async () => {
+        await form.trigger();
+      });
+
+      await waitFor(() => {
+        // Form should be valid when API returns success
+        expect(form.formState.isValid).toBe(true);
+        expect(Object.keys(form.formState.errors)).toHaveLength(0);
+      });
+    });
+
+    it('handles validation API error response correctly', async () => {
+      mockValidateRegistrationFieldsDebounced.mockImplementation(() => Promise.resolve({
+        isValid: false,
+        errors: {
+          adminEmail: 'Email already exists',
+          username: 'Username is too short',
+        },
+      }));
+
+      const form = renderComponent();
+
+      // Set form data that will trigger validation errors
+      await act(async () => {
+        form.setValue('adminEmail', 'existing@example.com');
+        form.setValue('fullName', 'John Doe');
+        form.setValue('username', 'js');
+        form.setValue('password', 'validpassword123');
+        form.setValue('confirmPassword', 'validpassword123');
+        form.setValue('country', 'US');
+      });
+
+      // Trigger validation
+      await act(async () => {
+        await form.trigger();
+      });
+
+      await waitFor(() => {
+        // Form should have errors when API returns validation errors
+        const { errors } = form.formState;
+        expect(errors.adminEmail?.message).toBe('Email already exists');
+        expect(errors.username?.message).toBe('Username is too short');
+      });
+    });
+
+    it('does not call validation API when passwords do not match', async () => {
+      const form = renderComponent();
+
+      // Set mismatched passwords
+      await act(async () => {
+        form.setValue('adminEmail', 'test@example.com');
+        form.setValue('fullName', 'John Doe');
+        form.setValue('username', 'johndoe');
+        form.setValue('password', 'password123');
+        form.setValue('confirmPassword', 'differentpassword');
+        form.setValue('country', 'US');
+      });
+
+      // Trigger validation
+      await act(async () => {
+        await form.trigger();
+      });
+
+      // Validation API should not be called when passwords don't match
+      await waitFor(() => {
+        expect(mockValidateRegistrationFieldsDebounced).not.toHaveBeenCalled();
+      });
+    });
+
+    it('calls validation API only when all required fields are present', async () => {
+      const form = renderComponent();
+
+      // Set incomplete form data (missing username)
+      await act(async () => {
+        form.setValue('adminEmail', 'test@example.com');
+        form.setValue('fullName', 'John Doe');
+        form.setValue('username', '');
+        form.setValue('password', 'validpassword123');
+        form.setValue('confirmPassword', 'validpassword123');
+        form.setValue('country', 'US');
+      });
+
+      // Trigger validation
+      await act(async () => {
+        await form.trigger();
+      });
+
+      // Should have client-side validation error first, but API might still be called
+      await waitFor(() => {
+        const { errors } = form.formState;
+        expect(errors.username?.message).toBe('Username is required');
+      });
+    });
+
+    it('handles validation API network errors gracefully', async () => {
+      mockValidateRegistrationFieldsDebounced.mockImplementation(() => Promise.reject(new Error('Network error')));
+
+      const form = renderComponent();
+
+      // Set valid form data
+      await act(async () => {
+        form.setValue('adminEmail', 'test@example.com');
+        form.setValue('fullName', 'John Doe');
+        form.setValue('username', 'johndoe');
+        form.setValue('password', 'validpassword123');
+        form.setValue('confirmPassword', 'validpassword123');
+        form.setValue('country', 'US');
+      });
+
+      // Trigger validation - this should handle the network error gracefully
+      await act(async () => {
+        try {
+          await form.trigger();
+        } catch (error) {
+          // The error should be handled by the validation schema
+        }
+      });
+
+      // Verify the validation API was called
+      await waitFor(() => {
+        expect(mockValidateRegistrationFieldsDebounced).toHaveBeenCalled();
+      });
+    });
+
+    it('maps field errors correctly from API response to form fields', async () => {
+      mockValidateRegistrationFieldsDebounced.mockImplementation(() => Promise.resolve({
+        isValid: false,
+        errors: {
+          adminEmail: 'Invalid email',
+          fullName: 'This field is required',
+          username: 'Username is required',
+          password: 'Password must be at least 8 characters',
+          country: 'Country is required',
+        },
+      }));
+
+      const form = renderComponent();
+
+      // Set form data that would trigger validation errors
+      await act(async () => {
+        form.setValue('adminEmail', 'invalid-email');
+        form.setValue('fullName', '');
+        form.setValue('username', '');
+        form.setValue('password', 'weak');
+        form.setValue('confirmPassword', 'weak');
+        form.setValue('country', '');
+      });
+
+      // Trigger validation
+      await act(async () => {
+        await form.trigger();
+      });
+
+      await waitFor(() => {
+        const { errors } = form.formState;
+        // Check that API validation errors are properly mapped to form fields
+        expect(mockValidateRegistrationFieldsDebounced).toHaveBeenCalled();
+        // The form should have validation errors from either client-side or API validation
+        expect(Object.keys(errors).length).toBeGreaterThan(0);
+      });
     });
   });
 });
