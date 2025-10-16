@@ -27,13 +27,13 @@ const LoginFields = ({ form }: LoginFieldsProps) => {
             description="Title for the login account section"
           />
         </h3>
-        <h3 className="font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.loginFields.description"
             defaultMessage="Please sign in or go back and use a different email."
             description="Description text explaining the login account purpose"
           />
-        </h3>
+        </p>
       </div>
       <Stack gap={1}>
         <Field
