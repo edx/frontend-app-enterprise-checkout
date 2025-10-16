@@ -21,14 +21,14 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
             description="Title for the custom url field section"
           />
         </h3>
-        <h3 className="font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.customUrl.description"
             defaultMessage="This is how your colleagues will access your team subscription on edX.
            This access link name cannot be changed after your trial subscription starts."
             description="Description text explaining the custom url field purpose"
           />
-        </h3>
+        </p>
         <span className="d-flex align-items-center mt-3">
           https://enterprise.edx.org/
           <Field
