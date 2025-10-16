@@ -19,13 +19,13 @@ const TermsAndConditions = ({ form }: TermsAndConditionsProps) => (
           description="Title for the terms and conditions field section"
         />
       </h3>
-      <h4 className="font-weight-light">
+      <p className="h4 font-weight-light">
         <FormattedMessage
           id="checkout.termsAndConditionsCheckboxes.description"
           defaultMessage="By subscribing, you and your organization agree to the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions linked below."
           description="Description text explaining the terms and conditions field purpose"
         />
-      </h4>
+      </p>
     </div>
     <TermsAndConditionsCheckboxes form={form} />
   </FieldContainer>

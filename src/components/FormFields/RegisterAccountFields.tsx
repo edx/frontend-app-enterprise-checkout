@@ -30,13 +30,13 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
             description="Title for the register account section"
           />
         </h3>
-        <h3 className="font-weight-light">
+        <p className="h4 font-weight-light">
           <FormattedMessage
             id="checkout.registerAccountField.description"
             defaultMessage="Your edX learner account will be granted administrator access to manage your organization's subscription when the trial starts."
             description="Description text explaining the register account purpose"
           />
-        </h3>
+        </p>
       </div>
       <Stack gap={3}>
         <Field

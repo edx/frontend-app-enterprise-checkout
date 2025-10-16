@@ -9,13 +9,13 @@ const OrderDetailsHeading: React.FC = () => (
         description="Title for the order details section"
       />
     </h3>
-    <h4 className="text-muted mb-3 font-weight-light">
+    <p className="h4 text-muted mb-3 font-weight-light">
       <FormattedMessage
         id="checkout.orderDetails.description"
         defaultMessage="You have purchased an edX team's subscription."
         description="Description text explaining the order details"
       />
-    </h4>
+    </p>
   </>
 );
 

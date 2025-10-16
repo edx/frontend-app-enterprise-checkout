@@ -23,13 +23,13 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             description="Title for the name and email section"
           />
         </h3>
-        <h3 className="font-weight-light">
+        <p className="h4 font-weight-light">
           <FormattedMessage
             id="checkout.NameAndEmailFields.description"
             defaultMessage="Please use your work email to build your team's subscription trial."
             description="Description text explaining the name and email purpose"
           />
-        </h3>
+        </p>
       </div>
       <Stack gap={1}>
         <Field
