@@ -49,7 +49,6 @@ const SubscriptionStartMessage = () => {
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
-                // TODO: Add URL to Subs Management Page
                 <a
                   onClick={() => sendEnterpriseCheckoutTrackingEvent({
                     checkoutIntentId: checkoutIntent?.id ?? null,

@@ -170,7 +170,7 @@ describe('BillingDetailsSuccessPage', () => {
         userId: 12345,
       },
     });
-    validateText('Order Details');
+    validateText('Order details');
     validateText('You have purchased an edX team\'s subscription.');
   });
 

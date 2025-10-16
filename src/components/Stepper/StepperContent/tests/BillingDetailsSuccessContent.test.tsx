@@ -85,7 +85,7 @@ describe('BillingDetailsSuccessContent', () => {
     // BillingDetailsHeadingMessage renders with celebration image
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
     // OrderDetails renders its content
-    validateText('Order Details');
+    validateText('Order details');
     validateText('You have purchased an edX team\'s subscription.');
   });
 
