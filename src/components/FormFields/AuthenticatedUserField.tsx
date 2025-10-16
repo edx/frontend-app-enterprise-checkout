@@ -17,7 +17,7 @@ const AuthenticatedUserField = ({ fullName, adminEmail }: AuthenticatedUserField
           description="Title for the authenticated user field section"
         />
       </h3>
-      <p className="fs-4 font-weight-light">
+      <p className="h4 font-weight-light">
         <FormattedMessage
           id="checkout.authenticatedUserField.description"
           defaultMessage="Signed in as: "

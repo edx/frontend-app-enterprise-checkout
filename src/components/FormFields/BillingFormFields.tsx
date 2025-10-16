@@ -23,7 +23,7 @@ const BillingPaymentTitle = () => (
         description="Stripe form billing payment information title"
       />
     </h3>
-    <p className="fs-4 font-weight-light">
+    <p className="h4 font-weight-light">
       <FormattedMessage
         id="billingDetailsPage.stripeFormFields.billingPayment.subtitle"
         defaultMessage="By providing your card information, you allow edX to charge your card for future payments in accordance with their terms."

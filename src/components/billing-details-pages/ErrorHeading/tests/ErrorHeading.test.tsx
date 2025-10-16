@@ -24,7 +24,7 @@ describe('ErrorHeading', () => {
     const descriptionText = screen.getByText(/We're experiencing a brief delay in setting up your edX Teams account/);
     const container = descriptionText.closest('p');
     expect(container).toBeInTheDocument();
-    expect(container).toHaveClass('fs-4', 'font-weight-light', 'text-center');
+    expect(container).toHaveClass('h4', 'font-weight-light', 'text-center');
   });
 
   it('renders the complete description message', () => {
