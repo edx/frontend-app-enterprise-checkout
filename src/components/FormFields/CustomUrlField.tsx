@@ -21,7 +21,7 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
             description="Title for the custom url field section"
           />
         </h3>
-        <p className="h4 font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.customUrl.description"
             defaultMessage="This is how your colleagues will access your team subscription on edX.

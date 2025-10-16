@@ -5,7 +5,7 @@ import { Hyperlink } from '@openedx/paragon';
 const RegistrationDisclaimer = () => {
   const { TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL } = getConfig();
   return (
-    <p className="h4 font-weight-light mt-2 mb-3">
+    <p className="fs-4 font-weight-light mt-2 mb-3">
       <FormattedMessage
         id="checkout.registration.disclaimer"
         defaultMessage="By creating an account, you agree to the {termsAndHonorLink} and you acknowledge that edX and each Member process your personal data in accordance with the {privacyPolicyLink}."

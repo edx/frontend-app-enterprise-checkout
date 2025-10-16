@@ -22,7 +22,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
             description="Title for the licenses field section"
           />
         </h3>
-        <p className="h4 font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.licensesField.description"
             defaultMessage="Enter in the number of licenses you want to purchase. As an administrator, you can issue and swap licenses between employees."

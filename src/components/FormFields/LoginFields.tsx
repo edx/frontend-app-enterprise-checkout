@@ -27,7 +27,7 @@ const LoginFields = ({ form }: LoginFieldsProps) => {
             description="Title for the login account section"
           />
         </h3>
-        <p className="h4 font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.loginFields.description"
             defaultMessage="Please sign in or go back and use a different email."

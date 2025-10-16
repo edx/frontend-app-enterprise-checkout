@@ -41,7 +41,7 @@ const SubscriptionStartMessage = () => {
             description="Title for the free trial success field section"
           />
         </h3>
-        <p className="h4 font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.freeTrialSubscriptionStartMessage.description"
             defaultMessage="Your trial expires on {boldDate}. Cancel anytime from the {link} page."
@@ -76,7 +76,7 @@ const SubscriptionStartMessage = () => {
             description="Sub title for the free trial success field section"
           />
         </h4>
-        <p className="h4 font-weight-light">
+        <p className="fs-4 font-weight-light">
           {freeTrialDateRangeText({ startTime, endTime })}
         </p>
       </div>

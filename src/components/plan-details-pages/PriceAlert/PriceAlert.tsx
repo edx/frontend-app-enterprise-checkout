@@ -28,7 +28,7 @@ const PriceAlert = () => {
               description="Title for the teams subscription price alert"
             />
           </h3>
-          <p className="h4 price-alert-text font-weight-light my-3">
+          <p className="fs-4 price-alert-text font-weight-light my-3">
             <FormattedMessage
               id="checkout.priceAlert.description"
               defaultMessage="Upskill your team across multiple areas with access to the entire course library."
