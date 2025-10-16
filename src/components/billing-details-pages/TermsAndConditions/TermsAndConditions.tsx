@@ -22,8 +22,27 @@ const TermsAndConditions = ({ form }: TermsAndConditionsProps) => (
       <p className="fs-4 font-weight-light">
         <FormattedMessage
           id="checkout.termsAndConditionsCheckboxes.description"
-          defaultMessage="By subscribing, you and your organization agree to the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions linked below."
+          defaultMessage={
+            'By subscribing, you and your organization agree to the {descriptionsAndTerms} and {termsAndConditions}'
+            + ' linked below.'
+          }
           description="Description text explaining the terms and conditions field purpose"
+          values={{
+            descriptionsAndTerms: (
+              <a
+                href="https://business.edx.org/product-descriptions-and-terms/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                edX Enterprise Product Descriptions and Terms
+              </a>
+            ),
+            termsAndConditions: (
+              <a href="https://business.edx.org/enterprise-sales-terms/" target="_blank" rel="noopener noreferrer">
+                edX Enterprise Sales Terms and Conditions
+              </a>
+            ),
+          }}
         />
       </p>
     </div>
