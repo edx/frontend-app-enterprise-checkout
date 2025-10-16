@@ -9,14 +9,13 @@ import Field from '@/components/FormFields/Field';
 import type { UseFormReturn } from 'react-hook-form';
 
 interface RegisterAccountFieldsProps {
-  form: UseFormReturn<PlanDetailsData>;
+  form: UseFormReturn<PlanDetailsRegisterPageData>;
 }
 
 const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
   const intl = useIntl();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
 
@@ -43,6 +42,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
           form={form}
           name="adminEmail"
           type="email"
+          value={form.getValues('adminEmail') || ''}
           floatingLabel={intl.formatMessage({
             id: 'checkout.registerAccountFields.workEmail.floatingLabel',
             defaultMessage: 'Work email',
@@ -63,6 +63,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
           form={form}
           name="fullName"
           type="text"
+          value={form.getValues('fullName') || ''}
           floatingLabel={intl.formatMessage({
             id: 'checkout.registerAccountFields.fullName.floatingLabel',
             defaultMessage: 'Full name',
@@ -74,19 +75,14 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
             description: 'Placeholder for the full name input field',
           })}
           controlClassName="mr-0"
-          registerOptions={{
-            required: intl.formatMessage({
-              id: 'checkout.registerAccountFields.fullName.required',
-              defaultMessage: 'Full name is required',
-              description: 'Error message for required full name field',
-            }),
-          }}
+          readOnly
         />
 
         <Field
           form={form}
           name="username"
           type="text"
+          value={form.getValues('username') || ''}
           floatingLabel={intl.formatMessage({
             id: 'checkout.registerAccountFields.username.floatingLabel',
             defaultMessage: 'Public username',
@@ -98,13 +94,6 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
             description: 'Placeholder for the username input field',
           })}
           controlClassName="mr-0"
-          registerOptions={{
-            required: intl.formatMessage({
-              id: 'checkout.registerAccountFields.username.required',
-              defaultMessage: 'Username is required',
-              description: 'Error message for required username field',
-            }),
-          }}
         />
 
         <Field
@@ -133,19 +122,14 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
               {showPassword ? <VisibilityOff className="text-muted" /> : <Visibility className="text-muted" />}
             </button>
           )}
+          manageState={false}
           registerOptions={{
-            required: intl.formatMessage({
-              id: 'checkout.registerAccountFields.password.required',
-              defaultMessage: 'Password is required',
-              description: 'Error message for required password field',
-            }),
-            minLength: {
-              value: 8,
-              message: intl.formatMessage({
-                id: 'checkout.registerAccountFields.password.minLength',
-                defaultMessage: 'Password must be at least 8 characters',
-                description: 'Error message for minimum password length',
-              }),
+            onChange: async () => {
+              // Trigger validation on confirmPassword field when password changes
+              // This ensures confirmPassword becomes invalid immediately if passwords don't match
+              if (form.getValues('confirmPassword')) {
+                await form.trigger('confirmPassword');
+              }
             },
           }}
         />
@@ -153,6 +137,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
         <Field
           form={form}
           name="confirmPassword"
+          value={form.getValues('confirmPassword') || ''}
           type={showConfirmPassword ? 'text' : 'password'}
           floatingLabel={intl.formatMessage({
             id: 'checkout.registerAccountFields.confirmPassword.floatingLabel',
@@ -176,27 +161,13 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
               {showConfirmPassword ? <VisibilityOff className="text-muted" /> : <Visibility className="text-muted" />}
             </button>
           )}
-          registerOptions={{
-            required: intl.formatMessage({
-              id: 'checkout.registerAccountFields.confirmPassword.required',
-              defaultMessage: 'Please confirm your password',
-              description: 'Error message for required confirm password field',
-            }),
-            validate: (value: string) => {
-              const password = form.getValues('password');
-              return value === password || intl.formatMessage({
-                id: 'checkout.registerAccountFields.confirmPassword.match',
-                defaultMessage: 'Passwords do not match',
-                description: 'Error message when passwords do not match',
-              });
-            },
-          }}
         />
 
         <Field
           form={form}
           name="country"
           type="select"
+          value={form.getValues('country') || ''}
           options={[
             {
               value: 'US',
