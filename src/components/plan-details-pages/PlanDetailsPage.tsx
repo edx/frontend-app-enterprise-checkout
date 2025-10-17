@@ -18,6 +18,7 @@ import { useFormValidationConstraints } from '@/components/app/data';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
+  useRegisterMutation,
 } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
@@ -75,6 +76,36 @@ const PlanDetailsPage = () => {
         type: 'manual',
         message: errorMessage,
       });
+    },
+  });
+
+  const registerMutation = useRegisterMutation({
+    onSuccess: () => {
+      navigate(CheckoutPageRoute.PlanDetails);
+    },
+    onError: (errorMessage, fieldErrors) => {
+      // Map API field errors back to our form field names
+      if (fieldErrors?.email) {
+        setError('adminEmail', { type: 'manual', message: fieldErrors.email });
+      }
+      if (fieldErrors?.name) {
+        setError('fullName', { type: 'manual', message: fieldErrors.name });
+      }
+      if (fieldErrors?.username) {
+        setError('username', { type: 'manual', message: fieldErrors.username });
+      }
+      if (fieldErrors?.password) {
+        setError('password', { type: 'manual', message: fieldErrors.password });
+      }
+      if (fieldErrors?.country) {
+        setError('country', { type: 'manual', message: fieldErrors.country });
+      }
+      if (!fieldErrors || Object.keys(fieldErrors).length === 0) {
+        setError('root.serverError', {
+          type: 'manual',
+          message: errorMessage || 'Registration failed',
+        });
+      }
     },
   });
 
@@ -156,9 +187,13 @@ const PlanDetailsPage = () => {
       });
     },
     [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
-      // Placeholder for a future register API call.
-      navigate(CheckoutPageRoute.PlanDetails);
-      return data;
+      registerMutation.mutate({
+        name: data.fullName,
+        email: data.adminEmail,
+        username: data.username,
+        password: data.password,
+        country: data.country,
+      });
     },
   };
 
@@ -168,15 +203,20 @@ const PlanDetailsPage = () => {
 
   // Determine which mutation states to surface to the button
   const isPlanDetailsMain = currentPage === SubmitCallbacks.PlanDetails;
+  const isLoginPage = currentPage === SubmitCallbacks.PlanDetailsLogin;
+  // const isRegisterPage = currentPage === SubmitCallbacks.PlanDetailsRegister;
+  // eslint-disable-next-line no-nested-ternary
   const submissionIsPending = isPlanDetailsMain
     ? createCheckoutIntentMutation.isPending
-    : loginMutation.isPending;
+    : (isLoginPage ? loginMutation.isPending : registerMutation.isPending);
+  // eslint-disable-next-line no-nested-ternary
   const submissionIsSuccess = isPlanDetailsMain
     ? createCheckoutIntentMutation.isSuccess
-    : loginMutation.isSuccess;
+    : (isLoginPage ? loginMutation.isSuccess : registerMutation.isSuccess);
+  // eslint-disable-next-line no-nested-ternary
   const submissionIsError = isPlanDetailsMain
     ? createCheckoutIntentMutation.isError
-    : loginMutation.isError;
+    : (isLoginPage ? loginMutation.isError : registerMutation.isError);
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;

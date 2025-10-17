@@ -90,7 +90,6 @@ export default async function validateRegistrationRequest(
 ): Promise<AxiosResponse<RegistrationSuccessResponseSchema>> {
   const requestPayload: RegistrationRequestPayload = snakeCaseObject(requestData);
   const requestConfig = {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
     // Convert response payload (success or error) to a response schema for use by callers.
