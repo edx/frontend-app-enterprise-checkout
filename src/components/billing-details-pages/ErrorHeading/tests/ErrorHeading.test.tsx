@@ -19,12 +19,12 @@ describe('ErrorHeading', () => {
     expect(heading).toHaveClass('text-center', 'font-weight-normal', 'mb-0');
   });
 
-  it('renders the description heading correctly', () => {
+  it('renders the description text styled correctly', () => {
     renderComponent();
-    const subheading = screen.getByRole('heading', { level: 3 });
-    expect(subheading).toBeInTheDocument();
-    expect(subheading).toHaveTextContent(/We're experiencing a brief delay in setting up your edX Teams account/);
-    expect(subheading).toHaveClass('font-weight-light', 'text-center');
+    const descriptionText = screen.getByText(/We're experiencing a brief delay in setting up your edX Teams account/);
+    const container = descriptionText.closest('p');
+    expect(container).toBeInTheDocument();
+    expect(container).toHaveClass('h4', 'font-weight-light', 'text-center');
   });
 
   it('renders the complete description message', () => {
