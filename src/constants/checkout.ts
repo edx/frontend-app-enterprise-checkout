@@ -79,39 +79,36 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({
     .min(1, 'Full name is required')
     .max(255),
   username: z.string().trim()
-    .min(1, 'Username is required')
-    .max(255),
+    .min(2, 'Username must be between 2 and 30 characters long.')
+    .max(30, 'Username must be between 2 and 30 characters long.'),
   password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(255),
+    .min(2, 'This password is too short. It must contain at least 2 characters.')
+    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
   confirmPassword: z.string()
     .min(8, 'Please confirm your password')
-    .max(255),
+    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
   country: z.string().trim()
     .min(1, 'Country is required'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
 }).superRefine(async (data, ctx) => {
-  if (data.password === data.confirmPassword) {
-    const { isValid, errors } = await validateRegistrationFieldsDebounced({
-      email: data.adminEmail,
-      name: data.fullName,
-      username: data.username,
-      password: data.password,
-      country: data.country,
-    });
-
-    if (!isValid) {
-      // Map LMS errors back to Zod issues
-      Object.entries(errors).forEach(([field, message]) => {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message,
-          path: [field === 'root' ? [] : [field]].flat(),
-        });
+  const { isValid, errors } = await validateRegistrationFieldsDebounced({
+    email: data.adminEmail,
+    name: data.fullName,
+    username: data.username,
+    password: data.password,
+    country: data.country,
+  });
+  if (!isValid) {
+    // Map LMS errors back to Zod issues
+    Object.entries(errors).forEach(([field, message]) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+        path: [field === 'root' ? [] : [field]].flat(),
       });
-    }
+    });
   }
 }));
 

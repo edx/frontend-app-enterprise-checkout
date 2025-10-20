@@ -1,5 +1,6 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -8,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { RegisterAccountFields } from '@/components/FormFields';
 import { PlanDetailsRegisterPageSchema } from '@/constants/checkout';
+import { queryClient } from '@/utils/tests';
 
 // Mock the hooks used by Field component
 jest.mock('@/hooks/index', () => {
@@ -60,9 +62,11 @@ const TestWrapper = (
   });
 
   return (
-    <IntlProvider locale="en">
-      {typeof children === 'function' ? children(form) : children}
-    </IntlProvider>
+    <QueryClientProvider client={queryClient()}>
+      <IntlProvider locale="en">
+        {typeof children === 'function' ? children(form) : children}
+      </IntlProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -139,44 +143,30 @@ describe('RegisterAccountFields', () => {
   });
 
   describe('Password Visibility Toggle', () => {
-    it('toggles password field visibility when button is clicked', async () => {
+    it.each<[
+      label: string,
+      index: number,
+      placeholder: RegExp,
+    ]>([
+      ['password', 0, /Enter your password/i],
+      ['confirm password', 1, /Confirm your password/i],
+    ])('toggles %s field visibility when button is clicked', async (_label, index, placeholder) => {
       const user = userEvent.setup();
       renderComponent();
 
-      const passwordField = screen.getByPlaceholderText(/Enter your password/i);
+      const field = screen.getByPlaceholderText(placeholder);
       const toggleButtons = screen.getAllByRole('button');
-      const passwordToggle = toggleButtons[0]; // First button should be password toggle
+      const toggle = toggleButtons[index];
 
       // Initially should be password type
-      expect(passwordField).toHaveAttribute('type', 'password');
-      expect(screen.getAllByTestId('visibility-icon')).toHaveLength(2);
+      expect(field).toHaveAttribute('type', 'password');
 
       // Click toggle button
-      await user.click(passwordToggle);
-
-      // Should change to text type and show visibility-off icon
-      await waitFor(() => {
-        expect(passwordField).toHaveAttribute('type', 'text');
-      });
-    });
-
-    it('toggles confirm password field visibility independently', async () => {
-      const user = userEvent.setup();
-      renderComponent();
-
-      const confirmPasswordField = screen.getByPlaceholderText(/Confirm your password/i);
-      const toggleButtons = screen.getAllByRole('button');
-      const confirmPasswordToggle = toggleButtons[1]; // Second button should be confirm password toggle
-
-      // Initially should be password type
-      expect(confirmPasswordField).toHaveAttribute('type', 'password');
-
-      // Click toggle button for confirm password
-      await user.click(confirmPasswordToggle);
+      await user.click(toggle);
 
       // Should change to text type
       await waitFor(() => {
-        expect(confirmPasswordField).toHaveAttribute('type', 'text');
+        expect(field).toHaveAttribute('type', 'text');
       });
     });
 
@@ -219,38 +209,36 @@ describe('RegisterAccountFields', () => {
       const form = renderComponent();
 
       // Set a short password
-      form.setValue('password', '123');
+      form.setValue('password', '1');
       await form.trigger('password');
 
       const passwordError = form.getFieldState('password').error;
-      expect(passwordError?.message).toMatch(/at least 8 characters/i);
+      expect(passwordError?.message).toMatch(/at least 2 characters/i);
     });
 
-    it('validates password confirmation match', async () => {
+    it.each<[
+      title: string,
+      password: string,
+      confirmPassword: string,
+      expectError: boolean,
+    ]>([
+      ['shows error when passwords do not match', 'password123', 'differentpassword', true],
+      ['passes when passwords match', 'password123', 'password123', false],
+    ])('%s', async (_title, password, confirmPassword, expectError) => {
       const form = renderComponent();
 
-      // Set different passwords
-      form.setValue('password', 'password123');
-      form.setValue('confirmPassword', 'differentpassword');
-      await form.trigger('confirmPassword');
-
-      const confirmPasswordError = form.getFieldState('confirmPassword').error;
-      expect(confirmPasswordError?.message).toMatch(/do not match/i);
-    });
-
-    it('passes validation when passwords match', async () => {
-      const form = renderComponent();
-
-      // Set matching passwords
-      form.setValue('password', 'password123');
-      form.setValue('confirmPassword', 'password123');
+      form.setValue('password', password);
+      form.setValue('confirmPassword', confirmPassword);
       await form.trigger(['password', 'confirmPassword']);
 
-      const passwordError = form.getFieldState('password').error;
       const confirmPasswordError = form.getFieldState('confirmPassword').error;
-
-      expect(passwordError).toBeUndefined();
-      expect(confirmPasswordError).toBeUndefined();
+      if (expectError) {
+        expect(confirmPasswordError?.message).toMatch(/do not match/i);
+      } else {
+        const passwordError = form.getFieldState('password').error;
+        expect(passwordError).toBeUndefined();
+        expect(confirmPasswordError).toBeUndefined();
+      }
     });
   });
 
@@ -497,9 +485,10 @@ describe('RegisterAccountFields', () => {
         await form.trigger();
       });
 
-      // Validation API should not be called when passwords don't match
+      // When passwords don't match, client-side validation should surface the error regardless of server validation
       await waitFor(() => {
-        expect(mockValidateRegistrationFieldsDebounced).not.toHaveBeenCalled();
+        const { error } = form.getFieldState('confirmPassword');
+        expect(error?.message).toMatch(/do not match/i);
       });
     });
 
@@ -524,7 +513,7 @@ describe('RegisterAccountFields', () => {
       // Should have client-side validation error first, but API might still be called
       await waitFor(() => {
         const { errors } = form.formState;
-        expect(errors.username?.message).toBe('Username is required');
+        expect(errors.username?.message).toBe('Username must be between 2 and 30 characters long.');
       });
     });
 

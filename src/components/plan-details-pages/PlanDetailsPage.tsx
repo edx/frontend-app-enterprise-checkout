@@ -18,6 +18,7 @@ import { useFormValidationConstraints } from '@/components/app/data';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
+  useRegisterMutation,
 } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
@@ -51,6 +52,7 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
   ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
@@ -74,6 +76,18 @@ const PlanDetailsPage = () => {
       setError('password', {
         type: 'manual',
         message: errorMessage,
+      });
+    },
+  });
+
+  const registerMutation = useRegisterMutation({
+    onSuccess: () => {
+      navigate(CheckoutPageRoute.PlanDetails);
+    },
+    onError: (errorMessage) => {
+      setError('root.serverError', {
+        type: 'manual',
+        message: errorMessage || 'Registration failed',
       });
     },
   });
@@ -156,9 +170,13 @@ const PlanDetailsPage = () => {
       });
     },
     [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
-      // Placeholder for a future register API call.
-      navigate(CheckoutPageRoute.PlanDetails);
-      return data;
+      registerMutation.mutate({
+        name: data.fullName,
+        email: data.adminEmail,
+        username: data.username,
+        password: data.password,
+        country: data.country,
+      });
     },
   };
 
@@ -168,15 +186,20 @@ const PlanDetailsPage = () => {
 
   // Determine which mutation states to surface to the button
   const isPlanDetailsMain = currentPage === SubmitCallbacks.PlanDetails;
+  const isLoginPage = currentPage === SubmitCallbacks.PlanDetailsLogin;
+  // const isRegisterPage = currentPage === SubmitCallbacks.PlanDetailsRegister;
+  // eslint-disable-next-line no-nested-ternary
   const submissionIsPending = isPlanDetailsMain
     ? createCheckoutIntentMutation.isPending
-    : loginMutation.isPending;
+    : (isLoginPage ? loginMutation.isPending : registerMutation.isPending);
+  // eslint-disable-next-line no-nested-ternary
   const submissionIsSuccess = isPlanDetailsMain
     ? createCheckoutIntentMutation.isSuccess
-    : loginMutation.isSuccess;
+    : (isLoginPage ? loginMutation.isSuccess : registerMutation.isSuccess);
+  // eslint-disable-next-line no-nested-ternary
   const submissionIsError = isPlanDetailsMain
     ? createCheckoutIntentMutation.isError
-    : loginMutation.isError;
+    : (isLoginPage ? loginMutation.isError : registerMutation.isError);
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;

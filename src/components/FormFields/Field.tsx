@@ -110,8 +110,8 @@ export const getTrailingElement = ({ isValid, isInvalid, rightIcon, fieldType }:
   // For other field types, keep the original order: rightIcon first, then validation icon
   return (
     <div className={classNames('d-flex align-items-center', { 'pr-4.5': fieldType === 'select' })} style={{ gap: '8px' }}>
-      {rightIcon}
       {validationIcon}
+      {rightIcon}
     </div>
   );
 };

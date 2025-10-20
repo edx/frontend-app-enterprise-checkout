@@ -1,7 +1,7 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { camelCaseObject, snakeCaseObject } from '@edx/frontend-platform/utils';
-import { debounce, isEqual } from 'lodash-es';
+import { debounce } from 'lodash-es';
 
 import { VALIDATION_DEBOUNCE_MS } from '@/components/app/data/constants';
 
@@ -15,7 +15,7 @@ import type { AxiosResponse } from 'axios';
 
 declare global {
   /**
-   * Data structure for a registration request payload.
+   * Data structure for a registration validation request payload.
    */
   interface RegistrationRequestSchema {
     email: string;
@@ -26,14 +26,7 @@ declare global {
   }
 
   /**
-   * Data structure for a registration response payload.
-   */
-  interface RegistrationSuccessResponseSchema {
-    success: boolean;
-  }
-
-  /**
-   * Data structure for an error response payload.
+   * Data structure for an error response payload (used by create API failures).
    */
   interface RegistrationErrorResponseSchema {
     email?: string[];
@@ -44,15 +37,49 @@ declare global {
     [key: string]: string[] | undefined;
   }
 
-  type RegistrationResponseSchema = RegistrationSuccessResponseSchema | RegistrationErrorResponseSchema;
-
   /**
-   * Snake_cased versions of above schemas for API communication
+   * Snake_cased version of the validation request schema for API communication.
    */
   type RegistrationRequestPayload = Payload<RegistrationRequestSchema>;
-  type RegistrationResponsePayload = Payload<RegistrationResponseSchema>;
-  type RegistrationSuccessResponsePayload = Payload<RegistrationSuccessResponseSchema>;
-  type RegistrationErrorResponsePayload = Payload<RegistrationErrorResponseSchema>;
+
+  /**
+   * API response from LMS registration validation endpoint.
+   * validationDecisions contain empty strings for valid fields, and error messages otherwise.
+   */
+  interface RegistrationValidationDecisionsSchema {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    country: string;
+  }
+
+  interface RegistrationValidationApiResponseSchema {
+    validationDecisions: RegistrationValidationDecisionsSchema;
+    usernameSuggestions?: string[];
+  }
+
+  /**
+   * Account creation (register) request/response schemas.
+   */
+  interface RegistrationCreateRequestSchema {
+    name: string;
+    username: string;
+    password: string;
+    email: string;
+    country: string;
+    honorCode?: boolean;
+  }
+
+  interface RegistrationCreateSuccessResponseSchema {
+    success: boolean;
+  }
+
+  /**
+   * Snake_cased versions of the create schemas for API communication.
+   */
+  type RegistrationCreateRequestPayload = Payload<RegistrationCreateRequestSchema>;
+  type RegistrationCreateSuccessResponsePayload = Payload<RegistrationCreateSuccessResponseSchema>;
 }
 
 /**
@@ -87,25 +114,20 @@ declare global {
  */
 export default async function validateRegistrationRequest(
   requestData: RegistrationRequestSchema,
-): Promise<AxiosResponse<RegistrationSuccessResponseSchema>> {
+): Promise<AxiosResponse<RegistrationValidationApiResponseSchema>> {
   const requestPayload: RegistrationRequestPayload = snakeCaseObject(requestData);
   const requestConfig = {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
-    // Convert response payload (success or error) to a response schema for use by callers.
-    transformResponse: [
-      (data: RegistrationResponsePayload): RegistrationResponseSchema => camelCaseObject(data),
-    ],
   };
-  const response: AxiosResponse<RegistrationSuccessResponseSchema> = (
-    await getAuthenticatedHttpClient().post<RegistrationSuccessResponsePayload>(
+  const response: AxiosResponse<RegistrationValidationApiResponseSchema> = (
+    await getAuthenticatedHttpClient().post(
       `${getConfig().LMS_BASE_URL}/api/user/v1/validation/registration`,
       (new URLSearchParams(requestPayload)).toString(),
       requestConfig,
     )
-  );
-  return response;
+  ) as AxiosResponse<RegistrationValidationApiResponseSchema>;
+  return camelCaseObject(response);
 }
 
 /**
@@ -155,47 +177,36 @@ export async function validateRegistrationFields(
   values: RegistrationRequestSchema,
 ): Promise<{ isValid: boolean; errors: Record<string, string> }> {
   try {
-    await validateRegistrationRequest(values);
-    return { isValid: true, errors: {} };
-  } catch (error: any) {
+    const response = await validateRegistrationRequest(values);
+    const { validationDecisions } = response.data;
+    // Map LMS field names to our form field names
+    const fieldMapping: Record<string, string> = {
+      email: 'adminEmail',
+      name: 'fullName',
+      username: 'username',
+      password: 'password',
+      country: 'country',
+    };
+
     const errors: Record<string, string> = {};
-
-    if (error.response?.data) {
-      const errorData = error.response.data as RegistrationErrorResponseSchema;
-
-      // Map LMS field errors to friendly error messages
-      Object.entries(errorData).forEach(([field, messages]) => {
-        if (messages && messages.length > 0) {
-          // Map LMS field names to our form field names
-          const fieldMapping: Record<string, string> = {
-            email: 'adminEmail',
-            name: 'fullName',
-            username: 'username',
-            password: 'password',
-            country: 'country',
-          };
-
-          const mappedField = fieldMapping[field] || field;
-          const [firstMessage] = messages;
-          errors[mappedField] = firstMessage;
-        }
-      });
-    }
-
-    // If no specific field errors, add a general error
-    if (Object.keys(errors).length === 0) {
-      errors.root = 'Registration validation failed. Please check your information.';
-    }
-
-    return { isValid: false, errors };
+    Object.entries(validationDecisions || {}).forEach(([field, message]) => {
+      if (typeof message === 'string' && message.trim()) {
+        const mappedField = fieldMapping[field] || field;
+        errors[mappedField] = message;
+      }
+    });
+    return { isValid: Object.keys(errors).length === 0, errors };
+  } catch (error) {
+    // Treat HTTP/network/server errors as non-blocking; do not parse validation here.
+    return { isValid: true, errors: {} };
   }
 }
 
 /**
- * Cache for storing previous registration values to enable efficient debouncing.
- * Maps cache keys (JSON stringified values) to registration data for comparison.
+ * Memoization cache storing validation results keyed by serialized form values.
+ * Prevents unnecessary API calls by returning the last known result for the same input.
  */
-const previousRegistrationValues = new Map<string, RegistrationRequestSchema>();
+const registrationValidationResultCache = new Map<string, { isValid: boolean; errors: Record<string, string> }>();
 
 /**
  * Singleton storage for the debounced registration validator function.
@@ -254,7 +265,8 @@ function getRegistrationDebouncer() {
           const result = await validateRegistrationFields(values);
           resolve(result);
         } catch (error) {
-          resolve({ isValid: false, errors: { root: 'Validation failed due to network error' } });
+          // Network/server issues: do not block user input; treat as temporarily valid
+          resolve({ isValid: true, errors: {} });
         }
       },
       VALIDATION_DEBOUNCE_MS,
@@ -270,11 +282,10 @@ function getRegistrationDebouncer() {
  * validateRegistrationFields with performance enhancements. The function:
  * - Uses a debounced function from getRegistrationDebouncer so that multiple rapid
  *   calls collapse into one API request per configured wait time (500ms)
- * - Skips validation entirely if the values have not changed since the last check
- *   by comparing against cached previous values using deep equality
+ * - Memoizes results for previously seen values and returns the last known result
+ *   for identical inputs without calling the API again
  * - Maintains the same interface as validateRegistrationFields for easy replacement
  * - Creates cache keys based on JSON serialization of all form values
- * - Returns early with valid state when values are unchanged to improve performance
  *
  * @param values - The registration form data containing all required user information
  * @returns A Promise that resolves to validation results containing:
@@ -327,18 +338,55 @@ export async function validateRegistrationFieldsDebounced(
   // Create a cache key based on all values
   const cacheKey = JSON.stringify(values);
 
-  // Check if values have changed since last validation
-  if (isEqual(previousRegistrationValues.get(cacheKey), values)) {
-    // Return cached result as valid (assuming no changes means previously valid state)
-    return { isValid: true, errors: {} };
+  // If we have a memoized result for these values, return it to avoid an API call
+  const cached = registrationValidationResultCache.get(cacheKey);
+  if (cached) {
+    return cached;
   }
 
-  // Store current values for next comparison
-  previousRegistrationValues.set(cacheKey, values);
-
-  // Return a promise that will be resolved by the debounced function
+  // Otherwise, debounce the validation request and memoize the result when it resolves
   return new Promise((resolve) => {
     const debounced = getRegistrationDebouncer();
-    debounced(values, resolve);
+    debounced(values, (result) => {
+      registrationValidationResultCache.set(cacheKey, result);
+      resolve(result);
+    });
   });
+}
+
+/**
+ * Performs registration by calling the edx-platform registration endpoint.
+ * Mirrors conventions used in services/login.ts.
+ *
+ * Note: The LMS registration endpoint expects form-urlencoded payload
+ * and is a public endpoint (no JWT refresh).
+ *
+ * @throws {AxiosError<RegistrationErrorResponseSchema>}
+ */
+export async function registerRequest(
+  requestData: RegistrationCreateRequestSchema,
+): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema>> {
+  // Ensure honor_code is always sent as true by default
+  const requestPayload: RegistrationCreateRequestPayload = snakeCaseObject({
+    ...requestData,
+    honorCode: true,
+  });
+  const requestConfig = {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
+    isPublic: true,
+  } as const;
+  const formParams = new URLSearchParams();
+  Object.entries(requestPayload as Record<string, unknown>).forEach(([key, value]) => {
+    formParams.append(key, String(value));
+  });
+
+  const response: AxiosResponse<RegistrationCreateSuccessResponseSchema> = (
+    await getAuthenticatedHttpClient().post<RegistrationCreateSuccessResponsePayload>(
+      `${getConfig().LMS_BASE_URL}/api/user/v2/account/registration/`,
+      formParams.toString(),
+      requestConfig,
+    )
+  );
+  return camelCaseObject(response);
 }
