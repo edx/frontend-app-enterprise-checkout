@@ -7,7 +7,10 @@ import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunction, redirect } from 'react-router-dom';
 
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import { determineExistingCheckoutIntentState, populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
+import {
+  determineExistingCheckoutIntentState,
+  populateInitialApplicationState,
+} from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute } from '@/constants/checkout';
 import { extractPriceId } from '@/utils/checkout';
 
@@ -59,13 +62,10 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       CheckoutPageRoute.AccountDetails,
       CheckoutPageRoute.BillingDetailsSuccess,
     ]);
+
     // Unauthenticated user → Plan Details
-    if (!authenticatedUser) {
-      if (protectedPaths.has(currentPath)) {
-        return redirectOrNull(CheckoutPageRoute.PlanDetails);
-      }
-      // For unauthenticated users on non-protected pages (e.g., Plan Details), do nothing.
-      return null;
+    if (protectedPaths.has(currentPath)) {
+      return redirectOrNull(CheckoutPageRoute.PlanDetails);
     }
 
     const { checkoutIntent, pricing } = contextMetadata;
@@ -82,6 +82,10 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       stripePriceId,
       authenticatedUser,
     });
+
+    if (!authenticatedUser) {
+      return null;
+    }
 
     // Successful intent → Success page
     if (existingSuccessfulCheckoutIntent) {

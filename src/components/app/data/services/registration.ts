@@ -1,7 +1,7 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { camelCaseObject, snakeCaseObject } from '@edx/frontend-platform/utils';
-import { debounce, isEqual } from 'lodash-es';
+import { debounce } from 'lodash-es';
 
 import { VALIDATION_DEBOUNCE_MS } from '@/components/app/data/constants';
 
@@ -119,19 +119,15 @@ export default async function validateRegistrationRequest(
   const requestConfig = {
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
-    // Convert response payload to camelCase for use by callers.
-    transformResponse: [
-      (data: any): any => camelCaseObject(data),
-    ],
   };
   const response: AxiosResponse<RegistrationValidationApiResponseSchema> = (
-    await getAuthenticatedHttpClient().post<unknown>(
+    await getAuthenticatedHttpClient().post(
       `${getConfig().LMS_BASE_URL}/api/user/v1/validation/registration`,
       (new URLSearchParams(requestPayload)).toString(),
       requestConfig,
     )
   ) as AxiosResponse<RegistrationValidationApiResponseSchema>;
-  return response;
+  return camelCaseObject(response);
 }
 
 /**
@@ -183,7 +179,6 @@ export async function validateRegistrationFields(
   try {
     const response = await validateRegistrationRequest(values);
     const { validationDecisions } = response.data;
-
     // Map LMS field names to our form field names
     const fieldMapping: Record<string, string> = {
       email: 'adminEmail',
@@ -200,7 +195,6 @@ export async function validateRegistrationFields(
         errors[mappedField] = message;
       }
     });
-
     return { isValid: Object.keys(errors).length === 0, errors };
   } catch (error) {
     // Treat HTTP/network/server errors as non-blocking; do not parse validation here.
@@ -209,10 +203,10 @@ export async function validateRegistrationFields(
 }
 
 /**
- * Cache for storing previous registration values to enable efficient debouncing.
- * Maps cache keys (JSON stringified values) to registration data for comparison.
+ * Memoization cache storing validation results keyed by serialized form values.
+ * Prevents unnecessary API calls by returning the last known result for the same input.
  */
-const previousRegistrationValues = new Map<string, RegistrationRequestSchema>();
+const registrationValidationResultCache = new Map<string, { isValid: boolean; errors: Record<string, string> }>();
 
 /**
  * Singleton storage for the debounced registration validator function.
@@ -288,11 +282,10 @@ function getRegistrationDebouncer() {
  * validateRegistrationFields with performance enhancements. The function:
  * - Uses a debounced function from getRegistrationDebouncer so that multiple rapid
  *   calls collapse into one API request per configured wait time (500ms)
- * - Skips validation entirely if the values have not changed since the last check
- *   by comparing against cached previous values using deep equality
+ * - Memoizes results for previously seen values and returns the last known result
+ *   for identical inputs without calling the API again
  * - Maintains the same interface as validateRegistrationFields for easy replacement
  * - Creates cache keys based on JSON serialization of all form values
- * - Returns early with valid state when values are unchanged to improve performance
  *
  * @param values - The registration form data containing all required user information
  * @returns A Promise that resolves to validation results containing:
@@ -345,19 +338,19 @@ export async function validateRegistrationFieldsDebounced(
   // Create a cache key based on all values
   const cacheKey = JSON.stringify(values);
 
-  // Check if values have changed since last validation
-  if (isEqual(previousRegistrationValues.get(cacheKey), values)) {
-    // Return cached result as valid (assuming no changes means previously valid state)
-    return { isValid: true, errors: {} };
+  // If we have a memoized result for these values, return it to avoid an API call
+  const cached = registrationValidationResultCache.get(cacheKey);
+  if (cached) {
+    return cached;
   }
 
-  // Store current values for next comparison
-  previousRegistrationValues.set(cacheKey, values);
-
-  // Return a promise that will be resolved by the debounced function
+  // Otherwise, debounce the validation request and memoize the result when it resolves
   return new Promise((resolve) => {
     const debounced = getRegistrationDebouncer();
-    debounced(values, resolve);
+    debounced(values, (result) => {
+      registrationValidationResultCache.set(cacheKey, result);
+      resolve(result);
+    });
   });
 }
 

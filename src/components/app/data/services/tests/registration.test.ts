@@ -139,5 +139,40 @@ describe('registration.ts validation', () => {
         upperMarginMs: 20,
       });
     });
+
+    it('memoizes results for identical values and avoids additional API calls', async () => {
+      const values = makeValues({ username: 'dupe' });
+
+      // First response: return an error for username to prove we return the same later
+      mockPost.mockResolvedValue({
+        data: {
+          validationDecisions: {
+            name: '',
+            username: 'Username already taken',
+            email: '',
+            password: '',
+            country: '',
+          },
+        },
+      });
+
+      // First call triggers HTTP and caches the result (use assertDebounce to drive timers)
+      await assertDebounce({
+        baseDelayMs: VALIDATION_DEBOUNCE_MS,
+        call: () => validateRegistrationFieldsDebounced(values),
+        getInvocationCount: () => mockPost.mock.calls.length,
+        upperMarginMs: 20,
+      });
+
+      // Reset counts and change mock to throw if called again (it shouldn't be)
+      mockPost.mockClear();
+      (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({ post: mockPost });
+
+      // Second call with identical values should return cached result immediately and not call HTTP
+      const secondResult = await validateRegistrationFieldsDebounced(values);
+      expect(secondResult.isValid).toBe(false);
+      expect(secondResult.errors).toEqual({ username: 'Username already taken' });
+      expect(mockPost).not.toHaveBeenCalled();
+    });
   });
 });
