@@ -1,6 +1,7 @@
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { CheckCircle, Error as ErrorIcon } from '@openedx/paragon/icons';
+import classNames from 'classnames';
 import React, {
   forwardRef,
   ReactNode,
@@ -79,9 +80,10 @@ interface TrailingElementProps {
   isValid: boolean;
   isInvalid: boolean;
   rightIcon?: ReactNode;
+  fieldType?: FieldType;
 }
 
-export const getTrailingElement = ({ isValid, isInvalid, rightIcon }: TrailingElementProps) => {
+export const getTrailingElement = ({ isValid, isInvalid, rightIcon, fieldType }: TrailingElementProps) => {
   let validationIcon: ReactNode | null = null;
   if (isValid) {
     validationIcon = <CheckCircle className="text-success" />;
@@ -89,21 +91,27 @@ export const getTrailingElement = ({ isValid, isInvalid, rightIcon }: TrailingEl
     validationIcon = <ErrorIcon className="text-danger" />;
   }
 
+  // If there are no icons at all, return null
+  if (!rightIcon && !validationIcon) {
+    return null;
+  }
+
   // If there's no rightIcon, return just the validation icon
   if (!rightIcon) {
-    return validationIcon;
+    return <div className={classNames({ 'pr-4.5': fieldType === 'select' })}>{validationIcon}</div>;
   }
 
   // If there's a rightIcon but no validation icon, return just the rightIcon
   if (!validationIcon) {
-    return rightIcon;
+    return <div className={classNames({ 'pr-4.5': fieldType === 'select' })}>{rightIcon}</div>;
   }
+  // For select fields, put validation icon to the left of the dropdown icon to avoid overlap
 
-  // If both icons exist, return them as an array with rightIcon first, then validation icon
+  // For other field types, keep the original order: rightIcon first, then validation icon
   return (
-    <div className="d-flex align-items-center" style={{ gap: '8px' }}>
-      {rightIcon}
+    <div className={classNames('d-flex align-items-center', { 'pr-4.5': fieldType === 'select' })} style={{ gap: '8px' }}>
       {validationIcon}
+      {rightIcon}
     </div>
   );
 };
@@ -247,6 +255,7 @@ const FieldBase = <T extends FieldValues>(
     isValid,
     isInvalid,
     rightIcon,
+    fieldType: type,
   });
   const errorMessage = form.formState.errors[name]?.message as string | undefined;
 

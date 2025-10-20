@@ -1,6 +1,7 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
+import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { serverValidationError } from '@/utils/common';
 
@@ -69,8 +70,47 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
     .max(255, 'Maximum 255 characters'),
 }));
 
-// TODO: complete as part of ticket to do register page.
-export const PlanDetailsRegisterPageSchema = () => (z.object({}));
+export const PlanDetailsRegisterPageSchema = () => (z.object({
+  adminEmail: z.string().trim()
+    .email()
+    .min(1, 'Email is required')
+    .max(254),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255),
+  username: z.string().trim()
+    .min(2, 'Username must be between 2 and 30 characters long.')
+    .max(30, 'Username must be between 2 and 30 characters long.'),
+  password: z.string()
+    .min(2, 'This password is too short. It must contain at least 2 characters.')
+    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
+  confirmPassword: z.string()
+    .min(8, 'Please confirm your password')
+    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
+  country: z.string().trim()
+    .min(1, 'Country is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+}).superRefine(async (data, ctx) => {
+  const { isValid, errors } = await validateRegistrationFieldsDebounced({
+    email: data.adminEmail,
+    name: data.fullName,
+    username: data.username,
+    password: data.password,
+    country: data.country,
+  });
+  if (!isValid) {
+    // Map LMS errors back to Zod issues
+    Object.entries(errors).forEach(([field, message]) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+        path: field === 'root' ? [] : [field],
+      });
+    });
+  }
+}));
 
 export const PlanDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,

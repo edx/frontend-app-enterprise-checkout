@@ -194,7 +194,7 @@ describe('utils.ts', () => {
       );
     });
 
-    it('defaults quantity to 0 when neither form data nor checkoutIntent have quantity', () => {
+    it('defaults quantity to null when neither form data nor checkoutIntent have quantity', () => {
       const initialState = {
         formData: {
           [DataStoreKey.PlanDetails]: {}, // no quantity in existing form data
@@ -235,7 +235,7 @@ describe('utils.ts', () => {
 
       expect(computed.formData[DataStoreKey.PlanDetails]).toEqual(
         expect.objectContaining({
-          quantity: 0, // should default to 0
+          quantity: null,
           fullName: 'Test User',
           adminEmail: 'user@example.com',
           country: 'US',

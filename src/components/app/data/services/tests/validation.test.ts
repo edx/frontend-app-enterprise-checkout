@@ -472,3 +472,49 @@ describe('validateFieldDetailed', () => {
     });
   });
 });
+
+describe('validateFieldDetailed memoization', () => {
+  it('memoizes results for identical field/value/extras and avoids additional API calls', async () => {
+    // Configure base URL and HTTP mock
+    (getConfig as jest.Mock).mockReturnValue({ ENTERPRISE_ACCESS_BASE_URL: 'https://example.test' });
+
+    const mockPost = jest.fn().mockResolvedValue({
+      data: {
+        validation_decisions: {
+          company_name: {
+            error_code: 'required_field',
+            developer_message: 'This field is required.',
+          },
+        },
+        user_authn: { user_exists_for_email: true },
+      },
+    });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({ post: mockPost });
+
+    // First call: drive debounce and cache the non-valid result
+    let firstResult: { isValid: boolean; validationDecisions: ValidationResponse['validationDecisions'] | null } | undefined;
+    await assertDebounce({
+      baseDelayMs: VALIDATION_DEBOUNCE_MS,
+      call: async () => {
+        const r = await validateFieldDetailed('companyName', '');
+        firstResult = r;
+        return r;
+      },
+      getInvocationCount: () => mockPost.mock.calls.length,
+      upperMarginMs: 20,
+    });
+
+    expect(firstResult).toBeDefined();
+    expect(firstResult!.isValid).toBe(false);
+    expect(firstResult!.validationDecisions?.companyName).toBeDefined();
+
+    // Second call with identical inputs should hit the memoization cache and not call HTTP
+    mockPost.mockClear();
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({ post: mockPost });
+
+    const secondResult = await validateFieldDetailed('companyName', '');
+    expect(secondResult.isValid).toBe(false);
+    expect(secondResult.validationDecisions?.companyName).toBeDefined();
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+});

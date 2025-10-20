@@ -18,6 +18,7 @@ import { useFormValidationConstraints } from '@/components/app/data';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
+  useRegisterMutation,
 } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
@@ -51,6 +52,7 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
   ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
@@ -74,6 +76,18 @@ const PlanDetailsPage = () => {
       setError('password', {
         type: 'manual',
         message: errorMessage,
+      });
+    },
+  });
+
+  const registerMutation = useRegisterMutation({
+    onSuccess: () => {
+      navigate(CheckoutPageRoute.PlanDetails);
+    },
+    onError: (errorMessage) => {
+      setError('root.serverError', {
+        type: 'manual',
+        message: errorMessage || 'Registration failed',
       });
     },
   });
@@ -156,9 +170,13 @@ const PlanDetailsPage = () => {
       });
     },
     [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
-      // Placeholder for a future register API call.
-      navigate(CheckoutPageRoute.PlanDetails);
-      return data;
+      registerMutation.mutate({
+        name: data.fullName,
+        email: data.adminEmail,
+        username: data.username,
+        password: data.password,
+        country: data.country,
+      });
     },
   };
 
@@ -167,16 +185,27 @@ const PlanDetailsPage = () => {
   ) => onSubmitCallbacks[currentPage!](data);
 
   // Determine which mutation states to surface to the button
-  const isPlanDetailsMain = currentPage === SubmitCallbacks.PlanDetails;
-  const submissionIsPending = isPlanDetailsMain
-    ? createCheckoutIntentMutation.isPending
-    : loginMutation.isPending;
-  const submissionIsSuccess = isPlanDetailsMain
-    ? createCheckoutIntentMutation.isSuccess
-    : loginMutation.isSuccess;
-  const submissionIsError = isPlanDetailsMain
-    ? createCheckoutIntentMutation.isError
-    : loginMutation.isError;
+  const activeMutation = useMemo(() => {
+    switch (currentPage) {
+      case SubmitCallbacks.PlanDetails:
+        return createCheckoutIntentMutation;
+      case SubmitCallbacks.PlanDetailsLogin:
+        return loginMutation;
+      case SubmitCallbacks.PlanDetailsRegister:
+        return registerMutation;
+      default:
+        // Safe fallback if currentPage is undefined or unexpected.
+        return { isPending: false, isSuccess: false, isError: false } as {
+          isPending: boolean; isSuccess: boolean; isError: boolean;
+        };
+    }
+  }, [currentPage, createCheckoutIntentMutation, loginMutation, registerMutation]);
+
+  const {
+    isPending: submissionIsPending,
+    isSuccess: submissionIsSuccess,
+    isError: submissionIsError,
+  } = activeMutation;
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;
