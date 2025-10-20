@@ -58,17 +58,18 @@ export default async function registerRequest(
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
-    // Convert response payload (success or error) to a response schema for use by callers.
-    transformResponse: [
-      (data: any): any => camelCaseObject(data),
-    ],
   };
+  const formParams = new URLSearchParams();
+  Object.entries(requestPayload as Record<string, unknown>).forEach(([key, value]) => {
+    formParams.append(key, String(value));
+  });
+
   const response: AxiosResponse<RegistrationCreateSuccessResponseSchema> = (
     await getAuthenticatedHttpClient().post<RegistrationCreateSuccessResponsePayload>(
       `${getConfig().LMS_BASE_URL}/api/user/v2/account/registration/`,
-      (new URLSearchParams(requestPayload)).toString(),
+      formParams.toString(),
       requestConfig,
     )
   );
-  return response;
+  return camelCaseObject(response);
 }

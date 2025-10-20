@@ -1,4 +1,4 @@
-import { FormattedMessage, useIntl, getCountryMessages } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Stack } from '@openedx/paragon';
 import { Lock, Visibility, VisibilityOff } from '@openedx/paragon/icons';
 import { useState } from 'react';
@@ -205,15 +205,7 @@ export const RegisterAccountCountry = ({
   form: UseFormReturn<PlanDetailsRegisterPageData>;
 }) => {
   const intl = useIntl();
-  let countryOptions;
-  try {
-    countryOptions = useCountryOptions();
-  } catch (e) {
-    const allCountries = getCountryMessages(intl.locale);
-    countryOptions = Object.keys(allCountries)
-      .map((code) => ({ value: code, label: allCountries[code] as string }))
-      .sort((a, b) => a.label.localeCompare(b.label, intl.locale));
-  }
+  const countryOptions = useCountryOptions();
   return (
     <Field
       form={form}

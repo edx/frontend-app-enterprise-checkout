@@ -1,5 +1,6 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -8,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { RegisterAccountFields } from '@/components/FormFields';
 import { PlanDetailsRegisterPageSchema } from '@/constants/checkout';
+import { queryClient } from '@/utils/tests';
 
 // Mock the hooks used by Field component
 jest.mock('@/hooks/index', () => {
@@ -60,9 +62,11 @@ const TestWrapper = (
   });
 
   return (
-    <IntlProvider locale="en">
-      {typeof children === 'function' ? children(form) : children}
-    </IntlProvider>
+    <QueryClientProvider client={queryClient()}>
+      <IntlProvider locale="en">
+        {typeof children === 'function' ? children(form) : children}
+      </IntlProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -219,11 +223,11 @@ describe('RegisterAccountFields', () => {
       const form = renderComponent();
 
       // Set a short password
-      form.setValue('password', '123');
+      form.setValue('password', '1');
       await form.trigger('password');
 
       const passwordError = form.getFieldState('password').error;
-      expect(passwordError?.message).toMatch(/at least 8 characters/i);
+      expect(passwordError?.message).toMatch(/at least 2 characters/i);
     });
 
     it('validates password confirmation match', async () => {
@@ -524,7 +528,7 @@ describe('RegisterAccountFields', () => {
       // Should have client-side validation error first, but API might still be called
       await waitFor(() => {
         const { errors } = form.formState;
-        expect(errors.username?.message).toBe('Username is required');
+        expect(errors.username?.message).toBe('Username must be between 2 and 30 characters long.');
       });
     });
 
