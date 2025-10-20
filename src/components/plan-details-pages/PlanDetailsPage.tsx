@@ -185,21 +185,27 @@ const PlanDetailsPage = () => {
   ) => onSubmitCallbacks[currentPage!](data);
 
   // Determine which mutation states to surface to the button
-  const isPlanDetailsMain = currentPage === SubmitCallbacks.PlanDetails;
-  const isLoginPage = currentPage === SubmitCallbacks.PlanDetailsLogin;
-  // const isRegisterPage = currentPage === SubmitCallbacks.PlanDetailsRegister;
-  // eslint-disable-next-line no-nested-ternary
-  const submissionIsPending = isPlanDetailsMain
-    ? createCheckoutIntentMutation.isPending
-    : (isLoginPage ? loginMutation.isPending : registerMutation.isPending);
-  // eslint-disable-next-line no-nested-ternary
-  const submissionIsSuccess = isPlanDetailsMain
-    ? createCheckoutIntentMutation.isSuccess
-    : (isLoginPage ? loginMutation.isSuccess : registerMutation.isSuccess);
-  // eslint-disable-next-line no-nested-ternary
-  const submissionIsError = isPlanDetailsMain
-    ? createCheckoutIntentMutation.isError
-    : (isLoginPage ? loginMutation.isError : registerMutation.isError);
+  const activeMutation = useMemo(() => {
+    switch (currentPage) {
+      case SubmitCallbacks.PlanDetails:
+        return createCheckoutIntentMutation;
+      case SubmitCallbacks.PlanDetailsLogin:
+        return loginMutation;
+      case SubmitCallbacks.PlanDetailsRegister:
+        return registerMutation;
+      default:
+        // Safe fallback if currentPage is undefined or unexpected.
+        return { isPending: false, isSuccess: false, isError: false } as {
+          isPending: boolean; isSuccess: boolean; isError: boolean;
+        };
+    }
+  }, [currentPage, createCheckoutIntentMutation, loginMutation, registerMutation]);
+
+  const {
+    isPending: submissionIsPending,
+    isSuccess: submissionIsSuccess,
+    isError: submissionIsError,
+  } = activeMutation;
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;
