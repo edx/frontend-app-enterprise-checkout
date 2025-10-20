@@ -361,7 +361,6 @@ export async function validateRegistrationFieldsDebounced(
   });
 }
 
-
 /**
  * Performs registration by calling the edx-platform registration endpoint.
  * Mirrors conventions used in services/login.ts.

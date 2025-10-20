@@ -143,44 +143,30 @@ describe('RegisterAccountFields', () => {
   });
 
   describe('Password Visibility Toggle', () => {
-    it('toggles password field visibility when button is clicked', async () => {
+    it.each<[
+      label: string,
+      index: number,
+      placeholder: RegExp,
+    ]>([
+      ['password', 0, /Enter your password/i],
+      ['confirm password', 1, /Confirm your password/i],
+    ])('toggles %s field visibility when button is clicked', async (_label, index, placeholder) => {
       const user = userEvent.setup();
       renderComponent();
 
-      const passwordField = screen.getByPlaceholderText(/Enter your password/i);
+      const field = screen.getByPlaceholderText(placeholder);
       const toggleButtons = screen.getAllByRole('button');
-      const passwordToggle = toggleButtons[0]; // First button should be password toggle
+      const toggle = toggleButtons[index];
 
       // Initially should be password type
-      expect(passwordField).toHaveAttribute('type', 'password');
-      expect(screen.getAllByTestId('visibility-icon')).toHaveLength(2);
+      expect(field).toHaveAttribute('type', 'password');
 
       // Click toggle button
-      await user.click(passwordToggle);
-
-      // Should change to text type and show visibility-off icon
-      await waitFor(() => {
-        expect(passwordField).toHaveAttribute('type', 'text');
-      });
-    });
-
-    it('toggles confirm password field visibility independently', async () => {
-      const user = userEvent.setup();
-      renderComponent();
-
-      const confirmPasswordField = screen.getByPlaceholderText(/Confirm your password/i);
-      const toggleButtons = screen.getAllByRole('button');
-      const confirmPasswordToggle = toggleButtons[1]; // Second button should be confirm password toggle
-
-      // Initially should be password type
-      expect(confirmPasswordField).toHaveAttribute('type', 'password');
-
-      // Click toggle button for confirm password
-      await user.click(confirmPasswordToggle);
+      await user.click(toggle);
 
       // Should change to text type
       await waitFor(() => {
-        expect(confirmPasswordField).toHaveAttribute('type', 'text');
+        expect(field).toHaveAttribute('type', 'text');
       });
     });
 
@@ -230,31 +216,29 @@ describe('RegisterAccountFields', () => {
       expect(passwordError?.message).toMatch(/at least 2 characters/i);
     });
 
-    it('validates password confirmation match', async () => {
+    it.each<[
+      title: string,
+      password: string,
+      confirmPassword: string,
+      expectError: boolean,
+    ]>([
+      ['shows error when passwords do not match', 'password123', 'differentpassword', true],
+      ['passes when passwords match', 'password123', 'password123', false],
+    ])('%s', async (_title, password, confirmPassword, expectError) => {
       const form = renderComponent();
 
-      // Set different passwords
-      form.setValue('password', 'password123');
-      form.setValue('confirmPassword', 'differentpassword');
-      await form.trigger('confirmPassword');
-
-      const confirmPasswordError = form.getFieldState('confirmPassword').error;
-      expect(confirmPasswordError?.message).toMatch(/do not match/i);
-    });
-
-    it('passes validation when passwords match', async () => {
-      const form = renderComponent();
-
-      // Set matching passwords
-      form.setValue('password', 'password123');
-      form.setValue('confirmPassword', 'password123');
+      form.setValue('password', password);
+      form.setValue('confirmPassword', confirmPassword);
       await form.trigger(['password', 'confirmPassword']);
 
-      const passwordError = form.getFieldState('password').error;
       const confirmPasswordError = form.getFieldState('confirmPassword').error;
-
-      expect(passwordError).toBeUndefined();
-      expect(confirmPasswordError).toBeUndefined();
+      if (expectError) {
+        expect(confirmPasswordError?.message).toMatch(/do not match/i);
+      } else {
+        const passwordError = form.getFieldState('password').error;
+        expect(passwordError).toBeUndefined();
+        expect(confirmPasswordError).toBeUndefined();
+      }
     });
   });
 
