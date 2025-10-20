@@ -158,7 +158,6 @@ export async function validateRegistrationFields(
     return { isValid: true, errors: {} };
   } catch (error: any) {
     const errors: Record<string, string> = {};
-
     if (error.response?.data) {
       const errorData = error.response.data as RegistrationErrorResponseSchema;
 
