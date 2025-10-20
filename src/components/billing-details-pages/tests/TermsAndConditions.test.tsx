@@ -21,6 +21,13 @@ jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn().mockReturnValue({
+    ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL: 'https://example.com/product-terms',
+    ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL: 'https://example.com/sales-terms',
+  }),
+}));
+
 const TestWrapper: React.FC = () => {
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
@@ -74,6 +81,17 @@ describe('TermsAndConditions', () => {
     expect(checkbox1).not.toBeChecked();
     expect(checkbox2).not.toBeChecked();
     expect(checkbox3).not.toBeChecked();
+  });
+
+  it('verifies links to term are present', async () => {
+    renderComponent();
+
+    const links = document.querySelectorAll('a');
+    expect(links.length).toEqual(2);
+    const [link1, link2] = links;
+
+    expect(link1.getAttribute('href')).toEqual('https://example.com/product-terms');
+    expect(link2.getAttribute('href')).toEqual('https://example.com/sales-terms');
   });
 
   it('checks the checkbox when clicked', async () => {
