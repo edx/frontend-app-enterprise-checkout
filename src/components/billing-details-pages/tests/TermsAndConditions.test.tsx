@@ -84,7 +84,6 @@ describe('TermsAndConditions', () => {
   });
 
   it('verifies links to term are present', async () => {
-    // const user = userEvent.setup();
     renderComponent();
 
     const links = document.querySelectorAll('a');

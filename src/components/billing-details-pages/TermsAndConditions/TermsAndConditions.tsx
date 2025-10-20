@@ -6,13 +6,6 @@ import TermsAndConditionsCheckboxes from '@/components/FormFields/TermsAndCondit
 
 import type { UseFormReturn } from 'react-hook-form';
 
-jest.mock('@edx/frontend-platform/config', () => ({
-  getConfig: jest.fn().mockReturnValue({
-    TERMS_OF_SERVICE_URL: 'https://example.com/terms',
-    PRIVACY_POLICY_URL: 'https://example.com/privacy',
-  }),
-}));
-
 interface TermsAndConditionsProps {
   form: UseFormReturn<BillingDetailsData>;
 }
