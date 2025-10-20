@@ -83,29 +83,11 @@ const PlanDetailsPage = () => {
     onSuccess: () => {
       navigate(CheckoutPageRoute.PlanDetails);
     },
-    onError: (errorMessage, fieldErrors) => {
-      // Map API field errors back to our form field names
-      if (fieldErrors?.email) {
-        setError('adminEmail', { type: 'manual', message: fieldErrors.email });
-      }
-      if (fieldErrors?.name) {
-        setError('fullName', { type: 'manual', message: fieldErrors.name });
-      }
-      if (fieldErrors?.username) {
-        setError('username', { type: 'manual', message: fieldErrors.username });
-      }
-      if (fieldErrors?.password) {
-        setError('password', { type: 'manual', message: fieldErrors.password });
-      }
-      if (fieldErrors?.country) {
-        setError('country', { type: 'manual', message: fieldErrors.country });
-      }
-      if (!fieldErrors || Object.keys(fieldErrors).length === 0) {
-        setError('root.serverError', {
-          type: 'manual',
-          message: errorMessage || 'Registration failed',
-        });
-      }
+    onError: (errorMessage) => {
+      setError('root.serverError', {
+        type: 'manual',
+        message: errorMessage || 'Registration failed',
+      });
     },
   });
 
