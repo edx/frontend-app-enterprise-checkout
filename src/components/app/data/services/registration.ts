@@ -92,10 +92,12 @@ declare global {
  * - Transforms API responses back to camelCase for client use
  * - Uses form-encoded data format as required by the LMS API
  * - Bypasses JWT token refresh since this is a public endpoint
+ * - Does not throw for field validation failures; instead, the API returns
+ *   messages in `validation_decisions` (empty string means the field passed)
  *
  * @param requestData - The registration form data to validate containing user information
  * @returns A promise that resolves to an AxiosResponse with validation results
- * @throws {AxiosError<RegistrationErrorResponseSchema>} When validation fails or API errors occur
+ * @throws {AxiosError<RegistrationErrorResponseSchema>} For HTTP/network/server errors while calling the API
  *
  * @example
  * // Validate registration data
@@ -107,9 +109,11 @@ declare global {
  *     password: 'securePassword123',
  *     country: 'US'
  *   });
- *   console.log('Validation successful:', result.data);
+ *   // Validation errors (if any) are returned in result.data.validationDecisions
+ *   console.log('Validation request resolved:', result.data);
  * } catch (error) {
- *   console.error('Validation failed:', error.response.data);
+ *   // Only network/server failures reach here
+ *   console.error('Validation request failed:', (error as any)?.response?.data ?? error);
  * }
  */
 export default async function validateRegistrationRequest(
@@ -117,6 +121,7 @@ export default async function validateRegistrationRequest(
 ): Promise<AxiosResponse<RegistrationValidationApiResponseSchema>> {
   const requestPayload: RegistrationRequestPayload = snakeCaseObject(requestData);
   const requestConfig = {
+    headers: { 'Content-type': 'application/x-www-form-urlencoded' },
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
   };
@@ -136,10 +141,13 @@ export default async function validateRegistrationRequest(
  * This function acts as a wrapper around validateRegistrationRequest to provide
  * a simplified interface for form validation. The function:
  * - Calls the LMS registration validation API through validateRegistrationRequest
+ * - Interprets the API's `validation_decisions` contract where an empty string
+ *   means the field passed, and any non-empty string is an error message
  * - Transforms LMS field names to match frontend form field names
- * - Extracts the first error message for each field to avoid message arrays
+ *   (email → adminEmail, name → fullName, etc.)
  * - Returns a consistent validation result structure for form integration
- * - Provides fallback error handling for network or unexpected errors
+ * - Treats HTTP/network/server errors as non-blocking and returns a safe default
+ *   of `{ isValid: true, errors: {} }` without throwing
  *
  * @param values - The registration form data containing all required user information
  * @returns A promise that resolves to validation results containing:
@@ -164,14 +172,9 @@ export default async function validateRegistrationRequest(
  * }
  *
  * @example
- * // Handle network errors gracefully
- * try {
- *   const result = await validateRegistrationFields(formData);
- *   // Process result...
- * } catch (error) {
- *   // This function handles errors internally and returns them in the result
- *   console.log('Validation completed with errors:', result.errors);
- * }
+ * // Network/server errors are handled internally and do not throw
+ * const { isValid, errors } = await validateRegistrationFields(formData);
+ * // If the request failed, this will fall back to: isValid === true and errors === {}
  */
 export async function validateRegistrationFields(
   values: RegistrationRequestSchema,
@@ -221,7 +224,8 @@ let debouncedRegistrationValidator: ReturnType<typeof debounce> | null = null;
  * the validateRegistrationFields function. The returned debounced function will:
  * - Call the validateRegistrationFields function with debouncing applied
  * - Debounce calls so rapid changes only trigger validation once per configured wait time (500ms)
- * - Handle errors gracefully by returning a fallback error result
+ * - Handle errors gracefully by returning a fallback result of `{ isValid: true, errors: {} }`
+ *   when a network/server error occurs
  * - Use a promise-based callback pattern for async resolution
  * - Maintain singleton behavior by caching the debounced function instance
  *
@@ -358,10 +362,13 @@ export async function validateRegistrationFieldsDebounced(
  * Performs registration by calling the edx-platform registration endpoint.
  * Mirrors conventions used in services/login.ts.
  *
- * Note: The LMS registration endpoint expects form-urlencoded payload
- * and is a public endpoint (no JWT refresh).
+ * Behavior details:
+ * - Sends an application/x-www-form-urlencoded payload (as required by the LMS API)
+ * - Forces `honorCode` to `true` in the outbound request
+ * - Treats the endpoint as public (no JWT refresh interception)
+ * - Returns a camelCased AxiosResponse on success
  *
- * @throws {AxiosError<RegistrationErrorResponseSchema>}
+ * @throws {AxiosError<RegistrationErrorResponseSchema>} For HTTP/network/server errors
  */
 export async function registerRequest(
   requestData: RegistrationCreateRequestSchema,
