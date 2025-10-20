@@ -63,8 +63,8 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
       CheckoutPageRoute.BillingDetailsSuccess,
     ]);
 
-    // Unauthenticated user → Plan Details
-    if (protectedPaths.has(currentPath)) {
+    // Unauthenticated user on protected paths → redirect to Plan Details
+    if (!authenticatedUser && protectedPaths.has(currentPath)) {
       return redirectOrNull(CheckoutPageRoute.PlanDetails);
     }
 

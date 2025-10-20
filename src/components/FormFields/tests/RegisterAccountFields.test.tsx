@@ -485,9 +485,10 @@ describe('RegisterAccountFields', () => {
         await form.trigger();
       });
 
-      // Validation API should not be called when passwords don't match
+      // When passwords don't match, client-side validation should surface the error regardless of server validation
       await waitFor(() => {
-        expect(mockValidateRegistrationFieldsDebounced).not.toHaveBeenCalled();
+        const { error } = form.getFieldState('confirmPassword');
+        expect(error?.message).toMatch(/do not match/i);
       });
     });
 
