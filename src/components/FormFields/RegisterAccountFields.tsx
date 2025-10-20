@@ -3,6 +3,7 @@ import { Stack } from '@openedx/paragon';
 import { Lock, Visibility, VisibilityOff } from '@openedx/paragon/icons';
 import { useState } from 'react';
 
+import { useCountryOptions } from '@/components/app/data';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
 
@@ -18,6 +19,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+  const countryOptions = useCountryOptions();
 
   return (
     <FieldContainer>
@@ -125,8 +127,6 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
           manageState={false}
           registerOptions={{
             onChange: async () => {
-              // Trigger validation on confirmPassword field when password changes
-              // This ensures confirmPassword becomes invalid immediately if passwords don't match
               if (form.getValues('confirmPassword')) {
                 await form.trigger('confirmPassword');
               }
@@ -168,40 +168,7 @@ const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
           name="country"
           type="select"
           value={form.getValues('country') || ''}
-          options={[
-            {
-              value: 'US',
-              label: 'United States of America',
-            },
-            {
-              value: 'CA',
-              label: 'Canada',
-            },
-            {
-              value: 'GB',
-              label: 'United Kingdom',
-            },
-            {
-              value: 'AU',
-              label: 'Australia',
-            },
-            {
-              value: 'DE',
-              label: 'Germany',
-            },
-            {
-              value: 'FR',
-              label: 'France',
-            },
-            {
-              value: 'IN',
-              label: 'India',
-            },
-            {
-              value: 'JP',
-              label: 'Japan',
-            },
-          ]}
+          options={countryOptions}
           floatingLabel={intl.formatMessage({
             id: 'checkout.registerAccountFields.country.floatingLabel',
             defaultMessage: 'Country/Region',
