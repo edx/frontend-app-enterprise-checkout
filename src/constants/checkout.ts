@@ -106,7 +106,7 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message,
-        path: [field === 'root' ? [] : [field]].flat(),
+        path: field === 'root' ? [] : [field],
       });
     });
   }
