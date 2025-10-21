@@ -65,8 +65,7 @@ describe('StatefulProvisioningButton', () => {
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: {
-          adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com' : null,
-          enterpriseSlug: state === 'fulfilled' ? 'test-enterprise' : null,
+          adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com/test-enterprise' : null,
         },
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
@@ -89,8 +88,7 @@ describe('StatefulProvisioningButton', () => {
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: {
-          adminPortalUrl: 'https://admin.example.com',
-          enterpriseSlug: 'test-enterprise',
+          adminPortalUrl: 'https://admin.example.com/test-enterprise',
         },
       },
     });
@@ -109,7 +107,7 @@ describe('StatefulProvisioningButton', () => {
     const user = userEvent.setup();
     const adminPortalUrl = 'https://admin.example.com';
     const enterpriseSlug = 'test-enterprise';
-    const expectedUrl = `${adminPortalUrl}/${enterpriseSlug}/admin/register`;
+    const expectedUrl = `${adminPortalUrl}/admin/register`;
 
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
       data: { state: 'fulfilled' },
