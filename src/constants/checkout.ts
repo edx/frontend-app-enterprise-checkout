@@ -134,9 +134,9 @@ export const PlanDetailsSchema = (
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'quantity',
         quantity,
-        { stripePriceId },
+        { stripePriceId, adminEmail: '' },
       );
-      if (!isValid) {
+      if (!isValid && validationDecisions?.quantity) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: serverValidationError('quantity', validationDecisions, CheckoutErrorMessagesByField),
