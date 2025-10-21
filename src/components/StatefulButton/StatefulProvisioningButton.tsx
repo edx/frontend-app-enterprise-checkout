@@ -30,7 +30,7 @@ const StatefulProvisioningButton = () => {
 
   const onClickHandler = () => {
     if (buttonState === 'success' && checkoutIntent?.adminPortalUrl && checkoutIntent?.enterpriseSlug) {
-      const adminRegisterUrl = `${checkoutIntent.adminPortalUrl}/${checkoutIntent.enterpriseSlug}/admin/register`;
+      const adminRegisterUrl = `${checkoutIntent.adminPortalUrl}/admin/register`;
       sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.GO_TO_DASHBOARD_BUTTON_CLICKED,
