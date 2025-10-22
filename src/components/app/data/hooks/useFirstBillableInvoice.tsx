@@ -36,7 +36,17 @@ const useFirstBillableInvoice = () => {
         if (!billableInvoice) {
           return null;
         }
-        const { billingAddress, cardBrand, last4 } = billableInvoice;
+
+        const {
+          billingAddress,
+          cardBrand,
+          last4,
+          startTime,
+          endTime,
+        } = billableInvoice;
+
+        const hasStartAndEndTime = startTime && endTime;
+        const hasCardDetails = cardBrand && last4;
         const hasBillingAddress = billingAddress && (
           billingAddress.line1
           || billingAddress.city
@@ -44,10 +54,11 @@ const useFirstBillableInvoice = () => {
           || billingAddress.postalCode
           || billingAddress.country
         );
-        const hasCardDetails = cardBrand && last4;
+
         return {
           ...DEFAULT_INVOICE,
           ...billableInvoice,
+          hasStartAndEndTime,
           hasBillingAddress,
           hasCardDetails,
         };
