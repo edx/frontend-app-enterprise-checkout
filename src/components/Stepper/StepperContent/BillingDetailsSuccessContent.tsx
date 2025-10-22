@@ -4,6 +4,7 @@ import { useContext, useMemo } from 'react';
 
 import { useBFFSuccess } from '@/components/app/data';
 import { BillingDetailsHeadingMessage } from '@/components/billing-details-pages/BillingDetailsHeadingMessage';
+import { ContactSupport } from '@/components/billing-details-pages/ContactSupport';
 import { ErrorHeading } from '@/components/billing-details-pages/ErrorHeading';
 import { OrderDetails } from '@/components/billing-details-pages/OrderDetails';
 import { PendingHeading } from '@/components/billing-details-pages/PendingHeading';
@@ -43,6 +44,7 @@ const BillingDetailsSuccessContent = () => {
       <Stack gap={4}>
         <SubscriptionStartMessage />
         <OrderDetails />
+        <ContactSupport />
       </Stack>
     </>
   );

@@ -4,7 +4,14 @@ import { useContext } from 'react';
 import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
 
 const DEFAULT_INVOICE = {
-  billingAddress: null,
+  billingAddress: {
+    city: '',
+    country: '',
+    line1: '',
+    line2: '',
+    postalCode: '',
+    state: '',
+  },
   customerPhone: '',
   last4: 0,
   cardBrand: 'card',
@@ -23,11 +30,22 @@ const useFirstBillableInvoice = () => {
       select: (data) => {
         const invoice = data?.checkoutIntent?.firstBillableInvoice;
         if (!invoice) {
-          return DEFAULT_INVOICE;
+          return null;
         }
+        const { billingAddress, cardBrand, last4 } = invoice;
+        const hasBillingAddress = billingAddress && (
+          billingAddress.line1
+          && billingAddress.city
+          && billingAddress.state
+          && billingAddress.postalCode
+          && billingAddress.country
+        );
+        const hasCardDetails = cardBrand && last4;
         return {
           ...DEFAULT_INVOICE,
           ...invoice,
+          hasBillingAddress,
+          hasCardDetails,
         };
       },
     },
