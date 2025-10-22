@@ -22,10 +22,11 @@ jest.mock('@/components/app/data', () => ({
   useCheckoutSessionClientSecret: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
   useBFFSuccess: jest.fn(),
+  useFirstBillableInvoice: jest.fn(),
 }));
 
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
-const { useCheckoutIntent } = jest.requireMock('@/components/app/data');
+const { useCheckoutIntent, useFirstBillableInvoice } = jest.requireMock('@/components/app/data');
 
 jest.mock('@/components/app/data/services/checkout-intent', () => ({
   patchCheckoutIntent: jest.fn(),
@@ -135,6 +136,16 @@ describe('BillingDetailsSuccessPage', () => {
         },
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+    });
+    // Ensure OrderDetails renders in success page by providing a valid invoice
+    (useFirstBillableInvoice as jest.Mock).mockReturnValue({
+      data: {
+        last4: '4242',
+        cardBrand: 'visa',
+        hasCardDetails: true,
+        hasBillingAddress: false,
+      },
+      isLoading: false,
     });
   });
 

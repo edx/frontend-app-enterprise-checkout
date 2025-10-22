@@ -7,6 +7,7 @@ import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import OrderDetails from '../OrderDetails';
+import { ContactSupport } from '@/components/billing-details-pages/ContactSupport';
 
 // Mock the hooks
 jest.mock('@/components/app/data', () => ({
@@ -41,7 +42,14 @@ describe('OrderDetails', () => {
   const mockPhone = '(555) 123-4567';
   const mockLast4 = '4242';
   const DEFAULT_INVOICE = {
-    billingAddress: null,
+    billingAddress: {
+      city: '',
+      country: '',
+      line1: '',
+      line2: '',
+      postalCode: '',
+      state: '',
+    },
     customerPhone: '',
     last4: 0,
     cardBrand: 'card',
@@ -50,6 +58,8 @@ describe('OrderDetails', () => {
     quantity: 0,
     unitAmountDecimal: 0,
     customerName: '',
+    hasBillingAddress: false,
+    hasCardDetails: false,
   };
 
   beforeEach(() => {
@@ -74,9 +84,14 @@ describe('OrderDetails', () => {
       setCheckoutSessionStatus: jest.fn(),
     });
 
-    // Default mock for useFirstBillableInvoice
+    // Default mock for useFirstBillableInvoice - ensure component renders by default
     (useFirstBillableInvoice as jest.Mock).mockReturnValue({
-      data: DEFAULT_INVOICE,
+      data: {
+        ...DEFAULT_INVOICE,
+        last4: mockLast4,
+        cardBrand: 'visa',
+        hasCardDetails: true,
+      },
       isLoading: false,
     });
 
@@ -109,6 +124,8 @@ describe('OrderDetails', () => {
         data: {
           last4: mockLast4,
           cardBrand: 'visa',
+          hasCardDetails: true,
+          hasBillingAddress: false,
         },
         isLoading: false,
       });
@@ -126,6 +143,7 @@ describe('OrderDetails', () => {
         data: {
           last4: mockLast4,
           cardBrand: 'visa',
+          hasCardDetails: true,
         },
         isLoading: false,
       });
@@ -139,6 +157,7 @@ describe('OrderDetails', () => {
         data: {
           last4: mockLast4,
           cardBrand: 'visa',
+          hasCardDetails: true,
         },
         isLoading: false,
       });
@@ -163,6 +182,7 @@ describe('OrderDetails', () => {
         data: {
           last4: mockLast4,
           cardBrand: 'visa',
+          hasCardDetails: true,
         },
         isLoading: false,
       });
@@ -171,24 +191,19 @@ describe('OrderDetails', () => {
       expect(screen.getByText(/Visa ending with 4242/)).toBeInTheDocument();
     });
 
-    it('displays default card ending when Stripe data is not available', () => {
+    it('does not render when no card details or billing address are available', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: {
-          last4: 0,
-          cardBrand: 'card',
-          billingAddress: null,
-          customerPhone: '',
-          startTime: '',
-          endTime: '',
-          quantity: 0,
-          unitAmountDecimal: 0,
-          customerName: '',
+          ...DEFAULT_INVOICE,
+          hasCardDetails: false,
+          hasBillingAddress: false,
         },
         isLoading: false,
       });
 
       renderComponent();
-      expect(screen.getByText(/Card ending with 0/)).toBeInTheDocument();
+      expect(screen.queryByText('Order details')).not.toBeInTheDocument();
+      expect(screen.queryByText(/Payment method/i)).not.toBeInTheDocument();
     });
   });
 
@@ -200,6 +215,7 @@ describe('OrderDetails', () => {
           cardBrand: 'visa',
           billingAddress: mockBillingAddress,
           customerPhone: mockPhone,
+          hasBillingAddress: true,
         },
         isLoading: false,
       });
@@ -218,39 +234,33 @@ describe('OrderDetails', () => {
     it('handles missing billing address gracefully', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: {
+          ...DEFAULT_INVOICE,
           billingAddress: null,
           customerPhone: '',
-          last4: 0,
-          cardBrand: 'card',
-          startTime: '',
-          endTime: '',
-          quantity: 0,
-          unitAmountDecimal: 0,
-          customerName: '',
+          hasCardDetails: true,
+          hasBillingAddress: false,
         },
         isLoading: false,
       });
 
-      renderComponent();
-      validateText('Billing address not available');
+      const { container } = renderComponent();
+      // Heading should still render
+      validateText('Billing address');
+      // No address lines should be rendered
+      const addressLines = container.querySelectorAll('.pgn__vstack.text-muted span');
+      expect(addressLines.length).toBe(0);
     });
 
     it('handles partial billing address data', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: {
+          ...DEFAULT_INVOICE,
           billingAddress: {
             line1: '123 Main St',
             city: 'Boston',
-            // Missing other fields
           },
-          customerPhone: '',
-          last4: 0,
-          cardBrand: 'card',
-          startTime: '',
-          endTime: '',
-          quantity: 0,
-          unitAmountDecimal: 0,
-          customerName: '',
+          hasCardDetails: true, // ensure component renders
+          hasBillingAddress: false,
         },
         isLoading: false,
       });
@@ -263,15 +273,12 @@ describe('OrderDetails', () => {
     it('renders address with proper formatting', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: {
+          ...DEFAULT_INVOICE,
           billingAddress: mockBillingAddress,
           customerPhone: mockPhone,
           last4: mockLast4,
           cardBrand: 'visa',
-          startTime: '',
-          endTime: '',
-          quantity: 0,
-          unitAmountDecimal: 0,
-          customerName: '',
+          hasBillingAddress: true,
         },
         isLoading: false,
       });
@@ -285,36 +292,37 @@ describe('OrderDetails', () => {
   });
 
   describe('Integration with first billable invoice', () => {
-    it('handles loading state', () => {
+    it('handles loading state by not rendering content', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: DEFAULT_INVOICE,
         isLoading: true,
       });
 
       renderComponent();
-      validateText('Order details');
-      expect(screen.getByText(/Card ending with 0/i)).toBeInTheDocument();
+      expect(screen.queryByText('Order details')).not.toBeInTheDocument();
     });
 
-    it('handles default invoice data', () => {
+    it('does not render with default invoice data (no card/address)', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: DEFAULT_INVOICE,
         isLoading: false,
       });
 
       renderComponent();
-      validateText('Order details');
-      expect(screen.getByText(/Card ending with 0/i)).toBeInTheDocument();
+      expect(screen.queryByText('Order details')).not.toBeInTheDocument();
     });
 
     it('displays all information when fully populated', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: {
+          ...DEFAULT_INVOICE,
           last4: mockLast4,
           cardBrand: 'visa',
           billingAddress: mockBillingAddress,
           customerPhone: mockPhone,
           quantity: 10,
+          hasBillingAddress: true,
+          hasCardDetails: true,
         },
         isLoading: false,
       });
@@ -340,7 +348,12 @@ describe('OrderDetails', () => {
         isLoading: false,
       });
 
-      renderComponent();
+      // Render ContactSupport directly, as it is now a separate component
+      render(
+        <IntlProvider locale="en">
+          <ContactSupport />
+        </IntlProvider>,
+      );
 
       const contactSupportLink = screen.getByText('Contact support');
       contactSupportLink.click();
