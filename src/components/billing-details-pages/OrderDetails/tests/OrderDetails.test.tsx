@@ -2,12 +2,12 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+import { ContactSupport } from '@/components/billing-details-pages/ContactSupport';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import OrderDetails from '../OrderDetails';
-import { ContactSupport } from '@/components/billing-details-pages/ContactSupport';
 
 // Mock the hooks
 jest.mock('@/components/app/data', () => ({
