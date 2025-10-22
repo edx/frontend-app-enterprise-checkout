@@ -33,7 +33,7 @@ const SubscriptionStartMessage = () => {
   const {
     startTime = null,
     endTime = null,
-    hasStartAndEndTime = null,
+    hasStartAndEndTime = false,
   } = firstBillableInvoice;
 
   if (!hasStartAndEndTime) {
