@@ -3,7 +3,7 @@ import { Stack } from '@openedx/paragon';
 import { Lock, Visibility, VisibilityOff } from '@openedx/paragon/icons';
 import { useState } from 'react';
 
-import { useCountryOptions } from '@/components/app/data';
+import { useCountryOptions, useRecaptchaSubmission } from '@/components/app/data';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
 
@@ -230,18 +230,24 @@ export const RegisterAccountCountry = ({
   );
 };
 
-const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => (
-  <FieldContainer>
-    <RegisterAccountFieldsHeader />
-    <Stack gap={3}>
-      <RegisterAccountAdminEmail form={form} />
-      <RegisterAccountFullName form={form} />
-      <RegisterAccountUsername form={form} />
-      <RegisterAccountPassword form={form} />
-      <RegisterAccountConfirmPassword form={form} />
-      <RegisterAccountCountry form={form} />
-    </Stack>
-  </FieldContainer>
-);
+const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
+  const { isLoading } = useRecaptchaSubmission('submit');
+  if (isLoading) {
+    return null;
+  }
+  return (
+    <FieldContainer>
+      <RegisterAccountFieldsHeader />
+      <Stack gap={3}>
+        <RegisterAccountAdminEmail form={form} />
+        <RegisterAccountFullName form={form} />
+        <RegisterAccountUsername form={form} />
+        <RegisterAccountPassword form={form} />
+        <RegisterAccountConfirmPassword form={form} />
+        <RegisterAccountCountry form={form} />
+      </Stack>
+    </FieldContainer>
+  );
+};
 
 export default RegisterAccountFields;

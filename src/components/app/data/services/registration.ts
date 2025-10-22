@@ -62,13 +62,22 @@ declare global {
   /**
    * Account creation (register) request/response schemas.
    */
-  interface RegistrationCreateRequestSchema {
+  interface BaseRegistrationCreateRequestSchema {
     name: string;
     username: string;
     password: string;
     email: string;
     country: string;
-    honorCode?: boolean;
+  }
+
+  interface RegistrationCreateRecaptchaRequestSchema extends BaseRegistrationCreateRequestSchema {
+    recaptchaToken: string;
+  }
+
+  interface RegistrationCreateRequestSchema extends
+    BaseRegistrationCreateRequestSchema,
+    RegistrationCreateRecaptchaRequestSchema {
+    honorCode: boolean;
   }
 
   interface RegistrationCreateSuccessResponseSchema {
@@ -387,7 +396,6 @@ export async function registerRequest(
   Object.entries(requestPayload as Record<string, unknown>).forEach(([key, value]) => {
     formParams.append(key, String(value));
   });
-
   const response: AxiosResponse<RegistrationCreateSuccessResponseSchema> = (
     await getAuthenticatedHttpClient().post<RegistrationCreateSuccessResponsePayload>(
       `${getConfig().LMS_BASE_URL}/api/user/v2/account/registration/`,

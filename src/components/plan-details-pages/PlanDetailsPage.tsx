@@ -1,4 +1,5 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -14,7 +15,7 @@ import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-import { useFormValidationConstraints } from '@/components/app/data';
+import { useFormValidationConstraints, useRecaptchaSubmission } from '@/components/app/data';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
@@ -42,6 +43,7 @@ import '../Stepper/Steps/css/PriceAlert.css';
 const PlanDetailsPage = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
+
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -52,7 +54,7 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
-
+  const { executeWithFallback } = useRecaptchaSubmission('submit');
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
   ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
@@ -169,14 +171,29 @@ const PlanDetailsPage = () => {
         password: data.password,
       });
     },
-    [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
-      registerMutation.mutate({
+    [SubmitCallbacks.PlanDetailsRegister]: async (data: PlanDetailsRegisterPageData) => {
+      let recaptchaToken: string | null = null;
+      try {
+        recaptchaToken = await executeWithFallback();
+      } catch (err: any) {
+        logError(err.message);
+      }
+
+      let registerMutationPayload: BaseRegistrationCreateRequestSchema = {
         name: data.fullName,
         email: data.adminEmail,
         username: data.username,
         password: data.password,
         country: data.country,
-      });
+      };
+
+      if (recaptchaToken) {
+        registerMutationPayload = {
+          ...registerMutationPayload,
+          captchaToken: recaptchaToken,
+        } as RegistrationCreateRecaptchaRequestSchema;
+      }
+      registerMutation.mutate(registerMutationPayload);
     },
   };
 
