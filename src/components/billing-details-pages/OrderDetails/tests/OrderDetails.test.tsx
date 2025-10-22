@@ -43,21 +43,21 @@ describe('OrderDetails', () => {
   const mockLast4 = '4242';
   const DEFAULT_INVOICE = {
     billingAddress: {
-      city: '',
-      country: '',
-      line1: '',
-      line2: '',
-      postalCode: '',
-      state: '',
+      city: null,
+      country: null,
+      line1: null,
+      line2: null,
+      postalCode: null,
+      state: null,
     },
-    customerPhone: '',
+    customerPhone: null,
     last4: 0,
     cardBrand: 'card',
-    startTime: '',
-    endTime: '',
+    startTime: null,
+    endTime: null,
     quantity: 0,
     unitAmountDecimal: 0,
-    customerName: '',
+    customerName: null,
     hasBillingAddress: false,
     hasCardDetails: false,
   };
@@ -109,14 +109,12 @@ describe('OrderDetails', () => {
   );
 
   describe('Basic rendering', () => {
-    it('renders the title correctly', () => {
+    it.each([
+      ['the title', 'Order details'],
+      ['the description', "You have purchased an edX team's subscription."],
+    ])('renders %s correctly', (_label, expectedText) => {
       renderComponent();
-      validateText('Order details');
-    });
-
-    it('renders the description correctly', () => {
-      renderComponent();
-      validateText('You have purchased an edX team\'s subscription.');
+      validateText(expectedText);
     });
 
     it('renders all section headings', () => {
@@ -224,10 +222,10 @@ describe('OrderDetails', () => {
 
       // Check that all address components are displayed
       expect(screen.getByText(mockBillingAddress.line1)).toBeInTheDocument();
-      expect(screen.getByText(mockBillingAddress.line2!)).toBeInTheDocument();
+      expect(screen.getByText(mockBillingAddress.line2)).toBeInTheDocument();
       // City, state, and postal code are combined on one line
       expect(screen.getByText(`${mockBillingAddress.city}, ${mockBillingAddress.state}, ${mockBillingAddress.postalCode}`)).toBeInTheDocument();
-      expect(screen.getByText(mockBillingAddress.country!)).toBeInTheDocument();
+      expect(screen.getByText(mockBillingAddress.country)).toBeInTheDocument();
       expect(screen.getByText(mockPhone)).toBeInTheDocument();
     });
 
@@ -292,22 +290,11 @@ describe('OrderDetails', () => {
   });
 
   describe('Integration with first billable invoice', () => {
-    it('handles loading state by not rendering content', () => {
-      (useFirstBillableInvoice as jest.Mock).mockReturnValue({
-        data: DEFAULT_INVOICE,
-        isLoading: true,
-      });
-
-      renderComponent();
-      expect(screen.queryByText('Order details')).not.toBeInTheDocument();
-    });
-
-    it('does not render with default invoice data (no card/address)', () => {
-      (useFirstBillableInvoice as jest.Mock).mockReturnValue({
-        data: DEFAULT_INVOICE,
-        isLoading: false,
-      });
-
+    it.each([
+      ['loading state', { data: DEFAULT_INVOICE, isLoading: true }],
+      ['default invoice without card/address', { data: DEFAULT_INVOICE, isLoading: false }],
+    ])('does not render when %s', (_label, mockReturn) => {
+      (useFirstBillableInvoice as jest.Mock).mockReturnValue(mockReturn);
       renderComponent();
       expect(screen.queryByText('Order details')).not.toBeInTheDocument();
     });
