@@ -5,21 +5,21 @@ import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
 
 const DEFAULT_INVOICE = {
   billingAddress: {
-    city: '',
-    country: '',
-    line1: '',
-    line2: '',
-    postalCode: '',
-    state: '',
+    city: null,
+    country: null,
+    line1: null,
+    line2: null,
+    postalCode: null,
+    state: null,
   },
-  customerPhone: '',
+  customerPhone: null,
   last4: 0,
   cardBrand: 'card',
-  startTime: '',
-  endTime: '',
+  startTime: null,
+  endTime: null,
   quantity: 0,
   unitAmountDecimal: 0,
-  customerName: '',
+  customerName: null,
 };
 
 const useFirstBillableInvoice = () => {
@@ -28,22 +28,26 @@ const useFirstBillableInvoice = () => {
     authenticatedUser?.userId ?? null,
     {
       select: (data) => {
-        const invoice = data?.checkoutIntent?.firstBillableInvoice;
-        if (!invoice) {
+        const { checkoutIntent = null } = data;
+        if (!checkoutIntent) {
           return null;
         }
-        const { billingAddress, cardBrand, last4 } = invoice;
+        const billableInvoice = checkoutIntent?.firstBillableInvoice;
+        if (!billableInvoice) {
+          return null;
+        }
+        const { billingAddress, cardBrand, last4 } = billableInvoice;
         const hasBillingAddress = billingAddress && (
           billingAddress.line1
-          && billingAddress.city
-          && billingAddress.state
-          && billingAddress.postalCode
-          && billingAddress.country
+          || billingAddress.city
+          || billingAddress.state
+          || billingAddress.postalCode
+          || billingAddress.country
         );
         const hasCardDetails = cardBrand && last4;
         return {
           ...DEFAULT_INVOICE,
-          ...invoice,
+          ...billableInvoice,
           hasBillingAddress,
           hasCardDetails,
         };

@@ -11,12 +11,16 @@ const OrderDetailsBillingInfo = () => {
   const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const { adminEmail } = planDetailsData;
 
+  if (!firstBillableInvoice) {
+    return null;
+  }
+
   const {
     billingAddress,
     customerPhone,
     last4,
     cardBrand,
-  } = firstBillableInvoice!;
+  } = firstBillableInvoice;
 
   const cardBrandDisplay = capitalize(cardBrand);
 

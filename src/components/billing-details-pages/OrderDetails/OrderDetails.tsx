@@ -19,10 +19,8 @@ const OrderDetails = () => {
 
   return (
     <FieldContainer>
-      <div>
-        <OrderDetailsHeading />
-        <OrderDetailsBillingInfo />
-      </div>
+      <OrderDetailsHeading />
+      <OrderDetailsBillingInfo />
     </FieldContainer>
   );
 };
