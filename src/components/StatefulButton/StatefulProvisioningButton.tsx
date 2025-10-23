@@ -29,15 +29,16 @@ const StatefulProvisioningButton = () => {
   const intl = useIntl();
 
   const onClickHandler = () => {
-    if (buttonState === 'success' && checkoutIntent?.adminPortalUrl) {
+    if (buttonState === 'success' && checkoutIntent?.adminPortalUrl && checkoutIntent?.enterpriseSlug) {
+      const adminRegisterUrl = `${checkoutIntent.adminPortalUrl}/admin/register`;
       sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.GO_TO_DASHBOARD_BUTTON_CLICKED,
         properties: {
-          adminPortalUrl: checkoutIntent?.adminPortalUrl,
+          adminPortalUrl: adminRegisterUrl,
         },
       });
-      window.location.href = checkoutIntent.adminPortalUrl;
+      window.location.href = adminRegisterUrl;
     }
   };
 

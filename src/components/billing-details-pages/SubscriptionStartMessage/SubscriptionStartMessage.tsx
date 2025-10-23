@@ -41,7 +41,7 @@ const SubscriptionStartMessage = () => {
             description="Title for the free trial success field section"
           />
         </h3>
-        <h3 className="font-weight-light">
+        <p className="fs-4 font-weight-light">
           <FormattedMessage
             id="checkout.freeTrialSubscriptionStartMessage.description"
             defaultMessage="Your trial expires on {boldDate}. Cancel anytime from the {link} page."
@@ -49,7 +49,6 @@ const SubscriptionStartMessage = () => {
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
-                // TODO: Add URL to Subs Management Page
                 <a
                   onClick={() => sendEnterpriseCheckoutTrackingEvent({
                     checkoutIntentId: checkoutIntent?.id ?? null,
@@ -67,7 +66,7 @@ const SubscriptionStartMessage = () => {
               ),
             }}
           />
-        </h3>
+        </p>
       </div>
       <div className="mt-3">
         <h4>
@@ -77,9 +76,9 @@ const SubscriptionStartMessage = () => {
             description="Sub title for the free trial success field section"
           />
         </h4>
-        <h4 className="font-weight-light">
+        <p className="fs-4 font-weight-light">
           {freeTrialDateRangeText({ startTime, endTime })}
-        </h4>
+        </p>
       </div>
     </FieldContainer>
   );

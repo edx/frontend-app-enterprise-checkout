@@ -37,6 +37,12 @@ describe('makeRootLoader (rootLoader) tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Provide a safe default for determineExistingCheckoutIntentState to avoid undefined destructuring
+    (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
+      existingSuccessfulCheckoutIntent: false,
+      expiredCheckoutIntent: false,
+    });
+
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -78,7 +84,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     ensureSpy.mockResolvedValue({ checkoutIntent: { state: 'paid' } } as any);
 
     const loader = makeRootLoader(queryClient);
-    const result = await loader({ request: makeRequest('/account-details') } as any);
+    const result = await loader({ request: makeRequest(CheckoutPageRoute.PlanDetails) } as any);
 
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'paid' },
@@ -117,7 +123,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     ensureSpy.mockResolvedValue({ checkoutIntent: { state: 'created' } } as any);
 
     const loader = makeRootLoader(queryClient);
-    const result = await loader({ request: makeRequest('/billing-details') } as any);
+    const result = await loader({ request: makeRequest(CheckoutPageRoute.BillingDetails) } as any);
 
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'created' },
@@ -141,7 +147,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     ensureSpy.mockResolvedValue({ checkoutIntent: { state: 'requires_payment' } } as any);
 
     const loader = makeRootLoader(queryClient);
-    const result = await loader({ request: makeRequest('/billing-details') } as any);
+    const result = await loader({ request: makeRequest(CheckoutPageRoute.BillingDetails) } as any);
 
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'requires_payment' },

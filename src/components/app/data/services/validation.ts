@@ -3,7 +3,7 @@ import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
-import { debounce, isEqual, snakeCase } from 'lodash-es';
+import { debounce, snakeCase } from 'lodash-es';
 
 import { VALIDATION_DEBOUNCE_MS } from '@/components/app/data/constants';
 
@@ -31,8 +31,8 @@ const fetchCheckoutValidation = async (
 
 type FieldKey = keyof ValidationSchema;
 
-// Cache previous values per field
-const previousValues = new Map<FieldKey, unknown>();
+// Memoization cache for detailed field validation results keyed by field + serialized inputs
+const detailedValidationCache = new Map<string, { isValid: boolean; validationDecisions: ValidationResponse['validationDecisions'] | null }>();
 
 // Store debounced validators per field
 const debouncers = new Map<FieldKey, ReturnType<typeof debounce>>();
@@ -114,7 +114,8 @@ function getDebouncer<K extends FieldKey>(field: K) {
  *
  * - Uses a per-field debounced function from `getDebouncer` so that
  *   multiple rapid calls for the same field collapse into one API request.
- * - Skips validation entirely if the value has not changed since the last check.
+ * - Skips validation entirely if the value has not changed since the last check
+ *   or if the forceValidate flag is set to `true`.
  * - Resolves to `true` if the API returns a `null` decision for the field
  *   (meaning no errors), otherwise `false`.
  *
@@ -123,6 +124,7 @@ function getDebouncer<K extends FieldKey>(field: K) {
  * @param value - The value to validate for this field.
  * @param extras - Optional additional fields to include in the validation payload
  *                 (e.g., `{ stripe_price_id: 'price_9876' }`).
+ * @param forceValidate - If `true`, skips the cache and performs validation immediately.
  * @returns A Promise that resolves to:
  *  - `true` if the server-side validation passes
  *  - `false` if it fails or an error occurs
@@ -142,22 +144,27 @@ function getDebouncer<K extends FieldKey>(field: K) {
 /**
  * Validates a single field value against the checkout API and returns a detailed result.
  * - Debounced per field (via getDebouncer)
- * - Caches previous values and skips when unchanged
+ * - Memoizes results and skips network calls for identical inputs by returning the last known result
  */
 export function validateFieldDetailed<K extends FieldKey>(
   field: K,
   value: ValidationSchema[K],
   extras?: Partial<ValidationSchema>,
+  forceValidate: boolean = false,
 ): Promise<{ isValid: boolean; validationDecisions: ValidationResponse['validationDecisions'] | null }> {
-  const current = { value, extras: extras ?? {} };
-  if (isEqual(previousValues.get(field), current)) {
-    // Treat unchanged value as valid and with no new decisions
-    return Promise.resolve({ isValid: true, validationDecisions: {} });
+  const key = `${String(field)}|${JSON.stringify({ value, extras: extras ?? {} })}`;
+  if (!forceValidate) {
+    const cached = detailedValidationCache.get(key);
+    if (cached) {
+      return Promise.resolve(cached);
+    }
   }
-  previousValues.set(field, current);
   return new Promise((resolve) => {
     const debounced = getDebouncer(field);
-    debounced(value, extras, resolve);
+    debounced(value, extras, (result) => {
+      detailedValidationCache.set(key, result);
+      resolve(result);
+    });
   });
 }
 

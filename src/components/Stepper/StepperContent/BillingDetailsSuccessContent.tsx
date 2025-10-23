@@ -27,7 +27,7 @@ const determineBannerMessage = (state?: string | null) => {
 
 const BillingDetailsSuccessContent = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
-  const { data: successBFFContext } = useBFFSuccess(authenticatedUser?.id);
+  const { data: successBFFContext } = useBFFSuccess(authenticatedUser?.userId ?? null);
   const { checkoutIntent } = successBFFContext || {};
   const bannerElement = useMemo(
     () => determineBannerMessage(checkoutIntent?.state),

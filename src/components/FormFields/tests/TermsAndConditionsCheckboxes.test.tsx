@@ -1,4 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
@@ -8,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { queryClient } from '@/utils/tests';
 
 import TermsAndConditionsCheckboxes from '../TermsAndConditionsCheckboxes';
 
@@ -36,9 +38,11 @@ describe('TermsAndConditionsCheckboxes', () => {
       } as any,
     });
     return (
-      <IntlProvider locale="en">
-        <TermsAndConditionsCheckboxes form={form} />
-      </IntlProvider>
+      <QueryClientProvider client={queryClient()}>
+        <IntlProvider locale="en">
+          <TermsAndConditionsCheckboxes form={form} />
+        </IntlProvider>
+      </QueryClientProvider>
     );
   };
 
@@ -58,6 +62,7 @@ describe('TermsAndConditionsCheckboxes', () => {
           ...(s.formData as any)[DataStoreKey.BillingDetails],
           confirmTnC: false,
           confirmSubscription: false,
+          confirmRecurringSubscription: false,
         },
       },
     }));

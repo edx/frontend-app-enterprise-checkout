@@ -1,5 +1,6 @@
 import { UseFormReturn } from 'react-hook-form';
 
+import { RegistrationDisclaimer } from '@/components/Disclaimer';
 import { RegisterAccountFields } from '@/components/FormFields';
 
 interface PlanDetailsRegisterContentProps {
@@ -7,7 +8,10 @@ interface PlanDetailsRegisterContentProps {
 }
 
 const PlanDetailsRegisterContent = ({ form }: PlanDetailsRegisterContentProps) => (
-  <RegisterAccountFields form={form} />
+  <>
+    <RegisterAccountFields form={form} />
+    <RegistrationDisclaimer />
+  </>
 );
 
 export default PlanDetailsRegisterContent;

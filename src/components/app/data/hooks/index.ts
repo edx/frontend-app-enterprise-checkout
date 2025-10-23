@@ -11,3 +11,5 @@ export { default as usePolledCheckoutIntent } from './usePolledCheckoutIntent';
 export { default as useCreateBillingPortalSession } from './useCreateBillingPortalSession';
 export { default as useCreateCheckoutIntentMutation } from './useCreateCheckoutIntentMutation';
 export { default as useCheckoutSessionClientSecret } from './useCheckoutSessionClientSecret';
+export { default as useRegisterMutation } from './useRegisterMutation';
+export { default as useCountryOptions } from './useCountryOptions';

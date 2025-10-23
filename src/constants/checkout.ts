@@ -1,6 +1,7 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
+import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { serverValidationError } from '@/utils/common';
 
@@ -69,8 +70,47 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
     .max(255, 'Maximum 255 characters'),
 }));
 
-// TODO: complete as part of ticket to do register page.
-export const PlanDetailsRegisterPageSchema = () => (z.object({}));
+export const PlanDetailsRegisterPageSchema = () => (z.object({
+  adminEmail: z.string().trim()
+    .email()
+    .min(1, 'Email is required')
+    .max(254),
+  fullName: z.string().trim()
+    .min(1, 'Full name is required')
+    .max(255),
+  username: z.string().trim()
+    .min(2, 'Username must be between 2 and 30 characters long.')
+    .max(30, 'Username must be between 2 and 30 characters long.'),
+  password: z.string()
+    .min(2, 'This password is too short. It must contain at least 2 characters.')
+    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
+  confirmPassword: z.string()
+    .min(8, 'Please confirm your password')
+    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
+  country: z.string().trim()
+    .min(1, 'Country is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+}).superRefine(async (data, ctx) => {
+  const { isValid, errors } = await validateRegistrationFieldsDebounced({
+    email: data.adminEmail,
+    name: data.fullName,
+    username: data.username,
+    password: data.password,
+    country: data.country,
+  });
+  if (!isValid) {
+    // Map LMS errors back to Zod issues
+    Object.entries(errors).forEach(([field, message]) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+        path: field === 'root' ? [] : [field],
+      });
+    });
+  }
+}));
 
 export const PlanDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,
@@ -86,7 +126,7 @@ export const PlanDetailsSchema = (
     .max(
       constraints?.quantity?.max,
       constraints?.quantity?.max
-        ? `Maximum ${constraints.quantity.max} users`
+        ? `You can only have up to ${constraints.quantity.max} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
     )
     .superRefine(async (quantity, ctx) => {
@@ -94,9 +134,9 @@ export const PlanDetailsSchema = (
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'quantity',
         quantity,
-        { stripePriceId },
+        { stripePriceId, adminEmail: '' },
       );
-      if (!isValid) {
+      if (!isValid && validationDecisions?.quantity) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: serverValidationError('quantity', validationDecisions, CheckoutErrorMessagesByField),
@@ -107,7 +147,26 @@ export const PlanDetailsSchema = (
     .min(1, 'Full name is required')
     .max(255),
   adminEmail: z.string().trim()
-    .max(254),
+    .max(254)
+    .superRefine(async (adminEmail, ctx) => {
+      // TODO: Nice to have to avoid calling this API if client side validation catches first
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'adminEmail',
+        adminEmail,
+      );
+      if (!isValid && validationDecisions?.adminEmail) {
+        // Check if the validation error is 'not_registered'
+        const adminEmailDecision = validationDecisions?.adminEmail;
+        if (adminEmailDecision.errorCode !== 'not_registered') {
+          // Only throw validation error for other error codes, not 'not_registered'
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: serverValidationError('adminEmail', validationDecisions, CheckoutErrorMessagesByField),
+          });
+        }
+        // For 'not_registered', we allow the form to submit and handle navigation in the submit callback
+      }
+    }),
   country: z.string().trim()
     .min(1, 'Country is required'),
   stripePriceId: z.string().trim().optional().nullable(),
@@ -250,10 +309,6 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     buttonMessage: null,
   },
 };
-
-// TODO: these should be fetched from the Stripe, likely via
-// an exposed REST API endpoint on the server.
-export const SUBSCRIPTION_PRICE_PER_USER_PER_MONTH = 33;
 
 // Constants specific to the Stepper component
 export const authenticatedSteps = [

@@ -60,7 +60,8 @@ Factory.define('checkoutContextFieldConstraints')
     min_length: faker.number.int({ min: 3, max: 5 }),
     max_length: faker.number.int({ min: 20, max: 50 }),
     pattern: '^[a-z0-9-]+$',
-  }));
+  }))
+  .attr('embargoed_countries', () => ['RU']);
 
 /**
  * Factory for creating checkout context checkout intent objects

@@ -9,7 +9,9 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent } from '@/components/app/data';
+import { termsAndConditions } from '@/components/app/data/constants';
 import { queryBffContext } from '@/components/app/data/queries/queries';
+import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -83,6 +85,16 @@ const StatefulSubscribeButton = () => {
     // Calls confirm() to start the Stripe checkout flow.
     let response;
     try {
+      if (checkoutIntent) {
+        const { id, country, state } = checkoutIntent;
+        const tncCheckoutUpdateRequest: CheckoutIntentPatchRequestSchema = {
+          id,
+          country,
+          state,
+          termsMetadata: termsAndConditions,
+        };
+        await patchCheckoutIntent(tncCheckoutUpdateRequest);
+      }
       response = await confirm({
         redirect: 'if_required',
         returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
@@ -108,7 +120,7 @@ const StatefulSubscribeButton = () => {
         setCheckoutSessionStatus(status);
         queryClient.invalidateQueries({
           queryKey: queryBffContext(
-            authenticatedUser.id,
+            authenticatedUser.userId ?? null,
           ).queryKey,
         })
           .then(data => data)

@@ -110,14 +110,14 @@ const populateInitialApplicationState = ({
           ...s.formData[DataStoreKey.PlanDetails],
           quantity: s.formData[DataStoreKey.PlanDetails]?.quantity
             ?? checkoutIntent?.quantity
-            ?? 0,
+            ?? null,
           fullName: s.formData[DataStoreKey.PlanDetails]?.fullName
-            ?? authenticatedUser.name
-            ?? authenticatedUser.username,
+            ?? authenticatedUser?.name
+            ?? authenticatedUser?.username,
           adminEmail: s.formData[DataStoreKey.PlanDetails]?.adminEmail
-            ?? authenticatedUser.email,
+            ?? authenticatedUser?.email,
           country: s.formData[DataStoreKey.PlanDetails]?.country
-            ?? authenticatedUser.country
+            ?? authenticatedUser?.country
             ?? null,
           stripePriceId: s.formData[DataStoreKey.PlanDetails]?.stripePriceId
             ?? stripePriceId
@@ -134,6 +134,7 @@ const populateInitialApplicationState = ({
           ...s.formData[DataStoreKey.BillingDetails],
           confirmTnC: s.formData[DataStoreKey.BillingDetails]?.confirmTnC ?? false,
           confirmSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmSubscription ?? false,
+          confirmRecurringSubscription: s.formData[DataStoreKey.BillingDetails]?.confirmRecurringSubscription ?? false,
         },
       },
       checkoutSessionStatus: {

@@ -197,7 +197,7 @@ declare global {
    */
   interface ValidationResponse {
     validationDecisions: {
-      [K in keyof ValidationSchema]?: ValidationDecision | ValidationSchemaPayload[K] | null;
+      [K in keyof ValidationSchema]?: ValidationDecision | null;
     };
     userAuthn: {
       userExistsForEmail: boolean;
@@ -268,6 +268,7 @@ declare global {
   interface CheckoutContextFieldConstraints {
     quantity: CheckoutContextFieldConstraint;
     enterpriseSlug: CheckoutContextFieldConstraint;
+    embargoedCountries?: string[];
   }
 
   type CheckoutIntentState =
@@ -290,18 +291,28 @@ declare global {
     workflowId: string;
     expiresAt: string;
     adminPortalUrl: string;
+    country: string;
   }
 
-  // TODO: to be updated with defined structure
+  type BillingAddress = {
+    city?: string | null;
+    country?: string | null;
+    line1?: string | null;
+    line2?: string | null;
+    postalCode?: string | null;
+    state?: string | null;
+  };
+
   type FirstBillableInvoice = {
     startTime: string;
     endTime: string;
-    last4: number | null;
+    last4: number;
+    cardBrand: string;
     quantity: number;
-    unitAmountDecimal: number | null;
-    customerPhone: string | null;
+    unitAmountDecimal: number;
+    customerPhone: string;
     customerName: string;
-    billingAddress: string | null;
+    billingAddress: BillingAddress | null;
   };
 
   // TODO: to be updated with defined structure
