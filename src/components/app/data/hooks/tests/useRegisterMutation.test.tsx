@@ -35,7 +35,7 @@ const createWrapper = () => {
 /**
  * Helper to create a mock register request payload
  */
-const createMockRegisterRequest = (overrides = {}): RegistrationCreateRequestSchema => ({
+const createMockRegisterRequest = (overrides = {}): Partial<RegistrationCreateRequestSchema> => ({
   name: 'John Doe',
   username: 'johndoe',
   password: 'Password123!',

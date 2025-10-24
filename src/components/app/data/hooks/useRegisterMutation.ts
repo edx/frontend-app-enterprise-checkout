@@ -22,7 +22,7 @@ export default function useRegisterMutation({
   return useMutation<
   AxiosResponse<RegistrationCreateSuccessResponseSchema>,
   AxiosError<RegistrationErrorResponseSchema>,
-  RegistrationCreateRequestSchema
+  Partial<RegistrationCreateRequestSchema>
   >({
     mutationFn: (requestData) => registerRequest(requestData),
     onSuccess: (axiosResponse) => onSuccess(axiosResponse.data),
