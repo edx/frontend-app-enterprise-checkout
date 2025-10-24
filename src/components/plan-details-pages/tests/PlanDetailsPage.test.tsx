@@ -12,6 +12,8 @@ import { renderStepperRoute } from '@/utils/tests';
 jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useFormValidationConstraints: jest.fn(),
+  useRecaptchaToken: jest.fn(() => ({ getToken: jest.fn().mockResolvedValue('test-token'), isLoading: false, isReady: true })),
+  useCheckoutIntent: jest.fn(() => ({ data: {} })),
 }));
 
 jest.mock('@/components/app/data/services/validation', () => ({
@@ -28,6 +30,7 @@ jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn().mockReturnValue({
     TERMS_OF_SERVICE_URL: 'https://example.com/terms',
     PRIVACY_POLICY_URL: 'https://example.com/privacy',
+    RECAPTCHA_SITE_WEB_KEY: 'test-recaptcha-key',
   }),
 }));
 
@@ -130,6 +133,8 @@ describe('PlanDetailsRegistrationPage', () => {
         },
       },
     });
+    // Ensure BFF context-dependent components (e.g., PurchaseSummary) have data
+    setupBFFContextMock();
   });
 
   it('renders the title correctly', () => {
