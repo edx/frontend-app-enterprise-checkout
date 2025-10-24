@@ -186,7 +186,7 @@ const PlanDetailsPage = () => {
       if (recaptchaToken) {
         registerMutationPayload = {
           ...registerMutationPayload,
-          recaptchaToken: recaptchaToken,
+          recaptchaToken,
         } as RegistrationCreateRecaptchaRequestSchema;
       }
       registerMutation.mutate(registerMutationPayload);
