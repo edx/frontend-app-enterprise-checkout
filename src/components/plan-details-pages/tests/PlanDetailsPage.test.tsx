@@ -6,7 +6,8 @@ import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@/components/app/data', () => ({
@@ -18,6 +19,24 @@ jest.mock('@/components/app/data', () => ({
 
 jest.mock('@/components/app/data/services/validation', () => ({
   validateFieldDetailed: jest.fn(),
+}));
+
+// Ensure no network calls are attempted during registration schema validation
+jest.mock('@/components/app/data/services/registration', () => ({
+  ...jest.requireActual('@/components/app/data/services/registration'),
+  validateRegistrationFieldsDebounced: jest.fn().mockResolvedValue({ isValid: true, errors: {} }),
+}));
+
+// Mock useRegisterMutation to capture mutate calls
+let registerMutateSpy: jest.Mock;
+jest.mock('@/components/app/data/hooks/useRegisterMutation', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    get mutate() { return registerMutateSpy; },
+    isPending: false,
+    isSuccess: false,
+    isError: false,
+  })),
 }));
 
 const mockNavigate = jest.fn();
@@ -428,5 +447,76 @@ describe('PlanDetailsPage - Admin Email Validation', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.PlanDetailsLogin);
     });
+  });
+});
+
+describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Provide safe constraints
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: {
+        quantity: {
+          min: 5,
+          max: 30,
+        },
+      },
+    });
+
+    // Ensure BFF context-dependent components (e.g., PurchaseSummary) have data
+    setupBFFContextMock();
+
+    // Pre-populate the plan details form data so read-only fields are satisfied
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'admin@example.com',
+          fullName: 'Admin User',
+          country: 'US',
+        },
+      },
+    }));
+
+    // Make reCAPTCHA return null token for this test
+    const { useRecaptchaToken } = jest.requireMock('@/components/app/data');
+    (useRecaptchaToken as jest.Mock).mockReturnValue(
+      { getToken: jest.fn().mockResolvedValue(null), isLoading: false, isReady: true },
+    );
+  });
+
+  it('calls register mutation without recaptchaToken when reCAPTCHA token is null', async () => {
+    registerMutateSpy = jest.fn();
+    const user = userEvent.setup();
+
+    // Set up register mutation mock to capture calls
+    const useRegisterMutation = (await import('@/components/app/data/hooks/useRegisterMutation')).default as unknown as jest.Mock;
+    const mutateSpy = jest.fn();
+    useRegisterMutation.mockReturnValue({ mutate: mutateSpy, isPending: false, isSuccess: false, isError: false });
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    // Fill in the required editable fields
+    await user.type(screen.getByLabelText(/public username/i), 'myuser');
+    await user.type(screen.getByLabelText(/^password$/i), 'password-1234');
+    await user.type(screen.getByLabelText(/confirm password/i), 'password-1234');
+
+    // Submit the form
+    await user.click(screen.getByTestId('stepper-submit-button'));
+
+    // Assert the register mutation was called with payload lacking recaptchaToken
+    await waitFor(() => expect(mutateSpy).toHaveBeenCalled());
+    const payload = (mutateSpy as jest.Mock).mock.calls[0][0];
+
+    expect(payload).toMatchObject({
+      name: 'Admin User',
+      email: 'admin@example.com',
+      username: 'myuser',
+      password: 'password-1234',
+      country: 'US',
+    });
+    expect(payload).not.toHaveProperty('recaptchaToken');
   });
 });
