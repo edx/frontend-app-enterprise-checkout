@@ -33,6 +33,7 @@ describe('SubscriptionStartMessage', () => {
         customerPhone: null,
         startTime: '2025-05-10T00:00:00Z', // Start of trial
         endTime: '2025-06-09T00:00:00Z', // End date that formats to "June 9th, 2025"
+        hasStartAndEndTime: true,
       },
     });
     (useCreateBillingPortalSession as jest.Mock).mockReturnValue({
@@ -86,5 +87,18 @@ describe('SubscriptionStartMessage', () => {
     await user.click(link);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
+  });
+
+  it('does not render when data is missing', () => {
+    (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
+      startTime: null,
+      endTime: null,
+      hasStartAndEndTime: false,
+    });
+    renderComponent();
+    const titleElement = screen.queryByText('Your free trial for edX team\'s subscription has started.');
+    expect(titleElement).not.toBeInTheDocument();
+    const link = screen.queryByRole('link', { name: 'Subscription Management' });
+    expect(link).toBeNull();
   });
 });

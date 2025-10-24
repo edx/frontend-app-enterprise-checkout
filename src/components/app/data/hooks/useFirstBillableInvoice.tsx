@@ -4,15 +4,22 @@ import { useContext } from 'react';
 import useBFFSuccess from '@/components/app/data/hooks/useBFFSuccess';
 
 const DEFAULT_INVOICE = {
-  billingAddress: null,
-  customerPhone: '',
+  billingAddress: {
+    city: null,
+    country: null,
+    line1: null,
+    line2: null,
+    postalCode: null,
+    state: null,
+  },
+  customerPhone: null,
   last4: 0,
   cardBrand: 'card',
-  startTime: '',
-  endTime: '',
+  startTime: null,
+  endTime: null,
   quantity: 0,
   unitAmountDecimal: 0,
-  customerName: '',
+  customerName: null,
 };
 
 const useFirstBillableInvoice = () => {
@@ -21,13 +28,39 @@ const useFirstBillableInvoice = () => {
     authenticatedUser?.userId ?? null,
     {
       select: (data) => {
-        const invoice = data?.checkoutIntent?.firstBillableInvoice;
-        if (!invoice) {
-          return DEFAULT_INVOICE;
+        const { checkoutIntent = null } = data;
+        if (!checkoutIntent) {
+          return null;
         }
+        const billableInvoice = checkoutIntent?.firstBillableInvoice;
+        if (!billableInvoice) {
+          return null;
+        }
+
+        const {
+          billingAddress,
+          cardBrand,
+          last4,
+          startTime,
+          endTime,
+        } = billableInvoice;
+
+        const hasStartAndEndTime = startTime && endTime;
+        const hasCardDetails = cardBrand && last4;
+        const hasBillingAddress = billingAddress && (
+          billingAddress.line1
+          || billingAddress.city
+          || billingAddress.state
+          || billingAddress.postalCode
+          || billingAddress.country
+        );
+
         return {
           ...DEFAULT_INVOICE,
-          ...invoice,
+          ...billableInvoice,
+          hasStartAndEndTime,
+          hasBillingAddress,
+          hasCardDetails,
         };
       },
     },
