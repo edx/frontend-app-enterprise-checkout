@@ -49,7 +49,7 @@ initialize({
         ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL: process.env.ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL || null,
         COMPARE_ENTERPRISE_PLANS_URL: process.env.COMPARE_ENTERPRISE_PLANS_URL || null,
         CONTACT_SUPPORT_URL: process.env.CONTACT_SUPPORT_URL || null,
-        RECAPTCHA_SITE_WEB_KEY: process.env.RECAPTCHA_SITE_WEB_KEY || null,
+        RECAPTCHA_SITE_KEY_WEB: process.env.RECAPTCHA_SITE_KEY_WEB || null,
       });
     },
   },

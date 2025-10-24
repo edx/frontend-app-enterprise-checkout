@@ -5,10 +5,10 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 const useRecaptchaToken = (actionName = 'submit') => {
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const { RECAPTCHA_SITE_WEB_KEY } = getConfig();
+  const { RECAPTCHA_SITE_KEY_WEB } = getConfig();
 
-  const isLoading = !(executeRecaptcha || RECAPTCHA_SITE_WEB_KEY);
-  const isReady = !!executeRecaptcha && RECAPTCHA_SITE_WEB_KEY;
+  const isLoading = !(executeRecaptcha || RECAPTCHA_SITE_KEY_WEB);
+  const isReady = !!executeRecaptcha && RECAPTCHA_SITE_KEY_WEB;
 
   const executeWithFallback = useCallback(async () => {
     if (isReady) {
@@ -20,12 +20,12 @@ const useRecaptchaToken = (actionName = 'submit') => {
     }
 
     // Fallback: no reCAPTCHA or not ready
-    if (RECAPTCHA_SITE_WEB_KEY) {
+    if (RECAPTCHA_SITE_KEY_WEB) {
       // eslint-disable-next-line no-console
       console.warn(`reCAPTCHA not ready for action: ${actionName}. Proceeding without token.`);
     }
     return null;
-  }, [isReady, RECAPTCHA_SITE_WEB_KEY, executeRecaptcha, actionName]);
+  }, [isReady, RECAPTCHA_SITE_KEY_WEB, executeRecaptcha, actionName]);
 
   const getToken = useCallback(async (): Promise<string | null> => {
     try {

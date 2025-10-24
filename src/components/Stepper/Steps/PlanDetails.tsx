@@ -5,10 +5,10 @@ import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import PlanDetailsPage from '@/components/plan-details-pages/PlanDetailsPage';
 
 const PlanDetails = (): ReactNode => {
-  const { RECAPTCHA_SITE_WEB_KEY } = getConfig();
+  const { RECAPTCHA_SITE_KEY_WEB } = getConfig();
   return (
     <GoogleReCaptchaProvider
-      reCaptchaKey={RECAPTCHA_SITE_WEB_KEY}
+      reCaptchaKey={RECAPTCHA_SITE_KEY_WEB}
       useEnterprise
     >
       <PlanDetailsPage />

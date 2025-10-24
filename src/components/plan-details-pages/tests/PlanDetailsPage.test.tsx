@@ -49,7 +49,7 @@ jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn().mockReturnValue({
     TERMS_OF_SERVICE_URL: 'https://example.com/terms',
     PRIVACY_POLICY_URL: 'https://example.com/privacy',
-    RECAPTCHA_SITE_WEB_KEY: 'test-recaptcha-key',
+    RECAPTCHA_SITE_KEY_WEB: 'test-recaptcha-key',
   }),
 }));
 
