@@ -380,7 +380,7 @@ export async function validateRegistrationFieldsDebounced(
  * @throws {AxiosError<RegistrationErrorResponseSchema>} For HTTP/network/server errors
  */
 export async function registerRequest(
-  requestData: RegistrationCreateRequestSchema,
+  requestData: Partial<RegistrationCreateRequestSchema>,
 ): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema>> {
   // Ensure honor_code is always sent as true by default
   const requestPayload: RegistrationCreateRequestPayload = snakeCaseObject({

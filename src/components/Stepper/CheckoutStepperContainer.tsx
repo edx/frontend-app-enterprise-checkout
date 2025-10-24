@@ -1,4 +1,5 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
+import { ReactNode } from 'react';
 
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
@@ -9,7 +10,7 @@ import {
 } from '@/components/Stepper/Steps';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
-const Steps: React.FC = () => (
+const Steps = (): ReactNode => (
   <>
     <PlanDetails />
     <AccountDetails />
@@ -17,7 +18,7 @@ const Steps: React.FC = () => (
   </>
 );
 
-const CheckoutStepperContainer: React.FC = () => {
+const CheckoutStepperContainer = (): ReactNode => {
   const { currentStepKey } = useCurrentStep();
   return (
     <Stepper activeKey={currentStepKey}>

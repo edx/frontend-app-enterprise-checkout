@@ -1,8 +1,9 @@
 import { getConfig } from '@edx/frontend-platform';
+import { logError } from '@edx/frontend-platform/logging';
 import { useCallback } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
-const useRecaptchaSubmission = (actionName = 'submit') => {
+const useRecaptchaToken = (actionName = 'submit') => {
   const { executeRecaptcha } = useGoogleReCaptcha();
   const { RECAPTCHA_SITE_WEB_KEY } = getConfig();
 
@@ -26,11 +27,20 @@ const useRecaptchaSubmission = (actionName = 'submit') => {
     return null;
   }, [isReady, RECAPTCHA_SITE_WEB_KEY, executeRecaptcha, actionName]);
 
+  const getToken = useCallback(async (): Promise<string | null> => {
+    try {
+      return await executeWithFallback();
+    } catch (err: any) {
+      logError(err?.message || 'Failed to execute reCAPTCHA');
+      return null;
+    }
+  }, [executeWithFallback]);
+
   return {
-    executeWithFallback,
+    getToken,
     isReady,
     isLoading,
   };
 };
 
-export default useRecaptchaSubmission;
+export default useRecaptchaToken;

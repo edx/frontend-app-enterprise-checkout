@@ -3,7 +3,7 @@ import { Stack } from '@openedx/paragon';
 import { Lock, Visibility, VisibilityOff } from '@openedx/paragon/icons';
 import { useState } from 'react';
 
-import { useCountryOptions, useRecaptchaSubmission } from '@/components/app/data';
+import { useCountryOptions, useRecaptchaToken } from '@/components/app/data';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
 
@@ -231,7 +231,7 @@ export const RegisterAccountCountry = ({
 };
 
 const RegisterAccountFields = ({ form }: RegisterAccountFieldsProps) => {
-  const { isLoading } = useRecaptchaSubmission('submit');
+  const { isLoading } = useRecaptchaToken('submit');
   if (isLoading) {
     return null;
   }

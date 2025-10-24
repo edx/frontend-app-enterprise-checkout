@@ -13,4 +13,4 @@ export { default as useCreateCheckoutIntentMutation } from './useCreateCheckoutI
 export { default as useCheckoutSessionClientSecret } from './useCheckoutSessionClientSecret';
 export { default as useRegisterMutation } from './useRegisterMutation';
 export { default as useCountryOptions } from './useCountryOptions';
-export { default as useRecaptchaSubmission } from './useRecaptchaSubmission';
+export { default as useRecaptchaToken } from './useRecaptchaToken';

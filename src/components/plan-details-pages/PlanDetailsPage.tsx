@@ -1,5 +1,4 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -15,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-import { useFormValidationConstraints, useRecaptchaSubmission } from '@/components/app/data';
+import { useFormValidationConstraints, useRecaptchaToken } from '@/components/app/data';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
@@ -54,7 +53,9 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
-  const { executeWithFallback } = useRecaptchaSubmission('submit');
+
+  const { getToken } = useRecaptchaToken('submit');
+
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
   ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
@@ -172,14 +173,9 @@ const PlanDetailsPage = () => {
       });
     },
     [SubmitCallbacks.PlanDetailsRegister]: async (data: PlanDetailsRegisterPageData) => {
-      let recaptchaToken: string | null = null;
-      try {
-        recaptchaToken = await executeWithFallback();
-      } catch (err: any) {
-        logError(err.message);
-      }
+      const recaptchaToken: string | null = await getToken();
 
-      let registerMutationPayload: BaseRegistrationCreateRequestSchema = {
+      let registerMutationPayload: Partial<RegistrationCreateRequestSchema> = {
         name: data.fullName,
         email: data.adminEmail,
         username: data.username,
@@ -190,7 +186,7 @@ const PlanDetailsPage = () => {
       if (recaptchaToken) {
         registerMutationPayload = {
           ...registerMutationPayload,
-          captchaToken: recaptchaToken,
+          recaptchaToken: recaptchaToken,
         } as RegistrationCreateRecaptchaRequestSchema;
       }
       registerMutation.mutate(registerMutationPayload);
