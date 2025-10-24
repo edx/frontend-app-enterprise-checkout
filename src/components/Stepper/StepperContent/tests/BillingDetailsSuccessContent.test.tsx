@@ -63,7 +63,12 @@ describe('BillingDetailsSuccessContent', () => {
     });
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
     (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
-      data: null,
+      data: {
+        last4: '4242',
+        cardBrand: 'visa',
+        hasCardDetails: true,
+        hasBillingAddress: false,
+      },
       refetch: jest.fn(),
       isLoading: false,
     });

@@ -21,13 +21,22 @@ const messages = defineMessages({
 
 const SubscriptionStartMessage = () => {
   const intl = useIntl();
-  const { data: firstBillableInvoice } = useFirstBillableInvoice();
+  const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
   // TODO: Add this endpoint to the success page loader
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
-  const { startTime, endTime } = firstBillableInvoice ?? { startTime: null, endTime: null };
 
-  if (!(startTime && endTime)) {
+  if (isLoading || !firstBillableInvoice) {
+    return null;
+  }
+
+  const {
+    startTime = null,
+    endTime = null,
+    hasStartAndEndTime = false,
+  } = firstBillableInvoice;
+
+  if (!hasStartAndEndTime) {
     return null;
   }
 
@@ -77,7 +86,7 @@ const SubscriptionStartMessage = () => {
           />
         </h4>
         <p className="fs-4 font-weight-light">
-          {freeTrialDateRangeText({ startTime, endTime })}
+          {freeTrialDateRangeText({ startTime: startTime!, endTime: endTime! })}
         </p>
       </div>
     </FieldContainer>
