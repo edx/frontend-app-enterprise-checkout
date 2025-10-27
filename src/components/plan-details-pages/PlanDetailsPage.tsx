@@ -175,7 +175,7 @@ const PlanDetailsPage = () => {
     [SubmitCallbacks.PlanDetailsRegister]: async (data: PlanDetailsRegisterPageData) => {
       const recaptchaToken: string | null = await getToken();
 
-      let registerMutationPayload: Partial<RegistrationCreateRequestSchema> = {
+      const registerMutationPayload: Partial<RegistrationCreateRequestSchema> = {
         name: data.fullName,
         email: data.adminEmail,
         username: data.username,
@@ -184,10 +184,7 @@ const PlanDetailsPage = () => {
       };
 
       if (recaptchaToken) {
-        registerMutationPayload = {
-          ...registerMutationPayload,
-          recaptchaToken,
-        } as RegistrationCreateRecaptchaRequestSchema;
+        registerMutationPayload.recaptchaToken = recaptchaToken;
       }
       registerMutation.mutate(registerMutationPayload);
     },

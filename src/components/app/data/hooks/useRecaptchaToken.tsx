@@ -1,5 +1,5 @@
 import { getConfig } from '@edx/frontend-platform';
-import { logError } from '@edx/frontend-platform/logging';
+import { logError, logInfo } from '@edx/frontend-platform/logging';
 import { useCallback } from 'react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
@@ -14,15 +14,14 @@ const useRecaptchaToken = (actionName = 'submit') => {
     if (isReady) {
       const token = await executeRecaptcha(actionName);
       if (!token) {
-        throw new Error("Oopsie! reCAPTCHA didn't return a token.");
+        throw new Error(`Failed to obtain reCAPTCHA verification token for action: ${actionName}. Please try again or contact support if the issue persists.`);
       }
       return token;
     }
 
     // Fallback: no reCAPTCHA or not ready
     if (RECAPTCHA_SITE_KEY_WEB) {
-      // eslint-disable-next-line no-console
-      console.warn(`reCAPTCHA not ready for action: ${actionName}. Proceeding without token.`);
+      logInfo(`reCAPTCHA not ready for action: ${actionName}. Proceeding without token.`);
     }
     return null;
   }, [isReady, RECAPTCHA_SITE_KEY_WEB, executeRecaptcha, actionName]);

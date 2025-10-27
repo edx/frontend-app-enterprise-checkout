@@ -70,14 +70,9 @@ declare global {
     country: string;
   }
 
-  interface RegistrationCreateRecaptchaRequestSchema extends BaseRegistrationCreateRequestSchema {
-    recaptchaToken: string;
-  }
-
-  interface RegistrationCreateRequestSchema extends
-    BaseRegistrationCreateRequestSchema,
-    RegistrationCreateRecaptchaRequestSchema {
+  interface RegistrationCreateRequestSchema extends BaseRegistrationCreateRequestSchema {
     honorCode: boolean;
+    recaptchaToken?: string;
   }
 
   interface RegistrationCreateSuccessResponseSchema {
