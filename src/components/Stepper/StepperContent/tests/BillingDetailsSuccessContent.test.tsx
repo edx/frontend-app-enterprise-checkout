@@ -8,7 +8,7 @@ import {
   useBFFSuccess, useCheckoutIntent,
   useCreateBillingPortalSession,
   useFirstBillableInvoice,
-  usePolledCheckoutIntent,
+  usePolledCheckoutIntent, usePurchaseSummaryPricing,
 } from '@/components/app/data';
 import { BillingDetailsSuccessContent } from '@/components/Stepper/StepperContent';
 import { queryClient } from '@/utils/tests';
@@ -20,6 +20,7 @@ jest.mock('@/components/app/data', () => ({
   useFirstBillableInvoice: jest.fn(),
   useCreateBillingPortalSession: jest.fn(),
   useCheckoutIntent: jest.fn(),
+  usePurchaseSummaryPricing: jest.fn(),
 }));
 
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
@@ -30,6 +31,13 @@ const mockCreateBillingPortalSession = useCreateBillingPortalSession as
 const mockUseCheckoutIntent = useCheckoutIntent as jest.MockedFunction<typeof useCheckoutIntent>;
 
 describe('BillingDetailsSuccessContent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (usePurchaseSummaryPricing as jest.Mock).mockReturnValue({
+      yearlySubscriptionCostForQuantity: 150,
+    });
+  });
+
   const mockAuthenticatedUser = {
     id: 12345,
     userId: 12345,

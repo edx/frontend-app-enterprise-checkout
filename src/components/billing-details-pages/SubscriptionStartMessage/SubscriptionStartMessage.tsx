@@ -67,7 +67,6 @@ const SubscriptionStartMessage = () => {
             begin, and we will charge your payment method on file {price} USD per year. To avoid being charged,
             you must cancel before your trial expires. This subscription will automatically renew every year unless
             you cancel from the {link} page."
-            // defaultMessage="Your trial expires on {boldDate}. Cancel anytime from the {link} page."
             description="Description text explaining the subscription details"
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,

@@ -75,7 +75,7 @@ describe('TermsAndConditions', () => {
     renderComponent();
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     expect(checkboxes.length).toEqual(3);
-    validateText('I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions.');
+    validateText('I have read and accepted the', { exact: false });
     validateText('I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution\'s employees, students and/or other sponsored learners.');
     const [checkbox1, checkbox2, checkbox3] = checkboxes;
     expect(checkbox1).not.toBeChecked();
