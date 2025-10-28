@@ -51,6 +51,7 @@ interface FieldProps<T extends FieldValues> {
   options?: { value: string; label: string }[]; // New: For select fields
   manageState?: boolean;
   rightIcon?: ReactNode;
+  formText?: string;
   // Allow any additional props to be passed to the Form.Control component
   [key: string]: any;
 }
@@ -217,16 +218,23 @@ const DefaultFormControlBase = <T extends FieldValues>(
 const DefaultFormControl = forwardRef(DefaultFormControlBase);
 
 interface DefaultErrorFeedbackProps {
+  isValid: boolean;
+  formText?: string;
   isInvalid: boolean;
   errorMessage?: string;
 }
 
-const DefaultErrorFeedback = ({ isInvalid, errorMessage }: DefaultErrorFeedbackProps) => {
+const DefaultErrorFeedback = ({ isValid, isInvalid, errorMessage, formText }: DefaultErrorFeedbackProps) => {
   if (!isInvalid || !errorMessage) {
-    return null;
+    return formText && !isValid ? (
+      <Form.Control.Feedback>
+        {formText}
+      </Form.Control.Feedback>
+    )
+      : null;
   }
   return (
-    <Form.Control.Feedback type="invalid">
+    <Form.Control.Feedback>
       {errorMessage}
     </Form.Control.Feedback>
   );
@@ -245,6 +253,7 @@ const FieldBase = <T extends FieldValues>(
     className,
     controlClassName,
     rightIcon,
+    formText,
     ...rest
   }: FieldProps<T>,
   ref: React.Ref<FormControlElement>,
@@ -291,8 +300,10 @@ const FieldBase = <T extends FieldValues>(
         {renderDefaultControl()}
         {renderControlFooterNode()}
         <DefaultErrorFeedback
+          isValid={isValid}
           isInvalid={isInvalid}
           errorMessage={errorMessage}
+          formText={formText}
         />
       </>
     );
@@ -308,8 +319,10 @@ const FieldBase = <T extends FieldValues>(
         defaultControl: renderDefaultControl(),
         defaultErrorFeedback: (
           <DefaultErrorFeedback
+            isValid={isValid}
             isInvalid={isInvalid}
             errorMessage={errorMessage}
+            formText={formText}
           />
         ),
         isValid,

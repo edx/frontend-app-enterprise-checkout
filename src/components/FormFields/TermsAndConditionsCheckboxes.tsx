@@ -1,5 +1,6 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { Form } from '@openedx/paragon';
+import { Form, Hyperlink } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
@@ -25,6 +26,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
     control,
     formState: { errors },
   } = form;
+  const { ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL, ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL } = getConfig();
 
   // Watch both source fields
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
@@ -77,14 +79,41 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
             value="confirmTnC"
             isInvalid={!!errors.confirmTnC}
           >
-            <FormattedMessage
-              id="checkout.termsAndConditionsCheckboxes.confirmTnC"
-              defaultMessage={
-                'I have read and accepted the edX Enterprise Product Descriptions'
-                + ' and Terms and edX Enterprise Sales Terms and Conditions.'
-              }
-              description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
-            />
+            <span>
+              <FormattedMessage
+                id="checkout.termsAndConditionsCheckboxes.confirmTnC.start"
+                defaultMessage="I have read and accepted the "
+                description="Checkbox label to confirm terms and conditions sentence start"
+              />
+              <Hyperlink
+                destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
+                target="_blank"
+                showLaunchIcon={false}
+              >
+                <FormattedMessage
+                  id="checkout.termsAndConditionsCheckboxes.confirmTnC.link.productDescriptionsAndTerms"
+                  defaultMessage="edX Enterprise Product Descriptions and Terms"
+                  description="Checkbox label to confirm terms and conditions product descriptions and terms link"
+                />
+              </Hyperlink>
+              <FormattedMessage
+                id="checkout.termsAndConditionsCheckboxes.confirmTnC.connector"
+                defaultMessage=" and "
+                description="Checkbox label to confirm terms and conditions connector word, 'and'"
+              />
+              <Hyperlink
+                destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
+                target="_blank"
+                showLaunchIcon={false}
+              >
+                <FormattedMessage
+                  id="checkout.termsAndConditionsCheckboxes.confirmTnC.link.salesTermsAndConditions"
+                  defaultMessage="edX Enterprise Sales Terms and Conditions."
+                  description="Checkbox label to confirm terms and conditions sales terms and conidtions link"
+                />
+
+              </Hyperlink>
+            </span>
           </Form.Checkbox>
         )}
       />
@@ -115,10 +144,8 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmSubscription"
-              defaultMessage={
-                'I confirm I am subscribing on behalf of my employer, school or other professional'
-                + ' organization for use by my institution\'s employees, students and/or other sponsored learners.'
-              }
+              defaultMessage="I confirm I am subscribing on behalf of my employer, school or other professional
+              organization for use by my institution's employees, students and/or other sponsored learners."
               description="Checkbox label to confirm the subscription is on behalf of an organization for use by its employees, students, or other sponsored learners"
             />
           </Form.Checkbox>
