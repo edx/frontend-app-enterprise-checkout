@@ -81,38 +81,32 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <span>
               <FormattedMessage
-                id="checkout.termsAndConditionsCheckboxes.confirmTnC.start"
-                defaultMessage="I have read and accepted the "
-                description="Checkbox label to confirm terms and conditions sentence start"
+                id="checkout.termsAndConditionsCheckboxes.confirmTnC"
+                defaultMessage="I have read and accepted the <a1>edX Enterprise Product Descriptions and Terms</a1> and <a2>edX Enterprise Sales Terms and Conditions</a2>."
+                description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
+                values={{
+                  a1: ((chunks) => (
+                    <Hyperlink
+                      destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      showLaunchIcon={false}
+                    >
+                      {chunks}
+                    </Hyperlink>
+                  )),
+                  a2: ((chunks) => (
+                    <Hyperlink
+                      destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      showLaunchIcon={false}
+                    >
+                      {chunks}
+                    </Hyperlink>
+                  )),
+                }}
               />
-              <Hyperlink
-                destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
-                target="_blank"
-                showLaunchIcon={false}
-              >
-                <FormattedMessage
-                  id="checkout.termsAndConditionsCheckboxes.confirmTnC.link.productDescriptionsAndTerms"
-                  defaultMessage="edX Enterprise Product Descriptions and Terms"
-                  description="Checkbox label to confirm terms and conditions product descriptions and terms link"
-                />
-              </Hyperlink>
-              <FormattedMessage
-                id="checkout.termsAndConditionsCheckboxes.confirmTnC.connector"
-                defaultMessage=" and "
-                description="Checkbox label to confirm terms and conditions connector word, 'and'"
-              />
-              <Hyperlink
-                destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
-                target="_blank"
-                showLaunchIcon={false}
-              >
-                <FormattedMessage
-                  id="checkout.termsAndConditionsCheckboxes.confirmTnC.link.salesTermsAndConditions"
-                  defaultMessage="edX Enterprise Sales Terms and Conditions."
-                  description="Checkbox label to confirm terms and conditions sales terms and conidtions link"
-                />
-
-              </Hyperlink>
             </span>
           </Form.Checkbox>
         )}
