@@ -2,6 +2,7 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Form, Hyperlink } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
+import { useCallback } from 'react';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
@@ -47,6 +48,28 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
     });
   };
 
+  const getProductDescriptionsTermsHyperlink = useCallback((chunks: string) => (
+    <Hyperlink
+      destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      showLaunchIcon={false}
+    >
+      {chunks}
+    </Hyperlink>
+  ), [ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL]);
+
+  const getSalesTermsHyperlink = useCallback((chunks: string) => (
+    <Hyperlink
+      destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      showLaunchIcon={false}
+    >
+      {chunks}
+    </Hyperlink>
+  ), [ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL]);
+
   return (
     <Form.CheckboxSet
       name="userDisclosureAndConsent"
@@ -85,26 +108,8 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
                 defaultMessage="I have read and accepted the <a1>edX Enterprise Product Descriptions and Terms</a1> and <a2>edX Enterprise Sales Terms and Conditions</a2>."
                 description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
                 values={{
-                  a1: ((chunks) => (
-                    <Hyperlink
-                      destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      showLaunchIcon={false}
-                    >
-                      {chunks}
-                    </Hyperlink>
-                  )),
-                  a2: ((chunks) => (
-                    <Hyperlink
-                      destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      showLaunchIcon={false}
-                    >
-                      {chunks}
-                    </Hyperlink>
-                  )),
+                  a1: getProductDescriptionsTermsHyperlink,
+                  a2: getSalesTermsHyperlink,
                 }}
               />
             </span>
