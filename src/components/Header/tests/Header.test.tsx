@@ -61,7 +61,5 @@ describe('Header', () => {
     // The avatar toggle should be present with the username label
     const toggle = screen.getByRole('button', { name: /alice/i });
     expect(toggle).toBeInTheDocument();
-
-    await userEvent.click(toggle);
   });
 });
