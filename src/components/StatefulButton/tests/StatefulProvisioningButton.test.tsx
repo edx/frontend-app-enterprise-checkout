@@ -23,15 +23,18 @@ jest.mock('@/utils/common', () => ({
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
 const mockUsePolledCheckoutIntent = usePolledCheckoutIntent as jest.MockedFunction<typeof usePolledCheckoutIntent>;
 
-// Mock window.location.href
+// Mock window.location.href and window.open
 const originalLocation = window.location;
+const originalOpen = window.open;
 beforeAll(() => {
   delete (window as any).location;
   window.location = { ...originalLocation, href: '' };
+  window.open = jest.fn();
 });
 
 afterAll(() => {
   window.location = originalLocation;
+  window.open = originalOpen!;
 });
 
 describe('StatefulProvisioningButton', () => {
@@ -124,6 +127,6 @@ describe('StatefulProvisioningButton', () => {
     await user.click(button);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
-    expect(window.location.href).toBe(expectedUrl);
+    expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank', 'noopener,noreferrer');
   });
 });
