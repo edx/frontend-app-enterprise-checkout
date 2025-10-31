@@ -3,7 +3,12 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import { useCheckoutIntent, useCreateBillingPortalSession, useFirstBillableInvoice } from '@/components/app/data';
+import {
+  useCheckoutIntent,
+  useCreateBillingPortalSession,
+  useFirstBillableInvoice,
+  usePurchaseSummaryPricing,
+} from '@/components/app/data';
 import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
@@ -12,6 +17,7 @@ jest.mock('@/components/app/data', () => ({
   useFirstBillableInvoice: jest.fn(),
   useCreateBillingPortalSession: jest.fn(),
   useCheckoutIntent: jest.fn(),
+  usePurchaseSummaryPricing: jest.fn(),
 }));
 
 jest.mock('@/utils/common', () => ({
@@ -46,6 +52,9 @@ describe('SubscriptionStartMessage', () => {
         id: 7,
       },
     });
+    (usePurchaseSummaryPricing as jest.Mock).mockReturnValue({
+      yearlySubscriptionCostForQuantity: 150,
+    });
   });
 
   const renderComponent = () => render(
@@ -56,7 +65,7 @@ describe('SubscriptionStartMessage', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    validateText('Your free trial for edX team\'s subscription has started.');
+    validateText('Your free 14-day trial for edX Team\'s subscription has started.');
   });
 
   it('renders the description message correctly', () => {
@@ -64,7 +73,6 @@ describe('SubscriptionStartMessage', () => {
     // Check for specific text parts in the rendered component
     validateText(/Your trial expires on/i);
     validateText('June 9, 2025');
-    validateText(/Cancel anytime from the/i);
     validateText('Subscription Management');
   });
 

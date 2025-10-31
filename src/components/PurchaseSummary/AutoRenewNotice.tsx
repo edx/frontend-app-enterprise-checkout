@@ -14,7 +14,7 @@ const AutoRenewNoticeComponent: React.FC<AutoRenewNoticeProps> = ({ quantity, to
     return null;
   }
   return (
-    <Stack gap={6} direction="horizontal" className="align-self-end w-75 text-right">
+    <Stack gap={6} direction="horizontal" className="small align-self-end w-75 text-right font-weight-light">
       <FormattedMessage
         id="checkout.purchaseSummary.a.text"
         defaultMessage="Auto-renews annually at {price}/yr. Cancel at any time."

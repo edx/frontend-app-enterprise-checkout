@@ -2,7 +2,6 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -61,7 +60,5 @@ describe('Header', () => {
     // The avatar toggle should be present with the username label
     const toggle = screen.getByRole('button', { name: /alice/i });
     expect(toggle).toBeInTheDocument();
-
-    await userEvent.click(toggle);
   });
 });

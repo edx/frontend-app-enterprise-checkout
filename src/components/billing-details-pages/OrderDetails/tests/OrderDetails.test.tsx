@@ -342,7 +342,7 @@ describe('OrderDetails', () => {
         </IntlProvider>,
       );
 
-      const contactSupportLink = screen.getByText('Contact support');
+      const contactSupportLink = screen.getByText('contact support', { selector: 'a' });
       contactSupportLink.click();
 
       expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
