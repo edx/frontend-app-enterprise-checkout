@@ -62,15 +62,12 @@ declare global {
   /**
    * Account creation (register) request/response schemas.
    */
-  interface BaseRegistrationCreateRequestSchema {
+  interface RegistrationCreateRequestSchema {
     name: string;
     username: string;
     password: string;
     email: string;
     country: string;
-  }
-
-  interface RegistrationCreateRequestSchema extends BaseRegistrationCreateRequestSchema {
     honorCode: boolean;
     recaptchaToken?: string;
   }

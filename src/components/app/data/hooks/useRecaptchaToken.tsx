@@ -7,12 +7,11 @@ export const RECAPTCHA_STATUS = {
   READY: 'ready',
   LOADING: 'loading',
   DISABLED: 'disabled',
-  ERRORED: 'error',
 } as const;
 export type RecaptchaStatus = typeof RECAPTCHA_STATUS[keyof typeof RECAPTCHA_STATUS];
 
 export const RECAPTCHA_ACTIONS = {
-  SUBMIT: 'submit',
+  SIGNUP: 'signup',
 } as const;
 export type KnownRecaptchaAction = typeof RECAPTCHA_ACTIONS[keyof typeof RECAPTCHA_ACTIONS];
 export type RecaptchaAction = KnownRecaptchaAction | (string & {});
@@ -33,7 +32,7 @@ export interface UseRecaptchaTokenResult {
   isLoading: boolean;
 }
 
-const DEFAULT_ACTION: KnownRecaptchaAction = RECAPTCHA_ACTIONS.SUBMIT;
+const DEFAULT_ACTION: KnownRecaptchaAction = RECAPTCHA_ACTIONS.SIGNUP;
 
 const useRecaptchaToken = (actionName: RecaptchaAction = DEFAULT_ACTION): UseRecaptchaTokenResult => {
   const { executeRecaptcha } = useGoogleReCaptcha();

@@ -54,7 +54,7 @@ const PlanDetailsPage = () => {
     formSchema,
   } = useCurrentPageDetails();
 
-  const { getToken } = useRecaptchaToken('submit');
+  const { getToken } = useRecaptchaToken('signup');
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
