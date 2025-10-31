@@ -1,6 +1,8 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { Form } from '@openedx/paragon';
+import { Form, Hyperlink } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
+import { useCallback } from 'react';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
@@ -25,6 +27,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
     control,
     formState: { errors },
   } = form;
+  const { ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL, ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL } = getConfig();
 
   // Watch both source fields
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
@@ -44,6 +47,28 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
       },
     });
   };
+
+  const getProductDescriptionsTermsHyperlink = useCallback((chunks: string) => (
+    <Hyperlink
+      destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      showLaunchIcon={false}
+    >
+      {chunks}
+    </Hyperlink>
+  ), [ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL]);
+
+  const getSalesTermsHyperlink = useCallback((chunks: string) => (
+    <Hyperlink
+      destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      showLaunchIcon={false}
+    >
+      {chunks}
+    </Hyperlink>
+  ), [ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL]);
 
   return (
     <Form.CheckboxSet
@@ -77,14 +102,17 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
             value="confirmTnC"
             isInvalid={!!errors.confirmTnC}
           >
-            <FormattedMessage
-              id="checkout.termsAndConditionsCheckboxes.confirmTnC"
-              defaultMessage={
-                'I have read and accepted the edX Enterprise Product Descriptions'
-                + ' and Terms and edX Enterprise Sales Terms and Conditions.'
-              }
-              description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
-            />
+            <span>
+              <FormattedMessage
+                id="checkout.termsAndConditionsCheckboxes.confirmTnC"
+                defaultMessage="I have read and accepted the <a1>edX Enterprise Product Descriptions and Terms</a1> and <a2>edX Enterprise Sales Terms and Conditions</a2>."
+                description="Checkbox label to confirm acceptance of edX Enterprise Product Descriptions, Terms, and Sales Terms and Conditions"
+                values={{
+                  a1: getProductDescriptionsTermsHyperlink,
+                  a2: getSalesTermsHyperlink,
+                }}
+              />
+            </span>
           </Form.Checkbox>
         )}
       />
@@ -115,10 +143,8 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
           >
             <FormattedMessage
               id="checkout.termsAndConditionsCheckboxes.confirmSubscription"
-              defaultMessage={
-                'I confirm I am subscribing on behalf of my employer, school or other professional'
-                + ' organization for use by my institution\'s employees, students and/or other sponsored learners.'
-              }
+              defaultMessage="I confirm I am subscribing on behalf of my employer, school or other professional
+              organization for use by my institution's employees, students and/or other sponsored learners."
               description="Checkbox label to confirm the subscription is on behalf of an organization for use by its employees, students, or other sponsored learners"
             />
           </Form.Checkbox>

@@ -10,11 +10,11 @@ const ContactSupport = () => {
   const { CONTACT_SUPPORT_URL } = getConfig();
   const { data: checkoutIntent } = useCheckoutIntent();
   return (
-    <div className="text-center mt-4">
+    <div className="text-left w-50 mx-auto">
       <p className="text-muted mb-0">
         <FormattedMessage
           id="checkout.orderDetails.needHelp"
-          defaultMessage="Need help? {contactSupport}"
+          defaultMessage="For questions about your subscription or our cancellation procedures, please {contactSupport}"
           description="Help text with link to contact support"
           values={{
             contactSupport: (
@@ -26,10 +26,11 @@ const ContactSupport = () => {
                   checkoutIntentId: checkoutIntent?.id ?? null,
                   eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CONTACT_SUPPORT_LINK_CLICKED,
                 })}
+                showLaunchIcon={false}
               >
                 <FormattedMessage
                   id="checkout.orderDetails.contactSupport"
-                  defaultMessage="Contact support"
+                  defaultMessage="contact support"
                   description="Link text for contacting support"
                 />
               </Hyperlink>

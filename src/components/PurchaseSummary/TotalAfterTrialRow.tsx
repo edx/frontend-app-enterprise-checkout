@@ -2,6 +2,7 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import classNames from 'classnames';
 import React from 'react';
 
+import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
 import { DisplayPrice } from '@/components/DisplayPrice';
 
 import SummaryRow from './SummaryRow';
@@ -17,8 +18,11 @@ const TotalAfterTrialRowComponent: React.FC<TotalAfterTrialRowProps> = ({ quanti
       label={(
         <FormattedMessage
           id="checkout.purchaseSummary.totalPricePerYear.text"
-          defaultMessage="Total after trial"
+          defaultMessage="Total after {trialLength}-day free trial"
           description="Label for the total price for all users per year"
+          values={{
+            trialLength: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
+          }}
         />
       )}
       right={(

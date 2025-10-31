@@ -1,6 +1,6 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -75,7 +75,7 @@ describe('TermsAndConditions', () => {
     renderComponent();
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     expect(checkboxes.length).toEqual(3);
-    validateText('I have read and accepted the edX Enterprise Product Descriptions and Terms and edX Enterprise Sales Terms and Conditions.');
+    validateText('I have read and accepted the', { exact: false });
     validateText('I confirm I am subscribing on behalf of my employer, school or other professional organization for use by my institution\'s employees, students and/or other sponsored learners.');
     const [checkbox1, checkbox2, checkbox3] = checkboxes;
     expect(checkbox1).not.toBeChecked();
@@ -105,15 +105,15 @@ describe('TermsAndConditions', () => {
     expect(checkbox2).not.toBeChecked();
     expect(checkbox3).not.toBeChecked();
 
-    await user.click(checkbox1);
+    await act(async () => { await user.click(checkbox1); });
     expect(checkbox1).toBeChecked();
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(1);
 
-    await user.click(checkbox2);
+    await act(async () => { await user.click(checkbox2); });
     expect(checkbox2).toBeChecked();
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(2);
 
-    await user.click(checkbox3);
+    await act(async () => { await user.click(checkbox3); });
     expect(checkbox3).toBeChecked();
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledTimes(3);
   });

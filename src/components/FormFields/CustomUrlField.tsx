@@ -42,6 +42,7 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
             })}
             controlClassName="ml-1.5"
             className="flex-grow-1 m-0 pt-2"
+            formText="Your link must be alphanumeric, lowercase, and may include hyphens"
           />
         </span>
       </div>
