@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-import { useFormValidationConstraints } from '@/components/app/data';
+import { useFormValidationConstraints, useRecaptchaToken } from '@/components/app/data';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
@@ -42,6 +42,7 @@ import '../Stepper/Steps/css/PriceAlert.css';
 const PlanDetailsPage = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
+
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -52,6 +53,8 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+
+  const { getToken } = useRecaptchaToken('signup');
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
@@ -169,14 +172,21 @@ const PlanDetailsPage = () => {
         password: data.password,
       });
     },
-    [SubmitCallbacks.PlanDetailsRegister]: (data: PlanDetailsRegisterPageData) => {
-      registerMutation.mutate({
+    [SubmitCallbacks.PlanDetailsRegister]: async (data: PlanDetailsRegisterPageData) => {
+      const recaptchaToken: string | null = await getToken();
+
+      const registerMutationPayload: Partial<RegistrationCreateRequestSchema> = {
         name: data.fullName,
         email: data.adminEmail,
         username: data.username,
         password: data.password,
         country: data.country,
-      });
+      };
+
+      if (recaptchaToken) {
+        registerMutationPayload.recaptchaToken = recaptchaToken;
+      }
+      registerMutation.mutate(registerMutationPayload);
     },
   };
 
