@@ -85,7 +85,7 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({
     .min(2, 'This password is too short. It must contain at least 2 characters.')
     .max(75, 'This password is too long. It must contain no more than 75 characters.'),
   confirmPassword: z.string()
-    .min(8, 'Please confirm your password')
+    .min(2, 'This password is too short. It must contain at least 2 characters.')
     .max(75, 'This password is too long. It must contain no more than 75 characters.'),
   country: z.string().trim()
     .min(1, 'Country is required'),
