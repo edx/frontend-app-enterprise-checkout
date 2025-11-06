@@ -39,6 +39,29 @@ jest.mock('@/components/app/data/hooks/useRegisterMutation', () => ({
   })),
 }));
 
+// Mock useLoginMutation for testing
+let loginMutateSpy: jest.Mock = jest.fn();
+jest.mock('@/components/app/data/hooks/useLoginMutation', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    get mutate() { return loginMutateSpy; },
+    isPending: false,
+    isSuccess: false,
+    isError: false,
+  })),
+}));
+
+let createCheckoutIntentMutateSpy: jest.Mock = jest.fn();
+jest.mock('@/components/app/data/hooks/useCreateCheckoutIntentMutation', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    get mutate() { return createCheckoutIntentMutateSpy; },
+    isPending: false,
+    isSuccess: false,
+    isError: false,
+  })),
+}));
+
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -518,5 +541,167 @@ describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
       country: 'US',
     });
     expect(payload).not.toHaveProperty('recaptchaToken');
+  });
+});
+
+describe('PlanDetailsPage - Button Pending State', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: {
+        quantity: {
+          min: 5,
+          max: 30,
+        },
+      },
+    });
+
+    // Default mock for validateFieldDetailed
+    (validateFieldDetailed as jest.Mock).mockResolvedValue({
+      isValid: true,
+      validationDecisions: {},
+    });
+
+    setupBFFContextMock();
+
+    // Reset mutation spies
+    createCheckoutIntentMutateSpy = jest.fn();
+    loginMutateSpy = jest.fn();
+
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'admin@example.com',
+          fullName: 'Admin User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+  });
+
+  it('button enters pending state immediately when clicked and remains disabled until API completes', async () => {
+    const user = userEvent.setup();
+
+    const mockUser = {
+      email: 'user@example.com',
+      name: 'Test User',
+      username: 'testuser',
+      userId: 123,
+      country: 'US',
+    } as AuthenticatedUser;
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetails, {
+      config: {},
+      authenticatedUser: mockUser,
+    });
+
+    const quantityInput = await screen.findByLabelText(/number of licenses/i);
+    await user.clear(quantityInput);
+    await user.type(quantityInput, '10');
+
+    const submitButton = screen.getByTestId('stepper-submit-button');
+
+    expect(submitButton).not.toHaveAttribute('aria-disabled', 'true');
+    expect(submitButton).toHaveTextContent('Continue');
+
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(submitButton).toHaveTextContent('Submitting...');
+    }, { timeout: 100 }); // Short timeout because it should be immediate
+
+    expect(submitButton).toHaveAttribute('aria-disabled', 'true');
+
+    expect(submitButton.querySelector('.icon-spin')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(createCheckoutIntentMutateSpy).toHaveBeenCalled();
+    });
+
+    // Try clicking again while pending - should not trigger another mutation call
+    await user.click(submitButton);
+    expect(createCheckoutIntentMutateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('button shows pending state for login mutation', async () => {
+    const user = userEvent.setup();
+
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'user@example.com',
+          password: 'password123',
+          fullName: 'Admin User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin, {
+      config: {},
+      authenticatedUser: null,
+    });
+
+    const submitButton = await screen.findByTestId('stepper-submit-button');
+
+    expect(submitButton).toHaveTextContent('Sign in');
+
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(submitButton).toHaveTextContent('Submitting...');
+    }, { timeout: 100 });
+
+    expect(submitButton).toHaveAttribute('aria-disabled', 'true');
+
+    await waitFor(() => {
+      expect(loginMutateSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('button is non-interactable when disabled during pending state', async () => {
+    const user = userEvent.setup();
+
+    const mockUser = {
+      email: 'user@example.com',
+      name: 'Test User',
+      username: 'testuser',
+      userId: 123,
+      country: 'US',
+    } as AuthenticatedUser;
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetails, {
+      config: {},
+      authenticatedUser: mockUser,
+    });
+
+    const quantityInput = await screen.findByLabelText(/number of licenses/i);
+    await user.clear(quantityInput);
+    await user.type(quantityInput, '10');
+
+    const submitButton = screen.getByTestId('stepper-submit-button');
+
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(submitButton).toHaveTextContent('Submitting...');
+    });
+
+    expect(submitButton).toHaveAttribute('aria-disabled', 'true');
+
+    // Attempt multiple rapid clicks - should not trigger additional mutations
+    await user.click(submitButton);
+    await user.click(submitButton);
+    await user.click(submitButton);
+
+    // Mutation should only be called once
+    expect(createCheckoutIntentMutateSpy).toHaveBeenCalledTimes(1);
   });
 });

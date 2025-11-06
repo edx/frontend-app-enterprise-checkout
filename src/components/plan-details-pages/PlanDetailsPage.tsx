@@ -8,7 +8,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -43,6 +43,9 @@ const PlanDetailsPage = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
 
+  // Local state to track immediate form submission (optimistic pending state)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -73,9 +76,11 @@ const PlanDetailsPage = () => {
 
   const loginMutation = useLoginMutation({
     onSuccess: () => {
+      setIsSubmitting(false);
       navigate(CheckoutPageRoute.PlanDetails);
     },
     onError: (errorMessage) => {
+      setIsSubmitting(false);
       setError('password', {
         type: 'manual',
         message: errorMessage,
@@ -85,9 +90,11 @@ const PlanDetailsPage = () => {
 
   const registerMutation = useRegisterMutation({
     onSuccess: () => {
+      setIsSubmitting(false);
       navigate(CheckoutPageRoute.PlanDetails);
     },
     onError: (errorMessage) => {
+      setIsSubmitting(false);
       setError('root.serverError', {
         type: 'manual',
         message: errorMessage || 'Registration failed',
@@ -110,9 +117,11 @@ const PlanDetailsPage = () => {
     onSuccess: async () => {
       // Invalidate BFF context queries so downstream pages see the new intent.
       await queryClientInvalidate(authenticatedUser?.userId);
+      setIsSubmitting(false);
       navigate(CheckoutPageRoute.AccountDetails);
     },
     onError: (errorData) => {
+      setIsSubmitting(false);
       // Basic field-level mapping if backend returns validation-like structure.
       if (errorData && typeof errorData === 'object') {
         Object.entries(errorData).forEach(([fieldKey, fieldVal]) => {
@@ -147,6 +156,8 @@ const PlanDetailsPage = () => {
 
       // Determine if user is authenticated; if not, proceed to logistration flows.
       if (!authenticatedUser) {
+        // Reset submitting state since we're just navigating, not making an API call
+        setIsSubmitting(false);
         // Check if the adminEmail validation returned 'not_registered'
         const adminEmailDecision = validationDecisions?.adminEmail;
         if (!isValidAdminEmailField && adminEmailDecision?.errorCode === 'not_registered') {
@@ -192,7 +203,11 @@ const PlanDetailsPage = () => {
 
   const onSubmit = (
     data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData,
-  ) => onSubmitCallbacks[currentPage!](data);
+  ) => {
+    // Set submitting state immediately to provide instant user feedback
+    setIsSubmitting(true);
+    onSubmitCallbacks[currentPage!](data);
+  };
 
   // Determine which mutation states to surface to the button
   const activeMutation = useMemo(() => {
@@ -216,6 +231,9 @@ const PlanDetailsPage = () => {
     isSuccess: submissionIsSuccess,
     isError: submissionIsError,
   } = activeMutation;
+
+  // Combine isSubmitting (immediate feedback) with actual mutation pending state
+  const effectiveSubmissionIsPending = isSubmitting || submissionIsPending;
 
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.PlanDetails;
@@ -246,7 +264,7 @@ const PlanDetailsPage = () => {
             <Stepper.ActionRow.Spacer />
             <PlanDetailsSubmitButton
               formIsValid={isValid}
-              submissionIsPending={submissionIsPending}
+              submissionIsPending={effectiveSubmissionIsPending}
               submissionIsSuccess={submissionIsSuccess}
               submissionIsError={submissionIsError}
             />
