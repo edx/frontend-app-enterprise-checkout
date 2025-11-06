@@ -276,7 +276,7 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     }),
     buttonMessage: defineMessages({
       id: 'checkout.accountDetails.continue',
-      defaultMessage: 'Continue',
+      defaultMessage: 'Create an account',
       description: 'Button to go to the next page',
     }),
   },

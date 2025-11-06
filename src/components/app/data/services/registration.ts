@@ -68,7 +68,8 @@ declare global {
     password: string;
     email: string;
     country: string;
-    honorCode?: boolean;
+    honorCode: boolean;
+    recaptchaToken?: string;
   }
 
   interface RegistrationCreateSuccessResponseSchema {
@@ -371,7 +372,7 @@ export async function validateRegistrationFieldsDebounced(
  * @throws {AxiosError<RegistrationErrorResponseSchema>} For HTTP/network/server errors
  */
 export async function registerRequest(
-  requestData: RegistrationCreateRequestSchema,
+  requestData: Partial<RegistrationCreateRequestSchema>,
 ): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema>> {
   // Ensure honor_code is always sent as true by default
   const requestPayload: RegistrationCreateRequestPayload = snakeCaseObject({
@@ -387,7 +388,6 @@ export async function registerRequest(
   Object.entries(requestPayload as Record<string, unknown>).forEach(([key, value]) => {
     formParams.append(key, String(value));
   });
-
   const response: AxiosResponse<RegistrationCreateSuccessResponseSchema> = (
     await getAuthenticatedHttpClient().post<RegistrationCreateSuccessResponsePayload>(
       `${getConfig().LMS_BASE_URL}/api/user/v2/account/registration/`,

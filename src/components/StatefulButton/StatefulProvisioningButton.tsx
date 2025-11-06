@@ -38,7 +38,7 @@ const StatefulProvisioningButton = () => {
           adminPortalUrl: adminRegisterUrl,
         },
       });
-      window.location.href = adminRegisterUrl;
+      window.open(adminRegisterUrl, '_blank', 'noopener,noreferrer');
     }
   };
 

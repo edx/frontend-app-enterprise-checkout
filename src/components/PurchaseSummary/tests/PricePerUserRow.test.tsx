@@ -17,6 +17,6 @@ describe('PricePerUserRow', () => {
   it('renders formatted price when pricePerUser is provided', () => {
     renderWithI18n(<PricePerUserRow pricePerUser={50} />);
     validateText('Team Subscription, price per user, paid yearly');
-    validateText('$50');
+    validateText('$50 USD');
   });
 });

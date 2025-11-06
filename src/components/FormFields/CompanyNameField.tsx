@@ -1,9 +1,9 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { Stack } from '@openedx/paragon';
+import { type UseFormReturn } from 'react-hook-form';
 
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-
-import type { UseFormReturn } from 'react-hook-form';
 
 interface CompanyNameFieldProps {
   form: UseFormReturn<AccountDetailsData>
@@ -13,7 +13,7 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
   const intl = useIntl();
   return (
     <FieldContainer>
-      <div>
+      <Stack gap={3}>
         <h3>
           <FormattedMessage
             id="checkout.organizationName.title"
@@ -37,7 +37,7 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
           })}
           controlClassName="mr-0 mt-3"
         />
-      </div>
+      </Stack>
     </FieldContainer>
   );
 };

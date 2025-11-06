@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
+import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -49,16 +50,15 @@ describe('PurchaseSummary', () => {
 
     // Price per user row
     validateText('Team Subscription, price per user, paid yearly');
-    validateText('$50');
+    validateText('$50 USD');
 
     // Licenses row
     validateText('Number of licenses');
     validateText('x3');
 
     // Total after trial row
-    validateText('Total after trial');
-    validateText('$150');
-    validateText('USD', { exact: false });
+    validateText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`);
+    validateText('$150 USD');
     expect(screen.getAllByText(/\/yr/).length).toBeGreaterThan(0);
 
     // Auto renew notice

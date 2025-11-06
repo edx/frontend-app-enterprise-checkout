@@ -18,8 +18,9 @@ const PricePerUserRowComponent: React.FC<PricePerUserRowProps> = ({ pricePerUser
         description="Label for the team plan per user per year"
       />
     )}
-    right={pricePerUser == null ? '-' : <DisplayPrice value={pricePerUser} />}
+    right={pricePerUser == null ? '-' : <span><DisplayPrice value={pricePerUser} /> USD</span>}
     boldRight
+    className="mb-3"
   />
 );
 
