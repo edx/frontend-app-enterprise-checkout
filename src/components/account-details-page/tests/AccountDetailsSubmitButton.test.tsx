@@ -20,7 +20,7 @@ jest.mock('@/hooks/index', () => ({
 (useCurrentPageDetails as jest.Mock).mockReturnValue({
   buttonMessage: {
     id: 'checkout.continue',
-    defaultMessage: 'Create an account',
+    defaultMessage: 'Continue',
     description: 'Continue to next step',
   },
 });
@@ -54,7 +54,7 @@ describe('AccountDetailsSubmitButton', () => {
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Create an account');
+    expect(button).toHaveTextContent('Continue');
     expect(button).not.toBeDisabled();
   });
 
@@ -67,7 +67,7 @@ describe('AccountDetailsSubmitButton', () => {
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Create an account');
+    expect(button).toHaveTextContent('Continue');
     // Can't use expect(button).toBeDisabled() because the Paragon StatefulButton doesn't actually
     // set the `disabled` attribute (no idea why not). Therefore, we need to look at the
     // aria-disabled attribute instead.
@@ -83,7 +83,7 @@ describe('AccountDetailsSubmitButton', () => {
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Creating account...');
+    expect(button).toHaveTextContent('Submitting...');
     // Can't use expect(button).toBeDisabled() because the Paragon StatefulButton doesn't actually
     // set the `disabled` attribute (no idea why not). Therefore, we need to look at the
     // aria-disabled attribute instead.
@@ -101,7 +101,7 @@ describe('AccountDetailsSubmitButton', () => {
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Account created');
+    expect(button).toHaveTextContent('Submitted');
     expect(button).not.toBeDisabled();
   });
 
@@ -114,7 +114,7 @@ describe('AccountDetailsSubmitButton', () => {
     });
     const button = screen.getByTestId('stepper-submit-button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Account created');
+    expect(button).toHaveTextContent('Submitted');
     expect(button).not.toBeDisabled();
   });
 
