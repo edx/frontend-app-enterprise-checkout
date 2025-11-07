@@ -18,6 +18,7 @@ export const lmsLoginRefresh = async () => {
 const usePolledCheckoutIntent = () => {
   const { data: checkoutIntent } = useCheckoutIntent();
 
+  // TODO: If we decide to go this route, disable polling by validating the users roles for enterprise_admin
   // Include we want to refresh jwt roles and permissions
   // useQuery({
   //   queryKey: ['authUser'],

@@ -14,16 +14,6 @@ import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const buttonMessages = defineMessages({
-  pendingInactive: {
-    id: 'checkout.billingDetails.statefulProvisioningButton.pending.inactive',
-    defaultMessage: 'Your account is pending verification. {b} Please complete the email verification.',
-    description: 'Button label when system is currently pending account verification while the admin dashboard is not ready',
-  },
-  pendingInactiveReady: {
-    id: 'checkout.billingDetails.statefulProvisioningButton.pending.inactive-ready',
-    defaultMessage: 'Your dashboard is ready. {b} Please check your email to complete the verification to access your dashboard.',
-    description: 'Button label when system is currently pending account verification when the admin dashboard is ready',
-  },
   success: {
     id: 'checkout.billingDetails.statefulProvisioningButton.success',
     defaultMessage: 'Go to dashboard',
@@ -58,7 +48,6 @@ const StatefulProvisioningButton = () => {
   const [buttonState, setButtonState] = useState('pending');
   const intl = useIntl();
   const dashboardReady: boolean = polledCheckoutIntent?.state === 'fulfilled' && !!checkoutIntent?.adminPortalUrl;
-  const [intervalState, setIntervalState] = useState(null);
 
   const onClickHandler = () => {
     if (buttonState === 'success' && checkoutIntent?.adminPortalUrl && checkoutIntent?.enterpriseSlug) {
@@ -115,7 +104,7 @@ const StatefulProvisioningButton = () => {
     onClick: onClickHandler,
   };
 
-  if (buttonState === 'pending') {
+  if (!authenticatedUser.isActive && buttonState === 'pending') {
     return (
       <InActiveUserMessage dashboardReady={dashboardReady} />
     );
