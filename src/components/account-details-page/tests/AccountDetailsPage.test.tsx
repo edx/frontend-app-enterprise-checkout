@@ -41,7 +41,7 @@ describe('AccountDetailsPage', () => {
         userId: 12345,
       },
     });
-    validateText('Create an account');
+    validateText('Continue');
   });
 
   it('renders the CompanyNameField component', () => {

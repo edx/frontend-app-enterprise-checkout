@@ -18,12 +18,12 @@ type ButtonState = 'inactive' | 'default' | 'pending' | 'complete' | 'errored';
 const overrideButtonMessage: Record<string, MessageDescriptor> = defineMessages({
   submitting: {
     id: 'checkout.submitting',
-    defaultMessage: 'Creating account...',
+    defaultMessage: 'Submitting...',
     description: 'Button label when the form is submitting',
   },
   submitted: {
     id: 'checkout.submitted',
-    defaultMessage: 'Account created',
+    defaultMessage: 'Submitted',
     description: 'Button label when the form has been submitted successfully',
   },
   tryAgain: {
