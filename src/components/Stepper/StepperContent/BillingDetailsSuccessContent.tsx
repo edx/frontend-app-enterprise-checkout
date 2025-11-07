@@ -28,13 +28,12 @@ const determineBannerMessage = (state?: string | null) => {
 
 const BillingDetailsSuccessContent = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
-  const { data: successBFFContext } = useBFFSuccess(authenticatedUser?.userId ?? null);
+  const { data: successBFFContext, isLoading } = useBFFSuccess(authenticatedUser?.userId ?? null);
   const { checkoutIntent } = successBFFContext || {};
   const bannerElement = useMemo(
     () => determineBannerMessage(checkoutIntent?.state),
     [checkoutIntent?.state],
   );
-  console.log({ authenticatedUser });
 
   // Reload page when tab is brought back to foreground
   useEffect(() => {
@@ -56,6 +55,11 @@ const BillingDetailsSuccessContent = () => {
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [authenticatedUser.isActive]);
+
+  // TODO: Either display a skeleton state or add success endpoint to loader
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <>
