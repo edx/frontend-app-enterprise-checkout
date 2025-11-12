@@ -240,6 +240,107 @@ describe('RegisterAccountFields', () => {
         expect(confirmPasswordError).toBeUndefined();
       }
     });
+
+    describe('Password Whitespace Handling', () => {
+      it.each<[
+        title: string,
+        password: string,
+        confirmPassword: string,
+        expectError: boolean,
+      ]>([
+        ['trims leading spaces from password', ' password123', 'password123', false],
+        ['trims trailing spaces from password', 'password123 ', 'password123', false],
+        ['trims leading and trailing spaces from password', ' password123 ', 'password123', false],
+        ['trims leading spaces from confirmPassword', 'password123', ' password123', false],
+        ['trims trailing spaces from confirmPassword', 'password123', 'password123 ', false],
+        ['trims leading and trailing spaces from confirmPassword', 'password123', ' password123 ', false],
+        ['trims spaces from both fields', ' password123 ', ' password123 ', false],
+        ['shows error when passwords differ after trimming', 'password123', 'password456', true],
+        ['trims multiple leading spaces', '   password123', 'password123', false],
+        ['trims multiple trailing spaces', 'password123   ', 'password123', false],
+        ['trims tabs and spaces', '\tpassword123 ', ' password123\t', false],
+        ['shows error with different passwords and spaces', ' password123 ', ' differentpassword ', true],
+      ])('%s', async (_title, password, confirmPassword, expectError) => {
+        const form = renderComponent();
+
+        form.setValue('password', password);
+        form.setValue('confirmPassword', confirmPassword);
+        await form.trigger(['password', 'confirmPassword']);
+
+        const confirmPasswordError = form.getFieldState('confirmPassword').error;
+        if (expectError) {
+          expect(confirmPasswordError?.message).toMatch(/do not match/i);
+        } else {
+          const passwordError = form.getFieldState('password').error;
+          expect(passwordError).toBeUndefined();
+          expect(confirmPasswordError).toBeUndefined();
+        }
+      });
+
+      it('does not trim internal spaces in passwords', async () => {
+        const form = renderComponent();
+
+        const passwordWithSpaces = 'pass word 123';
+        form.setValue('password', passwordWithSpaces);
+        form.setValue('confirmPassword', passwordWithSpaces);
+        await form.trigger(['password', 'confirmPassword']);
+
+        const confirmPasswordError = form.getFieldState('confirmPassword').error;
+        const passwordError = form.getFieldState('password').error;
+
+        expect(passwordError).toBeUndefined();
+        expect(confirmPasswordError).toBeUndefined();
+      });
+
+      it('shows error when internal spaces differ between password and confirmPassword', async () => {
+        const form = renderComponent();
+
+        form.setValue('password', 'pass word123');
+        form.setValue('confirmPassword', 'password123');
+        await form.trigger(['password', 'confirmPassword']);
+
+        const confirmPasswordError = form.getFieldState('confirmPassword').error;
+        expect(confirmPasswordError?.message).toMatch(/do not match/i);
+      });
+
+      it('validates minimum length after trimming whitespace', async () => {
+        const form = renderComponent();
+
+        // Single character with spaces should fail after trimming
+        form.setValue('password', ' 1 ');
+        await form.trigger('password');
+
+        const passwordError = form.getFieldState('password').error;
+        expect(passwordError?.message).toMatch(/at least 2 characters/i);
+      });
+
+      it('validates maximum length after trimming whitespace', async () => {
+        const form = renderComponent();
+
+        // Create a password that's 76 characters (exceeds max of 75)
+        const longPassword = 'a'.repeat(76);
+        form.setValue('password', ` ${longPassword} `);
+        await form.trigger('password');
+
+        const passwordError = form.getFieldState('password').error;
+        expect(passwordError?.message).toMatch(/no more than 75 characters/i);
+      });
+
+      it('handles empty strings with only whitespace', async () => {
+        const form = renderComponent();
+
+        form.setValue('password', '   ');
+        form.setValue('confirmPassword', '   ');
+        await form.trigger(['password', 'confirmPassword']);
+
+        const passwordError = form.getFieldState('password').error;
+        const confirmPasswordError = form.getFieldState('confirmPassword').error;
+
+        // Should fail validation because after trimming, it's empty
+        expect(passwordError?.message).toMatch(/at least 2 characters/i);
+        expect(confirmPasswordError?.message).toMatch(/confirm your password/i);
+      });
+    });
   });
 
   describe('Country Dropdown', () => {
