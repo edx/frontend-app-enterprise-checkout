@@ -82,11 +82,10 @@ export const PlanDetailsRegisterPageSchema = () => (z.object({
     .min(2, 'Username must be between 2 and 30 characters long.')
     .max(30, 'Username must be between 2 and 30 characters long.'),
   password: z.string()
-    .min(2, 'This password is too short. It must contain at least 2 characters.')
-    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
-  confirmPassword: z.string()
-    .min(8, 'Please confirm your password')
-    .max(75, 'This password is too long. It must contain no more than 75 characters.'),
+    .min(8, 'Password must be between 8 and 75 characters and contain at least one digit.')
+    .max(75, 'Password must be between 8 and 75 characters and contain at least one digit.')
+    .refine((value) => /[0-9]/.test(value), 'Password must contain at least one digit.'),
+  confirmPassword: z.string(),
   country: z.string().trim()
     .min(1, 'Country is required'),
 }).refine((data) => data.password === data.confirmPassword, {
