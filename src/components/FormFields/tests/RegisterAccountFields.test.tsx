@@ -213,7 +213,7 @@ describe('RegisterAccountFields', () => {
       await form.trigger('password');
 
       const passwordError = form.getFieldState('password').error;
-      expect(passwordError?.message).toMatch(/at least 2 characters/i);
+      expect(passwordError?.message).toMatch('Password must be between 8 and 75 characters and contain at least one digit.');
     });
 
     it.each<[
@@ -223,6 +223,8 @@ describe('RegisterAccountFields', () => {
       expectError: boolean,
     ]>([
       ['shows error when passwords do not match', 'password123', 'differentpassword', true],
+      ['validates spaces within passwords', '   password1 ', '   password1 ', false],
+      ['validates spaces when passwords do not match', 'password1', '   password1 ', true],
       ['passes when passwords match', 'password123', 'password123', false],
     ])('%s', async (_title, password, confirmPassword, expectError) => {
       const form = renderComponent();
