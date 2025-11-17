@@ -70,14 +70,24 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
     .max(255, 'Maximum 255 characters'),
 }));
 
-export const PlanDetailsRegisterPageSchema = () => (z.object({
+export const PlanDetailsRegisterPageSchema = (constraints) => (z.object({
   adminEmail: z.string().trim()
     .email()
-    .min(1, 'Email is required')
-    .max(254),
+    .min(
+      constraints?.adminEmail?.minLength,
+      constraints?.adminEmail?.minLength
+        ? 'Email is required'
+        : undefined,
+    )
+    .max(constraints?.adminEmail?.maxLength),
   fullName: z.string().trim()
-    .min(1, 'Full name is required')
-    .max(255),
+    .min(
+      constraints?.fullName?.minLength,
+      constraints?.fullName?.minLength
+        ? 'Full name is required'
+        : undefined,
+    )
+    .max(constraints?.fullName?.maxLength),
   username: z.string().trim()
     .min(2, 'Username must be between 2 and 30 characters long.')
     .max(30, 'Username must be between 2 and 30 characters long.'),
@@ -117,19 +127,18 @@ export const PlanDetailsSchema = (
 ) => (z.object({
   quantity: z.coerce.number()
     .min(
-      constraints?.quantity?.min,
+      constraints?.quantity?.min as number,
       constraints?.quantity?.min
         ? `Minimum ${constraints.quantity.min} users`
         : undefined,
     )
     .max(
-      constraints?.quantity?.max,
+      constraints?.quantity?.max as number,
       constraints?.quantity?.max
         ? `You can only have up to ${constraints.quantity.max} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
     )
     .superRefine(async (quantity, ctx) => {
-    // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'quantity',
         quantity,
@@ -143,10 +152,35 @@ export const PlanDetailsSchema = (
       }
     }),
   fullName: z.string().trim()
-    .min(1, 'Full name is required')
-    .max(255),
+    .min(
+      constraints?.fullName?.minLength as number,
+      constraints?.fullName?.minLength
+        ? 'Full name is required'
+        : undefined,
+    )
+    .max(
+      constraints?.fullName?.maxLength as number,
+      constraints?.fullName?.maxLength
+        ? `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength} characters.`
+        : undefined,
+    ),
   adminEmail: z.string().trim()
-    .max(254)
+    .min(
+      constraints?.adminEmail?.minLength as number,
+      constraints?.adminEmail?.minLength
+        ? 'Please enter valid email (too short)'
+        : undefined,
+    )
+    .max(
+      constraints?.adminEmail?.maxLength as number,
+      constraints?.adminEmail?.maxLength
+        ? `This email address is too long. It must contain no more than ${constraints?.adminEmail?.maxLength} characters`
+        : undefined,
+    )
+    .regex(
+      new RegExp(constraints?.adminEmail?.pattern as string),
+      'Please enter valid email',
+    )
     .superRefine(async (adminEmail, ctx) => {
       // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(
@@ -167,27 +201,42 @@ export const PlanDetailsSchema = (
       }
     }),
   country: z.string().trim()
-    .min(1, 'Country is required'),
+    .min(
+      constraints?.country?.minLength as number,
+      constraints?.country?.minLength
+        ? 'Country is required'
+        : undefined,
+    ),
   stripePriceId: z.string().trim().optional().nullable(),
 }));
 
 export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   companyName: z.string().trim()
-    .min(1, 'Company name is required')
-    .max(255, 'Maximum 255 characters'),
+    .min(
+      constraints?.companyName?.minLength as number,
+      constraints?.companyName?.minLength
+        ? 'Company name is required'
+        : undefined,
+    )
+    .max(
+      constraints?.companyName?.maxLength as number,
+      constraints?.companyName?.maxLength
+        ? `Maximum ${constraints?.companyName?.maxLength} characters.`
+        : undefined,
+    ),
   enterpriseSlug: z.string().trim()
     .min(
-      constraints?.enterpriseSlug?.minLength,
+      constraints?.enterpriseSlug?.minLength as number,
       'Company Url is required',
     )
     .max(
-      constraints?.enterpriseSlug?.maxLength,
+      constraints?.enterpriseSlug?.maxLength as number,
       constraints?.enterpriseSlug?.maxLength
         ? `Maximum ${constraints?.enterpriseSlug.maxLength} characters`
         : undefined,
     )
     .regex(
-      new RegExp(constraints?.enterpriseSlug?.pattern),
+      new RegExp(constraints?.enterpriseSlug?.pattern as string),
       'Only alphanumeric lowercase characters and hyphens are allowed.',
     ),
 }));
