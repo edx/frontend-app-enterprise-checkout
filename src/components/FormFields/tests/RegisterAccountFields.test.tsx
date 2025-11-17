@@ -205,15 +205,26 @@ describe('RegisterAccountFields', () => {
       });
     });
 
-    it('validates password minimum length', async () => {
+    it('validates password specifications', async () => {
       const form = renderComponent();
 
       // Set a short password
       form.setValue('password', '1');
       await form.trigger('password');
+      let passwordError = form.getFieldState('password').error;
+      expect(passwordError?.message).toMatch('Password must contain at least 8 characters.');
 
-      const passwordError = form.getFieldState('password').error;
-      expect(passwordError?.message).toMatch('Password must be between 8 and 75 characters and contain at least one digit.');
+      // Set a long password
+      form.setValue('password', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo lir elphie1.');
+      await form.trigger('password');
+      passwordError = form.getFieldState('password').error;
+      expect(passwordError?.message).toMatch('Password must contain no more than 75 characters.');
+
+      // Set a password without a number
+      form.setValue('password', 'passwordWithoutDigit');
+      await form.trigger('password');
+      passwordError = form.getFieldState('password').error;
+      expect(passwordError?.message).toMatch('Password must contain at least one digit.');
     });
 
     it.each<[
