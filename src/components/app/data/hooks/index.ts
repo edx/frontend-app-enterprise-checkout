@@ -7,6 +7,7 @@ export { default as useCreateCheckoutSessionMutation } from './useCreateCheckout
 export { default as usePurchaseSummaryPricing } from './usePurchaseSummaryPricing';
 export { default as useCheckoutIntent } from './useCheckoutIntent';
 export { default as useFirstBillableInvoice } from './useFirstBillableInvoice';
+export { default as usePolledAuthenticatedUser } from './usePolledAuthenticatedUser';
 export { default as usePolledCheckoutIntent } from './usePolledCheckoutIntent';
 export { default as useCreateBillingPortalSession } from './useCreateBillingPortalSession';
 export { default as useCreateCheckoutIntentMutation } from './useCreateCheckoutIntentMutation';

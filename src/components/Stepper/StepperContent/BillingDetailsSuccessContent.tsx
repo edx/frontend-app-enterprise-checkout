@@ -1,6 +1,6 @@
 import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 
 import { useBFFSuccess } from '@/components/app/data';
 import { BillingDetailsHeadingMessage } from '@/components/billing-details-pages/BillingDetailsHeadingMessage';
@@ -20,7 +20,11 @@ const determineBannerMessage = (state?: string | null) => {
   if (state === 'fulfilled') {
     return <SuccessHeading />;
   }
-  if (['errored_provisioning', 'errored_stripe_checkout'].includes(state)) {
+  if ([
+    'errored_provisioning',
+    'errored_fulfillment_stalled',
+    'errored_backoffice',
+  ].includes(state)) {
     return <ErrorHeading />;
   }
   return null;
@@ -28,38 +32,12 @@ const determineBannerMessage = (state?: string | null) => {
 
 const BillingDetailsSuccessContent = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
-  const { data: successBFFContext, isLoading } = useBFFSuccess(authenticatedUser?.userId ?? null);
+  const { data: successBFFContext } = useBFFSuccess(authenticatedUser?.userId ?? null);
   const { checkoutIntent } = successBFFContext || {};
   const bannerElement = useMemo(
     () => determineBannerMessage(checkoutIntent?.state),
     [checkoutIntent?.state],
   );
-
-  // Reload page when tab is brought back to foreground
-  useEffect(() => {
-    const onFocus = () => {
-      // Only from Success page
-      window.location.reload();
-    };
-
-    // Trigger on tab returning to foreground
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') { onFocus(); }
-    };
-    if (!authenticatedUser.isActive) {
-      window.addEventListener('focus', onFocus);
-      document.addEventListener('visibilitychange', onVisibility);
-    }
-    return () => {
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, [authenticatedUser.isActive]);
-
-  // TODO: Either display a skeleton state or add success endpoint to loader
-  if (isLoading) {
-    return null;
-  }
 
   return (
     <>

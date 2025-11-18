@@ -86,14 +86,16 @@ const StatefulSubscribeButton = () => {
     let response;
     try {
       if (checkoutIntent) {
-        const { id, country, state } = checkoutIntent;
+        const { uuid, country, state } = checkoutIntent;
         const tncCheckoutUpdateRequest: CheckoutIntentPatchRequestSchema = {
-          id,
           country,
           state,
           termsMetadata: termsAndConditions,
         };
-        await patchCheckoutIntent(tncCheckoutUpdateRequest);
+        await patchCheckoutIntent({
+          uuid,
+          requestData: tncCheckoutUpdateRequest,
+        });
       }
       response = await confirm({
         redirect: 'if_required',

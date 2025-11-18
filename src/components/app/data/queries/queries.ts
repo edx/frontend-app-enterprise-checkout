@@ -34,10 +34,10 @@ export const queryBffValidation = (payload: ValidationSchema) => {
   );
 };
 
-export const queryCheckoutIntent = (id: number) => (
+export const queryCheckoutIntent = (uuidOrId: string | number) => (
   queries
     .enterpriseCheckout
-    .checkoutIntent(id)
+    .checkoutIntent(uuidOrId)
 );
 
 export const queryCreateBillingPortalSession = (checkoutIntentId?: number) => (

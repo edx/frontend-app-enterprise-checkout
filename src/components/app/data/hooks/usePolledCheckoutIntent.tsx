@@ -1,46 +1,31 @@
-import {
-  getAuthenticatedHttpClient, getAuthenticatedUser,
-} from '@edx/frontend-platform/auth';
-import { getConfig } from '@edx/frontend-platform/config';
-import { camelCaseObject } from '@edx/frontend-platform/utils';
+import { type Query } from '@tanstack/query-core';
 import { queryOptions, useQuery } from '@tanstack/react-query';
+import { AxiosResponse } from 'axios';
 
 import useCheckoutIntent from '@/components/app/data/hooks/useCheckoutIntent';
 import { queryCheckoutIntent } from '@/components/app/data/queries/queries';
 
-export const lmsLoginRefresh = async () => {
-  const { LMS_BASE_URL } = getConfig();
-  const url = `${LMS_BASE_URL}/login_refresh`;
-  const response = await getAuthenticatedHttpClient().post(url);
-  return camelCaseObject(response.data);
-};
-
-const usePolledCheckoutIntent = () => {
+const usePolledCheckoutIntent = (): { polledCheckoutIntent: CheckoutIntent | undefined } => {
   const { data: checkoutIntent } = useCheckoutIntent();
 
-  // TODO: If we decide to go this route, disable polling by validating the users roles for enterprise_admin
-  // Include we want to refresh jwt roles and permissions
-  // useQuery({
-  //   queryKey: ['authUser'],
-  //   queryFn: lmsLoginRefresh,
-  //   // tuning optional
-  //   refetchOnWindowFocus: true,
-  //   refetchInterval: 5000,
-  //   enabled: !!checkoutIntent?.id,
-  // });
-
-  return useQuery(
+  const polledCheckoutIntentQuery = useQuery(
     queryOptions({
-      ...queryCheckoutIntent(checkoutIntent?.id!),
-      enabled: !!checkoutIntent?.id,
-      // Runs synchronously; closes over `user`
-      refetchInterval: (q) => {
-        const user = getAuthenticatedUser();
-        const fulfilled = q.state.data?.state === 'fulfilled';
-        return fulfilled && user?.isActive ? false : 5000;
+      ...queryCheckoutIntent(checkoutIntent!.uuid || checkoutIntent!.id),
+      // Begin refetching the CheckoutIntent once it becomes known.
+      enabled: !!checkoutIntent,
+      // Terminate refetching the CheckoutIntent once it becomes fulfilled.
+      refetchInterval: (query: Query<any, Error, AxiosResponse<CheckoutIntent>>): number | false => {
+        const updatedCheckoutIntentAxiosResponse: AxiosResponse<CheckoutIntent> | undefined = query.state.data;
+        const checkoutIntentIsFulfilled = updatedCheckoutIntentAxiosResponse?.data.state === 'fulfilled';
+        // False has special meaning, indicating that we want to terminate refetching.
+        return checkoutIntentIsFulfilled ? false : 5000;
       },
     }),
   );
+
+  const polledCheckoutIntentAxiosResponse: AxiosResponse<CheckoutIntent> | undefined = polledCheckoutIntentQuery.data;
+  const polledCheckoutIntent: CheckoutIntent | undefined = polledCheckoutIntentAxiosResponse?.data;
+  return { polledCheckoutIntent };
 };
 
 export default usePolledCheckoutIntent;

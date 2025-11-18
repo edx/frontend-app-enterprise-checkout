@@ -28,9 +28,12 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
     queryKey: [fields],
     queryFn: () => createCheckoutSession(payload),
   }),
-  checkoutIntent: (id) => ({
-    queryKey: [id],
-    queryFn: () => fetchCheckoutIntent(id),
+  checkoutIntent: (idOrUuid) => ({
+    queryKey: [idOrUuid],
+    queryFn: () => {
+      const isUuid = typeof idOrUuid === 'string' && idOrUuid.includes('-');
+      return fetchCheckoutIntent(isUuid ? { uuid: idOrUuid } : { id: idOrUuid });
+    },
   }),
   createBillingPortalSession: (checkoutIntentId) => ({
     queryKey: [checkoutIntentId],

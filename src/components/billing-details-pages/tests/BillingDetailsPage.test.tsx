@@ -3,7 +3,12 @@ import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import { useBFFSuccess, useCheckoutSessionClientSecret, usePolledCheckoutIntent } from '@/components/app/data';
+import {
+  useBFFSuccess,
+  useCheckoutSessionClientSecret,
+  usePolledAuthenticatedUser,
+  usePolledCheckoutIntent,
+} from '@/components/app/data';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -20,6 +25,7 @@ jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useCheckoutIntent: jest.fn(),
   useCheckoutSessionClientSecret: jest.fn(),
+  usePolledAuthenticatedUser: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
   useBFFSuccess: jest.fn(),
   useFirstBillableInvoice: jest.fn(),
@@ -128,6 +134,9 @@ describe('BillingDetailsSuccessPage', () => {
       data: {
         id: 1,
       },
+    });
+    (usePolledAuthenticatedUser as jest.Mock).mockReturnValue({
+      polledAuthenticatedUser: { isActive: true },
     });
     (useBFFSuccess as jest.Mock).mockReturnValue({
       data: {
