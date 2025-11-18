@@ -1,7 +1,7 @@
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import { camelCaseObject, snakeCaseObject } from '@edx/frontend-platform/utils';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosResponseTransformer } from 'axios';
 
 /**
  * Types for creating a CheckoutIntent.
@@ -11,87 +11,81 @@ import axios, { AxiosResponse } from 'axios';
 declare global {
 
   type TermsMetadata = {
-    readAndAcceptProductDescriptionsMessage: string,
-    confirmSubscribingMessage: string,
-    agreeToRecurringSubscriptionMessage: string,
+    readAndAcceptProductDescriptionsMessage?: string,
+    confirmSubscribingMessage?: string,
+    agreeToRecurringSubscriptionMessage?: string,
   };
 
   /**
-   * Writable request subset for creating a CheckoutIntent.
-   * (Backend serializer may accept additional fields; include as needed.)
+   * CheckoutIntent POST (create) requests.
    */
-  interface CreateCheckoutIntentRequestSchema {
+  interface CheckoutIntentCreateRequestSchema {
     quantity: number;
     enterpriseName?: string;
     enterpriseSlug?: string;
     country?: string;
     termsMetadata?: TermsMetadata;
   }
+  type CheckoutIntentCreateErrorResponseSchema = Record<string, unknown>;
 
   /**
-   * Success response (shape based on CheckoutIntentCreateRequest / Read serializer).
-   * We keep it loose but strongly typed for known fields we might use.
+   * CheckoutIntent GET (retrieve) requests.
    */
-  interface CreateCheckoutIntentSuccessResponseSchema {
-    id: number;
-    state: string;
-    quantity: number;
-    enterpriseName?: string;
-    enterpriseSlug?: string;
-    stripeCheckoutSessionId?: string | null;
-    expiresAt?: string;
-    created?: string;
-    modified?: string;
+  type CheckoutIntentRetrieveErrorResponseSchema = Record<string, unknown>;
+
+  /**
+   * CheckoutIntent PATCH requests.
+   */
+  interface CheckoutIntentPatchRequestSchema {
+    state: CheckoutIntentState;
+    country: string | null;
+    termsMetadata: TermsMetadata;
+  }
+  type CheckoutIntentPatchErrorResponseSchema = Record<string, unknown>;
+
+  /**
+   * Serialized CheckoutIntent in all responses.
+   */
+  interface CheckoutIntent {
+    uuid: string,
+    id: number,
+    created: string,
+    modified: string,
+    state: CheckoutIntentState,
+    enterpriseName: string | null,
+    enterpriseSlug: string | null,
+    enterpriseUuid: string | null,
+    expiresAt: string,
+    stripeCustomerId: string | null,
+    stripeCheckoutSessionId: string | null,
+    quantity: number,
+    country: string | null,
+    lastCheckoutError: string | null,
+    lastProvisioningError: string | null,
+    termsMetadata: TermsMetadata,
+    user: number,
+    workflow: string | null, // UUID
     // Add any other fields returned by backend as needed
     [key: string]: any;
   }
 
-  /**
-   * Schema for checkout session patch requests
+  /*
+   * Response schemas for all CheckoutIntent request types.
    */
-  interface CheckoutIntentPatchRequestSchema {
-    id: number;
-    state: CheckoutIntentState;
-    country: string | null;
-    termsMetadata: TermsMetadata;
-  }
-
-  interface CheckoutIntentPatchResponseSchema {
-    id: number;
-    created: string;
-    modified: string;
-    state: CheckoutIntentState;
-    enterpriseName: string;
-    enterpriseSlug: string;
-    enterpriseUuid: string | null;
-    stripeCustomerId: string | null;
-    expiresAt: string;
-    stripeCheckoutSessionId: string | null;
-    quantity: number;
-    country: string | null;
-    lastCheckoutError: string | null;
-    lastProvisioningError: string | null;
-    termsMetadata: TermsMetadata;
-    user: number;
-    workflow: string | null;
-  }
+  type CheckoutIntentCreateSuccessResponseSchema = CheckoutIntent;
+  type CheckoutIntentRetrieveSuccessResponseSchema = CheckoutIntent;
+  type CheckoutIntentPatchSuccessResponseSchema = CheckoutIntent;
 
   /**
    * Snake_cased versions of above schemas for API communication
    */
+  type CheckoutIntentCreateRequestPayload = Payload<CheckoutIntentCreateRequestSchema>;
+  type CheckoutIntentCreateSuccessResponsePayload = Payload<CheckoutIntentCreateSuccessResponseSchema>;
+  type CheckoutIntentCreateErrorResponsePayload = Payload<CheckoutIntentCreateErrorResponseSchema>;
+  type CheckoutIntentRetrieveSuccessResponsePayload = Payload<CheckoutIntentRetrieveSuccessResponseSchema>;
   type CheckoutIntentPatchRequestPayload = Payload<CheckoutIntentPatchRequestSchema>;
-  type CheckoutIntentPatchResponsePayload = Payload<CheckoutIntentPatchResponseSchema>;
-
-  type CreateCheckoutIntentErrorResponseSchema = Record<string, unknown>;
-
-  type CreateCheckoutIntentRequestPayload = Payload<CreateCheckoutIntentRequestSchema>;
-  type CreateCheckoutIntentSuccessResponsePayload = Payload<CreateCheckoutIntentSuccessResponseSchema>;
-  type CreateCheckoutIntentErrorResponsePayload = Payload<CreateCheckoutIntentErrorResponseSchema>;
+  type CheckoutIntentPatchSuccessResponsePayload = Payload<CheckoutIntentPatchSuccessResponseSchema>;
 }
-
-const camelCaseResponse = (
-  data: CreateCheckoutIntentSuccessResponsePayload | CreateCheckoutIntentErrorResponsePayload,
-) => camelCaseObject(data);
 
 /**
  * createCheckoutIntent
@@ -100,30 +94,67 @@ const camelCaseResponse = (
  * Only callable for an authenticated user.
  */
 async function createCheckoutIntent(
-  requestData: CreateCheckoutIntentRequestSchema,
-): Promise<AxiosResponse<CreateCheckoutIntentSuccessResponseSchema>> {
+  requestData: CheckoutIntentCreateRequestSchema,
+): Promise<AxiosResponse<CheckoutIntentCreateSuccessResponseSchema>> {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/`;
-  const requestPayload: CreateCheckoutIntentRequestPayload = snakeCaseObject(requestData);
+  const requestPayload: CheckoutIntentCreateRequestPayload = snakeCaseObject(requestData);
 
+  // Normalize the default transformers into something can be concat()'ed to.
+  const defaultTransforms: AxiosResponseTransformer[] = (
+    [axios.defaults.transformResponse ?? []].flat()
+  );
   const requestConfig = {
     // Preserve default transforms plus our camelCase transform.
-    // @ts-ignore(TS2339)
-    transformResponse: axios.defaults.transformResponse!.concat(camelCaseResponse),
+    transformResponse: defaultTransforms.concat(camelCaseObject),
   };
 
-  const response: AxiosResponse<CreateCheckoutIntentSuccessResponseSchema> = await getAuthenticatedHttpClient()
-    .post<CreateCheckoutIntentSuccessResponsePayload>(url, requestPayload, requestConfig);
+  const response: AxiosResponse<CheckoutIntentCreateSuccessResponseSchema> = (
+    await getAuthenticatedHttpClient().post<CheckoutIntentCreateSuccessResponsePayload>(
+      url,
+      requestPayload,
+      requestConfig,
+    )
+  );
 
   return response;
 }
 
-const fetchCheckoutIntent = async (id) => {
+/**
+ * fetchCheckoutIntent
+ * GET /api/v1/checkout-intent/<id>
+ *
+ * Only callable for an authenticated user.
+ */
+async function fetchCheckoutIntent({
+  id,
+  uuid,
+}: {
+  id?: number,
+  uuid?: string,
+}): Promise<AxiosResponse<CheckoutIntentRetrieveSuccessResponseSchema>> {
+  const idCoalesced = uuid || id;
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${id}/`;
-  const response = await getAuthenticatedHttpClient().get(url);
-  return camelCaseObject(response.data);
-};
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${idCoalesced}/`;
+
+  // Normalize the default transformers into something can be concat()'ed to.
+  const defaultTransforms: AxiosResponseTransformer[] = (
+    [axios.defaults.transformResponse ?? []].flat()
+  );
+  const requestConfig = {
+    // Preserve default transforms plus our camelCase transform.
+    transformResponse: defaultTransforms.concat(camelCaseObject),
+  };
+
+  const response: AxiosResponse<CheckoutIntentRetrieveSuccessResponseSchema> = (
+    await getAuthenticatedHttpClient().get<CheckoutIntentRetrieveSuccessResponsePayload>(
+      url,
+      requestConfig,
+    )
+  );
+
+  return response;
+}
 
 /**
  * Updates checkout intent from the API
@@ -145,30 +176,37 @@ const fetchCheckoutIntent = async (id) => {
   }
  */
 
-async function patchCheckoutIntent(
+async function patchCheckoutIntent({
+  id,
+  uuid,
+  requestData,
+}: {
+  id?: number,
+  uuid?: string,
   requestData: CheckoutIntentPatchRequestSchema,
-): Promise<AxiosResponse<CheckoutIntentPatchResponseSchema>> {
+}): Promise<AxiosResponse<CheckoutIntentPatchSuccessResponseSchema>> {
+  const idCoalesced = uuid || id;
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  // https://enterprise-access-internal.stage.edx.org/api/v1/checkout-intent/{id}/
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${requestData.id}/`;
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${idCoalesced}/`;
   const requestPayload: CheckoutIntentPatchRequestPayload = snakeCaseObject(requestData);
+
+  // Normalize the default transformers into something can be concat()'ed to.
+  const defaultTransforms: AxiosResponseTransformer[] = (
+    [axios.defaults.transformResponse ?? []].flat()
+  );
   const requestConfig = {
-    // Convert response payload (success or error) to a response schema for use by callers.
-    //
-    // Note: Append to default list of response transformers so that we don't lose the default JSON
-    // decode behavior.  This concat() approach is officially condoned by Axios docs:
-    // https://github.com/axios/axios/blob/12135b15/examples/transform-response/index.html#L27
-    //
-    // @ts-ignore(TS2339)
-    transformResponse: axios.defaults.transformResponse!.concat(camelCaseResponse),
+    // Preserve default transforms plus our camelCase transform.
+    transformResponse: defaultTransforms.concat(camelCaseObject),
   };
-  const response: AxiosResponse<CheckoutIntentPatchResponseSchema> = (
-    await getAuthenticatedHttpClient().patch<CheckoutIntentPatchResponseSchema>(
+
+  const response: AxiosResponse<CheckoutIntentPatchSuccessResponseSchema> = (
+    await getAuthenticatedHttpClient().patch<CheckoutIntentPatchSuccessResponsePayload>(
       url,
       requestPayload,
       requestConfig,
     )
   );
+
   return response;
 }
 

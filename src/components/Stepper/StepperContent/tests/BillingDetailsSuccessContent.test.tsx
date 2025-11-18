@@ -8,7 +8,9 @@ import {
   useBFFSuccess, useCheckoutIntent,
   useCreateBillingPortalSession,
   useFirstBillableInvoice,
-  usePolledCheckoutIntent, usePurchaseSummaryPricing,
+  usePolledAuthenticatedUser,
+  usePolledCheckoutIntent,
+  usePurchaseSummaryPricing,
 } from '@/components/app/data';
 import { BillingDetailsSuccessContent } from '@/components/Stepper/StepperContent';
 import { queryClient } from '@/utils/tests';
@@ -16,6 +18,7 @@ import { queryClient } from '@/utils/tests';
 // Mock only the hooks used by child components
 jest.mock('@/components/app/data', () => ({
   useBFFSuccess: jest.fn(),
+  usePolledAuthenticatedUser: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
   useFirstBillableInvoice: jest.fn(),
   useCreateBillingPortalSession: jest.fn(),
@@ -24,6 +27,9 @@ jest.mock('@/components/app/data', () => ({
 }));
 
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
+const mockUsePolledAuthenticatedUser = (
+  usePolledAuthenticatedUser as jest.MockedFunction<typeof usePolledAuthenticatedUser>
+);
 const mockUsePolledCheckoutIntent = usePolledCheckoutIntent as jest.MockedFunction<typeof usePolledCheckoutIntent>;
 const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
 const mockCreateBillingPortalSession = useCreateBillingPortalSession as
@@ -44,6 +50,7 @@ describe('BillingDetailsSuccessContent', () => {
     username: 'testuser',
     email: 'test@example.com',
     name: 'Test User',
+    isActive: true,
   };
 
   const mockAppContextValue = {
@@ -70,6 +77,9 @@ describe('BillingDetailsSuccessContent', () => {
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
+    (mockUsePolledAuthenticatedUser as jest.Mock).mockReturnValue({
+      polledAuthenticatedUser: { isActive: true },
+    });
     (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
       data: {
         last4: '4242',
@@ -87,7 +97,7 @@ describe('BillingDetailsSuccessContent', () => {
     });
     (mockUseCheckoutIntent as jest.Mock).mockReturnValue({
       data: {
-        id: 7,
+        uuid: 'checkout-intent-uuid',
       },
     });
   });
@@ -134,9 +144,10 @@ describe('BillingDetailsSuccessContent', () => {
 
   it.each([
     'errored_provisioning',
-    'errored_stripe_checkout',
+    'errored_fulfillment_stalled',
+    'errored_backoffice',
   ])('renders ErrorHeading when checkout intent state is (%s)', (
-    state: 'errored_provisioning' | 'errored_stripe_checkout',
+    state: CheckoutIntentState,
   ) => {
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {

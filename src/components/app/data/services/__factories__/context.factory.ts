@@ -69,7 +69,13 @@ Factory.define('checkoutContextFieldConstraints')
 Factory.define('checkoutContextCheckoutIntent')
   .attr('id', () => faker.number.int({ min: 1, max: 100000 }))
   .attr('state', () => faker.helpers.arrayElement<CheckoutIntentState>([
-    'created', 'paid', 'fulfilled', 'errored_stripe_checkout', 'errored_provisioning', 'expired',
+    'created',
+    'paid',
+    'fulfilled',
+    'errored_fulfillment_stalled',
+    'errored_backoffice',
+    'errored_provisioning',
+    'expired',
   ]))
   .attr('enterprise_name', () => faker.company.name())
   .attr('enterprise_slug', () => faker.helpers.slugify(faker.company.name()).toLowerCase())

@@ -6,14 +6,14 @@ import type { AxiosError, AxiosResponse } from 'axios';
 
 interface UseCreateCheckoutIntentMutationProps extends Omit<
 UseMutationOptions<
-AxiosResponse<CreateCheckoutIntentSuccessResponseSchema>,
-AxiosError<CreateCheckoutIntentErrorResponseSchema>,
-CreateCheckoutIntentRequestSchema
+AxiosResponse<CheckoutIntentCreateSuccessResponseSchema>,
+AxiosError<CheckoutIntentCreateErrorResponseSchema>,
+CheckoutIntentCreateRequestSchema
 >,
 'mutationFn' | 'onSuccess' | 'onError'
 > {
-  onSuccess?: (data: CreateCheckoutIntentSuccessResponseSchema) => void;
-  onError?: (errorData: CreateCheckoutIntentErrorResponseSchema | undefined) => void;
+  onSuccess?: (data: CheckoutIntentCreateSuccessResponseSchema) => void;
+  onError?: (errorData: CheckoutIntentCreateErrorResponseSchema | undefined) => void;
 }
 
 export default function useCreateCheckoutIntentMutation({
@@ -22,9 +22,9 @@ export default function useCreateCheckoutIntentMutation({
   ...mutationConfig
 }: UseCreateCheckoutIntentMutationProps = {}) {
   return useMutation<
-  AxiosResponse<CreateCheckoutIntentSuccessResponseSchema>,
-  AxiosError<CreateCheckoutIntentErrorResponseSchema>,
-  CreateCheckoutIntentRequestSchema
+  AxiosResponse<CheckoutIntentCreateSuccessResponseSchema>,
+  AxiosError<CheckoutIntentCreateErrorResponseSchema>,
+  CheckoutIntentCreateRequestSchema
   >({
     mutationFn: (requestData) => createCheckoutIntent(requestData),
     onSuccess: (axiosResponse) => {

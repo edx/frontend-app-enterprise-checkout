@@ -45,7 +45,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(() => ({
     data:
-      { id: 'test-intent', country: 'US', state: 'created' },
+      { uuid: 'test-intent-uuid', id: 1234, country: 'US', state: 'created' },
   })),
 }));
 
@@ -344,7 +344,7 @@ describe('StatefulSubscribeButton', () => {
         expect(mockSetCheckoutSessionStatus).toHaveBeenCalledWith({ type: 'complete', paymentStatus: 'paid' });
         expect(mockInvalidateQueries).toHaveBeenCalled();
         expect(jest.mocked(sendEnterpriseCheckoutTrackingEvent)).toHaveBeenCalledWith({
-          checkoutIntentId: 'test-intent',
+          checkoutIntentId: 1234,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
         });
         expect(mockNavigate).toHaveBeenCalledWith('/billing-details/success');
@@ -406,12 +406,14 @@ describe('StatefulSubscribeButton', () => {
 
       const expectedPatch = {
         country: 'US',
-        id: 'test-intent',
         state: 'created',
         termsMetadata: termsAndConditions,
       };
 
-      expect(patchCheckoutIntent).toHaveBeenCalledWith(expectedPatch);
+      expect(patchCheckoutIntent).toHaveBeenCalledWith({
+        uuid: 'test-intent-uuid',
+        requestData: expectedPatch,
+      });
     });
   });
 
