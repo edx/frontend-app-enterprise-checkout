@@ -127,13 +127,13 @@ export const PlanDetailsSchema = (
 ) => (z.object({
   quantity: z.coerce.number()
     .min(
-      constraints?.quantity?.min as number,
+      constraints?.quantity?.min ?? 5,
       constraints?.quantity?.min
         ? `Minimum ${constraints.quantity.min} users`
         : undefined,
     )
     .max(
-      constraints?.quantity?.max as number,
+      constraints?.quantity?.max ?? 50,
       constraints?.quantity?.max
         ? `You can only have up to ${constraints.quantity.max} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
@@ -153,32 +153,32 @@ export const PlanDetailsSchema = (
     }),
   fullName: z.string().trim()
     .min(
-      constraints?.fullName?.minLength as number,
+      constraints?.fullName?.minLength ?? 1,
       constraints?.fullName?.minLength
         ? 'Full name is required'
         : undefined,
     )
     .max(
-      constraints?.fullName?.maxLength as number,
+      constraints?.fullName?.maxLength ?? 150,
       constraints?.fullName?.maxLength
         ? `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength} characters.`
         : undefined,
     ),
   adminEmail: z.string().trim()
     .min(
-      constraints?.adminEmail?.minLength as number,
+      constraints?.adminEmail?.minLength ?? 6,
       constraints?.adminEmail?.minLength
         ? 'Please enter valid email (too short)'
         : undefined,
     )
     .max(
-      constraints?.adminEmail?.maxLength as number,
+      constraints?.adminEmail?.maxLength ?? 253,
       constraints?.adminEmail?.maxLength
         ? `This email address is too long. It must contain no more than ${constraints?.adminEmail?.maxLength} characters`
         : undefined,
     )
     .regex(
-      new RegExp(constraints?.adminEmail?.pattern as string),
+      new RegExp(constraints?.adminEmail?.pattern ?? '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'),
       'Please enter valid email',
     )
     .superRefine(async (adminEmail, ctx) => {
@@ -202,7 +202,7 @@ export const PlanDetailsSchema = (
     }),
   country: z.string().trim()
     .min(
-      constraints?.country?.minLength as number,
+      constraints?.country?.minLength ?? 2,
       constraints?.country?.minLength
         ? 'Country is required'
         : undefined,
@@ -213,24 +213,24 @@ export const PlanDetailsSchema = (
 export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   companyName: z.string().trim()
     .min(
-      constraints?.companyName?.minLength as number,
+      constraints?.companyName?.minLength ?? 1,
       constraints?.companyName?.minLength
         ? 'Company name is required'
         : undefined,
     )
     .max(
-      constraints?.companyName?.maxLength as number,
+      constraints?.companyName?.maxLength ?? 255,
       constraints?.companyName?.maxLength
         ? `Maximum ${constraints?.companyName?.maxLength} characters.`
         : undefined,
     ),
   enterpriseSlug: z.string().trim()
     .min(
-      constraints?.enterpriseSlug?.minLength as number,
+      constraints?.enterpriseSlug?.minLength ?? 1,
       'Company Url is required',
     )
     .max(
-      constraints?.enterpriseSlug?.maxLength as number,
+      constraints?.enterpriseSlug?.maxLength ?? 255,
       constraints?.enterpriseSlug?.maxLength
         ? `Maximum ${constraints?.enterpriseSlug.maxLength} characters`
         : undefined,
