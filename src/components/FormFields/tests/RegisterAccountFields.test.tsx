@@ -205,15 +205,26 @@ describe('RegisterAccountFields', () => {
       });
     });
 
-    it('validates password minimum length', async () => {
+    it('validates password specifications', async () => {
       const form = renderComponent();
 
       // Set a short password
       form.setValue('password', '1');
       await form.trigger('password');
+      let passwordError = form.getFieldState('password').error;
+      expect(passwordError?.message).toMatch('Password must contain at least 8 characters.');
 
-      const passwordError = form.getFieldState('password').error;
-      expect(passwordError?.message).toMatch(/at least 2 characters/i);
+      // Set a long password
+      form.setValue('password', 'fsdhjkfdshjkfdshfjsdhjfkdshfilewhuir32y84y13ui4h3jlhrfsjkhfdsuifyhui3hr2jl2h34jkl3hrj3klh4j32lh4j3hj34h32');
+      await form.trigger('password');
+      passwordError = form.getFieldState('password').error;
+      expect(passwordError?.message).toMatch('Password must contain no more than 100 characters.');
+
+      // Set a password without a number
+      form.setValue('password', 'passwordWithoutDigit');
+      await form.trigger('password');
+      passwordError = form.getFieldState('password').error;
+      expect(passwordError?.message).toMatch('Password must contain at least one digit.');
     });
 
     it.each<[
@@ -223,6 +234,8 @@ describe('RegisterAccountFields', () => {
       expectError: boolean,
     ]>([
       ['shows error when passwords do not match', 'password123', 'differentpassword', true],
+      ['validates spaces within passwords', '   password1 ', '   password1 ', false],
+      ['validates spaces when passwords do not match', 'password1', '   password1 ', true],
       ['passes when passwords match', 'password123', 'password123', false],
     ])('%s', async (_title, password, confirmPassword, expectError) => {
       const form = renderComponent();
