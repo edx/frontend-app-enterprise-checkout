@@ -215,10 +215,10 @@ describe('RegisterAccountFields', () => {
       expect(passwordError?.message).toMatch('Password must contain at least 8 characters.');
 
       // Set a long password
-      form.setValue('password', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo lir elphie1.');
+      form.setValue('password', 'fsdhjkfdshjkfdshfjsdhjfkdshfilewhuir32y84y13ui4h3jlhrfsjkhfdsuifyhui3hr2jl2h34jkl3hrj3klh4j32lh4j3hj34h32');
       await form.trigger('password');
       passwordError = form.getFieldState('password').error;
-      expect(passwordError?.message).toMatch('Password must contain no more than 75 characters.');
+      expect(passwordError?.message).toMatch('Password must contain no more than 100 characters.');
 
       // Set a password without a number
       form.setValue('password', 'passwordWithoutDigit');
