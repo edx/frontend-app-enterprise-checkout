@@ -129,13 +129,13 @@ export const PlanDetailsSchema = (
     .min(
       constraints?.quantity?.min ?? 5,
       constraints?.quantity?.min
-        ? `Minimum ${constraints.quantity.min} users`
+        ? `Minimum ${constraints?.quantity?.min ?? 5} users`
         : undefined,
     )
     .max(
       constraints?.quantity?.max ?? 50,
       constraints?.quantity?.max
-        ? `You can only have up to ${constraints.quantity.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
+        ? `You can only have up to ${constraints?.quantity?.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
     )
     .superRefine(async (quantity, ctx) => {
@@ -232,7 +232,7 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .max(
       constraints?.enterpriseSlug?.maxLength ?? 255,
       constraints?.enterpriseSlug?.maxLength
-        ? `Maximum ${constraints?.enterpriseSlug.maxLength ?? 255} characters`
+        ? `Maximum ${constraints?.enterpriseSlug?.maxLength ?? 255} characters`
         : undefined,
     )
     .regex(
