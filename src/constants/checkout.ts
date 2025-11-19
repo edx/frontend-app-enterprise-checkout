@@ -75,17 +75,13 @@ export const PlanDetailsRegisterPageSchema = (constraints) => (z.object({
     .email()
     .min(
       constraints?.adminEmail?.minLength ?? 6,
-      constraints?.adminEmail?.minLength
-        ? 'Email is required'
-        : undefined,
+      'Email is required',
     )
     .max(constraints?.adminEmail?.maxLength ?? 253),
   fullName: z.string().trim()
     .min(
       constraints?.fullName?.minLength ?? 1,
-      constraints?.fullName?.minLength
-        ? 'Full name is required'
-        : undefined,
+      'Full name is required',
     )
     .max(constraints?.fullName?.maxLength ?? 150),
   username: z.string().trim()
@@ -128,15 +124,11 @@ export const PlanDetailsSchema = (
   quantity: z.coerce.number()
     .min(
       constraints?.quantity?.min ?? 5,
-      constraints?.quantity?.min
-        ? `Minimum ${constraints?.quantity?.min ?? 5} users`
-        : undefined,
+      `Minimum ${constraints?.quantity?.min ?? 5} users`,
     )
     .max(
       constraints?.quantity?.max ?? 50,
-      constraints?.quantity?.max
-        ? `You can only have up to ${constraints?.quantity?.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
-        : undefined,
+      `You can only have up to ${constraints?.quantity?.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`,
     )
     .superRefine(async (quantity, ctx) => {
       const { isValid, validationDecisions } = await validateFieldDetailed(
@@ -154,15 +146,11 @@ export const PlanDetailsSchema = (
   fullName: z.string().trim()
     .min(
       constraints?.fullName?.minLength ?? 1,
-      constraints?.fullName?.minLength
-        ? 'Full name is required'
-        : undefined,
+      'Full name is required',
     )
     .max(
       constraints?.fullName?.maxLength ?? 150,
-      constraints?.fullName?.maxLength
-        ? `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength ?? 150} characters.`
-        : undefined,
+      `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength ?? 150} characters.`,
     ),
   adminEmail: z.string().trim()
     .min(
@@ -173,9 +161,7 @@ export const PlanDetailsSchema = (
     )
     .max(
       constraints?.adminEmail?.maxLength ?? 253,
-      constraints?.adminEmail?.maxLength
-        ? `This email address is too long. It must contain no more than ${constraints?.adminEmail?.maxLength ?? 253} characters`
-        : undefined,
+      `This email address is too long. It must contain no more than ${constraints?.adminEmail?.maxLength ?? 253} characters`,
     )
     .regex(
       new RegExp(constraints?.adminEmail?.pattern ?? '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'),
@@ -203,9 +189,7 @@ export const PlanDetailsSchema = (
   country: z.string().trim()
     .min(
       constraints?.country?.minLength ?? 2,
-      constraints?.country?.minLength
-        ? 'Country is required'
-        : undefined,
+      'Country is required',
     ),
   stripePriceId: z.string().trim().optional().nullable(),
 }));
@@ -214,15 +198,11 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
   companyName: z.string().trim()
     .min(
       constraints?.companyName?.minLength ?? 1,
-      constraints?.companyName?.minLength
-        ? 'Company name is required'
-        : undefined,
+      'Company name is required',
     )
     .max(
       constraints?.companyName?.maxLength ?? 255,
-      constraints?.companyName?.maxLength
-        ? `Maximum ${constraints?.companyName?.maxLength ?? 255} characters.`
-        : undefined,
+      `Maximum ${constraints?.companyName?.maxLength ?? 255} characters.`,
     ),
   enterpriseSlug: z.string().trim()
     .min(
@@ -231,9 +211,7 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     )
     .max(
       constraints?.enterpriseSlug?.maxLength ?? 255,
-      constraints?.enterpriseSlug?.maxLength
-        ? `Maximum ${constraints?.enterpriseSlug?.maxLength ?? 255} characters`
-        : undefined,
+      `Maximum ${constraints?.enterpriseSlug?.maxLength ?? 255} characters`,
     )
     .regex(
       new RegExp(constraints?.enterpriseSlug?.pattern ?? '^[a-z0-9-]+$'),
