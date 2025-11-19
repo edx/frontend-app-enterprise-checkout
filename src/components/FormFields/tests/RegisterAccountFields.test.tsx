@@ -51,7 +51,6 @@ const TestWrapper = (
     fullName: {
       minLength: 3,
       maxLength: 30,
-      pattern: '^[a-z0-9-]+$',
     },
   };
   const form = useForm({
