@@ -74,20 +74,20 @@ export const PlanDetailsRegisterPageSchema = (constraints) => (z.object({
   adminEmail: z.string().trim()
     .email()
     .min(
-      constraints?.adminEmail?.minLength,
+      constraints?.adminEmail?.minLength ?? 6,
       constraints?.adminEmail?.minLength
         ? 'Email is required'
         : undefined,
     )
-    .max(constraints?.adminEmail?.maxLength),
+    .max(constraints?.adminEmail?.maxLength ?? 253),
   fullName: z.string().trim()
     .min(
-      constraints?.fullName?.minLength,
+      constraints?.fullName?.minLength ?? 1,
       constraints?.fullName?.minLength
         ? 'Full name is required'
         : undefined,
     )
-    .max(constraints?.fullName?.maxLength),
+    .max(constraints?.fullName?.maxLength ?? 150),
   username: z.string().trim()
     .min(2, 'Username must be between 2 and 30 characters long.')
     .max(30, 'Username must be between 2 and 30 characters long.'),
@@ -135,7 +135,7 @@ export const PlanDetailsSchema = (
     .max(
       constraints?.quantity?.max ?? 50,
       constraints?.quantity?.max
-        ? `You can only have up to ${constraints.quantity.max} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
+        ? `You can only have up to ${constraints.quantity.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`
         : undefined,
     )
     .superRefine(async (quantity, ctx) => {
@@ -161,7 +161,7 @@ export const PlanDetailsSchema = (
     .max(
       constraints?.fullName?.maxLength ?? 150,
       constraints?.fullName?.maxLength
-        ? `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength} characters.`
+        ? `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength ?? 150} characters.`
         : undefined,
     ),
   adminEmail: z.string().trim()
@@ -174,7 +174,7 @@ export const PlanDetailsSchema = (
     .max(
       constraints?.adminEmail?.maxLength ?? 253,
       constraints?.adminEmail?.maxLength
-        ? `This email address is too long. It must contain no more than ${constraints?.adminEmail?.maxLength} characters`
+        ? `This email address is too long. It must contain no more than ${constraints?.adminEmail?.maxLength ?? 253} characters`
         : undefined,
     )
     .regex(
@@ -221,7 +221,7 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .max(
       constraints?.companyName?.maxLength ?? 255,
       constraints?.companyName?.maxLength
-        ? `Maximum ${constraints?.companyName?.maxLength} characters.`
+        ? `Maximum ${constraints?.companyName?.maxLength ?? 255} characters.`
         : undefined,
     ),
   enterpriseSlug: z.string().trim()
@@ -232,11 +232,11 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .max(
       constraints?.enterpriseSlug?.maxLength ?? 255,
       constraints?.enterpriseSlug?.maxLength
-        ? `Maximum ${constraints?.enterpriseSlug.maxLength} characters`
+        ? `Maximum ${constraints?.enterpriseSlug.maxLength ?? 255} characters`
         : undefined,
     )
     .regex(
-      new RegExp(constraints?.enterpriseSlug?.pattern as string),
+      new RegExp(constraints?.enterpriseSlug?.pattern ?? '^[a-z0-9-]+$'),
       'Only alphanumeric lowercase characters and hyphens are allowed.',
     ),
 }));
