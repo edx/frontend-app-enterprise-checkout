@@ -70,7 +70,7 @@ export const PlanDetailsLoginPageSchema = (constraints: CheckoutContextFieldCons
     .max(255, 'Maximum 255 characters'),
 }));
 
-export const PlanDetailsRegisterPageSchema = (constraints) => (z.object({
+export const PlanDetailsRegisterPageSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
   adminEmail: z.string().trim()
     .email()
     .min(
@@ -153,11 +153,10 @@ export const PlanDetailsSchema = (
       `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength ?? 150} characters.`,
     ),
   adminEmail: z.string().trim()
+    .email()
     .min(
       constraints?.adminEmail?.minLength ?? 6,
-      constraints?.adminEmail?.minLength
-        ? 'Please enter valid email (too short)'
-        : undefined,
+      'Please enter valid email (too short)',
     )
     .max(
       constraints?.adminEmail?.maxLength ?? 253,
@@ -202,7 +201,7 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     )
     .max(
       constraints?.companyName?.maxLength ?? 255,
-      `Maximum ${constraints?.companyName?.maxLength ?? 255} characters.`,
+      `Maximum ${constraints?.companyName?.maxLength ?? 255} characters`,
     ),
   enterpriseSlug: z.string().trim()
     .min(
