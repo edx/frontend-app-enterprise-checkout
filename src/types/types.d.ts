@@ -255,19 +255,23 @@ declare global {
    * Field constraint structure for form validation
    */
   interface CheckoutContextFieldConstraint {
-    min: number;
-    max: number;
-    minLength: number;
-    maxLength: number;
-    pattern: string;
+    min?: number;
+    max?: number;
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;
   }
 
   /**
    * Field constraints for checkout form
    */
   interface CheckoutContextFieldConstraints {
-    quantity: CheckoutContextFieldConstraint;
-    enterpriseSlug: CheckoutContextFieldConstraint;
+    quantity?: CheckoutContextFieldConstraint;
+    enterpriseSlug?: CheckoutContextFieldConstraint;
+    fullName?: CheckoutContextFieldConstraint;
+    adminEmail?: CheckoutContextFieldConstraint;
+    country?: CheckoutContextFieldConstraint;
+    companyName?: CheckoutContextFieldConstraint;
     embargoedCountries?: string[];
   }
 

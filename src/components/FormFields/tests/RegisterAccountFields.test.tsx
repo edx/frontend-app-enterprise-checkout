@@ -47,9 +47,15 @@ jest.mock('@openedx/paragon/icons', () => ({
 const TestWrapper = (
   { children, formProps = {} }: { children: React.ReactNode | ((form: any) => React.ReactNode); formProps?: any },
 ) => {
+  const constraints: CheckoutContextFieldConstraints = {
+    fullName: {
+      minLength: 3,
+      maxLength: 30,
+    },
+  };
   const form = useForm({
     mode: 'onTouched', // Use onTouched mode to match real application behavior
-    resolver: zodResolver(PlanDetailsRegisterPageSchema()),
+    resolver: zodResolver(PlanDetailsRegisterPageSchema(constraints)),
     defaultValues: {
       adminEmail: 'test@example.com',
       fullName: '',
