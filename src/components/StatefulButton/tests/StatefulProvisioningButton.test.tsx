@@ -1,11 +1,12 @@
+import { fetchAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
+import { useBFFSuccess, usePolledAuthenticatedUser, usePolledCheckoutIntent } from '@/components/app/data';
 import { StatefulProvisioningButton } from '@/components/StatefulButton';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { queryClient } from '@/utils/tests';
@@ -13,6 +14,7 @@ import { queryClient } from '@/utils/tests';
 // Mock the data hooks
 jest.mock('@/components/app/data', () => ({
   useBFFSuccess: jest.fn(),
+  usePolledAuthenticatedUser: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
 }));
 
@@ -20,8 +22,15 @@ jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/auth', () => ({
+  fetchAuthenticatedUser: jest.fn(),
+}));
+
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
 const mockUsePolledCheckoutIntent = usePolledCheckoutIntent as jest.MockedFunction<typeof usePolledCheckoutIntent>;
+const mockUsePolledAuthenticatedUser = (
+  usePolledAuthenticatedUser as jest.MockedFunction<typeof usePolledAuthenticatedUser>
+);
 
 // Mock window.location.href and window.open
 const originalLocation = window.location;
@@ -40,7 +49,9 @@ afterAll(() => {
 describe('StatefulProvisioningButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      polledCheckoutIntent: null,
+    });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: null,
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
@@ -59,16 +70,78 @@ describe('StatefulProvisioningButton', () => {
   );
 
   it.each([
-    'paid',
-    'errored_provisioning',
-    'errored_stripe_checkout',
-    'fulfilled',
-  ])('button does not render except on fulfilled checkout intent state', (state) => {
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: { state } });
+    {
+      checkoutIntentState: 'paid',
+      userIsActive: false,
+      expectedButtonState: 'waiting',
+      expectedHelpText: /check your email/,
+    },
+    {
+      checkoutIntentState: 'paid',
+      userIsActive: true,
+      expectedButtonState: 'waiting',
+      expectedHelpText: /wait while we provision/,
+    },
+    {
+      checkoutIntentState: 'fulfilled',
+      userIsActive: false,
+      expectedButtonState: 'waiting',
+      expectedHelpText: /check your email/,
+    },
+    {
+      checkoutIntentState: 'fulfilled',
+      userIsActive: true,
+      expectedButtonState: 'success',
+      expectedHelpText: /has been provisioned/i,
+    },
+    {
+      checkoutIntentState: 'errored_provisioning',
+      userIsActive: false,
+      expectedButtonState: 'errored',
+      expectedHelpText: /error while provisioning/i,
+    },
+    {
+      checkoutIntentState: 'errored_provisioning',
+      userIsActive: true,
+      expectedButtonState: 'errored',
+      expectedHelpText: /error while provisioning/i,
+    },
+    {
+      checkoutIntentState: 'errored_fulfillment_stalled',
+      userIsActive: false,
+      expectedButtonState: 'errored',
+      expectedHelpText: /error while provisioning/i,
+    },
+    {
+      checkoutIntentState: 'errored_backoffice',
+      userIsActive: false,
+      expectedButtonState: 'errored',
+      expectedHelpText: /error while provisioning/i,
+    },
+  ])('Validate button when checkoutIntent=$checkoutIntentState and user.isActive=$userIsActive', ({
+    checkoutIntentState,
+    userIsActive,
+    expectedButtonState,
+    expectedHelpText,
+  }: {
+    checkoutIntentState: CheckoutIntentState,
+    userIsActive: boolean,
+    expectedButtonState: 'waiting' | 'success' | 'errored',
+    expectedHelpText: RegExp,
+  }) => {
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      polledCheckoutIntent: { state: checkoutIntentState },
+    });
+    (mockUsePolledAuthenticatedUser as jest.Mock).mockReturnValue({
+      polledAuthenticatedUser: {
+        isActive: userIsActive,
+      },
+    });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: {
-          adminPortalUrl: state === 'fulfilled' ? 'https://admin.example.com/test-enterprise' : null,
+          adminPortalUrl: checkoutIntentState === 'fulfilled' ? 'https://admin.example.com/test-enterprise' : null,
+          state: checkoutIntentState,
         },
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
@@ -76,50 +149,38 @@ describe('StatefulProvisioningButton', () => {
     });
 
     renderComponent();
+    validateText('Go to dashboard');
     const button = screen.queryByTestId('stateful-provisioning-button');
-    if (state !== 'fulfilled') {
-      expect(button).toBeNull();
-    } else {
-      expect(button).toBeTruthy();
-    }
+    const helpText = screen.queryByTestId('stateful-provisioning-button-help-text');
+    expect(button).toHaveAttribute('data-button-state', expectedButtonState);
+    expect(helpText).toBeInTheDocument();
+    expect(helpText!.textContent).toMatch(expectedHelpText);
   });
 
-  it('renders with success state when checkout intent is fulfilled', () => {
+  it('redirects to manager-learners URL with enterprise slug when success button is clicked', async () => {
+    const user = userEvent.setup();
+    const adminPortalUrl = 'https://admin.example.com/test-enterprise';
+    const expectedButtonUrl = `${adminPortalUrl}/admin/subscriptions/manage-learners/`;
+
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: { state: 'fulfilled' },
+      polledCheckoutIntent: { state: 'fulfilled' },
     });
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: {
-          adminPortalUrl: 'https://admin.example.com/test-enterprise',
+          adminPortalUrl,
+          state: 'fulfilled',
         },
       },
+      refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+      isLoading: false,
     });
-
-    renderComponent();
-
-    validateText('Go to dashboard');
-
-    const button = screen.getByRole('button');
-    expect(button).not.toBeDisabled();
-    expect(button).toHaveClass('btn-secondary');
-    expect(button).toHaveClass('reverse-stateful-provisioning-success');
-  });
-
-  it('redirects to admin portal URL with enterprise slug and admin/register path when success button is clicked', async () => {
-    const user = userEvent.setup();
-    const adminPortalUrl = 'https://admin.example.com';
-    const enterpriseSlug = 'test-enterprise';
-    const expectedUrl = `${adminPortalUrl}/admin/register`;
-
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: { state: 'fulfilled' },
-    });
-    (mockUseBFFSuccess as jest.Mock).mockReturnValue({
-      data: {
-        checkoutIntent: { adminPortalUrl, enterpriseSlug },
+    (mockUsePolledAuthenticatedUser as jest.Mock).mockReturnValue({
+      polledAuthenticatedUser: {
+        isActive: true,
       },
     });
+    (fetchAuthenticatedUser as jest.Mock).mockResolvedValue({});
 
     renderComponent();
 
@@ -127,6 +188,9 @@ describe('StatefulProvisioningButton', () => {
     await user.click(button);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
-    expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank', 'noopener,noreferrer');
+    await waitFor(() => {
+      expect(fetchAuthenticatedUser).toHaveBeenCalled();
+    });
+    expect(window.open).toHaveBeenCalledWith(expectedButtonUrl, '_blank', 'noopener,noreferrer');
   });
 });

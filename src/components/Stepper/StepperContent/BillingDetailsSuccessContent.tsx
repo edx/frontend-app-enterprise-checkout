@@ -20,7 +20,11 @@ const determineBannerMessage = (state?: string | null) => {
   if (state === 'fulfilled') {
     return <SuccessHeading />;
   }
-  if (['errored_provisioning', 'errored_stripe_checkout'].includes(state)) {
+  if ([
+    'errored_provisioning',
+    'errored_fulfillment_stalled',
+    'errored_backoffice',
+  ].includes(state)) {
     return <ErrorHeading />;
   }
   return null;

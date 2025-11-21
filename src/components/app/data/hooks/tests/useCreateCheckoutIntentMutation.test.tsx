@@ -33,11 +33,26 @@ const createMockRequest = (overrides = {}) => ({
   ...overrides,
 });
 
-const createMockSuccessResponse = (overrides = {}): AxiosResponse<CreateCheckoutIntentSuccessResponseSchema> => ({
+const createMockSuccessResponse = (overrides = {}): AxiosResponse<CheckoutIntentCreateSuccessResponseSchema> => ({
   data: {
+    uuid: 'cbe46e59-09b3-4604-b48d-d84dca276ff4',
     id: 1,
     state: 'created',
     quantity: 10,
+    created: '2022-01-01T00:00Z',
+    modified: '2022-01-01T00:00Z',
+    enterpriseName: null,
+    enterpriseSlug: null,
+    enterpriseUuid: null,
+    expiresAt: '2022-01-02T00:00Z',
+    stripeCustomerId: null,
+    stripeCheckoutSessionId: null,
+    country: 'US',
+    lastCheckoutError: null,
+    lastProvisioningError: null,
+    termsMetadata: {},
+    user: 1,
+    workflow: null,
     ...overrides,
   },
   status: 201,
@@ -46,8 +61,8 @@ const createMockSuccessResponse = (overrides = {}): AxiosResponse<CreateCheckout
   config: {} as any,
 });
 
-const createMockErrorResponse = (overrides = {}): AxiosError<CreateCheckoutIntentErrorResponseSchema> => {
-  const errorData: CreateCheckoutIntentErrorResponseSchema = {
+const createMockErrorResponse = (overrides = {}): AxiosError<CheckoutIntentCreateErrorResponseSchema> => {
+  const errorData: CheckoutIntentCreateErrorResponseSchema = {
     quantity: { errorCode: 'Too low' },
     ...overrides,
   };

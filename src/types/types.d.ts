@@ -43,6 +43,7 @@ declare global {
     roles: string[];
     administrator: boolean;
     extendedProfile?: Record<string, any>;
+    isActive?: boolean;
   };
   type AppContextValue = {
     authenticatedUser: AuthenticatedUser;
@@ -279,23 +280,25 @@ declare global {
     | 'created'
     | 'paid'
     | 'fulfilled'
-    | 'errored_stripe_checkout'
+    | 'errored_backoffice'
     | 'errored_provisioning'
+    | 'errored_fulfillment_stalled'
     | 'expired';
 
   interface CheckoutContextCheckoutIntent {
     id: number;
+    uuid: string;
     state: CheckoutIntentState;
-    enterpriseName: string;
-    enterpriseSlug: string;
+    enterpriseName: string | null;
+    enterpriseSlug: string | null;
     quantity: number;
-    stripeCheckoutSessionId: string;
-    lastCheckoutError: string;
-    lastProvisioningError: string;
-    workflowId: string;
+    stripeCheckoutSessionId: string | null;
+    lastCheckoutError: string | null;
+    lastProvisioningError: string | null;
+    workflowId: string | null;
     expiresAt: string;
     adminPortalUrl: string;
-    country: string;
+    country: string | null;
   }
 
   type BillingAddress = {
