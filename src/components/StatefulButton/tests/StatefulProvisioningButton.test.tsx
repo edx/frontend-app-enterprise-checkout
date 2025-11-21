@@ -75,59 +75,69 @@ describe('StatefulProvisioningButton', () => {
       userIsActive: false,
       expectedButtonState: 'waiting',
       expectedHelpText: /check your email/,
+      expectedButtonRightSide: true,
     },
     {
       checkoutIntentState: 'paid',
       userIsActive: true,
       expectedButtonState: 'waiting',
       expectedHelpText: /wait while we provision/,
+      expectedButtonRightSide: true,
     },
     {
       checkoutIntentState: 'fulfilled',
       userIsActive: false,
       expectedButtonState: 'waiting',
       expectedHelpText: /check your email/,
+      expectedButtonRightSide: true,
     },
     {
       checkoutIntentState: 'fulfilled',
       userIsActive: true,
       expectedButtonState: 'success',
       expectedHelpText: /has been provisioned/i,
+      expectedButtonRightSide: true,
     },
     {
       checkoutIntentState: 'errored_provisioning',
       userIsActive: false,
       expectedButtonState: 'errored',
       expectedHelpText: /error while provisioning/i,
+      expectedButtonRightSide: false,
     },
     {
       checkoutIntentState: 'errored_provisioning',
       userIsActive: true,
       expectedButtonState: 'errored',
       expectedHelpText: /error while provisioning/i,
+      expectedButtonRightSide: false,
     },
     {
       checkoutIntentState: 'errored_fulfillment_stalled',
       userIsActive: false,
       expectedButtonState: 'errored',
       expectedHelpText: /error while provisioning/i,
+      expectedButtonRightSide: false,
     },
     {
       checkoutIntentState: 'errored_backoffice',
       userIsActive: false,
       expectedButtonState: 'errored',
       expectedHelpText: /error while provisioning/i,
+      expectedButtonRightSide: false,
     },
   ])('Validate button when checkoutIntent=$checkoutIntentState and user.isActive=$userIsActive', ({
     checkoutIntentState,
     userIsActive,
     expectedButtonState,
     expectedHelpText,
+    expectedButtonRightSide,
   }: {
     checkoutIntentState: CheckoutIntentState,
     userIsActive: boolean,
     expectedButtonState: 'waiting' | 'success' | 'errored',
     expectedHelpText: RegExp,
+    expectedButtonRightSide: boolean,
   }) => {
     (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
       polledCheckoutIntent: { state: checkoutIntentState },
@@ -155,6 +165,11 @@ describe('StatefulProvisioningButton', () => {
     expect(button).toHaveAttribute('data-button-state', expectedButtonState);
     expect(helpText).toBeInTheDocument();
     expect(helpText!.textContent).toMatch(expectedHelpText);
+    if (expectedButtonRightSide) {
+      expect(button).toHaveClass('button-icon-right-side');
+    } else {
+      expect(button).not.toHaveClass('button-icon-right-side');
+    }
   });
 
   it('redirects to manager-learners URL with enterprise slug when success button is clicked', async () => {
