@@ -34,9 +34,11 @@ main {
   width: 100%;
 }
 
-.reverse-stateful-provisioning-success {
+// Flip button direction to place icon on the right side of text.
+// ltr: (<Icon> <Button Message>)
+// rtl: (<Button Message> <Icon>)
+.button-icon-right-side {
   direction: rtl;
 }
-
 
 .disabled-opacity { opacity: 0.5 !important; }

@@ -166,14 +166,19 @@ const StatefulProvisioningButton = () => {
     helpTextMessage = messages.helpText.provisioningErroredMessage;
   }
 
+  const buttonClassNames: string = classNames(
+    'mx-auto d-block w-auto',
+    {
+      'button-icon-right-side': ['success', 'waiting'].includes(buttonState),
+    },
+  );
+
   return (
     <>
       <StatefulButton
         data-testid="stateful-provisioning-button"
         data-button-state={buttonState}
-        className={classNames('mx-auto d-block w-auto', {
-          'reverse-stateful-provisioning-success': buttonState === 'success',
-        })}
+        className={buttonClassNames}
         {...props}
       />
       <p
