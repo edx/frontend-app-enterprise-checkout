@@ -131,8 +131,10 @@ describe('BillingDetailsSuccessPage', () => {
       },
     });
     (usePolledCheckoutIntent as jest.Mock).mockReturnValue({
-      data: {
+      polledCheckoutIntent: {
         id: 1,
+        uuid: 'checkout-intent-uuid',
+        state: 'paid',
       },
     });
     (usePolledAuthenticatedUser as jest.Mock).mockReturnValue({
@@ -141,6 +143,8 @@ describe('BillingDetailsSuccessPage', () => {
     (useBFFSuccess as jest.Mock).mockReturnValue({
       data: {
         checkoutIntent: {
+          id: 1,
+          uuid: 'checkout-intent-uuid',
           state: 'paid',
         },
       },
