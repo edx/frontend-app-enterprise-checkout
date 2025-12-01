@@ -76,7 +76,7 @@ describe('BillingDetailsSuccessContent', () => {
       data: null,
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
-    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ data: null });
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ polledCheckoutIntent: null });
     (mockUsePolledAuthenticatedUser as jest.Mock).mockReturnValue({
       polledAuthenticatedUser: { isActive: true },
     });
@@ -120,6 +120,11 @@ describe('BillingDetailsSuccessContent', () => {
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      polledCheckoutIntent: {
+        state: 'paid',
+      },
+    });
 
     renderComponent();
 
@@ -134,6 +139,11 @@ describe('BillingDetailsSuccessContent', () => {
         checkoutIntent: { state: 'fulfilled' },
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+    });
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      polledCheckoutIntent: {
+        state: 'fulfilled',
+      },
     });
 
     renderComponent();
@@ -155,6 +165,9 @@ describe('BillingDetailsSuccessContent', () => {
         checkoutIntent: { state },
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+    });
+    (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({
+      polledCheckoutIntent: { state },
     });
 
     renderComponent();
