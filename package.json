@@ -38,6 +38,7 @@
   "dependencies": {
     "@edx/brand": "npm:@edx/elm-theme@^1.11.0",
     "@edx/frontend-component-header": "^6.4.0",
+    "@edx/frontend-logging": "^4.9.1",
     "@edx/frontend-platform": "^8.4.0",
     "@edx/typescript-config": "^1.1.0",
     "@hookform/resolvers": "^4.1.3",
