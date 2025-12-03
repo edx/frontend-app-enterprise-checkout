@@ -34,7 +34,7 @@ const PurchaseSummary: React.FC = () => {
           <hr className="w-100" />
           <TotalAfterTrialRow quantity={normalizedQuantity} totalPerYear={yearlySubscriptionCostForQuantity} />
           <AutoRenewNotice quantity={normalizedQuantity} totalPerYear={yearlySubscriptionCostForQuantity} />
-          <DueTodayRow amountDue={yearlySubscriptionCostForQuantity ?? 0} />
+          <DueTodayRow amountDue={0} />
         </Stack>
       </Card.Section>
       <Card.Footer>
