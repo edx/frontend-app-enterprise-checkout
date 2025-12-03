@@ -91,12 +91,10 @@ function setup(overrides = {}) {
         },
       },
       setFormData: jest.fn(),
-      checkoutSessionClientSecret: undefined,
       checkoutSessionStatus: {
         type: null,
         paymentStatus: null,
       },
-      setCheckoutSessionClientSecret: jest.fn(),
       setCheckoutSessionStatus: mockSetCheckoutSessionStatus,
     },
     ...overrides,
@@ -167,12 +165,10 @@ describe('StatefulSubscribeButton', () => {
             },
           },
           setFormData: jest.fn(),
-          checkoutSessionClientSecret: undefined,
           checkoutSessionStatus: {
             type: null,
             paymentStatus: null,
           },
-          setCheckoutSessionClientSecret: jest.fn(),
           setCheckoutSessionStatus: mockSetCheckoutSessionStatus,
         };
         return selector(mockState);
@@ -208,12 +204,10 @@ describe('StatefulSubscribeButton', () => {
             },
           },
           setFormData: jest.fn(),
-          checkoutSessionClientSecret: undefined,
           checkoutSessionStatus: {
             type: null,
             paymentStatus: null,
           },
-          setCheckoutSessionClientSecret: jest.fn(),
           setCheckoutSessionStatus: mockSetCheckoutSessionStatus,
         };
         return selector(mockState);
@@ -249,12 +243,10 @@ describe('StatefulSubscribeButton', () => {
             },
           },
           setFormData: jest.fn(),
-          checkoutSessionClientSecret: undefined,
           checkoutSessionStatus: {
             type: null,
             paymentStatus: null,
           },
-          setCheckoutSessionClientSecret: jest.fn(),
           setCheckoutSessionStatus: mockSetCheckoutSessionStatus,
         };
         return selector(mockState);
