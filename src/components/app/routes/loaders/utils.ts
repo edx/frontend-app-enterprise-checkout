@@ -144,6 +144,8 @@ const populateInitialApplicationState = ({
           checkoutIntent?.state,
         ).paymentStatus,
       },
+      checkoutSessionClientSecret: checkoutIntent?.checkoutSessionClientSecret
+        ?? s.checkoutSessionClientSecret,
     }),
     false,
   );
@@ -281,14 +283,8 @@ const validateFormState = async ({
   return { valid: true };
 };
 
-const getCheckoutSessionClientSecret = (): string | undefined => {
-  const { checkoutSessionClientSecret } = checkoutFormStore.getState();
-  return checkoutSessionClientSecret;
-};
-
 export {
   determineExistingCheckoutIntentState,
-  getCheckoutSessionClientSecret,
   mapCheckoutIntentStateToSessionStatus,
   populateInitialApplicationState,
   validateFormState,

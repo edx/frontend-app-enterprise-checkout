@@ -37,8 +37,6 @@ const AccountDetailsPage: React.FC = () => {
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-  const checkoutSessionClientSecret = useCheckoutFormStore((state) => state.checkoutSessionClientSecret);
-  const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
   const { data: checkoutIntent } = useCheckoutIntent();
   const queryClient = useQueryClient();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
@@ -68,8 +66,28 @@ const AccountDetailsPage: React.FC = () => {
 
   const createCheckoutSessionMutation = useCreateCheckoutSessionMutation({
     onSuccess: (responseData) => {
-      // Store the checkout session so that it can be recalled using useCheckoutSession() on subsequent pages.
-      setCheckoutSessionClientSecret(responseData.checkoutSessionClientSecret);
+      const applyCheckoutSessionClientSecretToCache = (secret: string) => {
+        const queryKeysToUpdate = [
+          queryBffContext(lmsUserId).queryKey,
+          queryBffSuccess(lmsUserId).queryKey,
+        ];
+        queryKeysToUpdate.forEach(queryKey => {
+          queryClient.setQueryData<CheckoutContextResponse>(queryKey, (previous) => {
+            if (!previous || !previous.checkoutIntent) {
+              return previous;
+            }
+            return {
+              ...previous,
+              checkoutIntent: {
+                ...previous.checkoutIntent,
+                checkoutSessionClientSecret: secret,
+              },
+            };
+          });
+        });
+      };
+
+      applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
 
       // Invalidate any queries that might be impacted by the creation of a checkout session.
       const queryKeysToInvalidate = [
@@ -121,17 +139,14 @@ const AccountDetailsPage: React.FC = () => {
     if (!mutationIsSuccess) {
       return;
     }
-    // Only reset the mutation when the form has changed since the last submission attempt
-    // (formIsDirty), OR when something cleared the checkoutSessionClientSecret which could happen if
-    // prior pages want to invalidate it.
-    if (formIsDirty || checkoutSessionClientSecret === undefined) {
+    // Only reset the mutation when the form has changed since the last submission attempt.
+    if (formIsDirty) {
       resetMutation();
     }
   }, [
     formIsDirty,
     mutationIsSuccess,
     resetMutation,
-    checkoutSessionClientSecret,
   ]);
 
   // Handle whenever the Continue button is clicked.
