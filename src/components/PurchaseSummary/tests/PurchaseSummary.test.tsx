@@ -66,5 +66,6 @@ describe('PurchaseSummary', () => {
 
     // Due today row
     validateText('Due today');
+    validateText('$0');
   });
 });
