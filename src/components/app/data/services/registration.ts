@@ -383,6 +383,8 @@ export async function registerRequest(
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
+    // We want to accept 400 responses as valid to be able to process certain error cases
+    validateStatus: (status) => (status >= 200 && status < 300) || status === 400,
   } as const;
   const formParams = new URLSearchParams();
   Object.entries(requestPayload as Record<string, unknown>).forEach(([key, value]) => {

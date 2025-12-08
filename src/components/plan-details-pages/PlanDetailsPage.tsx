@@ -89,7 +89,23 @@ const PlanDetailsPage = () => {
   });
 
   const registerMutation = useRegisterMutation({
-    onSuccess: () => {
+    onSuccess: (response) => {
+      // Check if the response contains field-level validation errors for email
+      // Expected format: {"email":[{"userMessage":"Unauthorized email address."}],"errorCode":"validation-error"}
+      const responseData = response as any;
+      const emailErrorMessage = responseData?.errorCode === 'validation-error'
+        ? responseData?.email?.[0]?.userMessage
+        : null;
+
+      if (emailErrorMessage) {
+        setError('adminEmail', {
+          type: 'manual',
+          message: emailErrorMessage,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       setIsSubmitting(false);
       navigate(CheckoutPageRoute.PlanDetails);
     },

@@ -116,25 +116,29 @@ describe('useRegisterMutation', () => {
   });
 
   describe('error handling', () => {
-    type Case = [title: string, errorFactory: () => unknown, expectedMessage: string];
+    type Case = [
+      title: string,
+      errorFactory: () => unknown,
+      expectedMessage: [string, { detail?: string } | undefined],
+    ];
 
     it.each<Case>([
       [
         'error with response.detail',
         () => createMockErrorResponse({ detail: 'Email already exists' }),
-        'Email already exists',
+        ['Email already exists', { detail: 'Email already exists' }],
       ],
       [
         'network error without response',
-        () => new AxiosError('Network Error'),
-        'Network Error',
+        () => new AxiosError('Network Error', '500'),
+        ['Network Error', undefined],
       ],
       [
         'error with response but no detail',
         () => createMockErrorResponse({}),
-        'Request failed with status code 400',
+        ['Request failed with status code 400', {}],
       ],
-    ])('handles %s and calls onError with expected message', async (_title, makeError, expectedMessage) => {
+    ])('handles %s and calls onError with expected message', async (_title, makeError, expectedMessages) => {
       const error = makeError();
       mockRegisterRequest.mockRejectedValue(error);
 
@@ -147,7 +151,7 @@ describe('useRegisterMutation', () => {
       });
 
       expect(mockRegisterRequest).toHaveBeenCalledWith(requestData);
-      expect(onError).toHaveBeenCalledWith(expectedMessage);
+      expect(onError).toHaveBeenCalledWith(...expectedMessages);
       expect(onSuccess).not.toHaveBeenCalled();
     });
   });

@@ -6,7 +6,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 
 interface UseRegisterMutationProps {
   onSuccess: (data: RegistrationCreateSuccessResponseSchema) => void;
-  onError: (errorMessage: string) => void;
+  onError: (errorMessage: string, errorData?: RegistrationErrorResponseSchema) => void;
   [key: string]: any;
 }
 
@@ -31,7 +31,8 @@ export default function useRegisterMutation({
       const serverMessage = (
         (axiosError?.response?.data as any)?.detail
       ) || axiosError?.message || 'Registration failed';
-      onError(serverMessage);
+      const errorData = axiosError?.response?.data;
+      onError(serverMessage, errorData);
     },
     ...mutationConfig,
   });
