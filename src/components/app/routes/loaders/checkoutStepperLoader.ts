@@ -28,7 +28,7 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
   const planDetailsMetadata = checkoutFormStore.getState().formData[DataStoreKey.PlanDetails];
   const redirectToPlanDetails = !planDetailsMetadata.adminEmail;
   if (redirectToPlanDetails || authenticatedUser) {
-    // If the user is already authenticated, redirect to PlanDetails Page.
+    // Redirect to PlanDetails if: (1) adminEmail is missing, or (2) user is already authenticated.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
@@ -44,11 +44,11 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
 
   const planDetailsMetadata = checkoutFormStore.getState().formData[DataStoreKey.PlanDetails];
   const redirectToPlanDetails = !(
-    planDetailsMetadata.adminEmail || planDetailsMetadata.fullName || planDetailsMetadata.country
+    planDetailsMetadata.adminEmail && planDetailsMetadata.fullName && planDetailsMetadata.country
   );
 
   if (redirectToPlanDetails || authenticatedUser) {
-    // If the user is already authenticated, redirect to PlanDetails Page.
+    // Redirect to PlanDetails if: (1) required metadata is missing, or (2) user is already authenticated.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 
