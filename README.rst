@@ -56,6 +56,24 @@ your local machine.
 
 #. Start the required enterprise Django IDAs, per their respective READMEs.
 
+#. Before starting the `enterprise-access` service, add required settings:
+
+   Navigate to the `enterprise-access` codebase and create a file inside enterprise_access/settings/private.py:
+   Add the following contents (update values as needed):
+
+   .. code-block::
+
+      ENABLE_CUSTOMER_BILLING_API = True
+      STRIPE_API_KEY = 'XXXXXXXXXXXXXXXXXXX'   # Please update this value from stripe stage account
+      SSP_PRODUCTS = {
+         'yearly_license_plan': {
+            'lookup_key': 'teams_subscription_license_yearly',
+            'quantity_range': [5, 50],
+         }
+      }
+
+   Then start the `enterprise-access` service.
+
 #. Start this MFE with:
 
    .. code-block::
