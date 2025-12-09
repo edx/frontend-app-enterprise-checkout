@@ -25,16 +25,14 @@ declare global {
     country: string;
   }
 
+  type BackendErrorMessage = Array<{ userMessage: string }>;
+
   /**
    * Data structure for an error response payload (used by create API failures).
    */
   interface RegistrationErrorResponseSchema {
-    email?: string[];
-    name?: string[];
-    username?: string[];
-    password?: string[];
-    country?: string[];
-    [key: string]: string[] | undefined;
+    email?: BackendErrorMessage;
+    [key: string]: BackendErrorMessage | undefined;
   }
 
   /**
