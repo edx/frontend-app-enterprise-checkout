@@ -21,14 +21,13 @@ const CheckoutStepperContainer = (): ReactElement => {
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
-      e.returnValue = 'Are you sure? Your data will not be saved.';
     };
     if (currentSubstepKey !== CheckoutSubstepKey.Success) {
-      global.addEventListener('beforeunload', preventUnload);
+      window.addEventListener('beforeunload', preventUnload);
     }
     // Added safety to force remove the 'beforeunload' event on the global window
     return () => {
-      global.removeEventListener('beforeunload', preventUnload);
+      window.removeEventListener('beforeunload', preventUnload);
     };
   }, [currentSubstepKey]);
 
