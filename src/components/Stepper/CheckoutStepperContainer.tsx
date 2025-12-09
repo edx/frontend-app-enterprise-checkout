@@ -20,11 +20,11 @@ const CheckoutStepperContainer = (): ReactElement => {
 
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
+      if (currentSubstepKey !== CheckoutSubstepKey.Success) {
+        e.preventDefault();
+      }
     };
-    if (currentSubstepKey !== CheckoutSubstepKey.Success) {
-      window.addEventListener('beforeunload', preventUnload);
-    }
+    window.addEventListener('beforeunload', preventUnload);
     // Added safety to force remove the 'beforeunload' event on the global window
     return () => {
       window.removeEventListener('beforeunload', preventUnload);
