@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
-import useCheckoutIntent from './useCheckoutIntent';
-
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
+
+import useCheckoutIntent from './useCheckoutIntent';
 
 const useCheckoutSessionClientSecret = (): string | null => {
   const { data: checkoutIntent } = useCheckoutIntent();
