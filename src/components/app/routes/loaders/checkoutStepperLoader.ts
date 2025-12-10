@@ -3,7 +3,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
+import { validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
@@ -128,8 +128,8 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     return redirect(invalidRoute);
   }
 
-  // TODO: check state for a stored checkout session ID.  If it does NOT exist, redirect:
-  if (!getCheckoutSessionClientSecret()) {
+  const checkoutSessionClientSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
+  if (!checkoutSessionClientSecret) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 
