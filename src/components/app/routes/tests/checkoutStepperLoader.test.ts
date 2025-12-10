@@ -1,7 +1,7 @@
 import * as authMod from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 
-import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
+import { camelCasedCheckoutContextResponseFactory, checkoutContextCheckoutIntentFactory } from '@/components/app/data/services/__factories__';
 import { makeCheckoutStepperLoader } from '@/components/app/routes/loaders';
 import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -42,15 +42,36 @@ const resetFormStore = () => {
       [DataStoreKey.BillingDetails]: {},
     },
     setFormData: checkoutFormStore.getState().setFormData,
+    checkoutSessionClientSecret: undefined,
+    checkoutSessionStatus: {
+      type: null,
+      paymentStatus: null,
+    },
+    setCheckoutSessionClientSecret: checkoutFormStore.getState().setCheckoutSessionClientSecret,
+    setCheckoutSessionStatus: checkoutFormStore.getState().setCheckoutSessionStatus,
   }, false);
 };
 
 // Build a context object with optionally valid pricing (so extractPriceId returns something)
-const buildContext = ({ withPrice = true }: { withPrice?: boolean } = {}) => {
+const buildContext = ({
+  withPrice = true,
+  includeCheckoutIntent = false,
+  checkoutSessionClientSecret = 'cs_test_context_secret',
+}: {
+  withPrice?: boolean;
+  includeCheckoutIntent?: boolean;
+  checkoutSessionClientSecret?: string | null;
+} = {}) => {
+  const checkoutIntent = includeCheckoutIntent
+    ? checkoutContextCheckoutIntentFactory({
+      checkout_session_client_secret: checkoutSessionClientSecret ?? null,
+    })
+    : null;
+
   if (!withPrice) {
     return camelCasedCheckoutContextResponseFactory({
       pricing: { default_by_lookup_key: 'abc', prices: [] },
-      checkout_intent: null,
+      checkout_intent: checkoutIntent,
     }) as any as CheckoutContextResponse;
   }
   const priceId = 'price_valid_123';
@@ -62,7 +83,7 @@ const buildContext = ({ withPrice = true }: { withPrice?: boolean } = {}) => {
   };
   return camelCasedCheckoutContextResponseFactory({
     pricing: pricingOverride,
-    checkout_intent: null,
+    checkout_intent: checkoutIntent,
   }) as any as CheckoutContextResponse;
 };
 
@@ -93,13 +114,6 @@ const populateValidAccountDetails = () => {
         enterpriseSlug: 'good-co',
       },
     },
-  }), false);
-};
-
-const populateCheckoutSessionClientSecret = () => {
-  checkoutFormStore.setState(s => ({
-    ...s,
-    checkoutSessionClientSecret: 'cs_test_123456',
   }), false);
 };
 
@@ -293,13 +307,12 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
 
     it('returns null after ensuring checkout session when everything is valid', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
-      const ctx = buildContext({ withPrice: true });
+      const ctx = buildContext({ withPrice: true, includeCheckoutIntent: true });
       ensureSpy.mockResolvedValueOnce(ctx);
       const { pricing } = ctx;
       const stripePriceId = pricing.prices[0].id as string;
       populateValidPlanDetails(stripePriceId);
       populateValidAccountDetails();
-      populateCheckoutSessionClientSecret();
 
       const loader = makeCheckoutStepperLoader(queryClient);
       const r = await loader(

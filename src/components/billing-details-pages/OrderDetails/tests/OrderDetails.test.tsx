@@ -74,13 +74,11 @@ describe('OrderDetails', () => {
         [DataStoreKey.AccountDetails]: {},
         [DataStoreKey.BillingDetails]: {},
       },
-      checkoutSessionClientSecret: undefined,
       checkoutSessionStatus: {
         type: null,
         paymentStatus: null,
       },
       setFormData: jest.fn(),
-      setCheckoutSessionClientSecret: jest.fn(),
       setCheckoutSessionStatus: jest.fn(),
     });
 
