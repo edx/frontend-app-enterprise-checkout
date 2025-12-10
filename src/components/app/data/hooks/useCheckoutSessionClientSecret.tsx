@@ -13,7 +13,7 @@ const useCheckoutSessionClientSecret = (): string | null => {
 
   useEffect(() => {
     if (!!latestSecret && latestSecret !== storedSecret) {
-      setStoredSecret(latestSecret ?? undefined);
+      setStoredSecret(latestSecret);
     }
   }, [latestSecret, setStoredSecret, storedSecret]);
 
