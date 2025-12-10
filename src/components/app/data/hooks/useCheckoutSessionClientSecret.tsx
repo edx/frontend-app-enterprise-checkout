@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
-import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
-
 import useCheckoutIntent from './useCheckoutIntent';
+
+import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 const useCheckoutSessionClientSecret = (): string | null => {
   const { data: checkoutIntent } = useCheckoutIntent();
@@ -12,7 +12,7 @@ const useCheckoutSessionClientSecret = (): string | null => {
   const latestSecret = checkoutIntent?.checkoutSessionClientSecret ?? null;
 
   useEffect(() => {
-    if (latestSecret !== storedSecret) {
+    if (!!latestSecret && latestSecret !== storedSecret) {
       setStoredSecret(latestSecret ?? undefined);
     }
   }, [latestSecret, setStoredSecret, storedSecret]);
