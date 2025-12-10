@@ -12,8 +12,8 @@ const useCheckoutSessionClientSecret = (): string | null => {
   const latestSecret = checkoutIntent?.checkoutSessionClientSecret ?? null;
 
   useEffect(() => {
-    if (latestSecret !== storedSecret) {
-      setStoredSecret(latestSecret ?? undefined);
+    if (!!latestSecret && latestSecret !== storedSecret) {
+      setStoredSecret(latestSecret);
     }
   }, [latestSecret, setStoredSecret, storedSecret]);
 
