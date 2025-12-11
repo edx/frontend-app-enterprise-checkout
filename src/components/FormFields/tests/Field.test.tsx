@@ -36,6 +36,8 @@ describe('Field', () => {
       touchedFields: {},
       dirtyFields: {},
     },
+    // Needed by useIsFieldValid in Field.tsx
+    getValues: jest.fn(() => ''),
     register: jest.fn().mockReturnValue({
       onChange: jest.fn(),
       onBlur: jest.fn(),
