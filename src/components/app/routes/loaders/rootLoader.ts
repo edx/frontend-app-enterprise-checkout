@@ -39,7 +39,7 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
 ): LoaderFunction {
   return async function rootLoader({ request }) {
     // Add a feature flag to enable/disable self-service purchasing
-    const SSP_SESSION_KEY = 'self-service-purchasing';
+    const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
 
     const { FEATURE_SELF_SERVICE_PURCHASING, FEATURE_SELF_SERVICE_PURCHASING_KEY } = getConfig();
     if (

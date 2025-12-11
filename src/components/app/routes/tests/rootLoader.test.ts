@@ -205,13 +205,13 @@ describe('makeRootLoader (rootLoader) tests', () => {
     } as any);
 
     expect(logInfo).toHaveBeenCalled();
-    expect(sessionStorage.getItem('self-service-purchasing')).toBe('test-key');
+    expect(sessionStorage.getItem('edx.checkout.self-service-purchasing')).toBe('test-key');
     // On Plan Details and unauthenticated → no redirect
     expect(result).toBeNull();
   });
 
   it('feature flag: proceeds without error when sessionStorage already has the correct key', async () => {
-    sessionStorage.setItem('self-service-purchasing', 'test-key');
+    sessionStorage.setItem('edx.checkout.self-service-purchasing', 'test-key');
     (getConfig as jest.Mock).mockReturnValueOnce({
       FEATURE_SELF_SERVICE_PURCHASING: false,
       FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
