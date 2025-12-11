@@ -13,6 +13,20 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+// Mock logging to avoid relying on frontend-platform logging initialization
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+  logInfo: jest.fn(),
+}));
+
+// Mock config to enable the self-service purchasing feature during tests
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn(() => ({
+    FEATURE_SELF_SERVICE_PURCHASING: true,
+    FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+  })),
+}));
+
 jest.mock('@edx/frontend-platform/auth', () => ({
   fetchAuthenticatedUser: jest.fn().mockResolvedValue(undefined),
   hydrateAuthenticatedUser: jest.fn().mockResolvedValue(undefined),
