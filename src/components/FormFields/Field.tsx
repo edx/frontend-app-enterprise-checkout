@@ -59,12 +59,27 @@ interface FieldProps<T extends FieldValues> {
 export function useIsFieldValid<T extends FieldValues>(form: UseFormReturn<T>) {
   return useCallback(
     (fieldName: keyof T): boolean => {
-      const { touchedFields, errors, dirtyFields } = form.formState;
+      const { touchedFields, dirtyFields, errors } = form.formState;
+
       const isTouched = !!touchedFields[fieldName as keyof typeof touchedFields];
       const isDirty = !!dirtyFields[fieldName as keyof typeof dirtyFields];
-      return isTouched && isDirty && !errors[fieldName];
+      const errorForField = errors[fieldName as keyof typeof errors];
+
+      // Read current value from RHF
+      const value = form.getValues(fieldName as any);
+
+      // Treat empty string / null / undefined as "no value"
+      const hasValue = typeof value === 'string'
+        ? value.trim() !== ''
+        : value !== null && value !== undefined;
+
+      // Valid when:
+      // - there is some value
+      // - no validation error
+      // - and the field has been touched OR modified
+      return hasValue && !errorForField && (isTouched || isDirty);
     },
-    [form.formState],
+    [form],
   );
 }
 
