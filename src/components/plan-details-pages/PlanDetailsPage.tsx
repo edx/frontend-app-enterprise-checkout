@@ -89,12 +89,15 @@ const PlanDetailsPage = () => {
   });
 
   const registerMutation = useRegisterMutation({
-    onSuccess: (response) => {
+    onSuccess: () => {
+      setIsSubmitting(false);
+      navigate(CheckoutPageRoute.PlanDetails);
+    },
+    onError: (errorMessage, errorData) => {
       // Check if the response contains field-level validation errors for email
       // Expected format: {"email":[{"userMessage":"Unauthorized email address."}],"errorCode":"validation-error"}
-      const responseData = response as any;
-      const emailErrorMessage = responseData?.errorCode === 'validation-error'
-        ? responseData?.email?.[0]?.userMessage
+      const emailErrorMessage = errorData?.errorCode === 'validation-error'
+        ? errorData?.email?.[0]?.userMessage
         : null;
 
       if (emailErrorMessage) {
@@ -102,14 +105,8 @@ const PlanDetailsPage = () => {
           type: 'manual',
           message: emailErrorMessage,
         });
-        setIsSubmitting(false);
-        return;
       }
 
-      setIsSubmitting(false);
-      navigate(CheckoutPageRoute.PlanDetails);
-    },
-    onError: (errorMessage) => {
       setIsSubmitting(false);
       setError('root.serverError', {
         type: 'manual',

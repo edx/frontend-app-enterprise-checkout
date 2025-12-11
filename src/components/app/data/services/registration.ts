@@ -27,12 +27,27 @@ declare global {
 
   type BackendErrorMessage = Array<{ userMessage: string }>;
 
+  interface RegistrationErrorPayload {
+    errorCode?: string;
+    email?: BackendErrorMessage;
+    name?: BackendErrorMessage;
+    username?: BackendErrorMessage;
+    password?: BackendErrorMessage;
+    country?: BackendErrorMessage;
+  }
+
+  interface RegistrationErrorResponsePayload {
+    data: any;
+  }
+
   /**
    * Data structure for an error response payload (used by create API failures).
    */
   interface RegistrationErrorResponseSchema {
-    email?: BackendErrorMessage;
-    [key: string]: BackendErrorMessage | undefined;
+    response?: RegistrationErrorResponsePayload;
+    message?: string;
+    data?: any;
+    success: boolean;
   }
 
   /**
@@ -371,7 +386,7 @@ export async function validateRegistrationFieldsDebounced(
  */
 export async function registerRequest(
   requestData: Partial<RegistrationCreateRequestSchema>,
-): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema>> {
+): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema> | Promise<RegistrationErrorResponseSchema>> {
   // Ensure honor_code is always sent as true by default
   const requestPayload: RegistrationCreateRequestPayload = snakeCaseObject({
     ...requestData,
@@ -395,5 +410,9 @@ export async function registerRequest(
       requestConfig,
     )
   );
+  // If response is error 400, reject with the response for upstream handling
+  if (response.status === 400) {
+    return Promise.reject(camelCaseObject(response));
+  }
   return camelCaseObject(response);
 }

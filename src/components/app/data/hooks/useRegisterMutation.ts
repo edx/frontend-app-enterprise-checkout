@@ -20,8 +20,8 @@ export default function useRegisterMutation({
   ...mutationConfig
 }: UseRegisterMutationProps) {
   return useMutation<
-  AxiosResponse<RegistrationCreateSuccessResponseSchema>,
-  AxiosError<RegistrationErrorResponseSchema>,
+  AxiosResponse<RegistrationCreateSuccessResponseSchema> | AxiosResponse<RegistrationErrorResponseSchema>,
+  Partial<RegistrationErrorResponseSchema> | AxiosError<any>,
   Partial<RegistrationCreateRequestSchema>
   >({
     mutationFn: (requestData) => registerRequest(requestData),
@@ -31,7 +31,7 @@ export default function useRegisterMutation({
       const serverMessage = (
         (axiosError?.response?.data as any)?.detail
       ) || axiosError?.message || 'Registration failed';
-      const errorData = axiosError?.response?.data;
+      const errorData = (axiosError as RegistrationErrorResponseSchema)?.data;
       onError(serverMessage, errorData);
     },
     ...mutationConfig,
