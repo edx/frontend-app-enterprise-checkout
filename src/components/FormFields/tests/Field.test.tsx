@@ -34,6 +34,7 @@ describe('Field', () => {
     formState: {
       errors: {},
       touchedFields: {},
+      dirtyFields: {},
     },
     register: jest.fn().mockReturnValue({
       onChange: jest.fn(),
