@@ -52,7 +52,7 @@ initialize({
         RECAPTCHA_SITE_KEY_WEB: process.env.RECAPTCHA_SITE_KEY_WEB || null,
         // Feature flags
         FEATURE_SELF_SERVICE_PURCHASING: process.env.FEATURE_SELF_SERVICE_PURCHASING || null,
-        FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY: process.env.FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY || null,
+        FEATURE_SELF_SERVICE_PURCHASING_KEY: process.env.FEATURE_SELF_SERVICE_PURCHASING_KEY || null,
       });
     },
   },

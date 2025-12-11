@@ -40,18 +40,18 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
   return async function rootLoader({ request }) {
     // Add a feature flag to enable/disable self-service purchasing
     const SSP_SESSION_KEY = 'self-service-purchasing';
-    const { FEATURE_SELF_SERVICE_PURCHASING, FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY } = getConfig();
+    const { FEATURE_SELF_SERVICE_PURCHASING, FEATURE_SELF_SERVICE_PURCHASING_KEY } = getConfig();
     if (
       !FEATURE_SELF_SERVICE_PURCHASING
-      && sessionStorage.getItem(SSP_SESSION_KEY) !== FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY
+      && sessionStorage.getItem(SSP_SESSION_KEY) !== FEATURE_SELF_SERVICE_PURCHASING_KEY
     ) {
       const featureFlagKey = new URL(request.url).searchParams.get('feature');
-      if (featureFlagKey !== FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY) {
+      if (featureFlagKey !== FEATURE_SELF_SERVICE_PURCHASING_KEY) {
         logError('Self-service purchasing is not enabled');
         throw new Error('Self-service purchasing is not enabled');
       } else {
         logInfo('Self-service purchasing is enabled. Setting feature flag in session storage.');
-        sessionStorage.setItem(SSP_SESSION_KEY, FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY);
+        sessionStorage.setItem(SSP_SESSION_KEY, FEATURE_SELF_SERVICE_PURCHASING_KEY);
       }
     }
 

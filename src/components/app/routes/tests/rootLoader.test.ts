@@ -1,4 +1,6 @@
 import * as authMod from '@edx/frontend-platform/auth';
+import { getConfig } from '@edx/frontend-platform/config';
+import { logError, logInfo } from '@edx/frontend-platform/logging';
 import { QueryClient } from '@tanstack/react-query';
 
 import { makeRootLoader } from '@/components/app/routes/loaders';
@@ -23,7 +25,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(() => ({
     FEATURE_SELF_SERVICE_PURCHASING: true,
-    FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
   })),
 }));
 
@@ -50,6 +52,8 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset feature flag session value between tests
+    sessionStorage.clear();
 
     // Provide a safe default for determineExistingCheckoutIntentState to avoid undefined destructuring
     (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
@@ -168,6 +172,56 @@ describe('makeRootLoader (rootLoader) tests', () => {
       stripePriceId: null,
       authenticatedUser,
     });
+    expect(result).toBeNull();
+  });
+
+  it('feature flag: throws and logs an error when SSP is disabled and no feature key is provided', async () => {
+    // Simulate feature flag disabled with known key
+    (getConfig as jest.Mock).mockReturnValueOnce({
+      FEATURE_SELF_SERVICE_PURCHASING: false,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    });
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+
+    const loader = makeRootLoader(queryClient);
+
+    await expect(
+      loader({ request: makeRequest(CheckoutPageRoute.PlanDetails) } as any),
+    ).rejects.toThrow('Self-service purchasing is not enabled');
+
+    expect(logError).toHaveBeenCalledWith('Self-service purchasing is not enabled');
+  });
+
+  it('feature flag: allows access when disabled but correct key is passed via URL and stores it in sessionStorage', async () => {
+    (getConfig as jest.Mock).mockReturnValueOnce({
+      FEATURE_SELF_SERVICE_PURCHASING: false,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    });
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+
+    const loader = makeRootLoader(queryClient);
+    const result = await loader({
+      request: makeRequest(`${CheckoutPageRoute.PlanDetails}?feature=test-key`),
+    } as any);
+
+    expect(logInfo).toHaveBeenCalled();
+    expect(sessionStorage.getItem('self-service-purchasing')).toBe('test-key');
+    // On Plan Details and unauthenticated → no redirect
+    expect(result).toBeNull();
+  });
+
+  it('feature flag: proceeds without error when sessionStorage already has the correct key', async () => {
+    sessionStorage.setItem('self-service-purchasing', 'test-key');
+    (getConfig as jest.Mock).mockReturnValueOnce({
+      FEATURE_SELF_SERVICE_PURCHASING: false,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    });
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+
+    const loader = makeRootLoader(queryClient);
+    const result = await loader({ request: makeRequest(CheckoutPageRoute.PlanDetails) } as any);
+
+    expect(logError).not.toHaveBeenCalled();
     expect(result).toBeNull();
   });
 });
