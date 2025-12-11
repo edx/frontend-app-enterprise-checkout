@@ -59,9 +59,10 @@ interface FieldProps<T extends FieldValues> {
 export function useIsFieldValid<T extends FieldValues>(form: UseFormReturn<T>) {
   return useCallback(
     (fieldName: keyof T): boolean => {
-      const { touchedFields, errors } = form.formState;
+      const { touchedFields, errors, dirtyFields } = form.formState;
       const isTouched = !!touchedFields[fieldName as keyof typeof touchedFields];
-      return isTouched && !errors[fieldName];
+      const isDirty = !!dirtyFields[fieldName as keyof typeof dirtyFields];
+      return isTouched && isDirty && !errors[fieldName];
     },
     [form.formState],
   );
