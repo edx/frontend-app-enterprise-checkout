@@ -50,6 +50,9 @@ initialize({
         COMPARE_ENTERPRISE_PLANS_URL: process.env.COMPARE_ENTERPRISE_PLANS_URL || null,
         CONTACT_SUPPORT_URL: process.env.CONTACT_SUPPORT_URL || null,
         RECAPTCHA_SITE_KEY_WEB: process.env.RECAPTCHA_SITE_KEY_WEB || null,
+        // Feature flags
+        FEATURE_SELF_SERVICE_PURCHASING: process.env.FEATURE_SELF_SERVICE_PURCHASING || null,
+        FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY: process.env.FEATURE_FLAG_SELF_SERVICE_PURCHASING_KEY || null,
       });
     },
   },
