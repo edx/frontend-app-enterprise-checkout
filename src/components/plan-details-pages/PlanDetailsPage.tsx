@@ -93,7 +93,20 @@ const PlanDetailsPage = () => {
       setIsSubmitting(false);
       navigate(CheckoutPageRoute.PlanDetails);
     },
-    onError: (errorMessage) => {
+    onError: (errorMessage, errorData) => {
+      // Check if the response contains field-level validation errors for email
+      const errorPayload = errorData?.data;
+      const emailErrorMessage = errorPayload?.errorCode === 'validation-error'
+        ? errorPayload?.email?.[0]?.userMessage
+        : null;
+
+      if (emailErrorMessage) {
+        setError('adminEmail', {
+          type: 'manual',
+          message: emailErrorMessage,
+        });
+      }
+
       setIsSubmitting(false);
       setError('root.serverError', {
         type: 'manual',
