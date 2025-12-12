@@ -37,7 +37,7 @@ declare global {
   }
 
   interface RegistrationErrorResponsePayload {
-    data: any;
+    data: RegistrationErrorPayload;
   }
 
   /**
@@ -46,7 +46,7 @@ declare global {
   interface RegistrationErrorResponseSchema {
     response?: RegistrationErrorResponsePayload;
     message?: string;
-    data?: any;
+    data?: RegistrationErrorPayload;
     success: boolean;
   }
 
