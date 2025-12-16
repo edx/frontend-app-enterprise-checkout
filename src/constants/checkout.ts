@@ -123,8 +123,12 @@ export const PlanDetailsSchema = (
 ) => (z.object({
   quantity: z.coerce.number()
     .min(
+      1,
+      'Number of licenses is required',
+    )
+    .min(
       constraints?.quantity?.min ?? 5,
-      `Minimum ${constraints?.quantity?.min ?? 5} users`,
+      `Must be at least ${constraints?.quantity?.min ?? 5} licenses`,
     )
     .max(
       constraints?.quantity?.max ?? 50,
@@ -153,7 +157,10 @@ export const PlanDetailsSchema = (
       `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength ?? 150} characters.`,
     ),
   adminEmail: z.string().trim()
-    .email()
+    .min(
+      1,
+      'Work email is required',
+    )
     .min(
       constraints?.adminEmail?.minLength ?? 6,
       'Please enter valid email (too short)',
@@ -166,6 +173,7 @@ export const PlanDetailsSchema = (
       new RegExp(constraints?.adminEmail?.pattern ?? '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'),
       'Please enter valid email',
     )
+    .email()
     .superRefine(async (adminEmail, ctx) => {
       // TODO: Nice to have to avoid calling this API if client side validation catches first
       const { isValid, validationDecisions } = await validateFieldDetailed(
