@@ -29,9 +29,9 @@ export default function useRegisterMutation({
     onError: (axiosError) => {
       // Treat errors generically; do not parse field-level errors here since validation occurs earlier.
       const serverMessage = (
-        (axiosError?.response?.data as any)?.detail
+        axiosError?.response?.data?.detail
       ) || axiosError?.message || 'Registration failed';
-      const errorData = (axiosError as RegistrationErrorResponseSchema)?.data;
+      const errorData = (axiosError as AxiosResponse<RegistrationErrorResponseSchema>)?.data;
       onError(serverMessage, errorData);
     },
     ...mutationConfig,

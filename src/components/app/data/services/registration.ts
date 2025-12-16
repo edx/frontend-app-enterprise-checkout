@@ -386,7 +386,7 @@ export async function validateRegistrationFieldsDebounced(
  */
 export async function registerRequest(
   requestData: Partial<RegistrationCreateRequestSchema>,
-): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema> | Promise<RegistrationErrorResponseSchema>> {
+): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema> | AxiosResponse<RegistrationErrorResponseSchema>> {
   // Ensure honor_code is always sent as true by default
   const requestPayload: RegistrationCreateRequestPayload = snakeCaseObject({
     ...requestData,
