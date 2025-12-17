@@ -3,8 +3,8 @@ import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import { getCheckoutSessionClientSecret, validateFormState } from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { validateFormState } from '@/components/app/routes/loaders/utils';
+import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
@@ -25,8 +25,10 @@ async function planDetailsLoader(): Promise<Response | null> {
  */
 async function planDetailsLoginLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
-  if (authenticatedUser) {
-    // If the user is already authenticated, redirect to PlanDetails Page.
+  const planDetailsMetadata = checkoutFormStore.getState().formData[DataStoreKey.PlanDetails];
+  const redirectToPlanDetails = !planDetailsMetadata.adminEmail;
+  if (redirectToPlanDetails || authenticatedUser) {
+    // Redirect to PlanDetails if: (1) adminEmail is missing, or (2) user is already authenticated.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
@@ -39,10 +41,17 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
  */
 async function planDetailsRegisterLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
-  if (authenticatedUser) {
-    // If the user is already authenticated, redirect to PlanDetails Page.
+
+  const planDetailsMetadata = checkoutFormStore.getState().formData[DataStoreKey.PlanDetails];
+  const redirectToPlanDetails = !(
+    planDetailsMetadata.adminEmail && planDetailsMetadata.fullName && planDetailsMetadata.country
+  );
+
+  if (redirectToPlanDetails || authenticatedUser) {
+    // Redirect to PlanDetails if: (1) required metadata is missing, or (2) user is already authenticated.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
+
   return null;
 }
 
@@ -119,8 +128,8 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     return redirect(invalidRoute);
   }
 
-  // TODO: check state for a stored checkout session ID.  If it does NOT exist, redirect:
-  if (!getCheckoutSessionClientSecret()) {
+  const checkoutSessionClientSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
+  if (!checkoutSessionClientSecret) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 

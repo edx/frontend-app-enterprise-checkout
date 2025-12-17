@@ -117,14 +117,14 @@ declare global {
     formData: Partial<FormData>;
     setFormData<K extends keyof StepDataMap>(
       step: K,
-      data: Partial<FormData<K>>,
+      data: Partial<FormData[K]>,
     ): void;
     checkoutSessionClientSecret: string | undefined;
     checkoutSessionStatus: {
       type: StripeCheckoutStatus['type'] | null,
       paymentStatus: StripeCheckoutStatus['paymentStatus'] | null,
     };
-    setCheckoutSessionClientSecret(checkoutSessionClientSecret: string): void;
+    setCheckoutSessionClientSecret(checkoutSessionClientSecret: string | undefined): void;
     setCheckoutSessionStatus(status: any): void;
   }
 
@@ -293,6 +293,7 @@ declare global {
     enterpriseSlug: string | null;
     quantity: number;
     stripeCheckoutSessionId: string | null;
+    checkoutSessionClientSecret?: string | null;
     lastCheckoutError: string | null;
     lastProvisioningError: string | null;
     workflowId: string | null;
