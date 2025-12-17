@@ -57,6 +57,14 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
         sessionStorage.setItem(SSP_SESSION_KEY, FEATURE_SELF_SERVICE_PURCHASING_KEY);
       }
     }
+    const currentPath = new URL(request.url).pathname;
+
+    const isCheckoutRoute = !currentPath.startsWith('/essentials');
+
+    if (!isCheckoutRoute) {
+      // we skip checkout-specific behavior
+      return null;
+    }
 
     // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
     // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the
@@ -68,7 +76,6 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
     const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
       queryBffContext(authenticatedUser?.userId || null),
     );
-    const currentPath = new URL(request.url).pathname;
 
     // Helper to avoid self-redirect loops
     /**
