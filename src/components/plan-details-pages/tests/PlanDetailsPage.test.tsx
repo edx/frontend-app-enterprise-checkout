@@ -587,10 +587,8 @@ describe('PlanDetailsRegistrationPage - Email Validation Error Handling', () => 
         mutate: jest.fn(() => {
           // Simulate 400 error response with email validation error
           onErrorCallback('Registration failed', {
-            data: {
-              errorCode: 'validation-error',
-              email: [{ userMessage: 'Email domain is not authorized for this purchase.' }],
-            },
+            errorCode: 'validation-error',
+            email: [{ userMessage: 'Email domain is not authorized for this purchase.' }],
           });
         }),
         isPending: false,

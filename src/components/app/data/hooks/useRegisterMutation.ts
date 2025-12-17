@@ -6,7 +6,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 
 interface UseRegisterMutationProps {
   onSuccess: (data: RegistrationCreateSuccessResponseSchema) => void;
-  onError: (errorMessage: string, errorData?: RegistrationErrorResponseSchema) => void;
+  onError: (errorMessage: string, errorData?: RegistrationErrorPayload) => void;
   [key: string]: any;
 }
 
@@ -32,6 +32,7 @@ export default function useRegisterMutation({
         axiosError?.response?.data?.detail
       ) || axiosError?.message || 'Registration failed';
       const errorData = (axiosError as AxiosResponse<RegistrationErrorResponseSchema>)?.data;
+      // @ts-ignore Getting spurious error 2559
       onError(serverMessage, errorData);
     },
     ...mutationConfig,

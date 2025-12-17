@@ -95,9 +95,8 @@ const PlanDetailsPage = () => {
     },
     onError: (errorMessage, errorData) => {
       // Check if the response contains field-level validation errors for email
-      const errorPayload = errorData?.data;
-      const emailErrorMessage = errorPayload?.errorCode === 'validation-error'
-        ? errorPayload?.email?.[0]?.userMessage
+      const emailErrorMessage = errorData?.errorCode === 'validation-error'
+        ? errorData?.email?.[0]?.userMessage
         : null;
 
       if (emailErrorMessage) {
