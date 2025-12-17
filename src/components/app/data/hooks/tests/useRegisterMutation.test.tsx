@@ -58,24 +58,14 @@ const createMockSuccessResponse = (overrides = {}): AxiosResponse<RegistrationCr
   config: {} as any,
 });
 
-/**
- * Helper to create a mock Axios error response
- */
-const createMockErrorResponse = (data: any = {}, status = 400, message = 'Request failed with status code 400') => (
-  new AxiosError(
-    message,
-    String(status),
-    undefined,
-    undefined,
-    {
-      status,
-      statusText: 'Bad Request',
-      data,
-      headers: {},
-      config: {} as any,
-    },
-  )
-);
+const createMockErrorResponse = (overrides = {}, status = 400): AxiosResponse<any> => ({
+  data: {},
+  ...overrides,
+  status,
+  statusText: 'Unimportant',
+  headers: {},
+  config: {} as any,
+});
 
 /**
  * Small helper to render the hook with default handlers and request data
@@ -116,25 +106,31 @@ describe('useRegisterMutation', () => {
   });
 
   describe('error handling', () => {
-    type Case = [title: string, errorFactory: () => unknown, expectedMessage: string];
+    type Case = [
+      title: string,
+      errorFactory: () => unknown,
+      expectedMessage: [string, { detail?: string } | undefined],
+    ];
 
     it.each<Case>([
       [
-        'error with response.detail',
-        () => createMockErrorResponse({ detail: 'Email already exists' }),
-        'Email already exists',
-      ],
-      [
+        'error with response.data.detail',
+        () => createMockErrorResponse({ response: { data: { detail: 'Error response detail' } } }),
+        ['Error response detail', {}],
+      ], [
         'network error without response',
-        () => new AxiosError('Network Error'),
-        'Network Error',
+        () => new AxiosError('Network Error', '500'),
+        ['Network Error', undefined],
+      ], [
+        'network error without response or message',
+        () => new AxiosError(undefined, '500'),
+        ['Registration failed', undefined],
+      ], [
+        'error with data but no response or message',
+        () => createMockErrorResponse({ data: { detail: 'Error response detail' } }),
+        ['Registration failed', { detail: 'Error response detail' }],
       ],
-      [
-        'error with response but no detail',
-        () => createMockErrorResponse({}),
-        'Request failed with status code 400',
-      ],
-    ])('handles %s and calls onError with expected message', async (_title, makeError, expectedMessage) => {
+    ])('handles %s and calls onError with expected message', async (_title, makeError, expectedMessages) => {
       const error = makeError();
       mockRegisterRequest.mockRejectedValue(error);
 
@@ -147,7 +143,7 @@ describe('useRegisterMutation', () => {
       });
 
       expect(mockRegisterRequest).toHaveBeenCalledWith(requestData);
-      expect(onError).toHaveBeenCalledWith(expectedMessage);
+      expect(onError).toHaveBeenCalledWith(...expectedMessages);
       expect(onSuccess).not.toHaveBeenCalled();
     });
   });
