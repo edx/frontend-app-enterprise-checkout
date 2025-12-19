@@ -201,7 +201,10 @@ export const PlanDetailsSchema = (
   stripePriceId: z.string().trim().optional().nullable(),
 }));
 
-export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
+export const AccountDetailsSchema = (
+  constraints: CheckoutContextFieldConstraints,
+  adminEmail?: string,
+) => (z.object({
   companyName: z.string().trim()
     .min(
       constraints?.companyName?.minLength ?? 1,
@@ -223,7 +226,20 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .regex(
       new RegExp(constraints?.enterpriseSlug?.pattern ?? '^[a-z0-9-]+$'),
       'Only alphanumeric lowercase characters and hyphens are allowed.',
-    ),
+    )
+    .superRefine(async (enterpriseSlug, ctx) => {
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'enterpriseSlug',
+        enterpriseSlug,
+        { adminEmail: adminEmail || '' },
+      );
+      if (!isValid && validationDecisions?.enterpriseSlug) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverValidationError('enterpriseSlug', validationDecisions, CheckoutErrorMessagesByField),
+        });
+      }
+    }),
 }));
 
 // @ts-ignore

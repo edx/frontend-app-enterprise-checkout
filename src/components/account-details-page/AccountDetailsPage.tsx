@@ -48,8 +48,8 @@ const AccountDetailsPage: React.FC = () => {
   } = useCurrentPageDetails();
 
   const accountDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints)
-  ), [formSchema, formValidationConstraints]);
+    formSchema(formValidationConstraints, planDetailsFormData.adminEmail)
+  ), [formSchema, formValidationConstraints, planDetailsFormData.adminEmail]);
 
   const form = useForm<AccountDetailsData>({
     mode: 'onTouched',
