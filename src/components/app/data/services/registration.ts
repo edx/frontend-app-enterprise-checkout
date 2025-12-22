@@ -25,16 +25,29 @@ declare global {
     country: string;
   }
 
+  type BackendErrorMessage = Array<{ userMessage: string }>;
+
+  interface RegistrationErrorPayload {
+    errorCode?: string;
+    email?: BackendErrorMessage;
+    name?: BackendErrorMessage;
+    username?: BackendErrorMessage;
+    password?: BackendErrorMessage;
+    country?: BackendErrorMessage;
+  }
+
+  interface RegistrationErrorResponsePayload {
+    data: RegistrationErrorPayload;
+  }
+
   /**
    * Data structure for an error response payload (used by create API failures).
    */
   interface RegistrationErrorResponseSchema {
-    email?: string[];
-    name?: string[];
-    username?: string[];
-    password?: string[];
-    country?: string[];
-    [key: string]: string[] | undefined;
+    response?: RegistrationErrorResponsePayload;
+    message?: string;
+    data?: RegistrationErrorPayload;
+    success: boolean;
   }
 
   /**
@@ -373,7 +386,7 @@ export async function validateRegistrationFieldsDebounced(
  */
 export async function registerRequest(
   requestData: Partial<RegistrationCreateRequestSchema>,
-): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema>> {
+): Promise<AxiosResponse<RegistrationCreateSuccessResponseSchema> | AxiosResponse<RegistrationErrorResponseSchema>> {
   // Ensure honor_code is always sent as true by default
   const requestPayload: RegistrationCreateRequestPayload = snakeCaseObject({
     ...requestData,
@@ -383,6 +396,8 @@ export async function registerRequest(
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     // Avoid eagerly intercepting the call to refresh the JWT token---it won't work so don't even try.
     isPublic: true,
+    // We want to accept 400 responses as valid to be able to process certain error cases
+    validateStatus: (status) => (status >= 200 && status < 300) || status === 400,
   } as const;
   const formParams = new URLSearchParams();
   Object.entries(requestPayload as Record<string, unknown>).forEach(([key, value]) => {
@@ -395,5 +410,9 @@ export async function registerRequest(
       requestConfig,
     )
   );
+  // If response is error 400, reject with the response for upstream handling
+  if (response.status === 400) {
+    return Promise.reject(camelCaseObject(response));
+  }
   return camelCaseObject(response);
 }

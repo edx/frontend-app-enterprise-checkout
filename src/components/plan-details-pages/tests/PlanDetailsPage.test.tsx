@@ -544,6 +544,78 @@ describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
   });
 });
 
+describe('PlanDetailsRegistrationPage - Email Validation Error Handling', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: {
+        quantity: {
+          min: 5,
+          max: 30,
+        },
+      },
+    });
+
+    setupBFFContextMock();
+
+    // Pre-populate the plan details form data
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'invalid@unauthorized-domain.com',
+          fullName: 'Test User',
+          country: 'US',
+        },
+      },
+    }));
+  });
+
+  it('displays email validation error from 400 response on registration form', async () => {
+    const user = userEvent.setup();
+
+    // Mock useRegisterMutation to simulate error response
+    const useRegisterMutation = (await import('@/components/app/data/hooks/useRegisterMutation')).default as unknown as jest.Mock;
+
+    let onErrorCallback: (errorMessage: string, errorData?: any) => void;
+
+    useRegisterMutation.mockImplementation(({ onError }: any) => {
+      onErrorCallback = onError;
+      return {
+        mutate: jest.fn(() => {
+          // Simulate 400 error response with email validation error
+          onErrorCallback('Registration failed', {
+            errorCode: 'validation-error',
+            email: [{ userMessage: 'Email domain is not authorized for this purchase.' }],
+          });
+        }),
+        isPending: false,
+        isSuccess: false,
+        isError: false,
+      };
+    });
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    // Fill in registration form fields
+    await user.type(screen.getByLabelText(/public username/i), 'testuser');
+    await user.type(screen.getByLabelText(/^password$/i), 'SecurePass123!');
+    await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+
+    // Submit the form
+    const submitButton = screen.getByTestId('stepper-submit-button');
+    await user.click(submitButton);
+
+    // Wait for and verify the email error is displayed in the form
+    await waitFor(() => {
+      const emailErrorElement = screen.getByText('Email domain is not authorized for this purchase.');
+      expect(emailErrorElement).toBeInTheDocument();
+    });
+  });
+});
+
 describe('PlanDetailsPage - Button Pending State', () => {
   beforeEach(() => {
     jest.clearAllMocks();
