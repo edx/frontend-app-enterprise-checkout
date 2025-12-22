@@ -10,7 +10,8 @@ import AppShell from '@/components/app/routes/AppShell';
 import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import { authenticatedSteps, CheckoutStepKey } from '@/constants/checkout';
+import AcademicSelection from '@/components/essentials-page/AcademicSelection';
+import { authenticatedSteps, CheckoutStepKey, EssentialsStepKey } from '@/constants/checkout';
 
 import { ErrorPage } from './components/ErrorPage';
 
@@ -88,14 +89,6 @@ function getCheckoutRoutes(queryClient: QueryClient) {
  */
 export function getRoutes(queryClient: QueryClient) {
   const checkoutRoutes = getCheckoutRoutes(queryClient);
-  const rootChildRoutes: RouteObject[] = [
-    ...checkoutRoutes,
-    {
-      path: '*',
-      element: (<div>Not Found</div>),
-    },
-  ];
-
   const routes: RouteObject[] = [
     {
       element: (
@@ -103,28 +96,55 @@ export function getRoutes(queryClient: QueryClient) {
           <AppShell />
         </PageWrap>
       ),
-      children: [{
-        path: '/',
-        loader: getRouteLoader(makeRootLoader, queryClient),
-        element: (
-          <PageWrap>
-            <Suspense fallback={<RouterFallback />}>
-              <Root />
-            </Suspense>
-          </PageWrap>
-        ),
-        children: rootChildRoutes,
-        errorElement: (<ErrorPage message="Error Boundary" />),
-      },
-      {
-        path: '*',
-        element: (<ErrorPage message="Not Found" />),
-      }],
+      loader: getRouteLoader(makeRootLoader, queryClient),
+      children: [
+        {
+          path: 'essentials',
+          element: (
+            <PageWrap>
+              <Suspense fallback={<RouterFallback />}>
+                <Layout />
+              </Suspense>
+            </PageWrap>
+          ),
+          children: [
+            {
+              index: true,
+              element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
+            },
+            {
+              path: EssentialsStepKey.AcademicSelection,
+              element: (
+                <PageWrap>
+                  <AcademicSelection />
+                </PageWrap>
+              ),
+            },
+          ],
+        },
+        {
+          path: 'essentials/*',
+          element: <ErrorPage message="Page Not Found" />,
+        },
+        {
+          path: '/',
+          loader: getRouteLoader(makeRootLoader, queryClient),
+          element: (
+            <PageWrap>
+              <Suspense fallback={<RouterFallback />}>
+                <Root />
+              </Suspense>
+            </PageWrap>
+          ),
+          children: checkoutRoutes,
+          errorElement: (<ErrorPage message="Error Boundary" />),
+        },
+        {
+          path: '*',
+          element: (<ErrorPage message="Not Found" />),
+        }],
     },
   ];
 
-  return {
-    routes,
-    rootChildRoutes,
-  };
+  return { routes };
 }

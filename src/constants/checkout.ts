@@ -17,6 +17,11 @@ export enum CheckoutSubstepKey {
   Success = 'success',
 }
 
+// NEW ENUMS - For Essentials/Academic flow
+export enum EssentialsStepKey {
+  AcademicSelection = 'academic-selection',
+}
+
 function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[keyof E], keyof E> {
   return Object.fromEntries(
     Object.entries(enumObj).map(([key, value]) => [value, key]),
@@ -239,6 +244,11 @@ export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraint
   })
 );
 
+// Simple empty schema - no validation needed for coming soon page
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const AcademicSelectionSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+
 export const CheckoutPageRoute = {
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
   PlanDetailsLogin: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
@@ -246,6 +256,27 @@ export const CheckoutPageRoute = {
   AccountDetails: `/${CheckoutStepKey.AccountDetails}`,
   BillingDetails: `/${CheckoutStepKey.BillingDetails}`,
   BillingDetailsSuccess: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
+} as const;
+
+// NEW ROUTES - Essentials flow
+export const EssentialsPageRoute = {
+  AcademicSelection: `/essentials/${EssentialsStepKey.AcademicSelection}`,
+} as const;
+
+// NEW PAGE DETAILS - Essentials flow
+export const EssentialsPageDetails = {
+  AcademicSelection: {
+    step: 'AcademicSelection',
+    substep: undefined,
+    formSchema: AcademicSelectionSchema,
+    route: EssentialsPageRoute.AcademicSelection,
+    title: defineMessages({
+      id: 'essentials.academicSelection.title',
+      defaultMessage: 'Academic Selection',
+      description: 'Title for the academic selection page',
+    }),
+    buttonMessage: null,
+  },
 } as const;
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
