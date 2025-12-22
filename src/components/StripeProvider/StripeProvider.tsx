@@ -22,6 +22,7 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
 
   return (
     <CheckoutProvider
+      key={checkoutSessionClientSecret}
       stripe={stripePromise}
       options={{
         fetchClientSecret: () => Promise.resolve(checkoutSessionClientSecret),

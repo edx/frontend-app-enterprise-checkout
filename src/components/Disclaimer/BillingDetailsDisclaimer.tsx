@@ -26,17 +26,19 @@ const BillingDetailsDisclaimer = () => {
         }}
       />
       <br /><br />
-      <FormattedMessage
-        id="checkout.billingDetails.disclaimer.afterBreak"
-        defaultMessage="After your {trialDays}-day free trial ends, your subscription will automatically renew each
+      <span className="font-weight-bold">
+        <FormattedMessage
+          id="checkout.billingDetails.disclaimer.afterBreak"
+          defaultMessage="After your {trialDays}-day free trial ends, your subscription will automatically renew each
         year at {price} USD per year until you cancel your subscription."
-        description="Billing details disclaimer text after the line break in the billing details page"
-        values={{
-          trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
-          price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
-          trialEndDate,
-        }}
-      />
+          description="Billing details disclaimer text after the line break in the billing details page"
+          values={{
+            trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
+            price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
+            trialEndDate,
+          }}
+        />
+      </span>
     </p>
   );
 };

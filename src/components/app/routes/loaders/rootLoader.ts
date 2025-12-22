@@ -3,6 +3,8 @@ import {
   getAuthenticatedUser,
   hydrateAuthenticatedUser,
 } from '@edx/frontend-platform/auth';
+import { getConfig } from '@edx/frontend-platform/config';
+import { logError, logInfo } from '@edx/frontend-platform/logging';
 import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunction, redirect } from 'react-router-dom';
 
@@ -36,6 +38,26 @@ const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRoot
   queryClient: QueryClient,
 ): LoaderFunction {
   return async function rootLoader({ request }) {
+    // Add a feature flag to enable/disable self-service purchasing
+    const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
+
+    const { FEATURE_SELF_SERVICE_PURCHASING, FEATURE_SELF_SERVICE_PURCHASING_KEY } = getConfig();
+    if (
+      !FEATURE_SELF_SERVICE_PURCHASING
+      && (
+        !!FEATURE_SELF_SERVICE_PURCHASING_KEY
+        && sessionStorage.getItem(SSP_SESSION_KEY) !== FEATURE_SELF_SERVICE_PURCHASING_KEY)
+    ) {
+      const featureFlagKey = new URL(request.url).searchParams.get('feature');
+      if (featureFlagKey !== FEATURE_SELF_SERVICE_PURCHASING_KEY) {
+        logError('Self-service purchasing is not enabled');
+        throw new Error('Self-service purchasing is not enabled');
+      } else {
+        logInfo('Self-service purchasing is enabled. Setting feature flag in session storage.');
+        sessionStorage.setItem(SSP_SESSION_KEY, FEATURE_SELF_SERVICE_PURCHASING_KEY);
+      }
+    }
+
     // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
     // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the
     // logged-in user's country if they are pre-registered.

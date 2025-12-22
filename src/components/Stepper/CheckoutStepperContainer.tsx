@@ -1,13 +1,10 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
-import {
-  AccountDetails,
-  BillingDetails,
-  PlanDetails,
-} from '@/components/Stepper/Steps';
+import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
+import { CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
 const Steps = (): ReactElement => (
@@ -19,7 +16,21 @@ const Steps = (): ReactElement => (
 );
 
 const CheckoutStepperContainer = (): ReactElement => {
-  const { currentStepKey } = useCurrentStep();
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
+
+  useEffect(() => {
+    const preventUnload = (e: BeforeUnloadEvent) => {
+      if (currentSubstepKey !== CheckoutSubstepKey.Success) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', preventUnload);
+    // Added safety to force remove the 'beforeunload' event on the global window
+    return () => {
+      window.removeEventListener('beforeunload', preventUnload);
+    };
+  }, [currentSubstepKey]);
+
   return (
     <Stepper activeKey={currentStepKey}>
       <Stack gap={3}>
