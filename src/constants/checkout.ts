@@ -36,6 +36,7 @@ export type FieldErrorCodes = {
   enterpriseSlug: 'invalid_format' | 'existing_enterprise_customer' | 'slug_reserved' | 'incomplete_data';
   quantity: 'invalid_format' | 'range_exceeded' | 'incomplete_data';
   stripePriceId: 'invalid_format' | 'does_not_exist' | 'incomplete_data';
+  companyName: 'existing_enterprise_customer';
 };
 
 export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Record<FieldErrorCodes[K], string> } = {
@@ -47,7 +48,7 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
   enterpriseSlug: {
     invalid_format: 'Only alphanumeric lowercase characters and hyphens are allowed.',
     // EXISTING_ENTERPRISE_CUSTOMER_FOR_ADMIN uses the same error code on the backend
-    existing_enterprise_customer: 'The slug conflicts with an existing customer.',
+    existing_enterprise_customer: 'URL is already in use.',
     slug_reserved: 'The slug is currently reserved by another user.',
     incomplete_data: 'Not enough parameters were given.',
   },
@@ -60,6 +61,9 @@ export const CheckoutErrorMessagesByField: { [K in keyof FieldErrorCodes]: Recor
     invalid_format: 'Must be a non-empty string.',
     does_not_exist: 'This stripe_price_id has not been configured.',
     incomplete_data: 'Not enough parameters were given.',
+  },
+  companyName: {
+    existing_enterprise_customer: 'This company already has an edX account. Please contact support to request access or modify the existing account',
   },
 };
 
@@ -206,7 +210,10 @@ export const PlanDetailsSchema = (
   stripePriceId: z.string().trim().optional().nullable(),
 }));
 
-export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({
+export const AccountDetailsSchema = (
+  constraints: CheckoutContextFieldConstraints,
+  adminEmail?: string,
+) => (z.object({
   companyName: z.string().trim()
     .min(
       constraints?.companyName?.minLength ?? 1,
@@ -215,7 +222,19 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .max(
       constraints?.companyName?.maxLength ?? 255,
       `Maximum ${constraints?.companyName?.maxLength ?? 255} characters`,
-    ),
+    )
+    .superRefine(async (companyName, ctx) => {
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'companyName',
+        companyName,
+      );
+      if (!isValid && validationDecisions?.companyName) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverValidationError('companyName', validationDecisions, CheckoutErrorMessagesByField),
+        });
+      }
+    }),
   enterpriseSlug: z.string().trim()
     .min(
       constraints?.enterpriseSlug?.minLength ?? 1,
@@ -228,7 +247,20 @@ export const AccountDetailsSchema = (constraints: CheckoutContextFieldConstraint
     .regex(
       new RegExp(constraints?.enterpriseSlug?.pattern ?? '^[a-z0-9-]+$'),
       'Only alphanumeric lowercase characters and hyphens are allowed.',
-    ),
+    )
+    .superRefine(async (enterpriseSlug, ctx) => {
+      const { isValid, validationDecisions } = await validateFieldDetailed(
+        'enterpriseSlug',
+        enterpriseSlug,
+        { adminEmail: adminEmail || '' },
+      );
+      if (!isValid && validationDecisions?.enterpriseSlug) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverValidationError('enterpriseSlug', validationDecisions, CheckoutErrorMessagesByField),
+        });
+      }
+    }),
 }));
 
 // @ts-ignore

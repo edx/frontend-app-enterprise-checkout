@@ -179,10 +179,11 @@ type ValidationResult = {
 const makeResolvers = (
   constraints: CheckoutContextFieldConstraints,
   stripePriceId: CheckoutContextPrice['id'],
+  adminEmail: string | undefined = undefined,
 ) => {
   const planDetailsResolver = zodResolver(PlanDetailsSchema(constraints, stripePriceId));
 
-  const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints));
+  const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints, adminEmail));
 
   const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
 
@@ -196,7 +197,9 @@ const makeResolvers = (
 interface PrerequisiteCheck<T> {
   pick: (formData: any) => T;
   getResolver: (
-    constraints: CheckoutContextFieldConstraints, stripePriceId: CheckoutContextPrice['id']
+    constraints: CheckoutContextFieldConstraints,
+    stripePriceId: CheckoutContextPrice['id'],
+    adminEmail?: string,
   ) => (values: any, ctx?: any, opts?: any) => any;
   failRoute: CheckoutPageRouteValue;
 }
@@ -211,19 +214,21 @@ export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>
   AccountDetails: [
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
+      getResolver: (constraints, stripePriceId) => makeResolvers(constraints, stripePriceId).planDetailsResolver,
       failRoute: CheckoutPageRoute.PlanDetails,
     },
   ],
   BillingDetails: [
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).planDetailsResolver,
+      getResolver: (constraints, stripePriceId) => makeResolvers(constraints, stripePriceId).planDetailsResolver,
       failRoute: CheckoutPageRoute.PlanDetails,
     },
     {
       pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
-      getResolver: (constraints, formData) => makeResolvers(constraints, formData).accountDetailsResolver,
+      getResolver: (constraints, stripePriceId, adminEmail) => (
+        makeResolvers(constraints, stripePriceId, adminEmail).accountDetailsResolver
+      ),
       failRoute: CheckoutPageRoute.AccountDetails,
     },
   ],
@@ -264,10 +269,13 @@ const validateFormState = async ({
 
   const checks = prerequisiteSpec[checkoutStep] ?? [];
 
+  // Extract adminEmail from Plan Details for use in validation
+  const adminEmail = (formData[DataStoreKey.PlanDetails] as PlanDetailsData)?.adminEmail;
+
   // Build all validation promises up front, check against the defined zod resolver
   const validationPromises = checks.map(async ({ pick, getResolver, failRoute }) => {
     const values = pick(formData);
-    const resolver = getResolver(constraints, stripePriceId);
+    const resolver = getResolver(constraints, stripePriceId, adminEmail);
     const { errors } = await resolver(values, undefined, { criteriaMode: 'all' });
     return { failRoute, hasErrors: errors && Object.keys(errors).length > 0 };
   });
