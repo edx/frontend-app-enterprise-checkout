@@ -5,22 +5,26 @@ import {
   CheckoutStepByKey,
   CheckoutStepKey,
   CheckoutSubstepByKey,
-  CheckoutSubstepKey,
 } from '@/constants/checkout';
 
 /**
  * Determines the step identifiers from the given URL params.
  */
+// When a user enters the dashboard, the Academic Selection page is displayed initially.
 function getStepFromParams(params) {
-  const {
-    step: currentStepKey,
-    substep: currentSubstepKey,
-  }: {
-    step?: CheckoutStepKey,
-    substep?: CheckoutSubstepKey,
-  } = params;
-  const currentStep = currentStepKey ? CheckoutStepByKey[currentStepKey] : undefined;
-  const currentSubstep = currentSubstepKey ? CheckoutSubstepByKey[currentSubstepKey] : undefined;
+  const { step, substep } = params;
+
+  // Essentials uses substep as the step
+  const resolvedStep = step ?? substep ?? CheckoutStepKey.AcademicSelection;
+
+  const currentStepKey = resolvedStep as CheckoutStepKey;
+
+  const currentSubstepKey = step && substep ? substep : undefined;
+
+  const currentStep = CheckoutStepByKey[currentStepKey];
+  const currentSubstep = currentSubstepKey
+    ? CheckoutSubstepByKey[currentSubstepKey]
+    : undefined;
   return {
     currentStep,
     currentStepKey,

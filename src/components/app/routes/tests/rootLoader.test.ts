@@ -80,7 +80,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(result).not.toBeNull();
     const res = result as any;
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+    expect(res.headers.get('Location')).toBe(CheckoutPageRoute.AcademicSelection);
   });
 
   it('does not self-redirect unauthenticated users already on Plan Details', async () => {
@@ -152,7 +152,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(result).not.toBeNull();
     const res = result as any;
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+    expect(res.headers.get('Location')).toBe(CheckoutPageRoute.AcademicSelection);
   });
 
   it('returns null when authenticated and no successful/expired intent (in-progress), but still populates form fields', async () => {
