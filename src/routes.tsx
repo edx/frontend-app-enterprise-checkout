@@ -10,8 +10,7 @@ import AppShell from '@/components/app/routes/AppShell';
 import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import AcademicSelection from '@/components/essentials-page/AcademicSelection';
-import { authenticatedSteps, CheckoutStepKey, EssentialsStepKey } from '@/constants/checkout';
+import { authenticatedSteps, CheckoutStepKey } from '@/constants/checkout';
 
 import { ErrorPage } from './components/ErrorPage';
 
@@ -42,7 +41,12 @@ const StepWrapper = () => {
 function getCheckoutRoutes(queryClient: QueryClient) {
   const checkoutChildRoutes: RouteObject[] = [
     {
-      path: '/:step?',
+      index: true,
+      element: <Navigate to={CheckoutStepKey.AcademicSelection} replace />,
+    },
+
+    {
+      path: ':step/:substep',
       loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
       element: (
         <PageWrap>
@@ -51,7 +55,7 @@ function getCheckoutRoutes(queryClient: QueryClient) {
       ),
     },
     {
-      path: '/:step/:substep',
+      path: ':step',
       loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
       element: (
         <PageWrap>
@@ -61,7 +65,7 @@ function getCheckoutRoutes(queryClient: QueryClient) {
     },
     {
       index: true,
-      element: <Navigate to={CheckoutStepKey.PlanDetails} replace />,
+      element: <Navigate to={CheckoutStepKey.AcademicSelection} replace />,
     },
   ];
   const checkoutRoutes: RouteObject[] = [
@@ -110,13 +114,14 @@ export function getRoutes(queryClient: QueryClient) {
           children: [
             {
               index: true,
-              element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
+              element: <Navigate to={CheckoutStepKey.AcademicSelection} replace />,
             },
             {
-              path: EssentialsStepKey.AcademicSelection,
+              path: ':substep',
+              loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
               element: (
                 <PageWrap>
-                  <AcademicSelection />
+                  <StepWrapper />
                 </PageWrap>
               ),
             },

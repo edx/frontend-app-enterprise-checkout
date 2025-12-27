@@ -1,22 +1,35 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
 import { ReactElement, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
-import { CheckoutSubstepKey } from '@/constants/checkout';
+import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
+
+import AcademicSelection from './Steps/AcademicSelection';
 
 const Steps = (): ReactElement => (
   <>
+    <AcademicSelection />
     <PlanDetails />
     <AccountDetails />
     <BillingDetails />
   </>
 );
 
+// Use ‘Academic selection’ as a fallback only when the value is null or undefined.
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+  const location = useLocation();
+
+  const isEssentialsFlow = location.pathname.startsWith('/essentials');
+
+  const activeStep = currentStepKey
+    ?? (isEssentialsFlow
+      ? CheckoutStepKey.AcademicSelection
+      : CheckoutStepKey.AcademicSelection);
 
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
@@ -25,14 +38,14 @@ const CheckoutStepperContainer = (): ReactElement => {
       }
     };
     window.addEventListener('beforeunload', preventUnload);
-    // Added safety to force remove the 'beforeunload' event on the global window
     return () => {
       window.removeEventListener('beforeunload', preventUnload);
     };
   }, [currentSubstepKey]);
 
   return (
-    <Stepper activeKey={currentStepKey}>
+    // when user entered in our dashbord so intial redering Academic selection.
+    <Stepper activeKey={activeStep}>
       <Stack gap={3}>
         <Row>
           <Col md={12} lg={8}>

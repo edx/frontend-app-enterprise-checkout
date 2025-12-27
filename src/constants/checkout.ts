@@ -6,6 +6,7 @@ import { validateFieldDetailed } from '@/components/app/data/services/validation
 import { serverValidationError } from '@/utils/common';
 
 export enum CheckoutStepKey {
+  AcademicSelection = 'academic-selection',
   PlanDetails = 'plan-details',
   AccountDetails = 'account-details',
   BillingDetails = 'billing-details',
@@ -282,6 +283,7 @@ export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraint
 export const AcademicSelectionSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
 
 export const CheckoutPageRoute = {
+  AcademicSelection: `/${CheckoutStepKey.AcademicSelection}`,
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
   PlanDetailsLogin: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
   PlanDetailsRegister: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
@@ -311,7 +313,24 @@ export const EssentialsPageDetails = {
   },
 } as const;
 
+// created academic selection and schema
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
+  AcademicSelection: {
+    step: 'AcademicSelection',
+    substep: undefined,
+    formSchema: AcademicSelectionSchema,
+    route: EssentialsPageRoute.AcademicSelection,
+    title: defineMessages({
+      id: 'essentials.academicSelection.title',
+      defaultMessage: 'Academic Selection',
+      description: 'Title for the academic selection page',
+    }),
+    buttonMessage: defineMessages({
+      id: 'checkout.AcademicSelection.continue',
+      defaultMessage: 'Continue',
+      description: 'Button label for the next step in the academic Selection step',
+    }),
+  },
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
@@ -408,17 +427,21 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
 
 // Constants specific to the Stepper component
 export const authenticatedSteps = [
+  'academic-selection',
+  'plan-details',
   'account-details',
   'billing-details',
 ] as const;
 
 export enum DataStoreKey {
+  AcademicSelection = 'AcademicSelection',
   PlanDetails = 'PlanDetails',
   AccountDetails = 'AccountDetails',
   BillingDetails = 'BillingDetails',
 }
 
 export enum SubmitCallbacks {
+  AcademicSelection = 'AcademicSelection',
   PlanDetails = 'PlanDetails',
   PlanDetailsLogin = 'PlanDetailsLogin',
   PlanDetailsRegister = 'PlanDetailsRegister',
