@@ -88,7 +88,7 @@ declare global {
   /**
    * Form data types derived from Zod schemas
    */
-  type AcademicDetailsData = z.infer<typeof AcademicSelectionDataSchema>;
+  type AcademicSelectionData = z.infer<typeof AcademicSelectionDataSchema>;
   type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
   type PlanDetailsLoginPageData = z.infer<typeof PlanDetailsLoginPageSchema>;
   type PlanDetailsRegisterPageData = z.infer<typeof PlanDetailsRegisterPageSchema>;
@@ -99,7 +99,7 @@ declare global {
    * Maps step names to their corresponding data types
    */
   interface StepDataMap {
-    'AcademicSelection': Partial<AcademicDetailsData>;
+    'AcademicSelection': Partial<AcademicSelectionData>;
     'PlanDetails': Partial<PlanDetailsData>;
     'AccountDetails': Partial<AccountDetailsData>;
     'BillingDetails': Partial<BillingDetailsData>;

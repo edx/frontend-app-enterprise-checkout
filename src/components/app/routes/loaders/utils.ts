@@ -232,6 +232,7 @@ export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>
       failRoute: CheckoutPageRoute.AccountDetails,
     },
   ],
+  AcademicSelection: [],
 };
 
 /**

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -154,8 +155,13 @@ const PlanDetailsPage = () => {
   });
 
   const onSubmitCallbacks: {
-    [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
+    [K in SubmitCallbacks]: (data: AcademicSelectionData | PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
   } = {
+    [SubmitCallbacks.AcademicSelection]: (data: AcademicSelectionData) => {
+      setFormData(DataStoreKey.AcademicSelection, data);
+      navigate(CheckoutPageRoute.PlanDetails);
+    },
+
     [SubmitCallbacks.PlanDetails]: async (data: PlanDetailsData) => {
       const { validationDecisions, isValid: isValidAdminEmailField } = await validateFieldDetailed(
         'adminEmail',
@@ -214,7 +220,7 @@ const PlanDetailsPage = () => {
   };
 
   const onSubmit = (
-    data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData,
+    data: AcademicSelectionData | PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData,
   ) => {
     // Set submitting state immediately to provide instant user feedback
     setIsSubmitting(true);

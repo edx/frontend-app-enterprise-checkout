@@ -1,3 +1,4 @@
+export { default as AcademicSelectionContent } from './AcademicSelectionContent';
 export { default as PlanDetailsContent } from './PlanDetailsContent';
 export { default as PlanDetailsLoginContent } from './PlanDetailsLoginContent';
 export { default as PlanDetailsRegisterContent } from './PlanDetailsRegisterContent';

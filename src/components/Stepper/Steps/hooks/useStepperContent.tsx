@@ -1,4 +1,5 @@
 import {
+  AcademicSelectionContent,
   AccountDetailsContent,
   BillingDetailsContent,
   BillingDetailsSuccessContent,
@@ -12,6 +13,7 @@ import useCurrentPage from '@/hooks/useCurrentPage';
 type StepperContentComponent = React.FC<{ form?: any }>;
 
 const StepperContentByPage = {
+  AcademicSelection: AcademicSelectionContent,
   PlanDetails: PlanDetailsContent,
   PlanDetailsLogin: PlanDetailsLoginContent,
   PlanDetailsRegister: PlanDetailsRegisterContent,
