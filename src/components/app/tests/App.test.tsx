@@ -71,28 +71,27 @@ describe('App', () => {
     ).toBeInstanceOf(Function);
   });
 
-it('toggles production ReactQueryDevtools when toggle function is called', async () => {
-  render(<App />);
+  it('toggles production ReactQueryDevtools when toggle function is called', async () => {
+    render(<App />);
 
-  expect(
-    screen.queryByTestId('react-query-devtools-production')
-  ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('react-query-devtools-production'),
+    ).not.toBeInTheDocument();
 
-  await act(async () => {
-    (window as any).toggleReactQueryDevtools();
+    await act(async () => {
+      (window as any).toggleReactQueryDevtools();
+    });
+
+    expect(
+      await screen.findByTestId('react-query-devtools-production'),
+    ).toBeInTheDocument();
+
+    await act(async () => {
+      (window as any).toggleReactQueryDevtools();
+    });
+
+    expect(
+      screen.queryByTestId('react-query-devtools-production'),
+    ).not.toBeInTheDocument();
   });
-
-  expect(
-    await screen.findByTestId('react-query-devtools-production')
-  ).toBeInTheDocument();
-
-  await act(async () => {
-    (window as any).toggleReactQueryDevtools();
-  });
-
-  expect(
-    screen.queryByTestId('react-query-devtools-production')
-  ).not.toBeInTheDocument();
-});
-
 });
