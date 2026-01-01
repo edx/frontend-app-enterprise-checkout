@@ -8,12 +8,14 @@ const AcademicSelectionContent = () => {
   return (
     <>
       {authenticatedUser && (
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted" data-testid="authenticated-user-email">
           Logged in as {authenticatedUser.email}
         </p>
       )}
 
-      <TermsAndConditionsText />
+      <div data-testid="terms-and-conditions-wrapper">
+        <TermsAndConditionsText />
+      </div>
     </>
   );
 };

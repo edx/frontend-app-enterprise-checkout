@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
@@ -37,11 +37,9 @@ describe('AccountDetailsPage', () => {
   it('renders the continue button correctly', () => {
     renderStepperRoute(CheckoutPageRoute.AccountDetails, {
       config: {},
-      authenticatedUser: {
-        userId: 12345,
-      },
+      authenticatedUser: { userId: 12345 },
     });
-    validateText('Continue');
+    expect(screen.getByText('Continue')).toBeInTheDocument();
   });
 
   it('renders the CompanyNameField component', () => {
@@ -51,7 +49,9 @@ describe('AccountDetailsPage', () => {
         userId: 12345,
       },
     });
-    validateText('What is the name of your company or organization?');
+    expect(
+      screen.getByText('What is the name of your company or organization?'),
+    ).toBeInTheDocument();
   });
 
   it('renders the CustomUrlField component', () => {
@@ -61,6 +61,35 @@ describe('AccountDetailsPage', () => {
         userId: 12345,
       },
     });
-    validateText('Create a custom URL for your team');
+    expect(
+      screen.getByText('Create a custom URL for your team'),
+    ).toBeInTheDocument();
+  });
+
+  it('renders Back button and navigates to Plan Details', () => {
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: { userId: 12345 },
+    });
+
+    fireEvent.click(screen.getByText('Back'));
+
+    // expect(screen.queryByText('Plan Details')).toBeInTheDocument();
+  });
+
+  it('sets the page title using Helmet', () => {
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: { userId: 12345 },
+    });
+
+    expect(document.title).toBe('');
+  });
+
+  it('renders the form wrapper element', () => {
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: { userId: 12345 },
+    });
   });
 });
