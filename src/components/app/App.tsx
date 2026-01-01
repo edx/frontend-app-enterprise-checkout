@@ -20,6 +20,7 @@ import { createAppRouter, RouterFallback } from './routes';
 
 // @ts-ignore
 const ReactQueryDevtoolsProduction = lazy(() => import('@tanstack/react-query-devtools/production').then((d) => ({
+  testId: 'react-query-devtools-production',
   default: d.ReactQueryDevtools,
 })));
 
@@ -60,7 +61,6 @@ function useReactQueryDevTools() {
 
 const App = () => {
   const queryClient = useAppQueryClient();
-
   // Create the app router during render vs. at the top-level of the module to ensure
   // the logging and auth modules are initialized before the router is created.
   const router = useMemo(() => createAppRouter(queryClient), [queryClient]);
@@ -68,17 +68,32 @@ const App = () => {
   const showReactQueryDevtools = useReactQueryDevTools();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
+    <QueryClientProvider
+      client={queryClient}
+      data-testid="query-client-provider"
+    >
+      <ReactQueryDevtools
+        initialIsOpen={false}
+        data-testid="react-query-devtools"
+      />
+
       {showReactQueryDevtools && (
         <Suspense fallback={null}>
-          <ReactQueryDevtoolsProduction />
+          <ReactQueryDevtoolsProduction
+            data-testid="react-query-devtools-production"
+          />
         </Suspense>
       )}
-      <AppProvider wrapWithRouter={false}>
+      <AppProvider
+        wrapWithRouter={false}
+        data-testid="app-provider"
+      >
         <RouterProvider
           router={router}
-          fallbackElement={<RouterFallback />}
+          data-testid="router-provider"
+          fallbackElement={
+            <RouterFallback data-testid="router-fallback" />
+          }
         />
       </AppProvider>
     </QueryClientProvider>
