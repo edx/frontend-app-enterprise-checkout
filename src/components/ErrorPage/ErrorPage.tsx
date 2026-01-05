@@ -2,13 +2,13 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { defineMessages, useIntl } from '@edx/frontend-platform/i18n';
 import { Button, Image } from '@openedx/paragon';
 import { MessageDescriptor } from 'react-intl';
-
 import { useRouteError } from 'react-router';
+import { isRouteErrorResponse } from 'react-router-dom';
+
 import { Footer } from '../Footer';
 import { Header } from '../Header';
 
 import ErrorIllustration from './images/ErrorIllustration.svg';
-import { isRouteErrorResponse } from 'react-router-dom';
 
 interface ErrorPageProps {
   message?: string;
