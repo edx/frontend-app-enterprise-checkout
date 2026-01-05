@@ -5,7 +5,9 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { makeRootLoader } from '@/components/app/routes/loaders';
 import * as utilsMod from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
+
+import { getFeatureForPath } from '../loaders/rootLoader';
 
 // Mock redirect to avoid depending on global Response being present in Jest env
 jest.mock('react-router-dom', () => ({
@@ -175,53 +177,139 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(result).toBeNull();
   });
 
-  it('feature flag: throws and logs an error when SSP is disabled and no feature key is provided', async () => {
-    // Simulate feature flag disabled with known key
-    (getConfig as jest.Mock).mockReturnValueOnce({
+  it('feature flag: should return checkout feature key when feature is disabled and path matches', () => {
+    (getConfig as jest.Mock).mockReturnValue({
       FEATURE_SELF_SERVICE_PURCHASING: false,
-      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'checkout-key',
+      FEATURE_SELF_SERVICE_ESSENTIALS: true,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'essentials-key',
     });
-    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
 
-    const loader = makeRootLoader(queryClient);
-
-    await expect(
-      loader({ request: makeRequest(CheckoutPageRoute.PlanDetails) } as any),
-    ).rejects.toThrow('Self-service purchasing is not enabled');
-
-    expect(logError).toHaveBeenCalledWith('Self-service purchasing is not enabled');
+    const result = getFeatureForPath(CheckoutPageRoute.PlanDetails);
+    expect(result).toBe('checkout-key');
   });
 
-  it('feature flag: allows access when disabled but correct key is passed via URL and stores it in sessionStorage', async () => {
-    (getConfig as jest.Mock).mockReturnValueOnce({
+  it('feature flag:should return essentials feature key when feature is disabled and path matches', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'checkout-key',
+      FEATURE_SELF_SERVICE_ESSENTIALS: false,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'essentials-key',
+    });
+
+    const result = getFeatureForPath(EssentialsPageRoute.AcademicSelection);
+    expect(result).toBe('essentials-key');
+  });
+
+  it('feature flag: allows access when disabled but correct route key is passed via URL and stores it in sessionStorage', async () => {
+    (getConfig as jest.Mock).mockReturnValue({
       FEATURE_SELF_SERVICE_PURCHASING: false,
-      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'SSP_TEAMS_CHECKOUT',
+      FEATURE_SELF_SERVICE_ESSENTIALS: true,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: null,
+      FEATURE_SELF_SERVICE_SITE_KEY: null,
     });
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
 
     const loader = makeRootLoader(queryClient);
     const result = await loader({
-      request: makeRequest(`${CheckoutPageRoute.PlanDetails}?feature=test-key`),
+      request: makeRequest(`${CheckoutPageRoute.PlanDetails}?feature=SSP_TEAMS_CHECKOUT`),
     } as any);
 
-    expect(logInfo).toHaveBeenCalled();
-    expect(sessionStorage.getItem('edx.checkout.self-service-purchasing')).toBe('test-key');
-    // On Plan Details and unauthenticated → no redirect
+    expect(logInfo).toHaveBeenCalledWith(
+      expect.stringContaining('Self-service purchasing is enabled'),
+    );
+    expect(sessionStorage.getItem('edx.checkout.self-service-purchasing'))
+      .toBe('SSP_TEAMS_CHECKOUT');
     expect(result).toBeNull();
   });
 
-  it('feature flag: proceeds without error when sessionStorage already has the correct key', async () => {
-    sessionStorage.setItem('edx.checkout.self-service-purchasing', 'test-key');
-    (getConfig as jest.Mock).mockReturnValueOnce({
-      FEATURE_SELF_SERVICE_PURCHASING: false,
-      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+  it('feature flag:allows access when correct route key is passed for gated route', async () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: null,
+      FEATURE_SELF_SERVICE_ESSENTIALS: false,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'SSP_ESSENTIALS_CHECKOUT',
+      FEATURE_SELF_SERVICE_SITE_KEY: null,
     });
-    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
 
     const loader = makeRootLoader(queryClient);
-    const result = await loader({ request: makeRequest(CheckoutPageRoute.PlanDetails) } as any);
 
-    expect(logError).not.toHaveBeenCalled();
+    const result = await loader({
+      request: makeRequest(`${EssentialsPageRoute.AcademicSelection}?feature=SSP_ESSENTIALS_CHECKOUT`),
+    } as any);
+
+    expect(logInfo).toHaveBeenCalledWith(
+      expect.stringContaining('Self-service purchasing is enabled'),
+    );
+    expect(sessionStorage.getItem('edx.checkout.self-service-purchasing'))
+      .toBe('SSP_ESSENTIALS_CHECKOUT');
+    expect(result).toBeNull();
+  });
+
+  it('blocks essentials route when essentials feature flag is not enabled', async () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: null,
+      FEATURE_SELF_SERVICE_ESSENTIALS: false,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'SSP_ESSENTIALS_CHECKOUT',
+      FEATURE_SELF_SERVICE_SITE_KEY: null,
+    });
+
+    const loader = makeRootLoader(queryClient);
+
+    await expect(
+      loader({ request: makeRequest(EssentialsPageRoute.AcademicSelection) } as any),
+    ).rejects.toThrow('Self-service purchasing is not enabled');
+
+    expect(logError).toHaveBeenCalledWith('Self-service purchasing is not enabled');
+  });
+
+  it('allows essentials route when SSP_ESSENTIALS_CHECKOUT is passed via URL', async () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: null,
+      FEATURE_SELF_SERVICE_ESSENTIALS: false,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'SSP_ESSENTIALS_CHECKOUT',
+      FEATURE_SELF_SERVICE_SITE_KEY: null,
+    });
+
+    const loader = makeRootLoader(queryClient);
+
+    const result = await loader({
+      request: makeRequest(`${EssentialsPageRoute.AcademicSelection}?feature=SSP_ESSENTIALS_CHECKOUT`),
+    } as any);
+
+    expect(logInfo).toHaveBeenCalledWith(
+      expect.stringContaining('Self-service purchasing is enabled'),
+    );
+    expect(sessionStorage.getItem('edx.checkout.self-service-purchasing'))
+      .toBe('SSP_ESSENTIALS_CHECKOUT');
+    expect(result).toBeNull();
+  });
+
+  it('feature flag:unlocks gated route when site-wide key is passed via query param', async () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: null,
+      FEATURE_SELF_SERVICE_ESSENTIALS: false,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'SSP_ESSENTIALS_CHECKOUT',
+      FEATURE_SELF_SERVICE_SITE_KEY: 'SSP_SITE_CHECKOUT',
+    });
+
+    const loader = makeRootLoader(queryClient);
+
+    const result = await loader({
+      request: makeRequest(
+        `${EssentialsPageRoute.AcademicSelection}?feature=SSP_SITE_CHECKOUT`,
+      ),
+    } as any);
+
+    expect(logInfo).toHaveBeenCalledWith(
+      expect.stringContaining('Self-service purchasing is enabled'),
+    );
+    expect(sessionStorage.getItem('edx.checkout.self-service-purchasing'))
+      .toBe('SSP_SITE_CHECKOUT');
     expect(result).toBeNull();
   });
 });
