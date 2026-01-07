@@ -13,7 +13,7 @@ import {
   determineExistingCheckoutIntentState,
   populateInitialApplicationState,
 } from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { extractPriceId } from '@/utils/checkout';
 
 /**
@@ -34,99 +34,159 @@ import { extractPriceId } from '@/utils/checkout';
  * @param {QueryClient} queryClient - TanStack Query client used to prefetch/ensure the BFF context.
  * @returns {LoaderFunction} A React Router loader that performs the redirect logic described above.
  */
-const makeRootLoader: MakeRouteLoaderFunctionWithQueryClient = function makeRootLoader(
-  queryClient: QueryClient,
-): LoaderFunction {
-  return async function rootLoader({ request }) {
-    // Add a feature flag to enable/disable self-service purchasing
-    const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
 
-    const { FEATURE_SELF_SERVICE_PURCHASING, FEATURE_SELF_SERVICE_PURCHASING_KEY } = getConfig();
-    if (
-      !FEATURE_SELF_SERVICE_PURCHASING
-      && (
-        !!FEATURE_SELF_SERVICE_PURCHASING_KEY
-        && sessionStorage.getItem(SSP_SESSION_KEY) !== FEATURE_SELF_SERVICE_PURCHASING_KEY)
-    ) {
-      const featureFlagKey = new URL(request.url).searchParams.get('feature');
-      if (featureFlagKey !== FEATURE_SELF_SERVICE_PURCHASING_KEY) {
+type FeatureRoute = {
+  routes: readonly string[];
+  enabled: boolean;
+  featureKey: string | null;
+};
+
+const isPathMatch = (pathname: string, route: string) => pathname === route || pathname.startsWith(`${route}/`);
+
+export function getFeatureForPath(pathname: string) {
+  const {
+    FEATURE_SELF_SERVICE_PURCHASING,
+    FEATURE_SELF_SERVICE_PURCHASING_KEY,
+    FEATURE_SELF_SERVICE_ESSENTIALS,
+    FEATURE_SELF_SERVICE_ESSENTIALS_KEY,
+  } = getConfig();
+
+  const featureRoutes: FeatureRoute[] = [
+    {
+      routes: Object.values(CheckoutPageRoute),
+      enabled: FEATURE_SELF_SERVICE_PURCHASING,
+      featureKey: FEATURE_SELF_SERVICE_PURCHASING_KEY,
+    },
+    {
+      routes: Object.values(EssentialsPageRoute),
+      enabled: FEATURE_SELF_SERVICE_ESSENTIALS,
+      featureKey: FEATURE_SELF_SERVICE_ESSENTIALS_KEY,
+    },
+  ];
+
+  const match = featureRoutes.find(
+    ({ routes, enabled }) => !enabled && routes.some(route => isPathMatch(pathname, route)),
+  );
+
+  return match?.featureKey ?? null;
+}
+
+const makeRootLoader = (
+  queryClient: QueryClient,
+): LoaderFunction => async function rootLoader({ request }) {
+  const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
+
+  const {
+    FEATURE_SELF_SERVICE_SITE_KEY,
+  } = getConfig();
+
+  const currentPath = new URL(request.url).pathname;
+
+  // Route-aware feature key
+  const routeFeatureKey = getFeatureForPath(currentPath);
+
+  // Feature flag check
+  if (routeFeatureKey) {
+    const sessionKey = sessionStorage.getItem(SSP_SESSION_KEY);
+
+    const isUnlockedBySiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY
+        && sessionKey === FEATURE_SELF_SERVICE_SITE_KEY;
+
+    const isUnlockedByRouteKey = sessionKey === routeFeatureKey;
+
+    if (!isUnlockedBySiteKey && !isUnlockedByRouteKey) {
+      const featureParam = new URL(request.url).searchParams.get('feature');
+
+      const paramIsSiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY
+          && featureParam === FEATURE_SELF_SERVICE_SITE_KEY;
+
+      const paramIsRouteKey = featureParam === routeFeatureKey;
+
+      if (!paramIsSiteKey && !paramIsRouteKey) {
         logError('Self-service purchasing is not enabled');
         throw new Error('Self-service purchasing is not enabled');
-      } else {
-        logInfo('Self-service purchasing is enabled. Setting feature flag in session storage.');
-        sessionStorage.setItem(SSP_SESSION_KEY, FEATURE_SELF_SERVICE_PURCHASING_KEY);
       }
+      const keyToStore = paramIsRouteKey
+        ? routeFeatureKey
+        : FEATURE_SELF_SERVICE_SITE_KEY;
+
+      logInfo(`Self-service purchasing is enabled. Setting feature flag in session storage. Key: ${keyToStore}`);
+
+      sessionStorage.setItem(SSP_SESSION_KEY, keyToStore);
     }
-    const currentPath = new URL(request.url).pathname;
+  }
 
-    const isCheckoutRoute = !currentPath.startsWith('/essentials');
+  /**
+   * IMPORTANT:
+   * Essentials routes do not participate in checkout intent logic.
+   * This check happens AFTER feature flag validation.
+   */
+  const isCheckoutRoute = !Object.values(EssentialsPageRoute).some(route => isPathMatch(currentPath, route));
 
-    if (!isCheckoutRoute) {
-      // we skip checkout-specific behavior
-      return null;
-    }
+  if (!isCheckoutRoute) {
+    return null;
+  }
 
-    // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
-    // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the
-    // logged-in user's country if they are pre-registered.
-    await fetchAuthenticatedUser();
-    await hydrateAuthenticatedUser();
-    const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
+  // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
+  // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the
+  // logged-in user's country if they are pre-registered.
+  await fetchAuthenticatedUser();
+  await hydrateAuthenticatedUser();
+  const authenticatedUser: AuthenticatedUser = getAuthenticatedUser();
 
-    const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
-      queryBffContext(authenticatedUser?.userId || null),
-    );
+  const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffContext(authenticatedUser?.userId || null),
+  );
 
-    // Helper to avoid self-redirect loops
-    /**
+  // Helper to avoid self-redirect loops
+  /**
      * Return a redirect Response to `to` unless it matches currentPath, in which case return null.
      *
      * @param {string} to - Target path to potentially redirect to.
      * @returns {Response | null} A redirect response if different from current path; otherwise null.
      */
-    const redirectOrNull = (to: string) => (to !== currentPath ? redirect(to) : null);
+  const redirectOrNull = (to: string) => (to !== currentPath ? redirect(to) : null);
 
-    const protectedPaths = new Set<string>([
-      CheckoutPageRoute.BillingDetails,
-      CheckoutPageRoute.AccountDetails,
-      CheckoutPageRoute.BillingDetailsSuccess,
-    ]);
+  const protectedPaths = new Set<string>([
+    CheckoutPageRoute.BillingDetails,
+    CheckoutPageRoute.AccountDetails,
+    CheckoutPageRoute.BillingDetailsSuccess,
+  ]);
 
-    // Unauthenticated user on protected paths → redirect to Plan Details
-    if (!authenticatedUser && protectedPaths.has(currentPath)) {
-      return redirectOrNull(CheckoutPageRoute.PlanDetails);
-    }
+  // Unauthenticated user on protected paths → redirect to Plan Details
+  if (!authenticatedUser && protectedPaths.has(currentPath)) {
+    return redirectOrNull(CheckoutPageRoute.PlanDetails);
+  }
 
-    const { checkoutIntent, pricing } = contextMetadata;
+  const { checkoutIntent, pricing } = contextMetadata;
 
-    const {
-      existingSuccessfulCheckoutIntent,
-      expiredCheckoutIntent,
-    } = determineExistingCheckoutIntentState(checkoutIntent);
+  const {
+    existingSuccessfulCheckoutIntent,
+    expiredCheckoutIntent,
+  } = determineExistingCheckoutIntentState(checkoutIntent);
 
-    const stripePriceId = extractPriceId(pricing);
+  const stripePriceId = extractPriceId(pricing);
 
-    populateInitialApplicationState({
-      checkoutIntent,
-      stripePriceId,
-      authenticatedUser,
-    });
+  populateInitialApplicationState({
+    checkoutIntent,
+    stripePriceId,
+    authenticatedUser,
+  });
 
-    if (!authenticatedUser) {
-      return null;
-    }
-
-    // Successful intent → Success page
-    if (existingSuccessfulCheckoutIntent) {
-      return redirectOrNull(CheckoutPageRoute.BillingDetailsSuccess);
-    }
-
-    // Expired intent → Plan Details
-    if (expiredCheckoutIntent) {
-      return redirectOrNull(CheckoutPageRoute.PlanDetails);
-    }
+  if (!authenticatedUser) {
     return null;
-  };
+  }
+
+  // Successful intent → Success page
+  if (existingSuccessfulCheckoutIntent) {
+    return redirectOrNull(CheckoutPageRoute.BillingDetailsSuccess);
+  }
+
+  // Expired intent → Plan Details
+  if (expiredCheckoutIntent) {
+    return redirectOrNull(CheckoutPageRoute.PlanDetails);
+  }
+  return null;
 };
 
 export default makeRootLoader;
