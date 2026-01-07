@@ -97,6 +97,7 @@ export function getRoutes(queryClient: QueryClient) {
         </PageWrap>
       ),
       loader: getRouteLoader(makeRootLoader, queryClient),
+      errorElement: <ErrorPage message="Error Boundary" />,
       children: [
         {
           path: 'essentials',
