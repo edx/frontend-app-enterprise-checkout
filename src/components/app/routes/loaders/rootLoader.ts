@@ -121,11 +121,11 @@ const makeRootLoader = (
    * Essentials routes do not participate in checkout intent logic.
    * This check happens AFTER feature flag validation.
    */
-  const isCheckoutRoute = !Object.values(EssentialsPageRoute).some(route => isPathMatch(currentPath, route));
-
-  if (!isCheckoutRoute) {
-    return null;
-  }
+  // const isCheckoutRoute = !Object.values(EssentialsPageRoute).some(route => isPathMatch(currentPath, route));
+  //
+  // if (!isCheckoutRoute) {
+  //   return null;
+  // }
 
   // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
   // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the

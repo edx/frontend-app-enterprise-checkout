@@ -6,12 +6,14 @@ import { validateFieldDetailed } from '@/components/app/data/services/validation
 import { serverValidationError } from '@/utils/common';
 
 export enum CheckoutStepKey {
+  Essentials = 'essentials',
   PlanDetails = 'plan-details',
   AccountDetails = 'account-details',
   BillingDetails = 'billing-details',
 }
 
 export enum CheckoutSubstepKey {
+  AcademicSelection = 'academic-selection',
   Login = 'login',
   Register = 'register',
   Success = 'success',
@@ -279,9 +281,15 @@ export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraint
 // Simple empty schema - no validation needed for coming soon page
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const AcademicSelectionSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+export const EssentialsAcademicSelectionSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+
+// NEW ROUTES - Essentials flow
+export const EssentialsPageRoute = {
+  EssentialsAcademicSelection: `/${CheckoutStepKey.Essentials}/${CheckoutSubstepKey.AcademicSelection}`,
+} as const;
 
 export const CheckoutPageRoute = {
+  ...EssentialsPageRoute,
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
   PlanDetailsLogin: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Login}`,
   PlanDetailsRegister: `/${CheckoutStepKey.PlanDetails}/${CheckoutSubstepKey.Register}`,
@@ -290,17 +298,13 @@ export const CheckoutPageRoute = {
   BillingDetailsSuccess: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
 } as const;
 
-// NEW ROUTES - Essentials flow
-export const EssentialsPageRoute = {
-  AcademicSelection: `/essentials/${EssentialsStepKey.AcademicSelection}`,
-} as const;
 
 // NEW PAGE DETAILS - Essentials flow
 export const EssentialsPageDetails = {
-  AcademicSelection: {
-    step: 'AcademicSelection',
+  Essentials: {
+    step: 'Essentials',
     substep: undefined,
-    formSchema: AcademicSelectionSchema,
+    formSchema: EssentialsAcademicSelectionSchema,
     route: EssentialsPageRoute.AcademicSelection,
     title: defineMessages({
       id: 'essentials.academicSelection.title',
@@ -312,6 +316,7 @@ export const EssentialsPageDetails = {
 } as const;
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {
+  ...EssentialsPageDetails,
   PlanDetails: {
     step: 'PlanDetails',
     substep: undefined,
@@ -413,12 +418,14 @@ export const authenticatedSteps = [
 ] as const;
 
 export enum DataStoreKey {
+  EssentialsAcademicSelection = 'EssentialsAcademicSelection',
   PlanDetails = 'PlanDetails',
   AccountDetails = 'AccountDetails',
   BillingDetails = 'BillingDetails',
 }
 
 export enum SubmitCallbacks {
+  EssentialsAcademicSelection = 'EssentialsAcademicSelection',
   PlanDetails = 'PlanDetails',
   PlanDetailsLogin = 'PlanDetailsLogin',
   PlanDetailsRegister = 'PlanDetailsRegister',

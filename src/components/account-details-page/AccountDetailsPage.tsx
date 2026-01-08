@@ -13,6 +13,7 @@ import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
+import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
@@ -29,7 +30,6 @@ import {
 } from '@/hooks/index';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
-import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 
 const AccountDetailsPage: React.FC = () => {
   const { data: formValidationConstraints } = useFormValidationConstraints();

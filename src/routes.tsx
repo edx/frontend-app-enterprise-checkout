@@ -99,34 +99,34 @@ export function getRoutes(queryClient: QueryClient) {
       loader: getRouteLoader(makeRootLoader, queryClient),
       errorElement: <ErrorPage message="Error Boundary" />,
       children: [
-        {
-          path: 'essentials',
-          element: (
-            <PageWrap>
-              <Suspense fallback={<RouterFallback />}>
-                <Layout />
-              </Suspense>
-            </PageWrap>
-          ),
-          children: [
-            {
-              index: true,
-              element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
-            },
-            {
-              path: EssentialsStepKey.AcademicSelection,
-              element: (
-                <PageWrap>
-                  <AcademicSelection />
-                </PageWrap>
-              ),
-            },
-          ],
-        },
-        {
-          path: 'essentials/*',
-          element: <ErrorPage message="Page Not Found" />,
-        },
+        // {
+        //   path: 'essentials',
+        //   element: (
+        //     <PageWrap>
+        //       <Suspense fallback={<RouterFallback />}>
+        //         <Layout />
+        //       </Suspense>
+        //     </PageWrap>
+        //   ),
+        //   children: [
+        //     {
+        //       index: true,
+        //       element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
+        //     },
+        //     {
+        //       path: EssentialsStepKey.AcademicSelection,
+        //       element: (
+        //         <PageWrap>
+        //           <AcademicSelection />
+        //         </PageWrap>
+        //       ),
+        //     },
+        //   ],
+        // },
+        // {
+        //   path: 'essentials/*',
+        //   element: <ErrorPage message="Page Not Found" />,
+        // },
         {
           path: '/',
           loader: getRouteLoader(makeRootLoader, queryClient),

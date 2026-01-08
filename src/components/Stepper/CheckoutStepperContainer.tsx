@@ -3,12 +3,13 @@ import { ReactElement, useEffect } from 'react';
 
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
-import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
+import { AccountDetails, BillingDetails, EssentialsAcademicSelection, PlanDetails } from '@/components/Stepper/Steps';
 import { CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
 const Steps = (): ReactElement => (
   <>
+    <EssentialsAcademicSelection />
     <PlanDetails />
     <AccountDetails />
     <BillingDetails />
@@ -17,7 +18,7 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
-
+  console.log('Current Step Key', currentStepKey);
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {

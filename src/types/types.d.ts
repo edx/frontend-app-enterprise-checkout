@@ -63,9 +63,9 @@ declare global {
    * ==============================
    */
 
-  type CheckoutStep = 'PlanDetails' | 'AccountDetails' | 'BillingDetails';
+  type CheckoutStep = 'Essentials' | 'PlanDetails' | 'AccountDetails' | 'BillingDetails';
 
-  type CheckoutSubstep = 'Login' | 'Register' | 'Success';
+  type CheckoutSubstep = 'AcademicSelection' |'Login' | 'Register' | 'Success';
 
   type CheckoutPage = 'PlanDetails' | 'PlanDetailsLogin' | 'PlanDetailsRegister' | 'AccountDetails' | 'BillingDetails' | 'BillingDetailsSuccess';
 
@@ -88,6 +88,7 @@ declare global {
   /**
    * Form data types derived from Zod schemas
    */
+  type EssentialAcademicSelectionData = z.infer<typeof AcademicSelectionSchema>;
   type PlanDetailsData = z.infer<typeof PlanDetailsSchema>;
   type PlanDetailsLoginPageData = z.infer<typeof PlanDetailsLoginPageSchema>;
   type PlanDetailsRegisterPageData = z.infer<typeof PlanDetailsRegisterPageSchema>;

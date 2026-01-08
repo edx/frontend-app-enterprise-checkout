@@ -191,6 +191,7 @@ const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = functi
   return async function checkoutStepperLoader({ params = {} }) {
     const { currentStep, currentSubstep } = getStepFromParams(params);
     const pageDetails = getCheckoutPageDetails({ step: currentStep, substep: currentSubstep });
+    console.log(currentStep, currentSubstep, pageDetails);
     if (!pageDetails) {
       // Invalid route, do nothing. 404 page should kick in automatically.
       return null;
