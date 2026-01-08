@@ -1,3 +1,4 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
 import { ReactElement, useEffect } from 'react';
 
@@ -6,19 +7,31 @@ import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import { AccountDetails, BillingDetails, EssentialsAcademicSelection, PlanDetails } from '@/components/Stepper/Steps';
 import { CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
+import { isFeatureEnabled } from '@/utils/common';
 
-const Steps = (): ReactElement => (
-  <>
-    <EssentialsAcademicSelection />
-    <PlanDetails />
-    <AccountDetails />
-    <BillingDetails />
-  </>
-);
+const Steps = (): ReactElement => {
+  const {
+    FEATURE_SELF_SERVICE_ESSENTIALS,
+    FEATURE_SELF_SERVICE_ESSENTIALS_KEY,
+  } = getConfig();
+  console.log(isFeatureEnabled(FEATURE_SELF_SERVICE_ESSENTIALS, FEATURE_SELF_SERVICE_ESSENTIALS_KEY));
+  return (
+    <>
+      {
+        isFeatureEnabled(
+          FEATURE_SELF_SERVICE_ESSENTIALS,
+          FEATURE_SELF_SERVICE_ESSENTIALS_KEY,
+        ) && <EssentialsAcademicSelection />
+      }
+      <PlanDetails />
+      <AccountDetails />
+      <BillingDetails />
+    </>
+  );
+};
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
-  console.log('Current Step Key', currentStepKey);
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {

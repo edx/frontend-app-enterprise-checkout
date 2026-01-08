@@ -4,13 +4,12 @@ import { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 
+import { useFormValidationConstraints } from '@/components/app/data';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
-import {CheckoutStepKey, DataStoreKey} from '@/constants/checkout';
-import {useCheckoutFormStore, useCurrentPageDetails} from '@/hooks/index';
-import {useFormValidationConstraints} from "@/components/app/data";
+import { CheckoutStepKey, DataStoreKey } from '@/constants/checkout';
+import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 
 const EssentialsAcademicSelectionPage = () => {
-  console.log('Academic Selection Page');
   const StepperContent = useStepperContent();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const eventKey = CheckoutStepKey.Essentials;
@@ -21,9 +20,9 @@ const EssentialsAcademicSelectionPage = () => {
 
   const essentialsAcademicSelectionSchema = useMemo(() => (
     formSchema(formValidationConstraints)
-  ));
+  ), [formSchema, formValidationConstraints]);
 
-  const form = useForm<AccountDetailsData>({
+  const form = useForm<EssentialAcademicSelectionData>({
     mode: 'onTouched',
     resolver: zodResolver(essentialsAcademicSelectionSchema),
     defaultValues: essentialsFormData,

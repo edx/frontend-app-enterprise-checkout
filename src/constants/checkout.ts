@@ -301,11 +301,11 @@ export const CheckoutPageRoute = {
 
 // NEW PAGE DETAILS - Essentials flow
 export const EssentialsPageDetails = {
-  Essentials: {
+  EssentialsAcademicSelection: {
     step: 'Essentials',
-    substep: undefined,
+    substep: 'AcademicSelection',
     formSchema: EssentialsAcademicSelectionSchema,
-    route: EssentialsPageRoute.AcademicSelection,
+    route: EssentialsPageRoute.EssentialsAcademicSelection,
     title: defineMessages({
       id: 'essentials.academicSelection.title',
       defaultMessage: 'Academic Selection',

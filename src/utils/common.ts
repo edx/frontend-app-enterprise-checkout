@@ -1,6 +1,7 @@
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { logError } from '@edx/frontend-platform/logging';
 import dayjs from 'dayjs';
+import {getConfig} from "@edx/frontend-platform/config";
 
 /**
  * Given an error, returns the status code from the custom attributes (Axios error)
@@ -109,6 +110,30 @@ const sendEnterpriseCheckoutTrackingEvent = ({
   );
 };
 
+/**
+ * Determines whether a feature is enabled.
+ * A feature is enabled if its configuration value is true, or if a valid
+ * feature key or site key is present in the session storage.
+ *
+ * @param {boolean} enabled - The configuration value for the feature.
+ * @param {string|null} featureKey - The specific override key for the feature.
+ * @returns {boolean} True if the feature is enabled; otherwise, false.
+ */
+const isFeatureEnabled = (enabled: boolean, featureKey?: string | null): boolean => {
+  const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
+  const { FEATURE_SELF_SERVICE_SITE_KEY } = getConfig();
+  const sessionKey = sessionStorage.getItem(SSP_SESSION_KEY);
+
+  if (enabled) {
+    return true;
+  }
+
+  const isUnlockedBySiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY && sessionKey === FEATURE_SELF_SERVICE_SITE_KEY;
+  const isUnlockedByFeatureKey = !!featureKey && sessionKey === featureKey;
+
+  return isUnlockedBySiteKey || isUnlockedByFeatureKey;
+};
+
 export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
@@ -117,4 +142,5 @@ export {
   serverValidationError,
   isExpired,
   sendEnterpriseCheckoutTrackingEvent,
+  isFeatureEnabled,
 };

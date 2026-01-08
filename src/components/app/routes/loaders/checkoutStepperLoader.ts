@@ -8,6 +8,10 @@ import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
 
+async function essentialsAcademicSelectionLoader(): Promise<Response | null> {
+  return null;
+}
+
 /**
  * Route loader for Plan Details page.
  *
@@ -169,6 +173,7 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
  * Page-specific route loaders mapped by checkout page
  */
 const PAGE_LOADERS: Record<CheckoutPage, (queryClient: QueryClient) => Promise<Response | null>> = {
+  EssentialsAcademicSelection: essentialsAcademicSelectionLoader,
   PlanDetails: planDetailsLoader,
   PlanDetailsLogin: planDetailsLoginLoader,
   PlanDetailsRegister: planDetailsRegisterLoader,
@@ -191,7 +196,6 @@ const makeCheckoutStepperLoader: MakeRouteLoaderFunctionWithQueryClient = functi
   return async function checkoutStepperLoader({ params = {} }) {
     const { currentStep, currentSubstep } = getStepFromParams(params);
     const pageDetails = getCheckoutPageDetails({ step: currentStep, substep: currentSubstep });
-    console.log(currentStep, currentSubstep, pageDetails);
     if (!pageDetails) {
       // Invalid route, do nothing. 404 page should kick in automatically.
       return null;

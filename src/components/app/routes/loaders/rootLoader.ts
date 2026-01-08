@@ -15,6 +15,7 @@ import {
 } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { extractPriceId } from '@/utils/checkout';
+import { isFeatureEnabled } from '@/utils/common';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -89,12 +90,9 @@ const makeRootLoader = (
   if (routeFeatureKey) {
     const sessionKey = sessionStorage.getItem(SSP_SESSION_KEY);
 
-    const isUnlockedBySiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY
-        && sessionKey === FEATURE_SELF_SERVICE_SITE_KEY;
+    const isUnlocked = isFeatureEnabled(false, routeFeatureKey);
 
-    const isUnlockedByRouteKey = sessionKey === routeFeatureKey;
-
-    if (!isUnlockedBySiteKey && !isUnlockedByRouteKey) {
+    if (!isUnlocked) {
       const featureParam = new URL(request.url).searchParams.get('feature');
 
       const paramIsSiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY
