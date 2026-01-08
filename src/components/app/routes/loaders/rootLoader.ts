@@ -88,8 +88,6 @@ const makeRootLoader = (
 
   // Feature flag check
   if (routeFeatureKey) {
-    const sessionKey = sessionStorage.getItem(SSP_SESSION_KEY);
-
     const isUnlocked = isFeatureEnabled(false, routeFeatureKey);
 
     if (!isUnlocked) {

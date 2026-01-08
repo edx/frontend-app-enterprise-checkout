@@ -298,7 +298,6 @@ export const CheckoutPageRoute = {
   BillingDetailsSuccess: `/${CheckoutStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
 } as const;
 
-
 // NEW PAGE DETAILS - Essentials flow
 export const EssentialsPageDetails = {
   EssentialsAcademicSelection: {

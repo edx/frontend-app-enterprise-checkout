@@ -14,7 +14,6 @@ const Steps = (): ReactElement => {
     FEATURE_SELF_SERVICE_ESSENTIALS,
     FEATURE_SELF_SERVICE_ESSENTIALS_KEY,
   } = getConfig();
-  console.log(isFeatureEnabled(FEATURE_SELF_SERVICE_ESSENTIALS, FEATURE_SELF_SERVICE_ESSENTIALS_KEY));
   return (
     <>
       {

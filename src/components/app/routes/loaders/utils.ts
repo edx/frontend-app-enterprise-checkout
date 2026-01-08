@@ -210,6 +210,7 @@ interface PrerequisiteCheck<T> {
  * and the route that should be returned if that slice is invalid.
  */
 export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>>> = {
+  Essentials: [],
   PlanDetails: [],
   AccountDetails: [
     {

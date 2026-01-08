@@ -1,1 +1,1 @@
-export { default as EssentialsAcademicSelectionPage } from './EssentialsAcademicSelectionPage'
+export { default as EssentialsAcademicSelectionPage } from './EssentialsAcademicSelectionPage';

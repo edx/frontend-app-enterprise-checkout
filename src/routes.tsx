@@ -10,8 +10,7 @@ import AppShell from '@/components/app/routes/AppShell';
 import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import AcademicSelection from '@/components/essentials-page/AcademicSelection';
-import { authenticatedSteps, CheckoutStepKey, EssentialsStepKey } from '@/constants/checkout';
+import { authenticatedSteps, CheckoutStepKey } from '@/constants/checkout';
 
 import { ErrorPage } from './components/ErrorPage';
 

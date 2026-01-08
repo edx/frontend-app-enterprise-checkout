@@ -1,12 +1,12 @@
-import dayjs from 'dayjs';
 import { getConfig } from '@edx/frontend-platform/config';
+import dayjs from 'dayjs';
 
 import { CheckoutErrorMessagesByField } from '@/constants/checkout';
 import {
   defaultQueryClientRetryHandler,
   isExpired,
-  serverValidationError,
   isFeatureEnabled,
+  serverValidationError,
 } from '@/utils/common';
 
 jest.mock('@edx/frontend-platform/config', () => ({
