@@ -48,7 +48,7 @@ export const createStripeAppearance = (): Appearance => (
       fontSmooth: 'auto',
 
       // Spacing
-      spacingUnit: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-base', '4px'),
+      spacingUnit: getComputedStylePropertyCSSVariable('', '4px'),
       spacingGridRow: getComputedStylePropertyCSSVariable('--pgn-spacing-grid-gutter-width', '16px'),
       spacingGridColumn: getComputedStylePropertyCSSVariable('--pgn-spacing-grid-gutter-width', '16px'),
       accordionItemSpacing: getComputedStylePropertyCSSVariable('--pgn-spacing-spacer-3', '12px'),
