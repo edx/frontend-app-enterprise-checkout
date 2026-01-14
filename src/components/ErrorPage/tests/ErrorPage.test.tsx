@@ -112,10 +112,14 @@ describe('ErrorPage', () => {
 
   it('handles useRouteError throwing an error', () => {
     (useRouteError as jest.Mock).mockImplementation(() => {
-      throw new Error('Hook failed');
+      const error = new Error('Hook failed');
+      error.stack = 'Insert stack trace here';
+      return error;
     });
     renderComponent();
     validateText("We're sorry, something went wrong");
+    validateText('Hook failed');
+    validateText('Insert stack trace here');
   });
 
   it('displays default error message when useRouteError returns an unknown type', () => {
