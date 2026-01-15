@@ -89,7 +89,7 @@ const ErrorPageContent = ({ message, stack }: ErrorPageContentProps) => {
   );
 };
 
-const useRouteErrorDerivedMessage = (routeError: UnknownError): string | undefined => {
+const getRouteErrorDerivedMessage = (routeError: UnknownError): string | undefined => {
   try {
     return routeError ? getErrorMessage(routeError) : undefined;
   } catch {
@@ -99,7 +99,7 @@ const useRouteErrorDerivedMessage = (routeError: UnknownError): string | undefin
 
 const ErrorPage = ({ message }: ErrorPageProps) => {
   const routeError = useRouteError() as UnknownError;
-  const derivedErrorMessage = useRouteErrorDerivedMessage(routeError);
+  const derivedErrorMessage = getRouteErrorDerivedMessage(routeError);
 
   // Prefer downstream thrown error message; fall back to prop message
   const errorMessage = derivedErrorMessage ?? message;
