@@ -110,7 +110,7 @@ describe('ErrorPage', () => {
     validateText('500 Internal Server Error');
   });
 
-  it('handles useRouteError throwing an error', () => {
+  it('displays error message and stack trace from useRouteError when error object is returned', () => {
     (useRouteError as jest.Mock).mockImplementation(() => {
       const error = new Error('Hook failed');
       error.stack = 'Insert stack trace here';
