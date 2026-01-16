@@ -16,7 +16,7 @@ interface ErrorPageProps {
 
 interface ErrorPageContentProps {
   message?: string;
-  stack?: string;
+  stackTrace?: string;
 }
 
 interface UnknownError {
@@ -71,7 +71,7 @@ function getErrorMessage(err: unknown): string | undefined {
   return undefined;
 }
 
-const ErrorPageContent = ({ message, stack }: ErrorPageContentProps) => {
+const ErrorPageContent = ({ message, stackTrace }: ErrorPageContentProps) => {
   const intl = useIntl();
   const { COMPARE_ENTERPRISE_PLANS_URL } = getConfig();
 
@@ -79,8 +79,8 @@ const ErrorPageContent = ({ message, stack }: ErrorPageContentProps) => {
     <div className="centered-body container-mw-lg container-fluid">
       <Image className="mb-3" src={ErrorIllustration} fluid alt="Something went wrong error page image" />
       <h2>{intl.formatMessage(errorPageMessages.errorHeader)}</h2>
-      {message && (<p className="mb-0">{message}</p>)}
-      {stack && (<p className="mb-0">{stack}</p>)}
+      {message && (<pre>{message}</pre>)}
+      {stackTrace && (<pre>{stackTrace}</pre>)}
       <p>{intl.formatMessage(errorPageMessages.errorSubtitle)}</p>
       <Button className="bg-warning-500 border-warning-500 text-primary-900" href={COMPARE_ENTERPRISE_PLANS_URL}>
         {intl.formatMessage(errorPageMessages.errorButton)}
@@ -106,7 +106,7 @@ const ErrorPage = ({ message }: ErrorPageProps) => {
   return (
     <>
       <Header />
-      <ErrorPageContent message={errorMessage} stack={routeError?.stack} />
+      <ErrorPageContent message={errorMessage} stackTrace={routeError?.stack} />
       <Footer />
     </>
   );
