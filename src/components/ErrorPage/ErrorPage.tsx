@@ -14,6 +14,15 @@ interface ErrorPageProps {
   message?: string;
 }
 
+interface ErrorPageContentProps {
+  message?: string;
+  stackTrace?: string;
+}
+
+interface UnknownError {
+  stack?: string;
+}
+
 const errorPageMessages: Record<string, MessageDescriptor> = defineMessages({
   errorHeader: {
     id: 'errorPage.header',
@@ -62,7 +71,7 @@ function getErrorMessage(err: unknown): string | undefined {
   return undefined;
 }
 
-const ErrorPageContent = ({ message }: ErrorPageProps) => {
+const ErrorPageContent = ({ message, stackTrace }: ErrorPageContentProps) => {
   const intl = useIntl();
   const { COMPARE_ENTERPRISE_PLANS_URL } = getConfig();
 
@@ -70,7 +79,8 @@ const ErrorPageContent = ({ message }: ErrorPageProps) => {
     <div className="centered-body container-mw-lg container-fluid">
       <Image className="mb-3" src={ErrorIllustration} fluid alt="Something went wrong error page image" />
       <h2>{intl.formatMessage(errorPageMessages.errorHeader)}</h2>
-      {message && (<p className="mb-0">{message}</p>)}
+      {message && (<pre>{message}</pre>)}
+      {stackTrace && (<pre>{stackTrace}</pre>)}
       <p>{intl.formatMessage(errorPageMessages.errorSubtitle)}</p>
       <Button className="bg-warning-500 border-warning-500 text-primary-900" href={COMPARE_ENTERPRISE_PLANS_URL}>
         {intl.formatMessage(errorPageMessages.errorButton)}
@@ -79,9 +89,8 @@ const ErrorPageContent = ({ message }: ErrorPageProps) => {
   );
 };
 
-const useRouteErrorDerivedMessage = (): string | undefined => {
+const getRouteErrorDerivedMessage = (routeError: UnknownError): string | undefined => {
   try {
-    const routeError = useRouteError();
     return routeError ? getErrorMessage(routeError) : undefined;
   } catch {
     return undefined;
@@ -89,14 +98,15 @@ const useRouteErrorDerivedMessage = (): string | undefined => {
 };
 
 const ErrorPage = ({ message }: ErrorPageProps) => {
-  const derivedErrorMessage = useRouteErrorDerivedMessage();
+  const routeError = useRouteError() as UnknownError;
+  const derivedErrorMessage = getRouteErrorDerivedMessage(routeError);
 
   // Prefer downstream thrown error message; fall back to prop message
   const errorMessage = derivedErrorMessage ?? message;
   return (
     <>
       <Header />
-      <ErrorPageContent message={errorMessage} />
+      <ErrorPageContent message={errorMessage} stackTrace={routeError?.stack} />
       <Footer />
     </>
   );
