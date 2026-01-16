@@ -68,6 +68,18 @@ describe('ErrorPage', () => {
     validateText(errorMsg);
   });
 
+  it('displays error message and stack trace from useRouteError if it is an Error object', () => {
+    (useRouteError as jest.Mock).mockImplementation(() => {
+      const error = new Error('Hook failed');
+      error.stack = 'Insert stack trace here';
+      return error;
+    });
+    renderComponent();
+    validateText("We're sorry, something went wrong");
+    validateText('Hook failed');
+    validateText('Insert stack trace here');
+  });
+
   it('displays error message from useRouteError Response with string data', () => {
     const errorMsg = 'Response error message';
     (isRouteErrorResponse as unknown as jest.Mock).mockReturnValue(true);
@@ -108,25 +120,6 @@ describe('ErrorPage', () => {
     });
     renderComponent();
     validateText('500 Internal Server Error');
-  });
-
-  it('displays error message from useRouteError when error object is returned', () => {
-    (useRouteError as jest.Mock).mockImplementation(() => new Error('Hook failed'));
-    renderComponent();
-    validateText("We're sorry, something went wrong");
-    validateText('Hook failed');
-  });
-
-  it('displays error message and stack trace from useRouteError when error object is returned', () => {
-    (useRouteError as jest.Mock).mockImplementation(() => {
-      const error = new Error('Hook failed');
-      error.stack = 'Insert stack trace here';
-      return error;
-    });
-    renderComponent();
-    validateText("We're sorry, something went wrong");
-    validateText('Hook failed');
-    validateText('Insert stack trace here');
   });
 
   it('displays default error message when useRouteError returns an unknown type', () => {
