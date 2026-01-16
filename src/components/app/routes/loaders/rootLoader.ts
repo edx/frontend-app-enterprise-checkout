@@ -15,6 +15,7 @@ import {
 } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { extractPriceId } from '@/utils/checkout';
+import { isFeatureEnabled } from '@/utils/common';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -87,14 +88,9 @@ const makeRootLoader = (
 
   // Feature flag check
   if (routeFeatureKey) {
-    const sessionKey = sessionStorage.getItem(SSP_SESSION_KEY);
+    const isUnlocked = isFeatureEnabled(false, routeFeatureKey);
 
-    const isUnlockedBySiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY
-        && sessionKey === FEATURE_SELF_SERVICE_SITE_KEY;
-
-    const isUnlockedByRouteKey = sessionKey === routeFeatureKey;
-
-    if (!isUnlockedBySiteKey && !isUnlockedByRouteKey) {
+    if (!isUnlocked) {
       const featureParam = new URL(request.url).searchParams.get('feature');
 
       const paramIsSiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY
@@ -121,11 +117,11 @@ const makeRootLoader = (
    * Essentials routes do not participate in checkout intent logic.
    * This check happens AFTER feature flag validation.
    */
-  const isCheckoutRoute = !Object.values(EssentialsPageRoute).some(route => isPathMatch(currentPath, route));
-
-  if (!isCheckoutRoute) {
-    return null;
-  }
+  // const isCheckoutRoute = !Object.values(EssentialsPageRoute).some(route => isPathMatch(currentPath, route));
+  //
+  // if (!isCheckoutRoute) {
+  //   return null;
+  // }
 
   // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
   // information from the `<LMS>/api/user/v1/accounts/<username>` endpoint. We need access to the

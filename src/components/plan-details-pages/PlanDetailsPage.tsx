@@ -153,9 +153,9 @@ const PlanDetailsPage = () => {
     },
   });
 
-  const onSubmitCallbacks: {
-    [K in SubmitCallbacks]: (data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void
-  } = {
+  const onSubmitCallbacks: Record<SubmitCallbacks, (
+    data: PlanDetailsData | PlanDetailsLoginPageData | PlanDetailsRegisterPageData) => void> = {
+    [SubmitCallbacks.EssentialsAcademicSelection]: () => {},
     [SubmitCallbacks.PlanDetails]: async (data: PlanDetailsData) => {
       const { validationDecisions, isValid: isValidAdminEmailField } = await validateFieldDetailed(
         'adminEmail',
