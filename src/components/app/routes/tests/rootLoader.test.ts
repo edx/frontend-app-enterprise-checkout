@@ -197,7 +197,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
       FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'essentials-key',
     });
 
-    const result = getFeatureForPath(EssentialsPageRoute.AcademicSelection);
+    const result = getFeatureForPath(EssentialsPageRoute.EssentialsAcademicSelection);
     expect(result).toBe('essentials-key');
   });
 
@@ -236,7 +236,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const loader = makeRootLoader(queryClient);
 
     const result = await loader({
-      request: makeRequest(`${EssentialsPageRoute.AcademicSelection}?feature=SSP_ESSENTIALS_CHECKOUT`),
+      request: makeRequest(`${EssentialsPageRoute.EssentialsAcademicSelection}?feature=SSP_ESSENTIALS_CHECKOUT`),
     } as any);
 
     expect(logInfo).toHaveBeenCalledWith(
@@ -259,7 +259,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const loader = makeRootLoader(queryClient);
 
     await expect(
-      loader({ request: makeRequest(EssentialsPageRoute.AcademicSelection) } as any),
+      loader({ request: makeRequest(EssentialsPageRoute.EssentialsAcademicSelection) } as any),
     ).rejects.toThrow('Self-service purchasing is not enabled');
 
     expect(logError).toHaveBeenCalledWith('Self-service purchasing is not enabled');
@@ -277,7 +277,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const loader = makeRootLoader(queryClient);
 
     const result = await loader({
-      request: makeRequest(`${EssentialsPageRoute.AcademicSelection}?feature=SSP_ESSENTIALS_CHECKOUT`),
+      request: makeRequest(`${EssentialsPageRoute.EssentialsAcademicSelection}?feature=SSP_ESSENTIALS_CHECKOUT`),
     } as any);
 
     expect(logInfo).toHaveBeenCalledWith(
@@ -301,7 +301,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
     const result = await loader({
       request: makeRequest(
-        `${EssentialsPageRoute.AcademicSelection}?feature=SSP_SITE_CHECKOUT`,
+        `${EssentialsPageRoute.EssentialsAcademicSelection}?feature=SSP_SITE_CHECKOUT`,
       ),
     } as any);
 

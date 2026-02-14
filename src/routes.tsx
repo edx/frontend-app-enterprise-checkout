@@ -10,8 +10,7 @@ import AppShell from '@/components/app/routes/AppShell';
 import { makeCheckoutStepperLoader, makeRootLoader } from '@/components/app/routes/loaders';
 import RouterFallback from '@/components/app/routes/RouterFallback';
 import CheckoutPage from '@/components/checkout-page/CheckoutPage';
-import AcademicSelection from '@/components/essentials-page/AcademicSelection';
-import { authenticatedSteps, CheckoutStepKey, EssentialsStepKey } from '@/constants/checkout';
+import { authenticatedSteps, CheckoutStepKey } from '@/constants/checkout';
 
 import { ErrorPage } from './components/ErrorPage';
 
@@ -99,34 +98,34 @@ export function getRoutes(queryClient: QueryClient) {
       loader: getRouteLoader(makeRootLoader, queryClient),
       errorElement: <ErrorPage message="Error Boundary" />,
       children: [
-        {
-          path: 'essentials',
-          element: (
-            <PageWrap>
-              <Suspense fallback={<RouterFallback />}>
-                <Layout />
-              </Suspense>
-            </PageWrap>
-          ),
-          children: [
-            {
-              index: true,
-              element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
-            },
-            {
-              path: EssentialsStepKey.AcademicSelection,
-              element: (
-                <PageWrap>
-                  <AcademicSelection />
-                </PageWrap>
-              ),
-            },
-          ],
-        },
-        {
-          path: 'essentials/*',
-          element: <ErrorPage message="Page Not Found" />,
-        },
+        // {
+        //   path: 'essentials',
+        //   element: (
+        //     <PageWrap>
+        //       <Suspense fallback={<RouterFallback />}>
+        //         <Layout />
+        //       </Suspense>
+        //     </PageWrap>
+        //   ),
+        //   children: [
+        //     {
+        //       index: true,
+        //       element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
+        //     },
+        //     {
+        //       path: EssentialsStepKey.AcademicSelection,
+        //       element: (
+        //         <PageWrap>
+        //           <AcademicSelection />
+        //         </PageWrap>
+        //       ),
+        //     },
+        //   ],
+        // },
+        // {
+        //   path: 'essentials/*',
+        //   element: <ErrorPage message="Page Not Found" />,
+        // },
         {
           path: '/',
           loader: getRouteLoader(makeRootLoader, queryClient),

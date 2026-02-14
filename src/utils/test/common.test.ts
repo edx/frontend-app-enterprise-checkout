@@ -1,7 +1,19 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import dayjs from 'dayjs';
 
 import { CheckoutErrorMessagesByField } from '@/constants/checkout';
-import { defaultQueryClientRetryHandler, isExpired, serverValidationError } from '@/utils/common';
+import {
+  defaultQueryClientRetryHandler,
+  isExpired,
+  isFeatureEnabled,
+  serverValidationError,
+} from '@/utils/common';
+
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn(() => ({
+    PUBLIC_PATH: '/',
+  })),
+}));
 
 describe('defaultQueryClientRetryHandler', () => {
   it.each([
@@ -105,5 +117,56 @@ describe('isExpired', () => {
   it('returns false for a date equal to now (boundary condition)', () => {
     const equalToNow = dayjs(fixedNow).toISOString();
     expect(isExpired(equalToNow)).toBe(false);
+  });
+});
+
+describe('isFeatureEnabled', () => {
+  const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    jest.clearAllMocks();
+  });
+
+  it('returns true when enabled is true', () => {
+    (getConfig as jest.Mock).mockReturnValue({});
+    expect(isFeatureEnabled(true)).toBe(true);
+  });
+
+  it('returns false when enabled is false and no keys are in session', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_SITE_KEY: 'site-key',
+    });
+    expect(isFeatureEnabled(false, 'feature-key')).toBe(false);
+  });
+
+  it('returns true when enabled is false but featureKey matches session storage', () => {
+    (getConfig as jest.Mock).mockReturnValue({});
+    sessionStorage.setItem(SSP_SESSION_KEY, 'feature-key');
+    expect(isFeatureEnabled(false, 'feature-key')).toBe(true);
+  });
+
+  it('returns true when enabled is false but siteKey matches session storage', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_SITE_KEY: 'site-key',
+    });
+    sessionStorage.setItem(SSP_SESSION_KEY, 'site-key');
+    expect(isFeatureEnabled(false, 'feature-key')).toBe(true);
+  });
+
+  it('returns false when session storage key does not match either featureKey or siteKey', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_SITE_KEY: 'site-key',
+    });
+    sessionStorage.setItem(SSP_SESSION_KEY, 'wrong-key');
+    expect(isFeatureEnabled(false, 'feature-key')).toBe(false);
+  });
+
+  it('returns true if enabled is false but siteKey is matched, even if featureKey is null', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_SITE_KEY: 'site-key',
+    });
+    sessionStorage.setItem(SSP_SESSION_KEY, 'site-key');
+    expect(isFeatureEnabled(false, null)).toBe(true);
   });
 });
