@@ -2,6 +2,7 @@ import {
   AccountDetailsContent,
   BillingDetailsContent,
   BillingDetailsSuccessContent,
+  EssentialsAcademicSelectionContent,
   PlanDetailsContent,
   PlanDetailsLoginContent,
   PlanDetailsRegisterContent,
@@ -12,6 +13,7 @@ import useCurrentPage from '@/hooks/useCurrentPage';
 type StepperContentComponent = React.FC<{ form?: any }>;
 
 const StepperContentByPage = {
+  EssentialsAcademicSelection: EssentialsAcademicSelectionContent,
   PlanDetails: PlanDetailsContent,
   PlanDetailsLogin: PlanDetailsLoginContent,
   PlanDetailsRegister: PlanDetailsRegisterContent,
