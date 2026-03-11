@@ -2,7 +2,6 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { defineMessages, useIntl } from '@edx/frontend-platform/i18n';
 import { Button, Image } from '@openedx/paragon';
 import { MessageDescriptor } from 'react-intl';
-import { useRouteError } from 'react-router';
 import { isRouteErrorResponse } from 'react-router-dom';
 
 import { Footer } from '../Footer';
@@ -98,7 +97,7 @@ const getRouteErrorDerivedMessage = (routeError: UnknownError): string | undefin
 };
 
 const ErrorPage = ({ message }: ErrorPageProps) => {
-  const routeError = useRouteError() as UnknownError;
+  const routeError : any = null;
   const derivedErrorMessage = getRouteErrorDerivedMessage(routeError);
 
   // Prefer downstream thrown error message; fall back to prop message
