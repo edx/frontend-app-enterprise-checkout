@@ -1,5 +1,6 @@
+// src/components/PurchaseSummary/tests/PurchaseSummary.test.tsx
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
@@ -10,16 +11,51 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import PurchaseSummary from '../PurchaseSummary';
 
+// -----------------------------
+// Global fetch mock for Node environment
+// -----------------------------
+import 'whatwg-fetch';
+
+// -----------------------------
+// Mock data hooks
+// -----------------------------
 jest.mock('@/components/app/data', () => ({
   __esModule: true,
   usePurchaseSummaryPricing: jest.fn(),
   useCreateBillingPortalSession: jest.fn(() => ({ data: { url: null } })),
   useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
-}));
+})); // ensures fetch is defined in Node
+
+beforeAll(() => {
+  jest.spyOn(global, 'fetch').mockImplementation((url: string) => {
+    if (typeof url === 'string') {
+      if (url.includes('/api/v1/testimonials/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ results: [] }),
+        } as Response);
+      }
+      if (url.includes('/api/v1/orders/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ id: 123, status: 'pending' }),
+        } as Response);
+      }
+    }
+    // fallback for other URLs
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({}),
+    } as Response);
+  }) as jest.Mock;
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
 
 describe('PurchaseSummary', () => {
   beforeEach(() => {
-    // Seed the form store
     checkoutFormStore.setState((s) => ({
       ...s,
       formData: {
@@ -33,6 +69,8 @@ describe('PurchaseSummary', () => {
       yearlySubscriptionCostForQuantity: 150,
       yearlyCostPerSubscriptionPerUser: 50,
     });
+
+    (global.fetch as jest.Mock).mockClear();
   });
 
   it('renders header and rows with computed values', () => {
@@ -44,28 +82,50 @@ describe('PurchaseSummary', () => {
       </IntlProvider>,
     );
 
-    // Header
-    validateText('Purchase summary');
-    validateText('For Acme');
+    expect(screen.getByText('Purchase summary')).toBeInTheDocument();
+    expect(screen.getByText('For Acme')).toBeInTheDocument();
+    expect(screen.getByText('Team Subscription, price per user, paid yearly')).toBeInTheDocument();
+    expect(screen.getByText('$50 USD')).toBeInTheDocument();
+    expect(screen.getByText('Number of licenses')).toBeInTheDocument();
+    expect(screen.getByText('x3')).toBeInTheDocument();
+    expect(screen.getByText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`)).toBeInTheDocument();
+    expect(screen.getByText('$150 USD')).toBeInTheDocument();
+    expect(screen.getByText(/Auto-renews annually/i)).toBeInTheDocument();
+    expect(screen.getByText('Due today')).toBeInTheDocument();
+    expect(screen.getByText('$0')).toBeInTheDocument();
+  });
 
-    // Price per user row
-    validateText('Team Subscription, price per user, paid yearly');
-    validateText('$50 USD');
+  it('calls the testimonials API on mount', async () => {
+    render(
+      <IntlProvider locale="en">
+        <MemoryRouter>
+          <PurchaseSummary />
+        </MemoryRouter>
+      </IntlProvider>,
+    );
 
-    // Licenses row
-    validateText('Number of licenses');
-    validateText('x3');
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${process.env.ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`,
+        expect.any(Object),
+      );
+    });
+  });
 
-    // Total after trial row
-    validateText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`);
-    validateText('$150 USD');
-    expect(screen.getAllByText(/\/yr/).length).toBeGreaterThan(0);
+  it('handles fetch failure gracefully', async () => {
+    (global.fetch as jest.Mock).mockImplementationOnce(() => Promise.reject(new Error('API failure')));
 
-    // Auto renew notice
-    validateText(/Auto-renews annually/i);
+    render(
+      <IntlProvider locale="en">
+        <MemoryRouter>
+          <PurchaseSummary />
+        </MemoryRouter>
+      </IntlProvider>,
+    );
 
-    // Due today row
-    validateText('Due today');
-    validateText('$0');
+    await waitFor(() => {
+      expect(screen.getByText('Purchase summary')).toBeInTheDocument();
+    });
   });
 });

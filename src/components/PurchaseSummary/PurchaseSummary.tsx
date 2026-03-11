@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { Card, Stack } from '@openedx/paragon';
+import React, { useEffect, useState } from 'react';
 
-import TestimonialCard from './TestimonialCard';
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
@@ -12,15 +11,16 @@ import LicensesRow from './LicensesRow';
 import PricePerUserRow from './PricePerUserRow';
 import PurchaseSummaryCardButton from './PurchaseSummaryCardButton';
 import PurchaseSummaryHeader from './PurchaseSummaryHeader';
+import TestimonialCard from './TestimonialCard';
 import TotalAfterTrialRow from './TotalAfterTrialRow';
 
 const PurchaseSummary: React.FC = () => {
   const quantity = useCheckoutFormStore(
-    (state) => state.formData[DataStoreKey.PlanDetails]?.quantity
+    (state) => state.formData[DataStoreKey.PlanDetails]?.quantity,
   );
 
   const companyName = useCheckoutFormStore(
-    (state) => state.formData[DataStoreKey.AccountDetails].companyName
+    (state) => state.formData[DataStoreKey.AccountDetails].companyName,
   );
 
   const {
@@ -28,8 +28,7 @@ const PurchaseSummary: React.FC = () => {
     yearlyCostPerSubscriptionPerUser,
   } = usePurchaseSummaryPricing();
 
-  const normalizedQuantity =
-    parseInt(quantity, 10) === 0 ? null : quantity;
+  const normalizedQuantity = parseInt(quantity, 10) === 0 ? null : quantity;
 
   // -----------------------------
   // Testimonial State
@@ -43,34 +42,26 @@ const PurchaseSummary: React.FC = () => {
   // -----------------------------
   useEffect(() => {
     const abortController = new AbortController();
-
     const url = `${process.env.ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`;
 
     fetch(url, { signal: abortController.signal })
-      .then((res) => {
-        if (!res.ok) {
-          console.error('Testimonials API failed:', res.status);
-          return null;
-        }
-        return res.json();
-      })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (!data) return;
+        if (!data) { return; }
 
         const results = data?.results || [];
-
         setTestimonials(results);
 
         if (results.length > 0) {
           const randomIndex = Math.floor(Math.random() * results.length);
           const firstTestimonial = results[randomIndex];
-
           setCurrentTestimonial(firstTestimonial);
           setShownTestimonials([firstTestimonial.uuid]);
         }
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
+          // eslint-disable-next-line no-console
           console.error('Failed to fetch testimonials:', err);
         }
       });
@@ -81,11 +72,11 @@ const PurchaseSummary: React.FC = () => {
   // -----------------------------
   // Rotation logic
   // -----------------------------
-  const showNextTestimonial = () => {
-    if (!testimonials.length) return;
+  useEffect(() => {
+    if (!testimonials.length) { return; }
 
     let available = testimonials.filter(
-      (t) => !shownTestimonials.includes(t.uuid)
+      (t) => !shownTestimonials.includes(t.uuid),
     );
 
     if (available.length === 0) {
@@ -93,19 +84,10 @@ const PurchaseSummary: React.FC = () => {
       setShownTestimonials([]);
     }
 
-    const random =
-      available[Math.floor(Math.random() * available.length)];
-
+    const random = available[Math.floor(Math.random() * available.length)];
     setCurrentTestimonial(random);
     setShownTestimonials((prev) => [...prev, random.uuid]);
-  };
-
-  // Rotate when quantity changes
-  useEffect(() => {
-    if (testimonials.length > 0) {
-      showNextTestimonial();
-    }
-  }, [quantity, testimonials]);
+  }, [quantity, testimonials, shownTestimonials]);
 
   return (
     <Card>
@@ -113,10 +95,7 @@ const PurchaseSummary: React.FC = () => {
 
       <Card.Section className="pt-2">
         <Stack gap={3}>
-          <PricePerUserRow
-            pricePerUser={yearlyCostPerSubscriptionPerUser}
-          />
-
+          <PricePerUserRow pricePerUser={yearlyCostPerSubscriptionPerUser} />
           <LicensesRow quantity={normalizedQuantity} />
 
           <hr className="w-100" />
@@ -133,10 +112,7 @@ const PurchaseSummary: React.FC = () => {
 
           <DueTodayRow amountDue={0} />
 
-          {/* Testimonial */}
-          {currentTestimonial && (
-            <TestimonialCard testimonial={currentTestimonial} />
-          )}
+          {currentTestimonial && <TestimonialCard testimonial={currentTestimonial} />}
         </Stack>
       </Card.Section>
 

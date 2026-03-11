@@ -1,5 +1,5 @@
-import React from 'react';
 import { Stack } from '@openedx/paragon';
+import React from 'react';
 
 interface Props {
   testimonial: {
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const TestimonialCard: React.FC<Props> = ({ testimonial }) => {
-  if (!testimonial) return null;
+  if (!testimonial) { return null; }
 
   return (
     <div className="border rounded p-3 mt-4 bg-light">

@@ -22,9 +22,33 @@ const config = createConfig('webpack-dev', {
   devServer: {
     allowedHosts: 'all',
     server: 'https',
+    port: 2012,
+    proxy: {
+      '/api/catalog/**': {
+        target: 'http://localhost:18160', // Enterprise Catalog API
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/access/**': {
+        target: 'http://localhost:18270', // Enterprise Access API
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/ecommerce/**': {
+        target: 'http://localhost:18130', // Ecommerce API
+        changeOrigin: true,
+        secure: false,
+      },
+      '/csrf/api/v1/token': {
+        target: 'http://localhost:18270', // CSRF token endpoint (example)
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });
 
+// Fix module rule for edX packages
 config.module.rules[0].exclude = /node_modules\/(?!(lodash-es|@(open)?edx))/;
 
 module.exports = config;

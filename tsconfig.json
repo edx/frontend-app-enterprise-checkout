@@ -3,6 +3,8 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
     "paths": {
       "@/components/*": ["./src/components/*"],
       "@/hooks/*": ["./src/hooks/*"],
