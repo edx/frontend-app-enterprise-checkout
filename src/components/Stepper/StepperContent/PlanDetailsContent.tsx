@@ -6,6 +6,7 @@ import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
 import { TermsAndConditionsText } from '@/components/TermsAndConditionsText';
 
 import type { UseFormReturn } from 'react-hook-form';
+import { useMatch } from 'react-router-dom';
 
 /**
  * Props for the PlanDetailsContent component.
@@ -26,9 +27,10 @@ interface PlanDetailsContentProps {
  */
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const isEssentials = !!useMatch('/essentials/*');
   return (
     <>
-      <PriceAlert />
+      {!isEssentials && <PriceAlert />}
       <LicensesField form={form} />
       {authenticatedUser
         ? (

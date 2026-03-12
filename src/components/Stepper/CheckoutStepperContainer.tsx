@@ -6,6 +6,7 @@ import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
 import { CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
+import { useMatch } from 'react-router-dom';
 
 const Steps = (): ReactElement => (
   <>
@@ -17,6 +18,8 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+  //  Detect Essentials flow
+  const isEssentials = !!useMatch('/essentials/*');
 
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
@@ -46,10 +49,15 @@ const CheckoutStepperContainer = (): ReactElement => {
           <Col md={12} lg={8}>
             <Steps />
           </Col>
+          {/* NOTE (Temporary Essentials Behavior):
+           PurchaseSummary is intentionally hidden for all Essentials routes.
+          */}
+          {!isEssentials && (
           <Col md={12} lg={4}>
             <PurchaseSummary />
           </Col>
-        </Row>
+          )}
+      </Row>
       </Stack>
     </Stepper>
   );
