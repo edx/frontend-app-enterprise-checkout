@@ -1,13 +1,22 @@
-import { Card } from '@openedx/paragon';
+import { Card, Stack } from '@openedx/paragon';
 import React from 'react';
 
-interface Testimonial {
+export interface Testimonial {
+  uuid?: string;
   quote_text: string;
   attribution_name: string;
   attribution_title: string;
 }
 
-const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
+interface Props {
+  testimonial: Testimonial | null;
+}
+
+const TestimonialCard: React.FC<Props> = ({ testimonial }) => {
+  if (!testimonial) {
+    return null;
+  }
+
   const {
     quote_text: quoteText,
     attribution_name: attributionName,
@@ -15,11 +24,39 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   } = testimonial;
 
   return (
-    <Card className="mb-3">
+    <Card
+      className="mt-4 border-light"
+      data-testid="testimonial-card"
+    >
       <Card.Body>
-        <p>{quoteText}</p>
-        <strong>{attributionName}</strong>
-        <div>{attributionTitle}</div>
+        <Stack gap={2}>
+          <div
+            style={{ fontSize: '24px' }}
+            aria-hidden="true"
+          >
+            ❝
+          </div>
+
+          <blockquote
+            className="mb-0"
+            data-testid="testimonial-quote"
+          >
+            {quoteText}
+          </blockquote>
+
+          <div className="mt-2">
+            <strong data-testid="testimonial-name">
+              {attributionName}
+            </strong>
+
+            <div
+              className="text-muted"
+              data-testid="testimonial-title"
+            >
+              {attributionTitle}
+            </div>
+          </div>
+        </Stack>
       </Card.Body>
     </Card>
   );

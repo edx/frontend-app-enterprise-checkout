@@ -20,7 +20,7 @@ const PurchaseSummary: React.FC = () => {
   );
 
   const companyName = useCheckoutFormStore(
-    (state) => state.formData[DataStoreKey.AccountDetails].companyName,
+    (state) => state.formData[DataStoreKey.AccountDetails]?.companyName,
   );
 
   const {
@@ -34,7 +34,9 @@ const PurchaseSummary: React.FC = () => {
   // Testimonial State
   // -----------------------------
   const [testimonials, setTestimonials] = useState<any[]>([]);
-  const [currentTestimonial, setCurrentTestimonial] = useState<any | null>(null);
+  const [currentTestimonial, setCurrentTestimonial] = useState<any | null>(
+    null,
+  );
   const [shownTestimonials, setShownTestimonials] = useState<string[]>([]);
 
   // -----------------------------
@@ -49,7 +51,7 @@ const PurchaseSummary: React.FC = () => {
       .then((data) => {
         if (!data) { return; }
 
-        const results = data?.results || [];
+        const results = data.results || [];
         setTestimonials(results);
 
         if (results.length > 0) {
