@@ -1,5 +1,6 @@
 import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
+import { useMatch } from 'react-router-dom';
 
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
 import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
@@ -26,9 +27,10 @@ interface PlanDetailsContentProps {
  */
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const isEssentials = !!useMatch('/essentials/*');
   return (
     <>
-      <PriceAlert />
+      {!isEssentials && <PriceAlert />}
       <LicensesField form={form} />
       {authenticatedUser
         ? (

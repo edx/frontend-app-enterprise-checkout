@@ -20,6 +20,9 @@ export enum CheckoutSubstepKey {
 // NEW ENUMS - For Essentials/Academic flow
 export enum EssentialsStepKey {
   AcademicSelection = 'academic-selection',
+  PlanDetails = 'plan-details',
+  AccountDetails = 'account-details',
+  BillingDetails = 'billing-details',
 }
 
 function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[keyof E], keyof E> {
@@ -293,6 +296,9 @@ export const CheckoutPageRoute = {
 // NEW ROUTES - Essentials flow
 export const EssentialsPageRoute = {
   AcademicSelection: `/essentials/${EssentialsStepKey.AcademicSelection}`,
+  PlanDetails: `/essentials/${EssentialsStepKey.PlanDetails}`,
+  AccountDetails: `/essentials/${EssentialsStepKey.AccountDetails}`,
+  BillingDetails: `/essentials/${EssentialsStepKey.BillingDetails}`,
 } as const;
 
 // NEW PAGE DETAILS - Essentials flow
@@ -309,6 +315,57 @@ export const EssentialsPageDetails = {
     }),
     buttonMessage: null,
   },
+
+  PlanDetails: {
+    step: 'PlanDetails',
+    substep: undefined,
+    formSchema: PlanDetailsSchema, // reuse unless Essentials needs a different schema
+    route: EssentialsPageRoute.PlanDetails,
+    title: defineMessages({
+      id: 'essentials.planDetails.title',
+      defaultMessage: 'Plan Details',
+      description: 'Title for the Essentials plan details page',
+    }),
+    buttonMessage: defineMessages({
+      id: 'essentials.planDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button for Essentials plan details',
+    }),
+  },
+
+  AccountDetails: {
+    step: 'AccountDetails',
+    substep: undefined,
+    formSchema: AccountDetailsSchema, // reuse unless Essentials needs a different schema
+    route: EssentialsPageRoute.AccountDetails,
+    title: defineMessages({
+      id: 'essentials.accountDetails.title',
+      defaultMessage: 'Account Details',
+      description: 'Title for the Essentials account details page',
+    }),
+    buttonMessage: defineMessages({
+      id: 'essentials.accountDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button for Essentials account details',
+    }),
+    BillingDetails: {
+      step: 'BillingDetails',
+      substep: undefined,
+      formSchema: BillingDetailsSchema,
+      route: CheckoutPageRoute.BillingDetails,
+      title: defineMessages({
+        id: 'checkout.billingDetails.title',
+        defaultMessage: 'Billing Details',
+        description: 'Title for the billing details step',
+      }),
+      buttonMessage: defineMessages({
+        id: 'checkout.billingDetails.purchaseNow',
+        defaultMessage: 'Subscribe',
+        description: 'Button to purchase the subscription product',
+      }),
+    },
+  },
+
 } as const;
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {

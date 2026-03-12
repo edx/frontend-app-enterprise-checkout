@@ -1,5 +1,6 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
 import { ReactElement, useEffect } from 'react';
+import { useMatch } from 'react-router-dom';
 
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
@@ -17,7 +18,8 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
-
+  //  Detect Essentials flow
+  const isEssentials = !!useMatch('/essentials/*');
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {
@@ -46,9 +48,14 @@ const CheckoutStepperContainer = (): ReactElement => {
           <Col md={12} lg={8}>
             <Steps />
           </Col>
+          {/* NOTE (Temporary Essentials Behavior):
+           PurchaseSummary is intentionally hidden for all Essentials routes.
+          */}
+          {!isEssentials && (
           <Col md={12} lg={4}>
             <PurchaseSummary />
           </Col>
+          )}
         </Row>
       </Stack>
     </Stepper>
