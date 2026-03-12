@@ -130,17 +130,17 @@ export function getRoutes(queryClient: QueryClient) {
                 </PageWrap>
               ),
             },
-          {
-        path: `:${'step'}/:${'substep'}`,
-        loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
-        element: (
-          <PageWrap>
-            <StepWrapper />
-          </PageWrap>
-        ),
-      },
+            {
+              path: `:${'step'}/:${'substep'}`,
+              loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
+              element: (
+                <PageWrap>
+                  <StepWrapper />
+                </PageWrap>
+              ),
+            },
 
-    ],
+          ],
         },
         {
           path: 'essentials/*',

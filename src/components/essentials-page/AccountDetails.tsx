@@ -1,6 +1,10 @@
-import AccountDetailsPage from '@/components/account-details-pages/AccountDetailsPage';
+import { AccountDetailsPage } from '@/components/account-details-page';
 
 // Essentials wrapper that reuses the Teams (Checkout) form as-is.
-export default function EssentialsAccountDetails() {
-  return <AccountDetailsPage />;
-}
+const EssentialsAccountDetails = () => (
+  <div className="essentials-account-details-wrapper">
+    <AccountDetailsPage />
+  </div>
+);
+
+export default EssentialsAccountDetails;

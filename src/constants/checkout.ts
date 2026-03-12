@@ -315,40 +315,40 @@ export const EssentialsPageDetails = {
     }),
     buttonMessage: null,
   },
-  
-PlanDetails: {
-  step: 'PlanDetails',
-  substep: undefined,
-  formSchema: PlanDetailsSchema, // reuse unless Essentials needs a different schema
-  route: EssentialsPageRoute.PlanDetails,
-  title: defineMessages({
-    id: 'essentials.planDetails.title',
-    defaultMessage: 'Plan Details',
-    description: 'Title for the Essentials plan details page',
-  }),
-  buttonMessage: defineMessages({
-    id: 'essentials.planDetails.continue',
-    defaultMessage: 'Continue',
-    description: 'Button for Essentials plan details',
-  }),
-},
 
-AccountDetails: {
-  step: 'AccountDetails',
-  substep: undefined,
-  formSchema: AccountDetailsSchema, // reuse unless Essentials needs a different schema
-  route: EssentialsPageRoute.AccountDetails,
-  title: defineMessages({
-    id: 'essentials.accountDetails.title',
-    defaultMessage: 'Account Details',
-    description: 'Title for the Essentials account details page',
-  }),
-  buttonMessage: defineMessages({
-    id: 'essentials.accountDetails.continue',
-    defaultMessage: 'Continue',
-    description: 'Button for Essentials account details',
-  }),
-},
+  PlanDetails: {
+    step: 'PlanDetails',
+    substep: undefined,
+    formSchema: PlanDetailsSchema, // reuse unless Essentials needs a different schema
+    route: EssentialsPageRoute.PlanDetails,
+    title: defineMessages({
+      id: 'essentials.planDetails.title',
+      defaultMessage: 'Plan Details',
+      description: 'Title for the Essentials plan details page',
+    }),
+    buttonMessage: defineMessages({
+      id: 'essentials.planDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button for Essentials plan details',
+    }),
+  },
+
+  AccountDetails: {
+    step: 'AccountDetails',
+    substep: undefined,
+    formSchema: AccountDetailsSchema, // reuse unless Essentials needs a different schema
+    route: EssentialsPageRoute.AccountDetails,
+    title: defineMessages({
+      id: 'essentials.accountDetails.title',
+      defaultMessage: 'Account Details',
+      description: 'Title for the Essentials account details page',
+    }),
+    buttonMessage: defineMessages({
+      id: 'essentials.accountDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button for Essentials account details',
+    }),
+  },
 
 } as const;
 

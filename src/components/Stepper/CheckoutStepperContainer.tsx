@@ -1,12 +1,12 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
 import { ReactElement, useEffect } from 'react';
+import { useMatch } from 'react-router-dom';
 
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
 import { CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
-import { useMatch } from 'react-router-dom';
 
 const Steps = (): ReactElement => (
   <>
@@ -57,7 +57,7 @@ const CheckoutStepperContainer = (): ReactElement => {
             <PurchaseSummary />
           </Col>
           )}
-      </Row>
+        </Row>
       </Stack>
     </Stepper>
   );
