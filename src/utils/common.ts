@@ -1,4 +1,5 @@
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 import dayjs from 'dayjs';
 
@@ -109,6 +110,22 @@ const sendEnterpriseCheckoutTrackingEvent = ({
   );
 };
 
+// Feature flag validation
+const isFeatureEnabled = (enabled: boolean, featureKey?: string | null): boolean => {
+  const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
+  const { FEATURE_SELF_SERVICE_SITE_KEY } = getConfig();
+  const sessionKey = sessionStorage.getItem(SSP_SESSION_KEY);
+
+  if (enabled) {
+    return true;
+  }
+
+  const isUnlockedBySiteKey = !!FEATURE_SELF_SERVICE_SITE_KEY && sessionKey === FEATURE_SELF_SERVICE_SITE_KEY;
+  const isUnlockedByFeatureKey = !!featureKey && sessionKey === featureKey;
+
+  return isUnlockedBySiteKey || isUnlockedByFeatureKey;
+};
+
 export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
@@ -117,4 +134,5 @@ export {
   serverValidationError,
   isExpired,
   sendEnterpriseCheckoutTrackingEvent,
+  isFeatureEnabled,
 };

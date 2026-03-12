@@ -1,3 +1,4 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -76,6 +77,16 @@ jest.mock('@edx/frontend-platform/config', () => ({
   }),
 }));
 
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn(() => ({
+    FEATURE_SELF_SERVICE_PURCHASING: true,
+    FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    FEATURE_SELF_SERVICE_ESSENTIALS: true,
+    FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
+    FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+  })),
+}));
+
 jest.mock('@/components/app/data/hooks/useBFFContext');
 
 const mockedUseBFFContext = useBFFContext as unknown as jest.Mock;
@@ -131,7 +142,16 @@ describe('PlanDetailsPage', () => {
   });
 
   it('renders the price alert', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: 'true',
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test_purchasing_key',
+      FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+    });
+
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
+
+    expect(screen.getByTestId('price-alert')).toBeInTheDocument();
+
     expect(screen.getByTestId('price-alert')).toHaveTextContent('Teams subscription');
     expect(screen.getByTestId('price-alert')).toHaveTextContent('999/yr');
   });
@@ -149,6 +169,34 @@ describe('PlanDetailsPage', () => {
   it('renders the PriceAlert component', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
     validateText('Teams subscription');
+  });
+
+  it('does NOT render PriceAlert for Essentials PlanDetails', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: 'true',
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test_purchasing_key',
+      FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+    });
+
+    renderStepperRoute('/essentials/plan-details');
+
+    expect(
+      screen.queryByTestId('price-alert'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides PriceAlert for Essentials even when purchasing feature is enabled', () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test_purchasing_key',
+      FEATURE_SELF_SERVICE_SITE_KEY: null,
+    });
+
+    renderStepperRoute('/essentials/plan-details');
+
+    expect(
+      screen.queryByText(/Teams subscription/i),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -217,6 +265,15 @@ describe('PlanDetailsRegistrationPage', () => {
 
   it('renders disclaimer links with correct destinations', () => {
     // getConfig is mocked at module level to provide test URLs
+
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: 'true',
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test_purchasing_key',
+      FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+      TERMS_OF_SERVICE_URL: 'https://example.com/terms',
+      PRIVACY_POLICY_URL: 'https://example.com/privacy',
+    });
+
     renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
 
     // Check that links exist and have correct attributes
@@ -775,5 +832,235 @@ describe('PlanDetailsPage - Button Pending State', () => {
 
     // Mutation should only be called once
     expect(createCheckoutIntentMutateSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+// Essentials navigation tests for Plan Details pages
+
+describe('PlanDetailsPage – Essentials navigation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Safe defaults for constraints used by the form schema
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    // Unless a test overrides it, admin email validation is ok
+    (validateFieldDetailed as jest.Mock).mockResolvedValue({
+      isValid: true,
+      validationDecisions: {},
+    });
+
+    // Ensure BFF-context dependent UI (e.g., PurchaseSummary) has data
+    setupBFFContextMock();
+
+    // Pre-populate minimal plan details for register/login pages
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'admin@example.com',
+          fullName: 'Admin User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+  });
+
+  it('PlanDetails (essentials): unregistered admin email → navigates to /essentials/plan-details/register', async () => {
+    const user = userEvent.setup();
+
+    // Simulate "not_registered" decision when submitting the form
+    (validateFieldDetailed as jest.Mock).mockImplementation(
+      (field, value, _extras, overridePrevious) => {
+        if (field === 'adminEmail' && value === 'new@company.com' && overridePrevious === true) {
+          return Promise.resolve({
+            isValid: false,
+            validationDecisions: { adminEmail: { errorCode: 'not_registered' } },
+          });
+        }
+        return Promise.resolve({ isValid: true, validationDecisions: {} });
+      },
+    );
+
+    renderStepperRoute('/essentials/plan-details');
+
+    // Fill required fields
+    await user.type(await screen.findByLabelText(/full name/i), 'John Doe');
+    await user.clear(screen.getByLabelText(/work email/i));
+    await user.type(screen.getByLabelText(/work email/i), 'new@company.com');
+    await user.clear(screen.getByLabelText(/number of licenses/i));
+    await user.type(screen.getByLabelText(/number of licenses/i), '10');
+    await user.selectOptions(screen.getByLabelText(/country/i), 'US');
+
+    // Submit
+    await user.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(validateFieldDetailed).toHaveBeenCalledWith(
+        'adminEmail',
+        'new@company.com',
+        {},
+        true,
+      );
+    });
+
+    //  Essentials-prefixed target
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details/register');
+    });
+  });
+
+  it('PlanDetails (essentials): registered/valid admin email → navigates to /essentials/plan-details/login', async () => {
+    const user = userEvent.setup();
+
+    // Any non "not_registered" outcome should send to login when unauthenticated
+    (validateFieldDetailed as jest.Mock).mockImplementation(
+      (field, value, _extras, overridePrevious) => {
+        if (field === 'adminEmail' && value === 'existing@company.com' && overridePrevious === true) {
+          return Promise.resolve({
+            isValid: true,
+            validationDecisions: {},
+          });
+        }
+        return Promise.resolve({ isValid: true, validationDecisions: {} });
+      },
+    );
+
+    renderStepperRoute('/essentials/plan-details');
+
+    // Fill required fields
+    await user.type(await screen.findByLabelText(/full name/i), 'Jane Doe');
+    await user.clear(screen.getByLabelText(/work email/i));
+    await user.type(screen.getByLabelText(/work email/i), 'existing@company.com');
+    await user.clear(screen.getByLabelText(/number of licenses/i));
+    await user.type(screen.getByLabelText(/number of licenses/i), '10');
+    await user.selectOptions(screen.getByLabelText(/country/i), 'US');
+
+    // Submit
+    await user.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details/login');
+    });
+  });
+
+  it('PlanDetails (essentials, authenticated): successful checkout intent → navigates to /essentials/account-details', async () => {
+    const user = userEvent.setup();
+
+    // Authenticated user
+    const mockUser = {
+      userId: 123,
+      email: 'auth@company.com',
+      name: 'Auth User',
+      username: 'authuser',
+      country: 'US',
+    } as AuthenticatedUser;
+
+    // Make the createCheckoutIntent mutation invoke onSuccess immediately
+    const useCreateCheckoutIntentMutation = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as unknown as jest.Mock;
+
+    useCreateCheckoutIntentMutation.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute('/essentials/plan-details', { config: {}, authenticatedUser: mockUser });
+
+    // Ensure quantity is present/valid and submit
+    await user.clear(await screen.findByLabelText(/number of licenses/i));
+    await user.type(screen.getByLabelText(/number of licenses/i), '10');
+    await user.click(screen.getByTestId('stepper-submit-button'));
+
+    // Essentials account-details
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/account-details');
+    });
+  });
+
+  it('PlanDetailsLogin (essentials): successful login → navigates back to /essentials/plan-details', async () => {
+    jest.clearAllMocks();
+
+    // Provide safe constraints so form schema resolves
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    // Ensure BFF-context dependent UI has data (same helper you use elsewhere)
+    setupBFFContextMock();
+
+    // Pre-populate login page fields in the store so the form is valid on submit
+    //    (This mirrors your existing "button shows pending state for login mutation" test.)
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'user@example.com',
+          password: 'password123',
+          fullName: 'Admin User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+
+    // Mock useLoginMutation so mutate() immediately calls onSuccess -> triggers navigate()
+    const useLoginMutation = (await import('@/components/app/data/hooks/useLoginMutation')).default as unknown as jest.Mock;
+
+    useLoginMutation.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    // Render directly on the essentials login route
+    renderStepperRoute('/essentials/plan-details/login', {
+      config: {},
+      authenticatedUser: null,
+    });
+
+    // Click submit to trigger mutate -> onSuccess -> navigate()
+    const submitButton = await screen.findByTestId('stepper-submit-button');
+    await userEvent.click(submitButton);
+
+    // Assert the essentials-prefixed navigation happened
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details');
+    });
+  });
+
+  it('PlanDetailsRegister (essentials): successful registration → navigates back to /essentials/plan-details', async () => {
+    const user = userEvent.setup();
+
+    // Registration success should navigate back to PlanDetails (essentials)
+    const useRegisterMutation = (await import('@/components/app/data/hooks/useRegisterMutation')).default as unknown as jest.Mock;
+
+    useRegisterMutation.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute('/essentials/plan-details/register');
+
+    // Fill minimal editable fields for registration page
+    await user.type(screen.getByLabelText(/public username/i), 'newuser');
+    await user.type(screen.getByLabelText(/^password$/i), 'P@ssword1234');
+    await user.type(screen.getByLabelText(/confirm password/i), 'P@ssword1234');
+
+    // Submit
+    await user.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details');
+    });
   });
 });

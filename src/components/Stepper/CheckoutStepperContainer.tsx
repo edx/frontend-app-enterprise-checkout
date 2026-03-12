@@ -17,7 +17,6 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
-
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {

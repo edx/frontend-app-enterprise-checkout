@@ -52,6 +52,10 @@ const PlanDetailsPage = () => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
   const currentPage = useCurrentPage();
+  const inEssentials = location.pathname.startsWith('/essentials/');
+  const buildCheckoutPath = (route: string) => (
+    inEssentials ? `/essentials${route}` : route
+  );
   const {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
@@ -77,7 +81,7 @@ const PlanDetailsPage = () => {
   const loginMutation = useLoginMutation({
     onSuccess: () => {
       setIsSubmitting(false);
-      navigate(CheckoutPageRoute.PlanDetails);
+      navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
     },
     onError: (errorMessage) => {
       setIsSubmitting(false);
@@ -91,7 +95,7 @@ const PlanDetailsPage = () => {
   const registerMutation = useRegisterMutation({
     onSuccess: () => {
       setIsSubmitting(false);
-      navigate(CheckoutPageRoute.PlanDetails);
+      navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
     },
     onError: (errorMessage, errorData) => {
       // Check if the response contains field-level validation errors for email
@@ -130,7 +134,7 @@ const PlanDetailsPage = () => {
       // Invalidate BFF context queries so downstream pages see the new intent.
       await queryClientInvalidate(authenticatedUser?.userId);
       setIsSubmitting(false);
-      navigate(CheckoutPageRoute.AccountDetails);
+      navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
     },
     onError: (errorData) => {
       setIsSubmitting(false);
@@ -174,10 +178,10 @@ const PlanDetailsPage = () => {
         const adminEmailDecision = validationDecisions?.adminEmail;
         if (!isValidAdminEmailField && adminEmailDecision?.errorCode === 'not_registered') {
           // User is not registered, navigate to registration page
-          navigate(CheckoutPageRoute.PlanDetailsRegister);
+          navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetailsRegister));
         } else {
           // User is registered (or other validation state), navigate to login page
-          navigate(CheckoutPageRoute.PlanDetailsLogin);
+          navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetailsLogin));
         }
         return;
       }
@@ -264,7 +268,7 @@ const PlanDetailsPage = () => {
             {location.pathname !== CheckoutPageRoute.PlanDetails && (
               <Button
                 variant="outline-primary"
-                onClick={() => navigate(CheckoutPageRoute.PlanDetails)}
+                onClick={() => navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails))}
               >
                 <FormattedMessage
                   id="checkout.back"
