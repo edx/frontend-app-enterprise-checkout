@@ -1,12 +1,12 @@
 import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
+import { useMatch } from 'react-router-dom';
 
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
 import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
 import { TermsAndConditionsText } from '@/components/TermsAndConditionsText';
 
 import type { UseFormReturn } from 'react-hook-form';
-import { useMatch } from 'react-router-dom';
 
 /**
  * Props for the PlanDetailsContent component.
