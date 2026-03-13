@@ -82,7 +82,7 @@ declare global {
     email: string;
     country: string;
     honorCode: boolean;
-    recaptchaToken?: string;
+    captchaToken?: string;
   }
 
   interface RegistrationCreateSuccessResponseSchema {
