@@ -1,5 +1,7 @@
+import { getConfig } from '@edx/frontend-platform';
+import { logError } from '@edx/frontend-platform/logging';
 import { Card, Stack } from '@openedx/paragon';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { DataStoreKey } from '@/constants/checkout';
@@ -11,10 +13,10 @@ import LicensesRow from './LicensesRow';
 import PricePerUserRow from './PricePerUserRow';
 import PurchaseSummaryCardButton from './PurchaseSummaryCardButton';
 import PurchaseSummaryHeader from './PurchaseSummaryHeader';
-import TestimonialCard from './TestimonialCard';
+import TestimonialCard, { Testimonial } from './TestimonialCard';
 import TotalAfterTrialRow from './TotalAfterTrialRow';
 
-const PurchaseSummary: React.FC = () => {
+const PurchaseSummary = () => {
   const quantity = useCheckoutFormStore(
     (state) => state.formData[DataStoreKey.PlanDetails]?.quantity,
   );
@@ -30,21 +32,15 @@ const PurchaseSummary: React.FC = () => {
 
   const normalizedQuantity = parseInt(quantity, 10) === 0 ? null : quantity;
 
-  // -----------------------------
-  // Testimonial State
-  // -----------------------------
-  const [testimonials, setTestimonials] = useState<any[]>([]);
-  const [currentTestimonial, setCurrentTestimonial] = useState<any | null>(
-    null,
-  );
-  const [shownTestimonials, setShownTestimonials] = useState<string[]>([]);
+  const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
 
-  // -----------------------------
-  // Fetch testimonials
-  // -----------------------------
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
+  const shownTestimonialsRef = useRef<string[]>([]);
+
   useEffect(() => {
     const abortController = new AbortController();
-    const url = `${process.env.ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`;
+    const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`;
 
     fetch(url, { signal: abortController.signal })
       .then((res) => (res.ok ? res.json() : null))
@@ -57,39 +53,45 @@ const PurchaseSummary: React.FC = () => {
         if (results.length > 0) {
           const randomIndex = Math.floor(Math.random() * results.length);
           const firstTestimonial = results[randomIndex];
+
           setCurrentTestimonial(firstTestimonial);
-          setShownTestimonials([firstTestimonial.uuid]);
+          shownTestimonialsRef.current = [firstTestimonial.uuid];
         }
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
-          // eslint-disable-next-line no-console
-          console.error('Failed to fetch testimonials:', err);
+          try {
+            logError('Failed to fetch testimonials:', err);
+          } catch {
+            // ignore logging errors
+          }
         }
       });
 
     return () => abortController.abort();
-  }, []);
+  }, [ENTERPRISE_ACCESS_BASE_URL]);
 
-  // -----------------------------
-  // Rotation logic
-  // -----------------------------
   useEffect(() => {
     if (!testimonials.length) { return; }
 
     let available = testimonials.filter(
-      (t) => !shownTestimonials.includes(t.uuid),
+      (t) => !shownTestimonialsRef.current.includes(t.uuid),
     );
 
     if (available.length === 0) {
       available = testimonials;
-      setShownTestimonials([]);
+      shownTestimonialsRef.current = [];
     }
 
     const random = available[Math.floor(Math.random() * available.length)];
+
     setCurrentTestimonial(random);
-    setShownTestimonials((prev) => [...prev, random.uuid]);
-  }, [quantity, testimonials, shownTestimonials]);
+
+    shownTestimonialsRef.current = [
+      ...shownTestimonialsRef.current,
+      random.uuid,
+    ];
+  }, [quantity, testimonials]);
 
   return (
     <Card>
@@ -114,7 +116,9 @@ const PurchaseSummary: React.FC = () => {
 
           <DueTodayRow amountDue={0} />
 
-          {currentTestimonial && <TestimonialCard testimonial={currentTestimonial} />}
+          {currentTestimonial && (
+            <TestimonialCard testimonial={currentTestimonial} />
+          )}
         </Stack>
       </Card.Section>
 

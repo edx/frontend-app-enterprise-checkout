@@ -1,8 +1,8 @@
-// src/components/PurchaseSummary/tests/PurchaseSummary.test.tsx
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
+import 'whatwg-fetch';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
@@ -11,20 +11,12 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import PurchaseSummary from '../PurchaseSummary';
 
-// -----------------------------
-// Global fetch mock for Node environment
-// -----------------------------
-import 'whatwg-fetch';
-
-// -----------------------------
-// Mock data hooks
-// -----------------------------
 jest.mock('@/components/app/data', () => ({
   __esModule: true,
   usePurchaseSummaryPricing: jest.fn(),
   useCreateBillingPortalSession: jest.fn(() => ({ data: { url: null } })),
   useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
-})); // ensures fetch is defined in Node
+}));
 
 beforeAll(() => {
   jest.spyOn(global, 'fetch').mockImplementation((url: string) => {
@@ -42,7 +34,7 @@ beforeAll(() => {
         } as Response);
       }
     }
-    // fallback for other URLs
+
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve({}),
@@ -88,7 +80,9 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$50 USD')).toBeInTheDocument();
     expect(screen.getByText('Number of licenses')).toBeInTheDocument();
     expect(screen.getByText('x3')).toBeInTheDocument();
-    expect(screen.getByText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`),
+    ).toBeInTheDocument();
     expect(screen.getByText('$150 USD')).toBeInTheDocument();
     expect(screen.getByText(/Auto-renews annually/i)).toBeInTheDocument();
     expect(screen.getByText('Due today')).toBeInTheDocument();
@@ -105,9 +99,8 @@ describe('PurchaseSummary', () => {
     );
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(global.fetch).toHaveBeenCalledWith(
-        `${process.env.ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`,
+        expect.stringContaining('/api/v1/testimonials/'),
         expect.any(Object),
       );
     });

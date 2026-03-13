@@ -12,7 +12,7 @@ interface Props {
   testimonial: Testimonial | null;
 }
 
-const TestimonialCard: React.FC<Props> = ({ testimonial }) => {
+const TestimonialCard = ({ testimonial }: Props) => {
   if (!testimonial) {
     return null;
   }
@@ -24,23 +24,14 @@ const TestimonialCard: React.FC<Props> = ({ testimonial }) => {
   } = testimonial;
 
   return (
-    <Card
-      className="mt-4 border-light"
-      data-testid="testimonial-card"
-    >
+    <Card className="mt-4 border-light" data-testid="testimonial-card">
       <Card.Body>
         <Stack gap={2}>
-          <div
-            style={{ fontSize: '24px' }}
-            aria-hidden="true"
-          >
+          <div className="h3" aria-hidden="true">
             ❝
           </div>
 
-          <blockquote
-            className="mb-0"
-            data-testid="testimonial-quote"
-          >
+          <blockquote className="mb-0" data-testid="testimonial-quote">
             {quoteText}
           </blockquote>
 
@@ -49,10 +40,7 @@ const TestimonialCard: React.FC<Props> = ({ testimonial }) => {
               {attributionName}
             </strong>
 
-            <div
-              className="text-muted"
-              data-testid="testimonial-title"
-            >
+            <div className="text-muted" data-testid="testimonial-title">
               {attributionTitle}
             </div>
           </div>
