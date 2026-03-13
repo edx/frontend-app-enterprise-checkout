@@ -207,7 +207,7 @@ const PlanDetailsPage = () => {
       };
 
       if (recaptchaToken) {
-        registerMutationPayload.recaptchaToken = recaptchaToken;
+        registerMutationPayload.captchaToken = recaptchaToken;
       }
       registerMutation.mutate(registerMutationPayload);
     },

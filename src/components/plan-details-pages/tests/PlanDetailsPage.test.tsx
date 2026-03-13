@@ -510,7 +510,7 @@ describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
     );
   });
 
-  it('calls register mutation without recaptchaToken when reCAPTCHA token is null', async () => {
+  it('calls register mutation without captchaToken when reCAPTCHA token is null', async () => {
     registerMutateSpy = jest.fn();
     const user = userEvent.setup();
 
@@ -529,7 +529,7 @@ describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
     // Submit the form
     await user.click(screen.getByTestId('stepper-submit-button'));
 
-    // Assert the register mutation was called with payload lacking recaptchaToken
+    // Assert the register mutation was called with payload lacking captchaToken
     await waitFor(() => expect(mutateSpy).toHaveBeenCalled());
     const payload = (mutateSpy as jest.Mock).mock.calls[0][0];
 
@@ -540,7 +540,7 @@ describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
       password: 'password-1234',
       country: 'US',
     });
-    expect(payload).not.toHaveProperty('recaptchaToken');
+    expect(payload).not.toHaveProperty('captchaToken');
   });
 });
 
