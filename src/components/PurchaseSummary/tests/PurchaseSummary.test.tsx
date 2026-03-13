@@ -1,4 +1,5 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
@@ -6,11 +7,13 @@ import 'whatwg-fetch';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
+import useTestimonials from '@/components/app/data/hooks/useTestimonials';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import PurchaseSummary from '../PurchaseSummary';
 
+// Mock your custom hooks
 jest.mock('@/components/app/data', () => ({
   __esModule: true,
   usePurchaseSummaryPricing: jest.fn(),
@@ -18,33 +21,21 @@ jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
 }));
 
-beforeAll(() => {
-  jest.spyOn(global, 'fetch').mockImplementation((url: string) => {
-    if (typeof url === 'string') {
-      if (url.includes('/api/v1/testimonials/')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ results: [] }),
-        } as Response);
-      }
-      if (url.includes('/api/v1/orders/')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ id: 123, status: 'pending' }),
-        } as Response);
-      }
-    }
+// Mock testimonials hook
+jest.mock('@/components/app/data/hooks/useTestimonials');
 
-    return Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({}),
-    } as Response);
-  }) as jest.Mock;
-});
-
-afterAll(() => {
-  jest.restoreAllMocks();
-});
+const renderWithProviders = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en">
+        <MemoryRouter>
+          <PurchaseSummary />
+        </MemoryRouter>
+      </IntlProvider>
+    </QueryClientProvider>,
+  );
+};
 
 describe('PurchaseSummary', () => {
   beforeEach(() => {
@@ -62,17 +53,11 @@ describe('PurchaseSummary', () => {
       yearlyCostPerSubscriptionPerUser: 50,
     });
 
-    (global.fetch as jest.Mock).mockClear();
+    (useTestimonials as jest.Mock).mockReturnValue({ data: [], isLoading: false });
   });
 
   it('renders header and rows with computed values', () => {
-    render(
-      <IntlProvider locale="en">
-        <MemoryRouter>
-          <PurchaseSummary />
-        </MemoryRouter>
-      </IntlProvider>,
-    );
+    renderWithProviders();
 
     expect(screen.getByText('Purchase summary')).toBeInTheDocument();
     expect(screen.getByText('For Acme')).toBeInTheDocument();
@@ -80,45 +65,40 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$50 USD')).toBeInTheDocument();
     expect(screen.getByText('Number of licenses')).toBeInTheDocument();
     expect(screen.getByText('x3')).toBeInTheDocument();
-    expect(
-      screen.getByText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`),
-    ).toBeInTheDocument();
+    expect(screen.getByText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`)).toBeInTheDocument();
     expect(screen.getByText('$150 USD')).toBeInTheDocument();
     expect(screen.getByText(/Auto-renews annually/i)).toBeInTheDocument();
     expect(screen.getByText('Due today')).toBeInTheDocument();
     expect(screen.getByText('$0')).toBeInTheDocument();
   });
 
-  it('calls the testimonials API on mount', async () => {
-    render(
-      <IntlProvider locale="en">
-        <MemoryRouter>
-          <PurchaseSummary />
-        </MemoryRouter>
-      </IntlProvider>,
-    );
-
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/testimonials/'),
-        expect.any(Object),
-      );
-    });
-  });
-
-  it('handles fetch failure gracefully', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(() => Promise.reject(new Error('API failure')));
-
-    render(
-      <IntlProvider locale="en">
-        <MemoryRouter>
-          <PurchaseSummary />
-        </MemoryRouter>
-      </IntlProvider>,
-    );
+  it('renders correctly when testimonials are empty', async () => {
+    renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByText('Purchase summary')).toBeInTheDocument();
+    });
+  });
+
+  it('renders correctly when testimonials exist', async () => {
+    (useTestimonials as jest.Mock).mockReturnValue({
+      data: [
+        {
+          uuid: '123',
+          quote_text: 'Great product!',
+          attribution_name: 'John Doe',
+          attribution_title: 'CEO',
+        },
+      ],
+      isLoading: false,
+    });
+
+    renderWithProviders();
+
+    await waitFor(() => {
+      expect(screen.getByText('Great product!')).toBeInTheDocument();
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('CEO')).toBeInTheDocument();
     });
   });
 });

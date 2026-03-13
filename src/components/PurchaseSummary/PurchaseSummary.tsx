@@ -1,9 +1,8 @@
-import { getConfig } from '@edx/frontend-platform';
-import { logError } from '@edx/frontend-platform/logging';
 import { Card, Stack } from '@openedx/paragon';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
+import useTestimonials from '@/components/app/data/hooks/useTestimonials';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
@@ -32,50 +31,16 @@ const PurchaseSummary = () => {
 
   const normalizedQuantity = parseInt(quantity, 10) === 0 ? null : quantity;
 
-  const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  // ✅ Move testimonials API call to client hook
+  const { data: testimonials = [] } = useTestimonials();
   const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
   const shownTestimonialsRef = useRef<string[]>([]);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`;
-
-    fetch(url, { signal: abortController.signal })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!data) { return; }
-
-        const results = data.results || [];
-        setTestimonials(results);
-
-        if (results.length > 0) {
-          const randomIndex = Math.floor(Math.random() * results.length);
-          const firstTestimonial = results[randomIndex];
-
-          setCurrentTestimonial(firstTestimonial);
-          shownTestimonialsRef.current = [firstTestimonial.uuid];
-        }
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          try {
-            logError('Failed to fetch testimonials:', err);
-          } catch {
-            // ignore logging errors
-          }
-        }
-      });
-
-    return () => abortController.abort();
-  }, [ENTERPRISE_ACCESS_BASE_URL]);
 
   useEffect(() => {
     if (!testimonials.length) { return; }
 
     let available = testimonials.filter(
-      (t) => !shownTestimonialsRef.current.includes(t.uuid),
+      (t) => t.uuid && !shownTestimonialsRef.current.includes(t.uuid),
     );
 
     if (available.length === 0) {
@@ -87,11 +52,10 @@ const PurchaseSummary = () => {
 
     setCurrentTestimonial(random);
 
-    shownTestimonialsRef.current = [
-      ...shownTestimonialsRef.current,
-      random.uuid,
-    ];
-  }, [quantity, testimonials]);
+    if (random.uuid) {
+      shownTestimonialsRef.current = [...shownTestimonialsRef.current, random.uuid];
+    }
+  }, [testimonials]);
 
   return (
     <Card>
