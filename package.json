@@ -49,6 +49,7 @@
     "@stripe/stripe-js": "^7.9.0",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
+    "@types/testing-library__jest-dom": "^5.14.9",
     "accessible-nprogress": "^2.1.2",
     "axios": "^1.12.2",
     "classnames": "^2.5.1",
@@ -67,6 +68,7 @@
     "redux": "^4.2.1",
     "slugify": "^1.6.6",
     "type-fest": "^4.41.0",
+    "whatwg-fetch": "^3.6.20",
     "zod": "^3.24.2",
     "zustand": "^4.5.6"
   },
