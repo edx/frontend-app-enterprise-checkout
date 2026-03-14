@@ -348,22 +348,22 @@ export const EssentialsPageDetails = {
       defaultMessage: 'Continue',
       description: 'Button for Essentials account details',
     }),
-    BillingDetails: {
-      step: 'BillingDetails',
-      substep: undefined,
-      formSchema: BillingDetailsSchema,
-      route: CheckoutPageRoute.BillingDetails,
-      title: defineMessages({
-        id: 'checkout.billingDetails.title',
-        defaultMessage: 'Billing Details',
-        description: 'Title for the billing details step',
-      }),
-      buttonMessage: defineMessages({
-        id: 'checkout.billingDetails.purchaseNow',
-        defaultMessage: 'Subscribe',
-        description: 'Button to purchase the subscription product',
-      }),
-    },
+  },
+  BillingDetails: {
+    step: 'BillingDetails',
+    substep: undefined,
+    formSchema: BillingDetailsSchema,
+    route: EssentialsPageRoute.BillingDetails,
+    title: defineMessages({
+      id: 'essentials.billingDetails.title',
+      defaultMessage: 'Billing Details',
+      description: 'Title for the billing details step',
+    }),
+    buttonMessage: defineMessages({
+      id: 'essentials.billingDetails.purchaseNow',
+      defaultMessage: 'Subscribe',
+      description: 'Button to purchase the subscription product',
+    }),
   },
 
 } as const;

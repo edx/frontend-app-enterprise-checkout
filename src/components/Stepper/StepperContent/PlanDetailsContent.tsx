@@ -16,6 +16,9 @@ interface PlanDetailsContentProps {
   form: UseFormReturn<PlanDetailsData>;
 }
 
+// Hook that determines whether the current route is part of the Essentials flow.
+const useIsEssentialsRoute = () => !!useMatch('/essentials/*');
+
 /**
  * Renders the content for the Plan Details step, including:
  * - Price alert
@@ -27,7 +30,7 @@ interface PlanDetailsContentProps {
  */
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
-  const isEssentials = !!useMatch('/essentials/*');
+  const isEssentials = useIsEssentialsRoute();
   return (
     <>
       {!isEssentials && <PriceAlert />}

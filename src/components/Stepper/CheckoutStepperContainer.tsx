@@ -8,6 +8,8 @@ import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Steppe
 import { CheckoutSubstepKey } from '@/constants/checkout';
 import useCurrentStep from '@/hooks/useCurrentStep';
 
+const useIsEssentialsRoute = (): boolean => !!useMatch('/essentials/*');
+
 const Steps = (): ReactElement => (
   <>
     <PlanDetails />
@@ -18,8 +20,7 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
-  //  Detect Essentials flow
-  const isEssentials = !!useMatch('/essentials/*');
+  const isEssentials = useIsEssentialsRoute;
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {
