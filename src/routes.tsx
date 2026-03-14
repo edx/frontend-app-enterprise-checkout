@@ -111,7 +111,7 @@ export function getRoutes(queryClient: QueryClient) {
           children: [
             {
               index: true,
-              element: <Navigate to={EssentialsStepKey.AcademicSelection} replace />,
+              element: <Navigate to={EssentialsStepKey.PlanDetails} replace />,
             },
             {
               path: EssentialsStepKey.AcademicSelection,
@@ -121,6 +121,25 @@ export function getRoutes(queryClient: QueryClient) {
                 </PageWrap>
               ),
             },
+            {
+              path: ':step',
+              loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
+              element: (
+                <PageWrap>
+                  <StepWrapper />  {/* renders CheckoutPage + Auth wrapper same as checkout */}
+                </PageWrap>
+              ),
+            },
+            {
+              path: ':step/:substep',
+              loader: getRouteLoader(makeCheckoutStepperLoader, queryClient),
+              element: (
+                <PageWrap>
+                  <StepWrapper />
+                </PageWrap>
+              ),
+            },
+
           ],
         },
         {

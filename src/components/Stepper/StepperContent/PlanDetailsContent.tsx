@@ -1,5 +1,6 @@
 import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
+import { useMatch } from 'react-router-dom';
 
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
 import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
@@ -15,6 +16,9 @@ interface PlanDetailsContentProps {
   form: UseFormReturn<PlanDetailsData>;
 }
 
+// Hook that determines whether the current route is part of the Essentials flow.
+const useIsEssentialsRoute = () => !!useMatch('/essentials/*');
+
 /**
  * Renders the content for the Plan Details step, including:
  * - Price alert
@@ -26,9 +30,10 @@ interface PlanDetailsContentProps {
  */
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const isEssentials = useIsEssentialsRoute();
   return (
     <>
-      <PriceAlert />
+      {!isEssentials && <PriceAlert />}
       <LicensesField form={form} />
       {authenticatedUser
         ? (
