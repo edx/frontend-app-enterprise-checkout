@@ -1,6 +1,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { screen } from '@testing-library/react';
+// src/setupTest.ts
 
+// src/setupTest.ts
+
+import 'whatwg-fetch';
+import '@testing-library/jest-dom';
 // @ts-ignore
 import type { TextMatch } from '@testing-library/dom';
 
