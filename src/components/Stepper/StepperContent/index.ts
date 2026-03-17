@@ -4,3 +4,4 @@ export { default as PlanDetailsRegisterContent } from './PlanDetailsRegisterCont
 export { default as AccountDetailsContent } from './AccountDetailsContent';
 export { default as BillingDetailsContent } from './BillingDetailsContent';
 export { default as BillingDetailsSuccessContent } from './BillingDetailsSuccessContent';
+export { default as EssentialsAcademicSelectionContent } from './EssentialsAcademicSelectionContent';
