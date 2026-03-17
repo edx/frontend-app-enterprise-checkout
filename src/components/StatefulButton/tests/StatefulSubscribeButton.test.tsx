@@ -86,8 +86,16 @@ function setup(overrides = {}) {
     useCheckoutFormStore: {
       formData: {
         BillingDetails: {
+          fullName: 'John Doe',
+          country: 'US',
+          line1: '123 Main St',
+          line2: '',
+          city: 'Boston',
+          state: 'MA',
+          zip: '02109',
           confirmTnC: true,
           confirmSubscription: true,
+          confirmRecurringSubscription: true,
         },
       },
       setFormData: jest.fn(),

@@ -12,7 +12,7 @@ interface BillingDetailsContentProps {
 
 const BillingDetailsContent = ({ form }: BillingDetailsContentProps) => (
   <Stack gap={4}>
-    <BillingFormFields />
+    <BillingFormFields form={form} />
     <TermsAndConditions form={form} />
     <BillingDetailsDisclaimer />
   </Stack>

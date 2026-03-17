@@ -5,6 +5,7 @@ import { StatefulButton } from '@openedx/paragon';
 import { CheckoutContextValue, useCheckout } from '@stripe/react-stripe-js';
 import { StripeCheckoutStatus } from '@stripe/stripe-js';
 import { useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -54,7 +55,11 @@ const buttonMessages = defineMessages({
   },
 });
 
-const StatefulSubscribeButton = () => {
+interface StatefulSubscribeButtonProps {
+  onClick?: () => void;
+}
+
+const StatefulSubscribeButton: React.FC<StatefulSubscribeButtonProps> = ({ onClick }) => {
   const [statefulButtonState, setStatefulButtonState] = useState('default');
   const [errorMessageKey, setErrorMessageKey] = useState('fallback');
   const { data: checkoutIntent } = useCheckoutIntent();
@@ -75,10 +80,24 @@ const StatefulSubscribeButton = () => {
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setCheckoutSessionStatus = useCheckoutFormStore((state) => state.setCheckoutSessionStatus);
 
-  const hasInvalidTerms = Object.values(billingDetailsData).some((value) => !value);
-  const isFormValid = canConfirm && !hasInvalidTerms;
+  const requiredBillingFields: Array<keyof BillingDetailsData> = [
+    'fullName',
+    'country',
+    'line1',
+    'city',
+    'state',
+    'zip',
+    'confirmTnC',
+    'confirmSubscription',
+    'confirmRecurringSubscription',
+  ];
+  const hasMissingRequiredField = requiredBillingFields.some((field) => !billingDetailsData?.[field]);
+  const isFormValid = canConfirm && !hasMissingRequiredField;
 
   const onClickHandler = async () => {
+    // Call the parent's onClick handler first (e.g., for tracking)
+    onClick?.();
+
     // Sets the button to pending state and then calls confirm()
     setStatefulButtonState('pending');
 
@@ -167,6 +186,14 @@ const StatefulSubscribeButton = () => {
   return (
     <StatefulButton {...props} />
   );
+};
+
+StatefulSubscribeButton.propTypes = {
+  onClick: PropTypes.func,
+};
+
+StatefulSubscribeButton.defaultProps = {
+  onClick: undefined,
 };
 
 export default StatefulSubscribeButton;

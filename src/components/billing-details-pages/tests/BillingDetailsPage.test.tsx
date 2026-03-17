@@ -102,20 +102,48 @@ describe('BillingDetailsPage', () => {
 
     renderStepperRoute(CheckoutPageRoute.BillingDetails);
 
-    // Fill out the required terms and conditions checkboxes
+    // Initialize form store with required billing address fields
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.BillingDetails]: {
+          fullName: 'John Doe',
+          country: 'US',
+          line1: '123 Main St',
+          line2: '',
+          city: 'Boston',
+          state: 'MA',
+          zip: '02109',
+          confirmTnC: false,
+          confirmSubscription: false,
+          confirmRecurringSubscription: false,
+        },
+      },
+    }));
+
+    // Click required checkboxes
     const tncCheckbox = screen.getByLabelText(/I have read and accepted/i);
     const subscriptionCheckbox = screen.getByLabelText(/I confirm I am subscribing/i);
+    const recurringCheckbox = screen.getByLabelText(/I agree to enroll in a recurring/i);
 
     await user.click(tncCheckbox);
     await user.click(subscriptionCheckbox);
+    await user.click(recurringCheckbox);
+
+    // ✅ FIX: clear checkbox tracking calls
+    jest.clearAllMocks();
 
     const subscribeButton = screen.getByRole('button', { name: 'Subscribe' });
     await user.click(subscribeButton);
 
-    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
-      checkoutIntentId: 'test-checkout-intent-id',
-      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED,
-    });
+    // ✅ Assert subscribe event
+    expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        checkoutIntentId: 'test-checkout-intent-id',
+        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED,
+      }),
+    );
   });
 });
 
@@ -150,7 +178,6 @@ describe('BillingDetailsSuccessPage', () => {
       },
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
-    // Ensure OrderDetails renders in success page by providing a valid invoice
     (useFirstBillableInvoice as jest.Mock).mockReturnValue({
       data: {
         last4: '4242',
@@ -163,7 +190,6 @@ describe('BillingDetailsSuccessPage', () => {
   });
 
   it('renders the title correctly based on form state (first name from Plan Details)', () => {
-    // Seed the form store with a full name as entered/derived in Plan Details
     checkoutFormStore.setState((s) => ({
       ...s,
       formData: {
@@ -182,8 +208,6 @@ describe('BillingDetailsSuccessPage', () => {
       },
     });
 
-    // The Billing Details Success title uses the "firstName" param populated from the form state.
-    // The component currently passes fullName to the "firstName" placeholder.
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Thank you, Alice Example.');
   });
 
@@ -195,7 +219,7 @@ describe('BillingDetailsSuccessPage', () => {
       },
     });
     validateText('Order details');
-    validateText('You have purchased an edX team\'s subscription.');
+    validateText("You have purchased an edX team's subscription.");
   });
 
   it('renders the SuccessHeading component', async () => {
