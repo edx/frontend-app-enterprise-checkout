@@ -60,7 +60,7 @@ const BillingDetailsPage: React.FC = () => {
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
     resolver: zodResolver(billingDetailsSchema),
-    defaultValues: billingDetailsData || {
+    defaultValues: {
       fullName: '',
       country: '',
       line1: '',
@@ -68,6 +68,7 @@ const BillingDetailsPage: React.FC = () => {
       city: '',
       state: '',
       zip: '',
+      ...(billingDetailsData || {}),
     },
   });
 
@@ -75,12 +76,10 @@ const BillingDetailsPage: React.FC = () => {
     handleSubmit,
   } = form;
 
-  // ✅ Keep submit clean (no tracking here)
   const onSubmit = async (data: BillingDetailsData) => {
     setFormData(DataStoreKey.BillingDetails, data);
   };
 
-  // ✅ Fire tracking BEFORE validation
   const handleSubscribeClick = () => {
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId: checkoutIntent?.id ?? null,
@@ -123,7 +122,6 @@ const BillingDetailsPage: React.FC = () => {
 
             <Stepper.ActionRow.Spacer />
 
-            {/* ✅ Fixed Subscribe Button */}
             <StatefulSubscribeButton onClick={handleSubscribeClick} />
           </Stepper.ActionRow>
         )}

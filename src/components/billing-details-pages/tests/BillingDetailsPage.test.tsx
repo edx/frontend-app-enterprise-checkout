@@ -131,13 +131,11 @@ describe('BillingDetailsPage', () => {
     await user.click(subscriptionCheckbox);
     await user.click(recurringCheckbox);
 
-    // ✅ FIX: clear checkbox tracking calls
     jest.clearAllMocks();
 
     const subscribeButton = screen.getByRole('button', { name: 'Subscribe' });
     await user.click(subscribeButton);
 
-    // ✅ Assert subscribe event
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         checkoutIntentId: 'test-checkout-intent-id',
