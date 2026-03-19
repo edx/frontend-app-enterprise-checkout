@@ -75,6 +75,12 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - Both fields use `step: 'registration'` and `plan_type: 'teams'`
   - Integrated useBFFContext in both components for checkoutIntentId
 
+- ✅ **Task 3.2**: Instrumented CompanyNameField
+  - File: `src/components/FormFields/CompanyNameField.tsx`
+  - Added tracking for companyName field: `field_name: 'companyName'`
+  - Uses `step: 'account_details'` and `plan_type: 'teams'`
+  - Integrated useBFFContext for checkoutIntentId
+
 ---
 
 ### 🔄 Current Sprint
