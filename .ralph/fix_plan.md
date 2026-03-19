@@ -90,6 +90,15 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - Uses form.watch() to get current enterpriseSlug value for tracking
   - Integrated useBFFContext for checkoutIntentId
 
+- ✅ **Task 3.4**: Added page view tracking for Registration
+  - File: `src/components/Stepper/StepperContent/PlanDetailsRegisterContent.tsx`
+  - Converted from functional component to component with hooks
+  - Added useEffect to fire page view event on mount
+  - Event: `CHECKOUT_PAGE_VIEW` with `{ step: 'registration', plan_type: 'teams' }`
+  - Integrated useBFFContext for checkoutIntentId
+  - Added error handling with logError
+  - useEffect depends on checkoutIntentId to re-fire if it changes
+
 ---
 
 ### 🔄 Current Sprint
