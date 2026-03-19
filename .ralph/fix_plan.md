@@ -81,6 +81,15 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - Uses `step: 'account_details'` and `plan_type: 'teams'`
   - Integrated useBFFContext for checkoutIntentId
 
+- ✅ **Task 3.3**: Instrumented CustomUrlField with debouncing
+  - File: `src/components/FormFields/CustomUrlField.tsx`
+  - Used useDebounceTracking hook (500ms delay)
+  - Field name: `urlSlug` (tracks the enterpriseSlug field)
+  - Uses `step: 'account_details'` and `plan_type: 'teams'`
+  - Includes `org_slug` property with the current field value
+  - Uses form.watch() to get current enterpriseSlug value for tracking
+  - Integrated useBFFContext for checkoutIntentId
+
 ---
 
 ### 🔄 Current Sprint
@@ -271,6 +280,7 @@ _(To be filled in during testing phase)_
 2. The `sendEnterpriseCheckoutTrackingEvent` already handles `checkoutIntentId` injection, simplifying our tracking hooks.
 3. **BFF Context Access**: Use `useBFFContext(userId)` hook to access checkout context. The checkoutIntentId is at `bffContext?.checkoutIntent?.id`.
 4. **Field Component Props**: The Field component accepts additional props via spread operator, making it easy to add onBlur handlers.
+5. **Dynamic Property Values**: Use `form.watch('fieldName')` to get current field values for tracking properties (e.g., org_slug). This ensures the tracking event includes the most up-to-date value.
 
 ---
 
