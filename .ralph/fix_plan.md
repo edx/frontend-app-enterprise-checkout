@@ -40,6 +40,14 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - Field name constants for all tracked fields
   - Plan type constant
 
+#### Phase 2: Step 1 Field Tracking (Plan Details) - In Progress
+- ✅ **Task 2.1**: Instrumented LicensesField (quantity)
+  - File: `src/components/FormFields/LicensesField.tsx`
+  - Added useFieldTracking hook integration
+  - Gets checkoutIntentId from useBFFContext hook
+  - Properties: `{ step: 'plan_details', field_name: 'numLicenses', plan_type: 'teams' }`
+  - Fixed import order lint issues in tracking hooks
+
 ---
 
 ### 🔄 Current Sprint
@@ -218,6 +226,8 @@ All field blur events should include:
 ### Challenges & Solutions
 1. **Debouncing Implementation**: Used `useRef` for timeout management with proper cleanup on unmount to prevent memory leaks.
 2. **TypeScript Compatibility**: Used `NodeJS.Timeout` type for timeout ref in useDebounceTracking hook.
+3. **Import Order Linting**: ESLint requires external imports (@edx) before React imports. Fixed by reordering imports.
+4. **Arrow Function Body**: ESLint prefers implicit returns in arrow functions when possible. Fixed useEffect cleanup.
 
 ### Test Patterns & Best Practices
 _(To be filled in during testing phase)_
@@ -225,6 +235,8 @@ _(To be filled in during testing phase)_
 ### PRD Clarifications
 1. The PRD mentions `org_slug` which maps to the `urlSlug` field in the codebase (used in Step 2: Account Details).
 2. The `sendEnterpriseCheckoutTrackingEvent` already handles `checkoutIntentId` injection, simplifying our tracking hooks.
+3. **BFF Context Access**: Use `useBFFContext(userId)` hook to access checkout context. The checkoutIntentId is at `bffContext?.checkoutIntent?.id`.
+4. **Field Component Props**: The Field component accepts additional props via spread operator, making it easy to add onBlur handlers.
 
 ---
 

@@ -1,6 +1,5 @@
-import { useCallback } from 'react';
-
 import { logError } from '@edx/frontend-platform/logging';
+import { useCallback } from 'react';
 
 import { TRACKING_EVENT_NAMES } from '../constants/tracking';
 import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';

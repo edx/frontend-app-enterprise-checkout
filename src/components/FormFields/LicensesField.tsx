@@ -1,6 +1,11 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { useContext } from 'react';
 
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
+import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/tracking';
+import { useFieldTracking } from '@/hooks/useFieldTracking';
 
 import Field from './Field';
 
@@ -12,6 +17,19 @@ interface LicensesFieldProps {
 
 const LicensesField = ({ form }: LicensesFieldProps) => {
   const intl = useIntl();
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+
+  const handleBlur = useFieldTracking({
+    fieldName: TRACKED_FIELDS.NUM_LICENSES,
+    step: CHECKOUT_STEPS.PLAN_DETAILS,
+    checkoutIntentId,
+    additionalProperties: {
+      plan_type: PLAN_TYPE.TEAMS,
+    },
+  });
+
   return (
     <FieldContainer>
       <div>
@@ -46,6 +64,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         })}
         min="0"
         className="mr-0 mt-3"
+        onBlur={handleBlur}
       />
     </FieldContainer>
   );

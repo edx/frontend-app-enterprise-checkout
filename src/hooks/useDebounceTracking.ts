@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
-
 import { logError } from '@edx/frontend-platform/logging';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { TRACKING_EVENT_NAMES } from '../constants/tracking';
 import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
@@ -41,12 +40,10 @@ export const useDebounceTracking = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+  useEffect(() => () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
   }, []);
 
   const handleBlur = useCallback(() => {
