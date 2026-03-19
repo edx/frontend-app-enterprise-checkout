@@ -48,6 +48,14 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - Properties: `{ step: 'plan_details', field_name: 'numLicenses', plan_type: 'teams' }`
   - Fixed import order lint issues in tracking hooks
 
+- ✅ **Task 2.2**: Instrumented NameAndEmailFields
+  - File: `src/components/FormFields/NameAndEmailFields.tsx`
+  - Added tracking for fullName field: `field_name: 'fullName'`
+  - Added tracking for adminEmail field: `field_name: 'adminEmail'`
+  - Added tracking for country field: `field_name: 'country'`
+  - All fields use `step: 'plan_details'` and `plan_type: 'teams'`
+  - Fixed import order (parent directory before subdirectory imports)
+
 ---
 
 ### 🔄 Current Sprint
