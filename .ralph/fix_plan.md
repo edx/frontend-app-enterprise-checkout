@@ -99,6 +99,16 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - Added error handling with logError
   - useEffect depends on checkoutIntentId to re-fire if it changes
 
+- ✅ **Task 3.5**: Added success event for registration submission
+  - File: `src/components/plan-details-pages/PlanDetailsPage.tsx`
+  - Added tracking in registerMutation.onSuccess callback
+  - Event: `CHECKOUT_REGISTRATION_SUCCESS` with `{ step: 'registration', plan_type: 'teams' }`
+  - Fires after setIsSubmitting(false) but before navigation
+  - Added error handling with logError
+  - Uses checkoutIntentId from BFF context
+
+#### Phase 3: Step 2 Field Tracking (Registration/Account Details) ✅ COMPLETE
+
 ---
 
 ### 🔄 Current Sprint

@@ -119,6 +119,21 @@ const PlanDetailsPage = () => {
   const registerMutation = useRegisterMutation({
     onSuccess: () => {
       setIsSubmitting(false);
+
+      // Fire registration success tracking event
+      try {
+        sendEnterpriseCheckoutTrackingEvent({
+          checkoutIntentId,
+          eventName: TRACKING_EVENT_NAMES.CHECKOUT_REGISTRATION_SUCCESS,
+          properties: {
+            step: CHECKOUT_STEPS.REGISTRATION,
+            plan_type: PLAN_TYPE.TEAMS,
+          },
+        });
+      } catch (error) {
+        logError('Failed to send registration success tracking event', error);
+      }
+
       navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
     },
     onError: (errorMessage, errorData) => {
