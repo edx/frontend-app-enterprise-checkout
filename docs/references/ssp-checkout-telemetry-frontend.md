@@ -28,7 +28,7 @@ This document details the implementation of Segment-based event tracking for the
 - `useDebounceTracking`: Debounced tracking for URL/slug fields (500ms)
 
 ### Tracking Constants  
-Located in `src/constants/tracking.ts`:
+Located in `src/constants/events.ts`:
 - Event names, checkout steps, tracked fields, plan types
 
 ### Field Instrumentation

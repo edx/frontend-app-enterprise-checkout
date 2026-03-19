@@ -1,7 +1,7 @@
 import { logError } from '@edx/frontend-platform/logging';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { TRACKING_EVENT_NAMES } from '../constants/tracking';
+import EVENT_NAMES from '../constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
 
 interface UseDebounceTrackingParams {
@@ -57,7 +57,7 @@ export const useDebounceTracking = ({
       try {
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId,
-          eventName: TRACKING_EVENT_NAMES.CHECKOUT_FIELD_BLUR,
+          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
           properties: {
             step,
             field_name: fieldName,

@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { useCountryOptions } from '@/components/app/data/hooks';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/tracking';
+import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
 import { useFieldTracking } from '@/hooks/useFieldTracking';
 
 import Field from './Field';

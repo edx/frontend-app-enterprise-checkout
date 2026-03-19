@@ -8,7 +8,7 @@ import { useCountryOptions } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/tracking';
+import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
 import { useFieldTracking } from '@/hooks/useFieldTracking';
 
 import type { UseFormReturn } from 'react-hook-form';

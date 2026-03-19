@@ -1,7 +1,7 @@
 import { logError } from '@edx/frontend-platform/logging';
 import { act, renderHook } from '@testing-library/react';
 
-import { TRACKING_EVENT_NAMES } from '@/constants/tracking';
+import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { useDebounceTracking } from '../useDebounceTracking';
@@ -71,7 +71,7 @@ describe('useDebounceTracking', () => {
     expect(mockSendEvent).toHaveBeenCalledTimes(1);
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 456,
-      eventName: TRACKING_EVENT_NAMES.CHECKOUT_FIELD_BLUR,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: 'account_details',
         field_name: 'urlSlug',
@@ -173,7 +173,7 @@ describe('useDebounceTracking', () => {
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: null,
-      eventName: TRACKING_EVENT_NAMES.CHECKOUT_FIELD_BLUR,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: 'registration',
         field_name: 'testField',
@@ -249,7 +249,7 @@ describe('useDebounceTracking', () => {
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 400,
-      eventName: TRACKING_EVENT_NAMES.CHECKOUT_FIELD_BLUR,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: 'plan_details',
         field_name: 'simpleField',

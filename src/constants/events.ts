@@ -32,7 +32,38 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   REACH_OUT_LINK_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.reach_out_link.clicked`,
   GO_TO_DASHBOARD_BUTTON_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.go_to_dashboard_button.clicked`,
   CONTACT_SUPPORT_LINK_CLICKED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.billing_details_success.contact_support_link.clicked`,
+
+  // Telemetry tracking
+  CHECKOUT_FIELD_BLURRED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.field.blurred`,
+  CHECKOUT_PAGE_VIEWED: `${SUBSCRIPTION_CHECKOUT_PREFIX}.page.viewed`,
+  CHECKOUT_REGISTRATION_SUCCESS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.registration.success`,
 };
+
+export const CHECKOUT_STEPS = {
+  PLAN_DETAILS: 'plan_details',
+  ACCOUNT_DETAILS: 'account_details',
+  REGISTRATION: 'registration',
+} as const;
+
+export const TRACKED_FIELDS = {
+  // Plan Details step
+  NUM_LICENSES: 'numLicenses',
+  FULL_NAME: 'fullName',
+  ADMIN_EMAIL: 'adminEmail',
+  COUNTRY: 'country',
+
+  // Registration step
+  USERNAME: 'username',
+  PASSWORD: 'password',
+
+  // Account Details step
+  COMPANY_NAME: 'companyName',
+  URL_SLUG: 'urlSlug',
+} as const;
+
+export const PLAN_TYPE = {
+  TEAMS: 'teams',
+} as const;
 
 const EVENT_NAMES = {
   SUBSCRIPTION_CHECKOUT: SUBSCRIPTION_CHECKOUT_EVENTS,

@@ -31,7 +31,7 @@ import {
   DataStoreKey,
   SubmitCallbacks,
 } from '@/constants/checkout';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKING_EVENT_NAMES } from '@/constants/tracking';
+import EVENT_NAMES, { CHECKOUT_STEPS, PLAN_TYPE } from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPage,
@@ -76,7 +76,7 @@ const PlanDetailsPage = () => {
     try {
       sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId,
-        eventName: TRACKING_EVENT_NAMES.CHECKOUT_PAGE_VIEW,
+        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
           step: CHECKOUT_STEPS.PLAN_DETAILS,
           plan_type: PLAN_TYPE.TEAMS,
@@ -124,7 +124,7 @@ const PlanDetailsPage = () => {
       try {
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId,
-          eventName: TRACKING_EVENT_NAMES.CHECKOUT_REGISTRATION_SUCCESS,
+          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
           properties: {
             step: CHECKOUT_STEPS.REGISTRATION,
             plan_type: PLAN_TYPE.TEAMS,
