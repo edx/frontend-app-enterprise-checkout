@@ -1,4 +1,5 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -8,7 +9,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ import {
   useLoginMutation,
   useRegisterMutation,
 } from '@/components/app/data/hooks';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
@@ -29,11 +31,13 @@ import {
   DataStoreKey,
   SubmitCallbacks,
 } from '@/constants/checkout';
+import { CHECKOUT_STEPS, PLAN_TYPE, TRACKING_EVENT_NAMES } from '@/constants/tracking';
 import {
   useCheckoutFormStore,
   useCurrentPage,
   useCurrentPageDetails,
 } from '@/hooks/index';
+import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
@@ -62,6 +66,26 @@ const PlanDetailsPage = () => {
   } = useCurrentPageDetails();
 
   const { getToken } = useRecaptchaToken('signup');
+
+  // Get checkout context for tracking
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+
+  // Fire page view tracking event on component mount
+  useEffect(() => {
+    try {
+      sendEnterpriseCheckoutTrackingEvent({
+        checkoutIntentId,
+        eventName: TRACKING_EVENT_NAMES.CHECKOUT_PAGE_VIEW,
+        properties: {
+          step: CHECKOUT_STEPS.PLAN_DETAILS,
+          plan_type: PLAN_TYPE.TEAMS,
+        },
+      });
+    } catch (error) {
+      logError('Failed to send page view tracking event for Plan Details', error);
+    }
+  }, [checkoutIntentId]);
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)

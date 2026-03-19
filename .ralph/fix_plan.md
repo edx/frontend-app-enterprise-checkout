@@ -56,6 +56,16 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
   - All fields use `step: 'plan_details'` and `plan_type: 'teams'`
   - Fixed import order (parent directory before subdirectory imports)
 
+- ✅ **Task 2.3**: Added page view tracking for Plan Details
+  - File: `src/components/plan-details-pages/PlanDetailsPage.tsx`
+  - Added useEffect to fire page view event on component mount
+  - Event: `CHECKOUT_PAGE_VIEW` with properties `{ step: 'plan_details', plan_type: 'teams' }`
+  - Integrated useBFFContext to get checkoutIntentId
+  - Added error handling with logError for tracking failures
+  - useEffect depends on checkoutIntentId to re-fire if it changes
+
+#### Phase 2: Step 1 Field Tracking (Plan Details) ✅ COMPLETE
+
 ---
 
 ### 🔄 Current Sprint
