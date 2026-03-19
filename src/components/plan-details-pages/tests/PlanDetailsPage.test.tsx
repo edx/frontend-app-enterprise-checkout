@@ -77,6 +77,7 @@ jest.mock('@edx/frontend-platform/config', () => ({
   }),
 }));
 
+<<<<<<< HEAD
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(() => ({
     FEATURE_SELF_SERVICE_PURCHASING: true,
@@ -85,6 +86,15 @@ jest.mock('@edx/frontend-platform/config', () => ({
     FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
     FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
   })),
+=======
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+  logInfo: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({
+  sendTrackEvent: jest.fn(),
+>>>>>>> 4a7deab (feat: SSP-TELEMETRY-FE - Add comprehensive tests and documentation for tracking implementation)
 }));
 
 jest.mock('@/components/app/data/hooks/useBFFContext');

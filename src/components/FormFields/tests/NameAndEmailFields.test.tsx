@@ -1,4 +1,6 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -6,9 +8,30 @@ import { useCountryOptions } from '@/components/app/data/hooks';
 
 import NameAndEmailFields from '../NameAndEmailFields';
 
+// Mock tracking hook
+const mockHandleBlur = jest.fn();
+jest.mock('@/hooks/useFieldTracking', () => ({
+  useFieldTracking: jest.fn(() => mockHandleBlur),
+}));
+
+// Mock BFF context hook
+jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    data: {
+      checkoutIntent: { id: 123 },
+    },
+  })),
+}));
+
 // Mock the useCountryOptions hook
 jest.mock('@/components/app/data/hooks', () => ({
   useCountryOptions: jest.fn(),
+  useBFFContext: jest.fn(() => ({
+    data: {
+      checkoutIntent: { id: 123 },
+    },
+  })),
 }));
 
 const mockedUseCountryOptions = useCountryOptions as jest.Mock;
@@ -16,7 +39,7 @@ const mockedUseCountryOptions = useCountryOptions as jest.Mock;
 // Mock the Field component
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
-  default: ({ floatingLabel, placeholder, form, name, type, options }) => {
+  default: ({ floatingLabel, placeholder, form, name, type, options, onBlur }) => {
     const error = form?.formState?.errors[name];
     return (
       <div data-testid={`field-${name}`}>
@@ -29,6 +52,7 @@ jest.mock('@/components/FormFields/Field', () => ({
           </div>
         )}
         {error && <div data-testid={`${name}-error-message`}>{error.message}</div>}
+        <button type="button" onClick={onBlur} data-testid={`${name}-blur-trigger`}>Trigger Blur</button>
       </div>
     );
   },
@@ -44,14 +68,29 @@ const createMockForm = (errors = {}) => ({
 });
 
 describe('NameAndEmailFields', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  const mockAuthenticatedUser = {
+    userId: 1,
+    username: 'test-user',
+    roles: [],
+    administrator: false,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const renderComponent = (errors = {}) => render(
-    <IntlProvider locale="en">
-      <NameAndEmailFields form={createMockForm(errors) as any} />
-    </IntlProvider>,
+    <QueryClientProvider client={queryClient}>
+      <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+        <IntlProvider locale="en">
+          <NameAndEmailFields form={createMockForm(errors) as any} />
+        </IntlProvider>
+      </AppContext.Provider>
+    </QueryClientProvider>,
   );
 
   it('renders the title and description correctly', () => {

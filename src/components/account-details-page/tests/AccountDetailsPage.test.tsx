@@ -10,6 +10,15 @@ jest.mock('@/components/app/data', () => ({
   useFormValidationConstraints: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+  logInfo: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({
+  sendTrackEvent: jest.fn(),
+}));
+
 describe('AccountDetailsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
