@@ -66,6 +66,15 @@ Implement Segment-based event tracking for the SSP Teams Plan checkout flow to i
 
 #### Phase 2: Step 1 Field Tracking (Plan Details) ✅ COMPLETE
 
+#### Phase 3: Step 2 Field Tracking (Registration/Account Details) - In Progress
+- ✅ **Task 3.1**: Instrumented RegisterAccountFields (username, password)
+  - File: `src/components/FormFields/RegisterAccountFields.tsx`
+  - Added tracking to RegisterAccountUsername component: `field_name: 'username'`
+  - Added tracking to RegisterAccountPassword component: `field_name: 'password'`
+  - **CRITICAL SECURITY**: Password tracking uses `interaction: 'blur'` property - NEVER logs password value
+  - Both fields use `step: 'registration'` and `plan_type: 'teams'`
+  - Integrated useBFFContext in both components for checkoutIntentId
+
 ---
 
 ### 🔄 Current Sprint
@@ -246,6 +255,7 @@ All field blur events should include:
 2. **TypeScript Compatibility**: Used `NodeJS.Timeout` type for timeout ref in useDebounceTracking hook.
 3. **Import Order Linting**: ESLint requires external imports (@edx) before React imports. Fixed by reordering imports.
 4. **Arrow Function Body**: ESLint prefers implicit returns in arrow functions when possible. Fixed useEffect cleanup.
+5. **Password Security**: For password field tracking, added explicit `interaction: 'blur'` property to clearly indicate interaction-only tracking. The useFieldTracking hook never receives or logs the password value.
 
 ### Test Patterns & Best Practices
 _(To be filled in during testing phase)_
