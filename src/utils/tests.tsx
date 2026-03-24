@@ -116,7 +116,7 @@ export function renderWithRouterAndStepperProvider(
 }
 
 export const renderStepperRoute = (
-  route: CheckoutPageRouteValue,
+  route: CheckoutPageRouteValue | `/essentials${CheckoutPageRouteValue}`,
   appContextValue = {
     config: {},
     authenticatedUser: null,
@@ -136,6 +136,17 @@ export const renderStepperRoute = (
                 path="/:step/:substep"
                 element={<CheckoutStepperContainer />}
               />
+
+              {/* Essentials routes */}
+              <Route
+                path="/essentials/:step"
+                element={<CheckoutStepperContainer />}
+              />
+              <Route
+                path="/essentials/:step/:substep"
+                element={<CheckoutStepperContainer />}
+              />
+
             </Routes>
           </MemoryRouter>
         </AppContext.Provider>

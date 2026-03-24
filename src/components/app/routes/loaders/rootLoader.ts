@@ -122,9 +122,8 @@ const makeRootLoader = (
    * This check happens AFTER feature flag validation.
    */
   const isCheckoutRoute = !Object.values(EssentialsPageRoute).some(route => isPathMatch(currentPath, route));
-
   if (!isCheckoutRoute) {
-    return null;
+    // return null; Allowing essential routes to participate checkout intent logic
   }
 
   // Fetch basic info about authenticated user from JWT token, and also hydrate it with additional
@@ -151,10 +150,40 @@ const makeRootLoader = (
     CheckoutPageRoute.BillingDetails,
     CheckoutPageRoute.AccountDetails,
     CheckoutPageRoute.BillingDetailsSuccess,
+    EssentialsPageRoute.BillingDetails,
+    EssentialsPageRoute.AccountDetails,
+    EssentialsPageRoute.BillingDetailsSuccess,
   ]);
 
+  // Parse query params & check essentials keys
+  const url = new URL(request.url);
+  const { searchParams } = url;
+
+  // list of accepted essentials product_keys
+  const essentialsLookupKeys = new Set<string>([
+    'essentials_artificial_intelligence_subscription_license_yearly',
+    'essentials_sustainability_subscription_license_yearly',
+    'essentials',
+    'essentials_tech_and_digital_transformation',
+    'essentials_data_subscription_license_yearly',
+    'essentials_management_subscription_license_yearly',
+    'essentials_leadership_subscription_license_yearly',
+    'essentials_supply_chain_subscription_license_yearly',
+    'essentials_communication_subscription_license_yearly',
+  ]);
+
+  const productKey = searchParams.get('product_key');
+
+  // Determine if current path is Essentials by route or by query product_key
+  const isEssentialsRoute = isPathMatch(currentPath, '/essentials');
+  const isEssentialsProduct = !!productKey && essentialsLookupKeys.has(productKey);
+  const isEssentialsPath = isEssentialsRoute || isEssentialsProduct;
   // Unauthenticated user on protected paths → redirect to Plan Details
   if (!authenticatedUser && protectedPaths.has(currentPath)) {
+    // If essentials, send to Essentials plan details; else default to Teams plan details
+    if (isEssentialsPath) {
+      return redirectOrNull(EssentialsPageRoute.PlanDetails);
+    }
     return redirectOrNull(CheckoutPageRoute.PlanDetails);
   }
 
@@ -184,6 +213,9 @@ const makeRootLoader = (
 
   // Expired intent → Plan Details
   if (expiredCheckoutIntent) {
+    if (isEssentialsPath) {
+      return redirectOrNull(EssentialsPageRoute.PlanDetails);
+    }
     return redirectOrNull(CheckoutPageRoute.PlanDetails);
   }
   return null;

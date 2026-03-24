@@ -20,6 +20,9 @@ export enum CheckoutSubstepKey {
 // NEW ENUMS - For Essentials/Academic flow
 export enum EssentialsStepKey {
   AcademicSelection = 'academic-selection',
+  PlanDetails = 'plan-details',
+  AccountDetails = 'account-details',
+  BillingDetails = 'billing-details',
 }
 
 function reverseEnum<E extends Record<string, string>>(enumObj: E): Record<E[keyof E], keyof E> {
@@ -292,7 +295,12 @@ export const CheckoutPageRoute = {
 
 // NEW ROUTES - Essentials flow
 export const EssentialsPageRoute = {
+  Base: '/essentials',
   AcademicSelection: `/essentials/${EssentialsStepKey.AcademicSelection}`,
+  PlanDetails: `/essentials/${EssentialsStepKey.PlanDetails}`,
+  AccountDetails: `/essentials/${EssentialsStepKey.AccountDetails}`,
+  BillingDetails: `/essentials/${EssentialsStepKey.BillingDetails}`,
+  BillingDetailsSuccess: `/essentials/${EssentialsStepKey.BillingDetails}/${CheckoutSubstepKey.Success}`,
 } as const;
 
 // NEW PAGE DETAILS - Essentials flow
@@ -309,6 +317,7 @@ export const EssentialsPageDetails = {
     }),
     buttonMessage: null,
   },
+
 } as const;
 
 export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } = {

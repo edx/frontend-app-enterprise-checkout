@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import * as authMod from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 
@@ -7,24 +8,31 @@ import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey } 
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { generateTestPermutations } from '@/utils/tests';
 
-// Avoid relying on Response implementation in Jest env
+// Avoid relying on Response implementation in Jest env for non-Essentials tests
 jest.mock('react-router-dom', () => ({
-  redirect: (to: string) => ({
+  redirect: jest.fn((to: string) => ({
     status: 302,
     headers: { get: (name: string) => (name === 'Location' ? to : null) },
-  }),
+  })),
 }));
-
 // Auth controls
 jest.mock('@edx/frontend-platform/auth', () => ({
   getAuthenticatedUser: jest.fn(),
 }));
-
 // Prevent network during schema validation superRefine
 jest.mock('@/components/app/data/services/validation', () => ({
   validateFieldDetailed: jest.fn().mockResolvedValue({ isValid: true, validationDecisions: [] }),
 }));
 
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn(() => ({
+    FEATURE_SELF_SERVICE_PURCHASING: true,
+    FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    FEATURE_SELF_SERVICE_ESSENTIALS: true,
+    FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
+    FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+  })),
+}));
 // Helpers to build args the loader expects
 const makeReq = (path: string) => ({ url: `http://localhost${path}` } as any);
 const makeLoaderArgs = (
@@ -32,7 +40,6 @@ const makeLoaderArgs = (
   substep?: CheckoutSubstepKey,
   path: string = '/',
 ) => ({ params: { step, substep }, request: makeReq(path) });
-
 // Reset the checkout form store between tests
 const resetFormStore = () => {
   checkoutFormStore.setState({
@@ -51,7 +58,6 @@ const resetFormStore = () => {
     setCheckoutSessionStatus: checkoutFormStore.getState().setCheckoutSessionStatus,
   }, false);
 };
-
 // Build a context object with optionally valid pricing (so extractPriceId returns something)
 const buildContext = ({
   withPrice = true,
@@ -67,7 +73,6 @@ const buildContext = ({
       checkout_session_client_secret: checkoutSessionClientSecret ?? null,
     })
     : null;
-
   if (!withPrice) {
     return camelCasedCheckoutContextResponseFactory({
       pricing: { default_by_lookup_key: 'abc', prices: [] },
@@ -86,7 +91,6 @@ const buildContext = ({
     checkout_intent: checkoutIntent,
   }) as any as CheckoutContextResponse;
 };
-
 // Populate store with valid data for AccountDetails/BillingDetails flows
 const populateValidPlanDetails = (stripePriceId: string) => {
   checkoutFormStore.setState(s => ({
@@ -103,7 +107,6 @@ const populateValidPlanDetails = (stripePriceId: string) => {
     },
   }), false);
 };
-
 const populateValidAccountDetails = () => {
   checkoutFormStore.setState(s => ({
     ...s,
@@ -116,19 +119,15 @@ const populateValidAccountDetails = () => {
     },
   }), false);
 };
-
 describe('makeCheckoutStepperLoader (stepper loaders)', () => {
   let queryClient: QueryClient;
   let ensureSpy: jest.SpyInstance;
-
   beforeEach(() => {
     jest.clearAllMocks();
     resetFormStore();
-
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     ensureSpy = jest.spyOn(queryClient, 'ensureQueryData');
   });
-
   it('PlanDetails loader returns null', async () => {
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
     const loader = makeCheckoutStepperLoader(queryClient);
@@ -137,7 +136,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
     );
     expect(result).toBeNull();
   });
-
   it('PlanDetailsLogin redirects when authenticated, null otherwise', async () => {
     const loader = makeCheckoutStepperLoader(queryClient);
     populateValidPlanDetails('price_valid_123');
@@ -146,7 +144,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       makeLoaderArgs(CheckoutStepKey.PlanDetails, CheckoutSubstepKey.Login, CheckoutPageRoute.PlanDetailsLogin),
     );
     expect(r1).toBeNull();
-
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
     const r2 = await loader(
       makeLoaderArgs(CheckoutStepKey.PlanDetails, CheckoutSubstepKey.Login, CheckoutPageRoute.PlanDetailsLogin),
@@ -154,7 +151,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
     expect(r2).not.toBeNull();
     expect((r2 as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
   });
-
   it('PlanDetailsRegister redirects when authenticated, null otherwise', async () => {
     const loader = makeCheckoutStepperLoader(queryClient);
     populateValidPlanDetails('price_valid_123');
@@ -163,7 +159,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       makeLoaderArgs(CheckoutStepKey.PlanDetails, CheckoutSubstepKey.Register, CheckoutPageRoute.PlanDetailsRegister),
     );
     expect(r1).toBeNull();
-
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
     const r2 = await loader(
       makeLoaderArgs(CheckoutStepKey.PlanDetails, CheckoutSubstepKey.Register, CheckoutPageRoute.PlanDetailsRegister),
@@ -171,7 +166,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
     expect(r2).not.toBeNull();
     expect((r2 as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
   });
-
   it.each(generateTestPermutations({
     authenticatedUser: [{ userId: 1 }, null],
     loaderArguments: [{
@@ -195,7 +189,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
     expect(r1).not.toBeNull();
     expect((r1 as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
   });
-
   describe('AccountDetails loader', () => {
     it('redirects unauthenticated users to Plan Details', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
@@ -207,7 +200,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
       expect(ensureSpy).not.toHaveBeenCalled();
     });
-
     it('redirects to Plan Details when no Stripe price id can be derived', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       ensureSpy.mockResolvedValue(buildContext({ withPrice: false }));
@@ -217,7 +209,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('redirects to Plan Details when prerequisite Plan Details form is invalid', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
@@ -228,7 +219,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('returns null when prerequisites pass', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
@@ -236,7 +226,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       const { pricing } = ctx;
       const stripePriceId = pricing.prices[0].id as string;
       populateValidPlanDetails(stripePriceId);
-
       const loader = makeCheckoutStepperLoader(queryClient);
       const r = await loader(
         makeLoaderArgs(CheckoutStepKey.AccountDetails, undefined, CheckoutPageRoute.AccountDetails),
@@ -244,7 +233,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       expect(r).toBeNull();
     });
   });
-
   describe('BillingDetails loader', () => {
     it('redirects unauthenticated users to Plan Details', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
@@ -254,7 +242,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('redirects to Plan Details when no Stripe price id found', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       ensureSpy.mockResolvedValue(buildContext({ withPrice: false }));
@@ -264,7 +251,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('redirects to prerequisite page when form validation fails (Plan Details invalid)', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
@@ -275,7 +261,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('redirects to Account Details when Plan Details valid but Account Details invalid', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
@@ -288,7 +273,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.AccountDetails);
     });
-
     it('redirects to Plan Details when checkout session is missing from state', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
@@ -297,14 +281,12 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       const stripePriceId = pricing.prices[0].id as string;
       populateValidPlanDetails(stripePriceId);
       populateValidAccountDetails();
-
       const loader = makeCheckoutStepperLoader(queryClient);
       const r = await loader(
         makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, CheckoutPageRoute.BillingDetails),
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('returns null after ensuring checkout session when everything is valid', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true, includeCheckoutIntent: true });
@@ -313,7 +295,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       const stripePriceId = pricing.prices[0].id as string;
       populateValidPlanDetails(stripePriceId);
       populateValidAccountDetails();
-
       const loader = makeCheckoutStepperLoader(queryClient);
       const r = await loader(
         makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, CheckoutPageRoute.BillingDetails),
@@ -322,7 +303,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       expect(ensureSpy).toHaveBeenCalledTimes(1);
     });
   });
-
   describe('BillingDetailsSuccess loader', () => {
     it('redirects unauthenticated users to Plan Details', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
@@ -336,7 +316,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('redirects to Plan Details when no Stripe price available', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       ensureSpy.mockResolvedValue(buildContext({ withPrice: false }));
@@ -350,7 +329,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
-
     it('redirects to prerequisite route when forms invalid', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
@@ -366,7 +344,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
   });
-
   it('returns null for unknown/invalid route (factory guards)', async () => {
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
     const loader = makeCheckoutStepperLoader(queryClient);
