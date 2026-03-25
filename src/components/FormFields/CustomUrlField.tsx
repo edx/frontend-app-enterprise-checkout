@@ -7,11 +7,9 @@ import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
 import { CheckoutStepKey } from '@/constants/checkout';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
-
-import type { UseFormReturn } from 'react-hook-form';
-
 import { trackDebouncedFieldBlur } from '@/hooks/useDebounceTrackFieldBlur';
 
+import type { UseFormReturn } from 'react-hook-form';
 
 interface CustomUrlFieldProps {
   form: UseFormReturn<AccountDetailsData>

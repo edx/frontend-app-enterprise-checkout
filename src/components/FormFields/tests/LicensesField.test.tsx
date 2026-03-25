@@ -4,7 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { useFieldTracking } from '@/hooks/useFieldTracking';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
+
 import LicensesField from '../LicensesField';
 
 // Mock the form object
@@ -20,8 +21,6 @@ const mockForm = {
 jest.mock('@/hooks/useFieldTracking', () => ({
   trackFieldBlur: jest.fn(),
 }));
-
-import { trackFieldBlur } from '@/hooks/useFieldTracking';
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
 
 // Mock BFF context hook
@@ -32,7 +31,7 @@ const mockUseBFFContext = jest.fn(() => ({
 }));
 jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
   __esModule: true,
-  default: (...args) => mockUseBFFContext(...args),
+  default: (...args: any) => mockUseBFFContext.apply(null, args),
 }));
 
 jest.mock('@/components/FormFields/Field', () => ({
@@ -100,7 +99,7 @@ describe('LicensesField', () => {
     jest.clearAllMocks();
 
     // Mock unauthenticated user and no bff context data
-    mockUseBFFContext.mockReturnValue({ data: null });
+    mockUseBFFContext.mockReturnValue({ data: null } as any);
 
     render(
       <QueryClientProvider client={queryClient}>

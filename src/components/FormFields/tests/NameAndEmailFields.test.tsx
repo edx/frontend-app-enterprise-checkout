@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { useCountryOptions, useBFFContext } from '@/components/app/data/hooks';
+import { useCountryOptions } from '@/components/app/data/hooks';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import NameAndEmailFields from '../NameAndEmailFields';
@@ -26,7 +26,7 @@ const mockUseBFFContext = jest.fn(() => ({
 // Mock the useCountryOptions hook
 jest.mock('@/components/app/data/hooks', () => ({
   useCountryOptions: jest.fn(),
-  useBFFContext: jest.fn((...args) => mockUseBFFContext(...args)),
+  useBFFContext: jest.fn((...args: any) => mockUseBFFContext.apply(null, args)),
 }));
 
 const mockedUseCountryOptions = useCountryOptions as jest.Mock;
@@ -225,7 +225,7 @@ describe('NameAndEmailFields', () => {
 
     mockedUseCountryOptions.mockReturnValue([]);
     // Mock unauthenticated user and no bff context data
-    mockUseBFFContext.mockReturnValue({ data: null });
+    mockUseBFFContext.mockReturnValue({ data: null } as any);
 
     render(
       <QueryClientProvider client={queryClient}>

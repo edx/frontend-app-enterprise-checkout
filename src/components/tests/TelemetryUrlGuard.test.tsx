@@ -1,8 +1,9 @@
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+
+import { useBFFContext, useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data/hooks';
 import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { renderStepperRoute } from '@/utils/tests';
-import { useFormValidationConstraints, useCheckoutIntent, useBFFContext } from '@/components/app/data/hooks';
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
   sendTrackEvent: jest.fn(),

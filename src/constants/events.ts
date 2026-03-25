@@ -39,7 +39,6 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   CHECKOUT_REGISTRATION_SUCCESS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.registration.success`,
 };
 
-
 export const TRACKED_FIELDS = {
   // Plan Details step
   NUM_LICENSES: 'numLicenses',

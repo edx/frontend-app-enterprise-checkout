@@ -2,13 +2,14 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+// eslint-disable-next-line import/order
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { CheckoutStepKey, CheckoutSubstepKey, CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';

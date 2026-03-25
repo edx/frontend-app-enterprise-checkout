@@ -1,6 +1,6 @@
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import { CheckoutPageRoute, CheckoutStepKey } from '@/constants/checkout';

@@ -1,7 +1,7 @@
 import { logError } from '@edx/frontend-platform/logging';
 
-import EVENT_NAMES from '@/constants/events';
 import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
+import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { trackDebouncedFieldBlur } from '../useDebounceTrackFieldBlur';

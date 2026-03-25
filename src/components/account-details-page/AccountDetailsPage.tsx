@@ -1,5 +1,5 @@
-import { logError } from '@edx/frontend-platform/logging';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -12,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
@@ -49,8 +49,6 @@ const AccountDetailsPage: React.FC = () => {
   const {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
-    route: expectedRoute,
-    page: currentPage,
   } = useCurrentPageDetails();
 
   // Fire page view tracking event whenever the URL changes

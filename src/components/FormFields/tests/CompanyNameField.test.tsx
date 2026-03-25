@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
+
 import CompanyNameField from '../CompanyNameField';
 
 // Mock the form object
@@ -31,7 +32,7 @@ const mockUseBFFContext = jest.fn(() => ({
 }));
 jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
   __esModule: true,
-  default: (...args) => mockUseBFFContext(...args),
+  default: (...args: any) => mockUseBFFContext.apply(null, args),
 }));
 
 jest.mock('@/components/FormFields/Field', () => ({
@@ -111,7 +112,7 @@ describe('CompanyNameField', () => {
     jest.clearAllMocks();
 
     // Mock unauthenticated user and no bff context data
-    mockUseBFFContext.mockReturnValue({ data: null });
+    mockUseBFFContext.mockReturnValue({ data: null } as any);
 
     render(
       <QueryClientProvider client={queryClient}>

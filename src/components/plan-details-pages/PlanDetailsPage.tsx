@@ -64,7 +64,6 @@ const PlanDetailsPage = () => {
   const {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
-    route: expectedRoute,
   } = useCurrentPageDetails();
 
   const { getToken } = useRecaptchaToken('signup');

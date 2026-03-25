@@ -2,7 +2,6 @@ import { logError } from '@edx/frontend-platform/logging';
 
 import { CheckoutStepKey, CheckoutSubstepKey } from '../constants/checkout';
 import EVENT_NAMES from '../constants/events';
-import { getPlanType } from '../utils/checkout';
 import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
 
 interface TrackFieldBlurParams {
