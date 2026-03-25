@@ -76,7 +76,15 @@ markdown file in the .ralph/specs/stdlib folder.
 1. Follow `.ralph/fix_plan.md` and choose the most important item to implement next. Make sure
    to read the whole file to load your institutional memory.
 2. If using a PRD, check that you're on the correct branch from PRD `branchName`.
-3. If test and lint checks pass, commit changes to the feature branch with message `feat: [Story ID] - [Story Title]`
+3. If test and lint checks pass, commit changes to the feature branch.
+  - Commit message format:
+    ```
+    feat: [Short Title For Task]
+
+    [Paragraph Description]
+
+    [Story ID]
+    ```
 4. Update the PRD to set `passes: true` for the completed story - this would be done by editing the corresponding
    JSON file in the `.ralph/specs` directory. 
 5. Add completed items to the Completed section of `.ralph/fix_plan.md`
