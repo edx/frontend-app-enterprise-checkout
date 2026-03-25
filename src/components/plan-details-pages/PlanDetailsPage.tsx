@@ -27,6 +27,7 @@ import {
   CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
+  EssentialsPageRoute,
   SubmitCallbacks,
 } from '@/constants/checkout';
 import {
@@ -265,7 +266,8 @@ const PlanDetailsPage = () => {
         </Stepper.Step>
         {stepperActionButtonMessage && (
           <Stepper.ActionRow eventKey={eventKey}>
-            {location.pathname !== CheckoutPageRoute.PlanDetails && (
+            {(location.pathname !== CheckoutPageRoute.PlanDetails
+              && location.pathname !== EssentialsPageRoute.PlanDetails) && (
               <Button
                 variant="outline-primary"
                 onClick={() => navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails))}

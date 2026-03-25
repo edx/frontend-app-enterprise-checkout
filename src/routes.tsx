@@ -97,6 +97,13 @@ export function getRoutes(queryClient: QueryClient) {
         </PageWrap>
       ),
       loader: getRouteLoader(makeRootLoader, queryClient),
+      shouldRevalidate: ({ currentUrl, nextUrl, defaultShouldRevalidate }) => {
+        if (currentUrl.pathname !== nextUrl.pathname) {
+          return true;
+        }
+
+        return defaultShouldRevalidate;
+      },
       errorElement: <ErrorPage message="Error Boundary" />,
       children: [
         {

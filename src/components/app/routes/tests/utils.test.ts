@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
 import { determineExistingCheckoutIntentState, mapCheckoutIntentStateToSessionStatus, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 jest.mock('@hookform/resolvers/zod', () => ({
@@ -30,6 +30,16 @@ type TestCheckoutIntent = {
   enterpriseSlug?: string;
   enterpriseName?: string;
 };
+
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn(() => ({
+    FEATURE_SELF_SERVICE_PURCHASING: true,
+    FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
+    FEATURE_SELF_SERVICE_ESSENTIALS: true,
+    FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
+    FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+  })),
+}));
 
 describe('utils.ts', () => {
   beforeEach(() => {
@@ -336,8 +346,8 @@ describe('utils.ts', () => {
             stripePriceId: 'price_123',
           },
           [DataStoreKey.AccountDetails]: {
-            enterpriseSlug: '', // missing
-            companyName: '', // missing
+            enterpriseSlug: '',
+            companyName: '',
           },
         },
       });
@@ -369,6 +379,32 @@ describe('utils.ts', () => {
         stripePriceId: 'price_123' as any,
       });
       expect(result).toEqual({ valid: true });
+    });
+  });
+});
+
+describe('validateFormState – Essentials flow', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionStorage.setItem('isEssentials', 'true');
+  });
+
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
+  it('returns Essentials PlanDetails when constraints are null', async () => {
+    (checkoutFormStore.getState as jest.Mock).mockReturnValue({ formData: {} });
+
+    const result = await validateFormState({
+      checkoutStep: 'AccountDetails',
+      constraints: null as any,
+      stripePriceId: 'price_123' as any,
+    });
+
+    expect(result).toEqual({
+      valid: false,
+      invalidRoute: EssentialsPageRoute.PlanDetails,
     });
   });
 });

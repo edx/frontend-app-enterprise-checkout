@@ -178,6 +178,18 @@ const makeRootLoader = (
   const isEssentialsRoute = isPathMatch(currentPath, '/essentials');
   const isEssentialsProduct = !!productKey && essentialsLookupKeys.has(productKey);
   const isEssentialsPath = isEssentialsRoute || isEssentialsProduct;
+
+  // TODO: Remove this sessionStorage-based `isEssentials` flow tracking once the
+  // SubscriptionProduct model is available and serialized into CheckoutIntent.
+  // At that point, the selected plan type (Essentials vs Teams) should be derived
+  // directly from CheckoutIntent instead of inferring it from the route/product_key
+  // and managing it via sessionStorage.
+
+  if (isEssentialsPath) {
+    sessionStorage.setItem('isEssentials', 'true');
+  } else {
+    sessionStorage.removeItem('isEssentials');
+  }
   // Unauthenticated user on protected paths → redirect to Plan Details
   if (!authenticatedUser && protectedPaths.has(currentPath)) {
     // If essentials, send to Essentials plan details; else default to Teams plan details
