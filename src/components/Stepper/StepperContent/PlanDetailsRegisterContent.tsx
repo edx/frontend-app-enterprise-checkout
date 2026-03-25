@@ -6,7 +6,8 @@ import { UseFormReturn } from 'react-hook-form';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { RegistrationDisclaimer } from '@/components/Disclaimer';
 import { RegisterAccountFields } from '@/components/FormFields';
-import EVENT_NAMES, { CHECKOUT_STEPS, PLAN_TYPE } from '@/constants/events';
+import { CheckoutSubstepKey } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 interface PlanDetailsRegisterContentProps {
@@ -25,7 +26,7 @@ const PlanDetailsRegisterContent = ({ form }: PlanDetailsRegisterContentProps) =
         checkoutIntentId,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
-          step: CHECKOUT_STEPS.REGISTRATION,
+          step: CheckoutSubstepKey.Register,
           plan_type: PLAN_TYPE.TEAMS,
         },
       });

@@ -4,8 +4,9 @@ import { useContext } from 'react';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
-import { useFieldTracking } from '@/hooks/useFieldTracking';
+import { CheckoutStepKey } from '@/constants/checkout';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import Field from './Field';
 
@@ -20,15 +21,6 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
-
-  const handleBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.NUM_LICENSES,
-    step: CHECKOUT_STEPS.PLAN_DETAILS,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-    },
-  });
 
   return (
     <FieldContainer>
@@ -64,7 +56,14 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         })}
         min="0"
         className="mr-0 mt-3"
-        onBlur={handleBlur}
+        onBlur={() => trackFieldBlur({
+          fieldName: TRACKED_FIELDS.NUM_LICENSES,
+          step: CheckoutStepKey.PlanDetails,
+          checkoutIntentId,
+          additionalProperties: {
+            plan_type: PLAN_TYPE.TEAMS,
+          },
+        })}
       />
     </FieldContainer>
   );

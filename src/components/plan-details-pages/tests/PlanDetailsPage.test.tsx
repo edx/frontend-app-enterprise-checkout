@@ -2,12 +2,14 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { CheckoutStepKey, CheckoutSubstepKey, CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
@@ -169,6 +171,31 @@ describe('PlanDetailsPage', () => {
   it('renders the title correctly', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Plan Details');
+  });
+
+  it('fires page view tracking event for PlanDetails step', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetails);
+
+    expect(sendTrackEvent).toHaveBeenCalledWith(
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutStepKey.PlanDetails,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
+  });
+
+  it('fires page view tracking event for Registration step (Register)', () => {
+    // Navigate to Register substep
+    renderStepperRoute(`${CheckoutPageRoute.PlanDetails}/register`);
+
+    expect(sendTrackEvent).toHaveBeenCalledWith(
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutSubstepKey.Register,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
   });
 
   it('renders the continue button correctly', () => {

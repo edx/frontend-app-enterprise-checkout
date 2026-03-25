@@ -1,8 +1,10 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutStepKey } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@/components/app/data', () => ({
@@ -71,5 +73,22 @@ describe('AccountDetailsPage', () => {
       },
     });
     validateText('Create a custom URL for your team');
+  });
+
+  it('fires page view tracking event on mount', () => {
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    expect(sendTrackEvent).toHaveBeenCalledWith(
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutStepKey.AccountDetails,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
   });
 });

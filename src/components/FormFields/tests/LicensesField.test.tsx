@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+import { useFieldTracking } from '@/hooks/useFieldTracking';
 import LicensesField from '../LicensesField';
 
 // Mock the form object
@@ -15,20 +16,23 @@ const mockForm = {
   register: jest.fn().mockReturnValue({}),
 };
 
-// Mock tracking hook
-const mockHandleBlur = jest.fn();
+// Mock tracking
 jest.mock('@/hooks/useFieldTracking', () => ({
-  useFieldTracking: jest.fn(() => mockHandleBlur),
+  trackFieldBlur: jest.fn(),
 }));
 
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
+const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
+
 // Mock BFF context hook
+const mockUseBFFContext = jest.fn(() => ({
+  data: {
+    checkoutIntent: { id: 123 },
+  },
+}));
 jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
   __esModule: true,
-  default: jest.fn(() => ({
-    data: {
-      checkoutIntent: { id: 123 },
-    },
-  })),
+  default: (...args) => mockUseBFFContext(...args),
 }));
 
 jest.mock('@/components/FormFields/Field', () => ({
@@ -88,6 +92,31 @@ describe('LicensesField', () => {
     renderComponent();
     const blurTrigger = screen.getByTestId('blur-trigger');
     blurTrigger.click();
-    expect(mockHandleBlur).toHaveBeenCalledTimes(1);
+    expect(mockTrackFieldBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it('should pass null checkoutIntentId for unauthenticated user', () => {
+    // Reset mocks
+    jest.clearAllMocks();
+
+    // Mock unauthenticated user and no bff context data
+    mockUseBFFContext.mockReturnValue({ data: null });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: null }}>
+          <IntlProvider locale="en">
+            <LicensesField form={mockForm as any} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    const blurTrigger = screen.getByTestId('blur-trigger');
+    blurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      checkoutIntentId: null,
+    }));
   });
 });

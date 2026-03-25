@@ -7,8 +7,9 @@ import { type UseFormReturn } from 'react-hook-form';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
-import { useFieldTracking } from '@/hooks/useFieldTracking';
+import { CheckoutStepKey } from '@/constants/checkout';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 interface CompanyNameFieldProps {
   form: UseFormReturn<AccountDetailsData>
@@ -19,15 +20,6 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
-
-  const handleCompanyNameBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.COMPANY_NAME,
-    step: CHECKOUT_STEPS.ACCOUNT_DETAILS,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-    },
-  });
 
   return (
     <FieldContainer>
@@ -54,7 +46,14 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
             description: 'Placeholder for the company name input field',
           })}
           controlClassName="mr-0 mt-3"
-          onBlur={handleCompanyNameBlur}
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.COMPANY_NAME,
+            step: CheckoutStepKey.AccountDetails,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
       </Stack>
     </FieldContainer>

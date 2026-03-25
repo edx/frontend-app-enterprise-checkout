@@ -5,10 +5,13 @@ import { useContext } from 'react';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
-import { useDebounceTracking } from '@/hooks/useDebounceTracking';
+import { CheckoutStepKey } from '@/constants/checkout';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
 
 import type { UseFormReturn } from 'react-hook-form';
+
+import { trackDebouncedFieldBlur } from '@/hooks/useDebounceTrackFieldBlur';
+
 
 interface CustomUrlFieldProps {
   form: UseFormReturn<AccountDetailsData>
@@ -22,17 +25,6 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
 
   // Get the current value of the enterpriseSlug field for org_slug property
   const enterpriseSlugValue = form.watch('enterpriseSlug') || '';
-
-  const handleUrlSlugBlur = useDebounceTracking({
-    fieldName: TRACKED_FIELDS.URL_SLUG,
-    step: CHECKOUT_STEPS.ACCOUNT_DETAILS,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-      org_slug: enterpriseSlugValue,
-    },
-    debounceMs: 500,
-  });
 
   return (
     <FieldContainer>
@@ -66,7 +58,16 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
             controlClassName="ml-1.5"
             className="flex-grow-1 m-0 pt-2"
             formText="Your link must be alphanumeric, lowercase, and may include hyphens"
-            onBlur={handleUrlSlugBlur}
+            onBlur={() => trackDebouncedFieldBlur({
+              fieldName: TRACKED_FIELDS.URL_SLUG,
+              step: CheckoutStepKey.AccountDetails,
+              checkoutIntentId,
+              additionalProperties: {
+                plan_type: PLAN_TYPE.TEAMS,
+                org_slug: enterpriseSlugValue,
+              },
+              debounceMs: 500,
+            })}
           />
         </span>
       </div>

@@ -11,6 +11,7 @@ export enum CheckoutStepKey {
   BillingDetails = 'billing-details',
 }
 
+
 export enum CheckoutSubstepKey {
   Login = 'login',
   Register = 'register',

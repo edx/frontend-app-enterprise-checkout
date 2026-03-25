@@ -65,10 +65,3 @@ const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContextPrice['
   const matched = extractPriceObject(pricing);
   return matched?.id ?? null;
 };
-
-export {
-  getStepFromParams,
-  getCheckoutPageDetails,
-  extractPriceId,
-  extractPriceObject,
-};

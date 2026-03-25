@@ -1,3 +1,4 @@
+import { logError } from '@edx/frontend-platform/logging';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
@@ -22,7 +23,9 @@ import {
   CheckoutStepKey,
   DataStoreKey,
 } from '@/constants/checkout';
-import EVENT_NAMES from '@/constants/events';
+import EVENT_NAMES, {
+  PLAN_TYPE,
+} from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPageDetails,
@@ -34,6 +37,7 @@ import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 const AccountDetailsPage: React.FC = () => {
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
+  const location = useLocation();
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -45,7 +49,30 @@ const AccountDetailsPage: React.FC = () => {
   const {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
+    route: expectedRoute,
+    page: currentPage,
   } = useCurrentPageDetails();
+
+  // Fire page view tracking event whenever the URL changes
+  useEffect(() => {
+    // Ensure that the current URL matches the expected route before firing the event
+    if (location.pathname !== CheckoutPageRoute.AccountDetails) {
+      return;
+    }
+
+    try {
+      sendEnterpriseCheckoutTrackingEvent({
+        checkoutIntentId: checkoutIntent?.id ?? null,
+        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+        properties: {
+          step: CheckoutStepKey.AccountDetails,
+          plan_type: PLAN_TYPE.TEAMS,
+        },
+      });
+    } catch (error) {
+      logError('Failed to send page view tracking event for Account Details', error);
+    }
+  }, [checkoutIntent?.id, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.adminEmail)

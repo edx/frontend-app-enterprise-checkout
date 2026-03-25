@@ -4,34 +4,29 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { useCountryOptions } from '@/components/app/data/hooks';
+import { useCountryOptions, useBFFContext } from '@/components/app/data/hooks';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import NameAndEmailFields from '../NameAndEmailFields';
 
-// Mock tracking hook
-const mockHandleBlur = jest.fn();
+// Mock tracking
 jest.mock('@/hooks/useFieldTracking', () => ({
-  useFieldTracking: jest.fn(() => mockHandleBlur),
+  trackFieldBlur: jest.fn(),
 }));
 
+const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
+
 // Mock BFF context hook
-jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    data: {
-      checkoutIntent: { id: 123 },
-    },
-  })),
+const mockUseBFFContext = jest.fn(() => ({
+  data: {
+    checkoutIntent: { id: 123 },
+  },
 }));
 
 // Mock the useCountryOptions hook
 jest.mock('@/components/app/data/hooks', () => ({
   useCountryOptions: jest.fn(),
-  useBFFContext: jest.fn(() => ({
-    data: {
-      checkoutIntent: { id: 123 },
-    },
-  })),
+  useBFFContext: jest.fn((...args) => mockUseBFFContext(...args)),
 }));
 
 const mockedUseCountryOptions = useCountryOptions as jest.Mock;
@@ -211,5 +206,59 @@ describe('NameAndEmailFields', () => {
     const options = JSON.parse(optionsElement.textContent || '[]');
 
     expect(options).toEqual([]);
+  });
+
+  it('should call tracking handler on blur', () => {
+    mockedUseCountryOptions.mockReturnValue([]);
+    renderComponent();
+    const blurTrigger = screen.getByTestId('fullName-blur-trigger');
+    blurTrigger.click();
+    expect(mockTrackFieldBlur).toHaveBeenCalledTimes(1);
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'fullName',
+    }));
+  });
+
+  it('should pass null checkoutIntentId for unauthenticated user', () => {
+    // Reset mocks
+    jest.clearAllMocks();
+
+    mockedUseCountryOptions.mockReturnValue([]);
+    // Mock unauthenticated user and no bff context data
+    mockUseBFFContext.mockReturnValue({ data: null });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: null }}>
+          <IntlProvider locale="en">
+            <NameAndEmailFields form={createMockForm() as any} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    const fullNameBlurTrigger = screen.getByTestId('fullName-blur-trigger');
+    fullNameBlurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'fullName',
+      checkoutIntentId: null,
+    }));
+
+    const adminEmailBlurTrigger = screen.getByTestId('adminEmail-blur-trigger');
+    adminEmailBlurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'adminEmail',
+      checkoutIntentId: null,
+    }));
+
+    const countryBlurTrigger = screen.getByTestId('country-blur-trigger');
+    countryBlurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'country',
+      checkoutIntentId: null,
+    }));
   });
 });

@@ -39,11 +39,6 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   CHECKOUT_REGISTRATION_SUCCESS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.registration.success`,
 };
 
-export const CHECKOUT_STEPS = {
-  PLAN_DETAILS: 'plan_details',
-  ACCOUNT_DETAILS: 'account_details',
-  REGISTRATION: 'registration',
-} as const;
 
 export const TRACKED_FIELDS = {
   // Plan Details step

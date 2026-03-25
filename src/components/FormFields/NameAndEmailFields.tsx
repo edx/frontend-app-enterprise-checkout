@@ -6,8 +6,9 @@ import { useContext } from 'react';
 import { useCountryOptions } from '@/components/app/data/hooks';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
-import { useFieldTracking } from '@/hooks/useFieldTracking';
+import { CheckoutStepKey } from '@/constants/checkout';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import Field from './Field';
 
@@ -23,33 +24,6 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
-
-  const handleFullNameBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.FULL_NAME,
-    step: CHECKOUT_STEPS.PLAN_DETAILS,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-    },
-  });
-
-  const handleAdminEmailBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.ADMIN_EMAIL,
-    step: CHECKOUT_STEPS.PLAN_DETAILS,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-    },
-  });
-
-  const handleCountryBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.COUNTRY,
-    step: CHECKOUT_STEPS.PLAN_DETAILS,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-    },
-  });
 
   return (
     <FieldContainer>
@@ -86,7 +60,14 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           })}
           controlClassName="mr-0"
           className="bg-light-300"
-          onBlur={handleFullNameBlur}
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.FULL_NAME,
+            step: CheckoutStepKey.PlanDetails,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
 
         <Field
@@ -104,7 +85,14 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             description: 'Placeholder for the work email input field',
           })}
           controlClassName="mr-0"
-          onBlur={handleAdminEmailBlur}
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.ADMIN_EMAIL,
+            step: CheckoutStepKey.PlanDetails,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
         <Field
           form={form}
@@ -122,7 +110,14 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             description: 'Placeholder for the country of residence dropdown field',
           })}
           controlClassName="mr-0"
-          onBlur={handleCountryBlur}
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.COUNTRY,
+            step: CheckoutStepKey.PlanDetails,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
       </Stack>
     </FieldContainer>

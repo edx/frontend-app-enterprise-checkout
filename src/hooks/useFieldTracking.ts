@@ -1,53 +1,48 @@
 import { logError } from '@edx/frontend-platform/logging';
-import { useCallback } from 'react';
 
+import { CheckoutStepKey, CheckoutSubstepKey } from '../constants/checkout';
 import EVENT_NAMES from '../constants/events';
+import { getPlanType } from '../utils/checkout';
 import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
 
-interface UseFieldTrackingParams {
+interface TrackFieldBlurParams {
   fieldName: string;
-  step: string;
+  step: CheckoutStepKey | CheckoutSubstepKey;
   checkoutIntentId: number | null;
+  lookupKey?: string | null;
   additionalProperties?: Record<string, any>;
 }
 
 /**
- * Custom hook to track field blur events with Segment analytics.
+ * Function to track field blur events with Segment analytics.
  *
- * @param {UseFieldTrackingParams} params - Configuration for field tracking
- * @returns {Function} onBlur handler to attach to form fields
+ * @param {TrackFieldBlurParams} params - Configuration for field tracking
  *
  * @example
- * const handleBlur = useFieldTracking({
+ * <input onBlur={() => trackFieldBlur({
  *   fieldName: 'fullName',
  *   step: 'plan_details',
  *   checkoutIntentId: 123,
  *   additionalProperties: { plan_type: 'teams' }
- * });
- *
- * <input onBlur={handleBlur} />
+ * })} />
  */
-export const useFieldTracking = ({
+export const trackFieldBlur = ({
   fieldName,
   step,
-  checkoutIntentId,
+  checkoutIntentId = null,
   additionalProperties = {},
-}: UseFieldTrackingParams) => {
-  const handleBlur = useCallback(() => {
-    try {
-      sendEnterpriseCheckoutTrackingEvent({
-        checkoutIntentId,
-        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
-        properties: {
-          step,
-          field_name: fieldName,
-          ...additionalProperties,
-        },
-      });
-    } catch (error) {
-      logError(`Failed to send tracking event for field: ${fieldName}`, error);
-    }
-  }, [fieldName, step, checkoutIntentId, additionalProperties]);
-
-  return handleBlur;
+}: TrackFieldBlurParams): void => {
+  try {
+    sendEnterpriseCheckoutTrackingEvent({
+      checkoutIntentId,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
+      properties: {
+        step,
+        field_name: fieldName,
+        ...additionalProperties,
+      },
+    });
+  } catch (error) {
+    logError(`Failed to send tracking event for field: ${fieldName}`, error);
+  }
 };

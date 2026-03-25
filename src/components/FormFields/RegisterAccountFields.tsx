@@ -8,8 +8,9 @@ import { useCountryOptions } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { CHECKOUT_STEPS, PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
-import { useFieldTracking } from '@/hooks/useFieldTracking';
+import { CheckoutSubstepKey } from '@/constants/checkout';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -114,15 +115,6 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
 
-  const handleUsernameBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.USERNAME,
-    step: CHECKOUT_STEPS.REGISTRATION,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-    },
-  });
-
   return (
     <Field
       form={form}
@@ -140,7 +132,14 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
         description: 'Placeholder for the username input field',
       })}
       controlClassName="mr-0"
-      onBlur={handleUsernameBlur}
+      onBlur={() => trackFieldBlur({
+        fieldName: TRACKED_FIELDS.USERNAME,
+        step: CheckoutSubstepKey.Register,
+        checkoutIntentId,
+        additionalProperties: {
+          plan_type: PLAN_TYPE.TEAMS,
+        },
+      })}
     />
   );
 };
@@ -153,17 +152,6 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
-
-  // CRITICAL: Track interaction only, NEVER the password value
-  const handlePasswordBlur = useFieldTracking({
-    fieldName: TRACKED_FIELDS.PASSWORD,
-    step: CHECKOUT_STEPS.REGISTRATION,
-    checkoutIntentId,
-    additionalProperties: {
-      plan_type: PLAN_TYPE.TEAMS,
-      interaction: 'blur', // Explicit interaction tracking, no value
-    },
-  });
 
   return (
     <Field
@@ -195,7 +183,14 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
           }
         },
       }}
-      onBlur={handlePasswordBlur}
+      onBlur={() => trackFieldBlur({
+        fieldName: TRACKED_FIELDS.PASSWORD,
+        step: CheckoutSubstepKey.Register,
+        checkoutIntentId,
+        additionalProperties: {
+          plan_type: PLAN_TYPE.TEAMS,
+        },
+      })}
     />
   );
 };

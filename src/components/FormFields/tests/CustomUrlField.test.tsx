@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+import { CheckoutStepKey } from '@/constants/checkout';
 import CustomUrlField from '../CustomUrlField';
 
 const mockForm = {
@@ -15,10 +16,10 @@ const mockForm = {
   watch: jest.fn(() => 'test-slug'),
 };
 
-// Mock debounce tracking hook
-const mockHandleBlur = jest.fn();
-jest.mock('@/hooks/useDebounceTracking', () => ({
-  useDebounceTracking: jest.fn(() => mockHandleBlur),
+// Mock debounce tracking function
+const mockTrackDebouncedFieldBlur = jest.fn();
+jest.mock('@/hooks/useDebounceTrackFieldBlur', () => ({
+  trackDebouncedFieldBlur: (args) => mockTrackDebouncedFieldBlur(args),
 }));
 
 // Mock BFF context hook
@@ -79,10 +80,14 @@ describe('CustomUrlField', () => {
     validateText((content) => content.includes('This access link name cannot be changed after your trial subscription starts'));
   });
 
-  it('should call debounce tracking handler on blur', () => {
+  it('should call debounce tracking function on blur', () => {
     renderComponent();
     const blurTrigger = screen.getByTestId('blur-trigger');
     blurTrigger.click();
-    expect(mockHandleBlur).toHaveBeenCalledTimes(1);
+    expect(mockTrackDebouncedFieldBlur).toHaveBeenCalledTimes(1);
+    expect(mockTrackDebouncedFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'urlSlug',
+      step: CheckoutStepKey.AccountDetails,
+    }));
   });
 });

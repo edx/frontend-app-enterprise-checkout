@@ -1,4 +1,4 @@
-# SSP Checkout Telemetry Frontend - Implementation Documentation
+# SSP Checkout Frontend Telemetry - Implementation Documentation
 
 ## Overview
 This document details the implementation of Segment-based event tracking for the SSP Teams Plan checkout flow. The tracking system identifies user drop-offs and interaction patterns across the checkout funnel to support data-driven decision-making for conversion rate optimization.
@@ -23,13 +23,14 @@ This document details the implementation of Segment-based event tracking for the
 
 ## Key Technical Implementation
 
-### Custom Hooks
-- `useFieldTracking`: Standard blur event tracking
-- `useDebounceTracking`: Debounced tracking for URL/slug fields (500ms)
+### Custom Tracking Utilities
+- `trackFieldBlur`: Standard blur event tracking (plain function)
+- `trackDebouncedFieldBlur`: Debounced tracking for URL/slug fields (plain function, 500ms)
 
 ### Tracking Constants  
-Located in `src/constants/events.ts`:
-- Event names, checkout steps, tracked fields, plan types
+Located in `src/constants/events.ts` and `src/constants/checkout.ts`:
+- Event names, tracked fields, plan types (`events.ts`)
+- Checkout steps (`checkout.ts`)
 
 ### Field Instrumentation
 **Step 1 - Plan Details**:
@@ -55,7 +56,7 @@ Located in `src/constants/events.ts`:
 ## Test Results
 
 ✅ **All 386 tests passing**  
-✅ **100% coverage** for `useFieldTracking.ts` and `useDebounceTracking.ts`  
+✅ **100% coverage** for `trackFieldBlur` (in `useFieldTracking.ts`) and `trackDebouncedFieldBlur` (in `useDebounceTrackFieldBlur.ts`)
 ✅ **Lint passed** - No errors  
 ✅ **TypeScript checks passed** - No type errors
 
@@ -65,7 +66,7 @@ Located in `src/constants/events.ts`:
 
 All tracking events include:
 - `checkoutIntentId`: number | null
-- `step`: 'plan_details' | 'registration' | 'account_details'  
+- `step`: 'plan-details' | 'account-details' | 'register'
 - `field_name`: string
 - `plan_type`: 'teams'
 - `org_slug`: string (optional, for urlSlug field)
