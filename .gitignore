@@ -21,3 +21,4 @@ temp/babel-plugin-react-intl
 
 # LLMs and stuff
 CLAUDE.md
+.ralph/fix_plan.md

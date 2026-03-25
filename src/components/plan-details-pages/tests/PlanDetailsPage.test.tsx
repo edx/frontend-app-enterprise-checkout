@@ -73,23 +73,18 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@edx/frontend-platform/config', () => ({
-  getConfig: jest.fn().mockReturnValue({
+  getConfig: jest.fn(() => ({
     TERMS_OF_SERVICE_URL: 'https://example.com/terms',
     PRIVACY_POLICY_URL: 'https://example.com/privacy',
     RECAPTCHA_SITE_KEY_WEB: 'test-recaptcha-key',
-  }),
-}));
-
-<<<<<<< HEAD
-jest.mock('@edx/frontend-platform/config', () => ({
-  getConfig: jest.fn(() => ({
     FEATURE_SELF_SERVICE_PURCHASING: true,
     FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
     FEATURE_SELF_SERVICE_ESSENTIALS: true,
     FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
     FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
   })),
-=======
+}));
+
 jest.mock('@edx/frontend-platform/logging', () => ({
   logError: jest.fn(),
   logInfo: jest.fn(),
@@ -97,7 +92,6 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
   sendTrackEvent: jest.fn(),
->>>>>>> 4a7deab (feat: SSP-TELEMETRY-FE - Add comprehensive tests and documentation for tracking implementation)
 }));
 
 jest.mock('@/components/app/data/hooks/useBFFContext');

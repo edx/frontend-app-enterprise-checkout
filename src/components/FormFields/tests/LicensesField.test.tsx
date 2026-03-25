@@ -31,7 +31,7 @@ const mockUseBFFContext = jest.fn(() => ({
 }));
 jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
   __esModule: true,
-  default: (...args: any) => mockUseBFFContext.apply(null, args),
+  default: (...args: any[]) => (mockUseBFFContext as any)(...args),
 }));
 
 jest.mock('@/components/FormFields/Field', () => ({

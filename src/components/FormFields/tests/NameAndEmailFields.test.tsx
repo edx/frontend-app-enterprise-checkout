@@ -26,7 +26,7 @@ const mockUseBFFContext = jest.fn(() => ({
 // Mock the useCountryOptions hook
 jest.mock('@/components/app/data/hooks', () => ({
   useCountryOptions: jest.fn(),
-  useBFFContext: jest.fn((...args: any) => mockUseBFFContext.apply(null, args)),
+  useBFFContext: jest.fn((...args: any[]) => (mockUseBFFContext as any)(...args)),
 }));
 
 const mockedUseCountryOptions = useCountryOptions as jest.Mock;
