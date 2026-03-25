@@ -9,7 +9,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -51,10 +51,17 @@ const AccountDetailsPage: React.FC = () => {
     formSchema,
   } = useCurrentPageDetails();
 
+  const lastTrackedPathRef = useRef<string | null>(null);
+
   // Fire page view tracking event whenever the URL changes
   useEffect(() => {
     // Ensure that the current URL matches the expected route before firing the event
     if (location.pathname !== CheckoutPageRoute.AccountDetails) {
+      return;
+    }
+
+    // Avoid double counting: only fire once per pathname
+    if (lastTrackedPathRef.current === location.pathname) {
       return;
     }
 
@@ -67,6 +74,7 @@ const AccountDetailsPage: React.FC = () => {
           plan_type: PLAN_TYPE.TEAMS,
         },
       });
+      lastTrackedPathRef.current = location.pathname;
     } catch (error) {
       logError('Failed to send page view tracking event for Account Details', error);
     }

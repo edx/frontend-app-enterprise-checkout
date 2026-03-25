@@ -9,7 +9,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -72,6 +72,8 @@ const PlanDetailsPage = () => {
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
 
+  const lastTrackedPathRef = useRef<string | null>(null);
+
   // Fire page view tracking event whenever the current page changes
   useEffect(() => {
     // Ensure that the current URL matches one of the handled routes before firing the event
@@ -81,7 +83,7 @@ const PlanDetailsPage = () => {
       CheckoutPageRoute.PlanDetailsRegister as string,
     ];
 
-    if (!handledRoutes.includes(location.pathname)) {
+    if (!handledRoutes.includes(location.pathname) || lastTrackedPathRef.current === location.pathname) {
       return;
     }
 
@@ -105,6 +107,7 @@ const PlanDetailsPage = () => {
           plan_type: PLAN_TYPE.TEAMS,
         },
       });
+      lastTrackedPathRef.current = location.pathname;
     } catch (error) {
       logError(`Failed to send page view tracking event for ${location.pathname}`, error);
     }
