@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 // eslint-disable-next-line import/order
-import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';

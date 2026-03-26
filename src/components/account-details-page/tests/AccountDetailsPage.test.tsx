@@ -1,4 +1,4 @@
-import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent } from '@edx/frontend-platform/analytics';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 

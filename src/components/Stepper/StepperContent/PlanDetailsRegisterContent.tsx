@@ -7,13 +7,13 @@ interface PlanDetailsRegisterContentProps {
   form: UseFormReturn<PlanDetailsData>;
 }
 
-const PlanDetailsRegisterContent = ({ form }: PlanDetailsRegisterContentProps) => {
-  return (
-    <>
-      <RegisterAccountFields form={form} />
-      <RegistrationDisclaimer />
-    </>
-  );
-};
+const PlanDetailsRegisterContent = (
+  { form }: PlanDetailsRegisterContentProps,
+) => (
+  <>
+    <RegisterAccountFields form={form} />
+    <RegistrationDisclaimer />
+  </>
+);
 
 export default PlanDetailsRegisterContent;

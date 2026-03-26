@@ -1,4 +1,4 @@
-import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent } from '@edx/frontend-platform/analytics';
 
 import { useBFFContext, useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data/hooks';
 import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
