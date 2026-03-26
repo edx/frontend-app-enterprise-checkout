@@ -30,7 +30,7 @@ import {
   useCheckoutFormStore,
   useCurrentPageDetails,
 } from '@/hooks/index';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 
@@ -66,17 +66,23 @@ const AccountDetailsPage: React.FC = () => {
     }
 
     try {
-      sendEnterpriseCheckoutTrackingEvent({
+      sendEnterpriseCheckoutPageEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
-        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+        category: 'enterprise_checkout',
+        name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
           step: CheckoutStepKey.AccountDetails,
           plan_type: PLAN_TYPE.TEAMS,
+          path: location.pathname,
         },
       });
+
       lastTrackedPathRef.current = location.pathname;
     } catch (error) {
-      logError('Failed to send page view tracking event for Account Details', error);
+      logError(
+        `Failed to send page view tracking event for ${CheckoutStepKey.AccountDetails}`,
+        error,
+      );
     }
   }, [checkoutIntent?.id, location.pathname]);
 
