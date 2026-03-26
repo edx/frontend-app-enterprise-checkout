@@ -1,4 +1,4 @@
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -19,6 +19,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
   sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 describe('AccountDetailsPage', () => {
@@ -83,7 +84,8 @@ describe('AccountDetailsPage', () => {
       },
     });
 
-    expect(sendTrackEvent).toHaveBeenCalledWith(
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.AccountDetails,

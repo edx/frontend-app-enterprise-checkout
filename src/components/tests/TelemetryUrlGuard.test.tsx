@@ -1,4 +1,4 @@
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
 
 import { useBFFContext, useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data/hooks';
 import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
@@ -7,6 +7,7 @@ import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
   sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 jest.mock('@edx/frontend-platform/logging', () => ({
@@ -47,7 +48,8 @@ describe('Telemetry URL Guard', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
 
     // Should fire for PlanDetails
-    expect(sendTrackEvent).toHaveBeenCalledWith(
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.PlanDetails,
@@ -55,7 +57,8 @@ describe('Telemetry URL Guard', () => {
     );
 
     // Should NOT fire for AccountDetails
-    expect(sendTrackEvent).not.toHaveBeenCalledWith(
+    expect(sendPageEvent).not.toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.AccountDetails,
@@ -71,7 +74,8 @@ describe('Telemetry URL Guard', () => {
     });
 
     // Should fire for AccountDetails
-    expect(sendTrackEvent).toHaveBeenCalledWith(
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.AccountDetails,
@@ -79,7 +83,8 @@ describe('Telemetry URL Guard', () => {
     );
 
     // Should NOT fire for PlanDetails
-    expect(sendTrackEvent).not.toHaveBeenCalledWith(
+    expect(sendPageEvent).not.toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.PlanDetails,
@@ -91,7 +96,8 @@ describe('Telemetry URL Guard', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
 
     // Should fire for Register
-    expect(sendTrackEvent).toHaveBeenCalledWith(
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutSubstepKey.Register,
@@ -99,7 +105,8 @@ describe('Telemetry URL Guard', () => {
     );
 
     // Should NOT fire for AccountDetails
-    expect(sendTrackEvent).not.toHaveBeenCalledWith(
+    expect(sendPageEvent).not.toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.AccountDetails,

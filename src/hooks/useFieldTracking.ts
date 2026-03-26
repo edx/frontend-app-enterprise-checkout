@@ -8,7 +8,6 @@ interface TrackFieldBlurParams {
   fieldName: string;
   step: CheckoutStepKey | CheckoutSubstepKey;
   checkoutIntentId: number | null;
-  lookupKey?: string | null;
   additionalProperties?: Record<string, any>;
 }
 

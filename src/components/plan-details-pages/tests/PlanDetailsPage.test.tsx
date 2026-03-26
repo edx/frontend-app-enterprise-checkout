@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 // eslint-disable-next-line import/order
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
@@ -92,6 +92,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
   sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 jest.mock('@/components/app/data/hooks/useBFFContext');
@@ -171,7 +172,8 @@ describe('PlanDetailsPage', () => {
   it('fires page view tracking event for PlanDetails step', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
 
-    expect(sendTrackEvent).toHaveBeenCalledWith(
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutStepKey.PlanDetails,
@@ -184,7 +186,8 @@ describe('PlanDetailsPage', () => {
     // Navigate to Register substep
     renderStepperRoute(`${CheckoutPageRoute.PlanDetails}/register`);
 
-    expect(sendTrackEvent).toHaveBeenCalledWith(
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
         step: CheckoutSubstepKey.Register,
