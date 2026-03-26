@@ -20,12 +20,31 @@ const StripeProvider = ({ children }: StripeProviderProps) => {
     return null;
   }
 
+  // Wrap fetchClientSecret so that any non-Error rejection from Stripe's SDK
+  // (e.g. a raw API error object like { type: 'invalid_request_error', ... })
+  // is converted to a proper Error instance.  Without this conversion the
+  // webpack dev overlay shows the unhelpful "[object Object]" message and
+  // React Router's error boundary cannot display a meaningful message either.
+  const fetchClientSecret = (): Promise<string> => (
+    Promise.resolve(checkoutSessionClientSecret).catch((err: unknown) => {
+      let message: string;
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === 'string') {
+        message = err;
+      } else {
+        message = JSON.stringify(err);
+      }
+      throw new Error(`Stripe session initialization failed: ${message}`);
+    })
+  );
+
   return (
     <CheckoutProvider
       key={checkoutSessionClientSecret}
       stripe={stripePromise}
       options={{
-        fetchClientSecret: () => Promise.resolve(checkoutSessionClientSecret),
+        fetchClientSecret,
         elementsOptions: { appearance },
       }}
     >

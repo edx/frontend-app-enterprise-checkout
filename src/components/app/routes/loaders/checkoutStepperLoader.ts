@@ -128,8 +128,16 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     return redirect(invalidRoute);
   }
 
-  const checkoutSessionClientSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
-  if (!checkoutSessionClientSecret) {
+  const { checkoutIntent: ctxCheckoutIntent } = contextMetadata;
+  const checkoutSessionClientSecret = ctxCheckoutIntent?.checkoutSessionClientSecret;
+  const isExpiredIntent = ctxCheckoutIntent?.expiredCheckoutIntent;
+
+  // Redirect to PlanDetails when:
+  //  – no Stripe client secret has been created yet, OR
+  //  – the checkout intent (and therefore its Stripe session) has expired.
+  //    Passing an expired secret to Stripe causes it to reject with a plain
+  //    object instead of an Error, which surfaces as "[object Object]" in the UI.
+  if (!checkoutSessionClientSecret || isExpiredIntent) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 

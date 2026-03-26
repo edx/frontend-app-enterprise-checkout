@@ -101,32 +101,59 @@ const StatefulSubscribeButton: React.FC<StatefulSubscribeButtonProps> = ({ onCli
     // Sets the button to pending state and then calls confirm()
     setStatefulButtonState('pending');
 
-    // Calls confirm() to start the Stripe checkout flow.
-    let response;
-    try {
-      if (checkoutIntent) {
-        const { uuid, country, state } = checkoutIntent;
-        const tncCheckoutUpdateRequest: CheckoutIntentPatchRequestSchema = {
-          country,
-          state,
-          termsMetadata: termsAndConditions,
-        };
+    // Step 1: Persist T&C acceptance on the checkout intent before charging.
+    // This is a separate try-catch so patchCheckoutIntent failures are clearly
+    // distinguished from Stripe confirm() failures and never silently swallowed.
+    if (checkoutIntent) {
+      const { uuid, country, state } = checkoutIntent;
+      const tncCheckoutUpdateRequest: CheckoutIntentPatchRequestSchema = {
+        country,
+        state,
+        termsMetadata: termsAndConditions,
+      };
+      try {
         await patchCheckoutIntent({
           uuid,
           requestData: tncCheckoutUpdateRequest,
         });
+      } catch (patchError) {
+        const detail = patchError instanceof Error
+          ? patchError.message
+          : JSON.stringify(patchError);
+        logError(
+          `[BillingDetails] Failed to record terms acceptance before Stripe confirm – checkoutIntent: ${JSON.stringify(checkoutIntent)}, error: ${detail}`,
+        );
+        setStatefulButtonState('error');
+        setErrorMessageKey('fallback');
+        return;
       }
+    }
+
+    // Step 2: Confirm Stripe checkout. confirm() returns a StripeCheckoutStatus;
+    // it should not throw, but we guard against unexpected rejections anyway.
+    let response;
+    try {
       response = await confirm({
         redirect: 'if_required',
         returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
       });
-    } catch (error) {
-      response = error;
+    } catch (confirmError) {
+      // confirm() threw instead of returning a status — convert to a safe error state.
+      const detail = confirmError instanceof Error
+        ? confirmError.message
+        : JSON.stringify(confirmError);
+      logError(
+        `[BillingDetails] Stripe confirm() threw unexpectedly – checkoutIntent: ${JSON.stringify(checkoutIntent)}, error: ${detail}`,
+      );
+      setStatefulButtonState('error');
+      setErrorMessageKey('fallback');
+      return;
     }
-    // Set the button to the appropriate state based on the response.
+
+    // Step 3: Map the Stripe response type to a button state.
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
-    setStatefulButtonState(response.type || 'default');
-    if (response.type === 'error') {
+    setStatefulButtonState(response?.type ?? 'error');
+    if (response?.type === 'error') {
       setErrorMessageKey(buttonMessages.error[response.error?.code] ? response.error?.code : 'fallback');
       logError(
         `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${JSON.stringify(checkoutIntent)}, ${JSON.stringify(response.error)}`,

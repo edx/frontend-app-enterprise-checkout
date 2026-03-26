@@ -68,6 +68,22 @@ function getErrorMessage(err: unknown): string | undefined {
     return err;
   }
 
+  // Plain object (e.g. raw API error, Stripe error object) – avoid "[object Object]"
+  if (err !== null && typeof err === 'object') {
+    const errObj = err as Record<string, unknown>;
+    if (typeof errObj.message === 'string') {
+      return errObj.message;
+    }
+    if (typeof errObj.detail === 'string') {
+      return errObj.detail;
+    }
+    try {
+      return JSON.stringify(errObj, null, 2);
+    } catch {
+      return '[Unknown error]';
+    }
+  }
+
   return undefined;
 }
 

@@ -88,11 +88,6 @@ const BillingFormFields = ({ form }: BillingFormFieldsProps) => {
 
   const addressElementOptions: StripeAddressElementOptions = {
     mode: 'billing',
-    validation: {
-      phone: {
-        required: 'never',
-      },
-    },
   };
 
   return (
