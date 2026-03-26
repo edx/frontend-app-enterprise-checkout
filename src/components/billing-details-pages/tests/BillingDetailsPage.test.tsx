@@ -97,6 +97,20 @@ describe('BillingDetailsPage', () => {
     validateText('I confirm I am subscribing', { exact: false });
   });
 
+  it('renders the same billing address collection UI on essentials billing route', async () => {
+    renderStepperRoute('/essentials/billing-details', {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    } as any);
+
+    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Billing Details');
+    validateText('AddressElement');
+    validateText('PaymentElement');
+    await waitFor(() => validateText('Subscribe'));
+  });
+
   it('emits tracking event when subscribe button is clicked', async () => {
     const user = userEvent.setup();
 
