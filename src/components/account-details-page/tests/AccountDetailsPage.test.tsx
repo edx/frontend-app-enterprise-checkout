@@ -1,11 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
-import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
+import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
