@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
 import { useFormValidationConstraints } from '@/components/app/data';
+import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
 
@@ -11,9 +12,38 @@ jest.mock('@/components/app/data', () => ({
   useFormValidationConstraints: jest.fn(),
 }));
 
+jest.mock('@/components/app/data/hooks', () => ({
+  ...jest.requireActual('@/components/app/data/hooks'),
+  useCreateCheckoutSessionMutation: jest.fn(),
+}));
+
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
+
 describe('AccountDetailsPage', () => {
+  let mutationCallbacks: {
+    onSuccess?: (responseData: { checkoutSessionClientSecret: string }) => void;
+    onError?: (fieldErrors?: Record<string, any>) => void;
+  } = {};
+
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.removeItem('isEssentials');
+
+    (useCreateCheckoutSessionMutation as jest.Mock).mockImplementation((callbacks) => {
+      mutationCallbacks = callbacks;
+      return {
+        mutate: jest.fn(),
+        isSuccess: false,
+        isPending: false,
+        isError: false,
+        reset: jest.fn(),
+      };
+    });
+
     (useFormValidationConstraints as jest.Mock).mockReturnValue({
       data: {
         enterpriseSlug: {
@@ -78,7 +108,23 @@ describe('AccountDetailsPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Back' }));
 
-    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Plan Details');
+    expect(mockNavigate).toHaveBeenCalledWith(EssentialsPageRoute.PlanDetails);
+    sessionStorage.removeItem('isEssentials');
+  });
+
+  it('navigates to essentials billing details on successful checkout session creation in essentials flow', () => {
+    sessionStorage.setItem('isEssentials', 'true');
+
+    renderStepperRoute(EssentialsPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    mutationCallbacks.onSuccess?.({ checkoutSessionClientSecret: 'client_secret' });
+
+    expect(mockNavigate).toHaveBeenCalledWith(EssentialsPageRoute.BillingDetails);
     sessionStorage.removeItem('isEssentials');
   });
 });
