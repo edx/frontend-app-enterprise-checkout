@@ -1,4 +1,4 @@
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 import dayjs from 'dayjs';
@@ -110,6 +110,29 @@ const sendEnterpriseCheckoutTrackingEvent = ({
   );
 };
 
+interface SendEnterpriseCheckoutPageEventArgs {
+  checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null;
+  category: string;
+  name: string;
+  properties?: Record<string, any>;
+}
+
+const sendEnterpriseCheckoutPageEvent = ({
+  checkoutIntentId,
+  category,
+  name,
+  properties = {},
+}: SendEnterpriseCheckoutPageEventArgs) => {
+  sendPageEvent(
+    category,
+    name,
+    {
+      checkoutIntentId,
+      ...properties,
+    },
+  );
+};
+
 // Feature flag validation
 const isFeatureEnabled = (enabled: boolean, featureKey?: string | null): boolean => {
   const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
@@ -134,5 +157,6 @@ export {
   serverValidationError,
   isExpired,
   sendEnterpriseCheckoutTrackingEvent,
+  sendEnterpriseCheckoutPageEvent,
   isFeatureEnabled,
 };

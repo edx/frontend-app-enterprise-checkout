@@ -1,13 +1,25 @@
+import { sendPageEvent } from '@edx/frontend-platform/analytics';
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useFormValidationConstraints } from '@/components/app/data';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutStepKey } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useFormValidationConstraints: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+  logInfo: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({
+  sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 describe('AccountDetailsPage', () => {
@@ -62,5 +74,23 @@ describe('AccountDetailsPage', () => {
       },
     });
     validateText('Create a custom URL for your team');
+  });
+
+  it('fires page view tracking event on mount', () => {
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutStepKey.AccountDetails,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
   });
 });

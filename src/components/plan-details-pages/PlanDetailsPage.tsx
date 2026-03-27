@@ -1,4 +1,5 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -8,7 +9,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -20,21 +21,25 @@ import {
   useLoginMutation,
   useRegisterMutation,
 } from '@/components/app/data/hooks';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
   CheckoutStepKey,
+  CheckoutSubstepKey,
   DataStoreKey,
   EssentialsPageRoute,
   SubmitCallbacks,
 } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPage,
   useCurrentPageDetails,
 } from '@/hooks/index';
+import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
@@ -63,6 +68,54 @@ const PlanDetailsPage = () => {
   } = useCurrentPageDetails();
 
   const { getToken } = useRecaptchaToken('signup');
+
+  // Get checkout context for tracking
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+
+  const lastTrackedPathRef = useRef<string | null>(null);
+
+  // Fire page view tracking event whenever the current page changes
+  useEffect(() => {
+    // Ensure that the current URL matches one of the handled routes before firing the event
+    const handledRoutes = [
+      CheckoutPageRoute.PlanDetails as string,
+      CheckoutPageRoute.PlanDetailsLogin as string,
+      CheckoutPageRoute.PlanDetailsRegister as string,
+    ];
+
+    if (!handledRoutes.includes(location.pathname) || lastTrackedPathRef.current === location.pathname) {
+      return;
+    }
+
+    let step: string;
+    switch (location.pathname) {
+      case CheckoutPageRoute.PlanDetailsRegister:
+        step = CheckoutSubstepKey.Register;
+        break;
+      case CheckoutPageRoute.PlanDetails:
+      case CheckoutPageRoute.PlanDetailsLogin:
+      default:
+        step = CheckoutStepKey.PlanDetails;
+    }
+
+    try {
+      sendEnterpriseCheckoutPageEvent({
+        checkoutIntentId,
+        category: 'enterprise_checkout',
+        name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+        properties: {
+          step,
+          plan_type: PLAN_TYPE.TEAMS,
+          path: location.pathname,
+        },
+      });
+
+      lastTrackedPathRef.current = location.pathname;
+    } catch (error) {
+      logError(`Failed to send page view tracking event for ${location.pathname}`, error);
+    }
+  }, [checkoutIntentId, location.pathname]);
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
@@ -96,6 +149,21 @@ const PlanDetailsPage = () => {
   const registerMutation = useRegisterMutation({
     onSuccess: () => {
       setIsSubmitting(false);
+
+      // Fire registration success tracking event
+      try {
+        sendEnterpriseCheckoutTrackingEvent({
+          checkoutIntentId,
+          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
+          properties: {
+            step: CheckoutSubstepKey.Register,
+            plan_type: PLAN_TYPE.TEAMS,
+          },
+        });
+      } catch (error) {
+        logError('Failed to send registration success tracking event', error);
+      }
+
       navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
     },
     onError: (errorMessage, errorData) => {

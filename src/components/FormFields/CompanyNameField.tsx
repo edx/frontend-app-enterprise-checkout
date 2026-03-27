@@ -1,9 +1,15 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
+import { useContext } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
+import { CheckoutStepKey } from '@/constants/checkout';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 interface CompanyNameFieldProps {
   form: UseFormReturn<AccountDetailsData>
@@ -11,6 +17,10 @@ interface CompanyNameFieldProps {
 
 const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
   const intl = useIntl();
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+
   return (
     <FieldContainer>
       <Stack gap={3}>
@@ -36,6 +46,14 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
             description: 'Placeholder for the company name input field',
           })}
           controlClassName="mr-0 mt-3"
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.COMPANY_NAME,
+            step: CheckoutStepKey.AccountDetails,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
       </Stack>
     </FieldContainer>

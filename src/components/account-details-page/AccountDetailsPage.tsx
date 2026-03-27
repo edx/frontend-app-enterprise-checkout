@@ -1,4 +1,5 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -8,10 +9,10 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
@@ -22,18 +23,21 @@ import {
   CheckoutStepKey,
   DataStoreKey,
 } from '@/constants/checkout';
-import EVENT_NAMES from '@/constants/events';
+import EVENT_NAMES, {
+  PLAN_TYPE,
+} from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPageDetails,
 } from '@/hooks/index';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 
 const AccountDetailsPage: React.FC = () => {
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
+  const location = useLocation();
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -46,6 +50,41 @@ const AccountDetailsPage: React.FC = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+
+  const lastTrackedPathRef = useRef<string | null>(null);
+
+  // Fire page view tracking event whenever the URL changes
+  useEffect(() => {
+    // Ensure that the current URL matches the expected route before firing the event
+    if (location.pathname !== CheckoutPageRoute.AccountDetails) {
+      return;
+    }
+
+    // Avoid double counting: only fire once per pathname
+    if (lastTrackedPathRef.current === location.pathname) {
+      return;
+    }
+
+    try {
+      sendEnterpriseCheckoutPageEvent({
+        checkoutIntentId: checkoutIntent?.id ?? null,
+        category: 'enterprise_checkout',
+        name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+        properties: {
+          step: CheckoutStepKey.AccountDetails,
+          plan_type: PLAN_TYPE.TEAMS,
+          path: location.pathname,
+        },
+      });
+
+      lastTrackedPathRef.current = location.pathname;
+    } catch (error) {
+      logError(
+        `Failed to send page view tracking event for ${CheckoutStepKey.AccountDetails}`,
+        error,
+      );
+    }
+  }, [checkoutIntent?.id, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.adminEmail)
