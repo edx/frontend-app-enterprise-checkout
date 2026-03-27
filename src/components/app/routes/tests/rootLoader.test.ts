@@ -7,6 +7,7 @@ import { makeRootLoader } from '@/components/app/routes/loaders';
 import * as utilsMod from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 
+import { getRoutes } from '../../../../routes';
 import { getFeatureForPath } from '../loaders/rootLoader';
 
 // Mock redirect to avoid depending on global Response being present in Jest env
@@ -83,6 +84,36 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const res = result as any;
     expect(res.status).toBe(302);
     expect(res.headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+  });
+
+  it('redirects unauthenticated user on protected Essentials path to Essentials PlanDetails', async () => {
+    // Arrange: unauthenticated user
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+
+    // Ensure feature flags do not block Essentials route
+    (getConfig as jest.Mock).mockReturnValue({
+      FEATURE_SELF_SERVICE_PURCHASING: true,
+      FEATURE_SELF_SERVICE_PURCHASING_KEY: null,
+      FEATURE_SELF_SERVICE_ESSENTIALS: true,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: null,
+      FEATURE_SELF_SERVICE_SITE_KEY: null,
+    });
+
+    const loader = makeRootLoader(queryClient);
+
+    // Act: hit a PROTECTED Essentials route (not PlanDetails itself)
+    const result = await loader({
+      request: makeRequest(EssentialsPageRoute.AccountDetails),
+    } as any);
+
+    // Assert: redirect to Essentials PlanDetails
+    expect(result).not.toBeNull();
+    const res = result as any;
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe(
+      EssentialsPageRoute.PlanDetails,
+    );
   });
 
   it('does not self-redirect unauthenticated users already on Plan Details', async () => {
@@ -311,5 +342,37 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(sessionStorage.getItem('edx.checkout.self-service-purchasing'))
       .toBe('SSP_SITE_CHECKOUT');
     expect(result).toBeNull();
+  });
+});
+
+describe('AppShell route shouldRevalidate', () => {
+  const makeAppShellRoute = () => {
+    const queryClient = new QueryClient();
+    const { routes } = getRoutes(queryClient);
+    return routes[0]; // route with shouldRevalidate in routes.tsx
+  };
+
+  it('returns true when pathname changes', () => {
+    const route = makeAppShellRoute();
+
+    const result = route.shouldRevalidate?.({
+      currentUrl: new URL('http://example.com/essentials'),
+      nextUrl: new URL('http://example.com/essentials/plan-details'),
+      defaultShouldRevalidate: false,
+    } as any);
+
+    expect(result).toBe(true);
+  });
+
+  it('uses defaultShouldRevalidate when pathname does not change', () => {
+    const route = makeAppShellRoute();
+
+    const result = route.shouldRevalidate?.({
+      currentUrl: new URL('http://example.com/essentials/plan-details'),
+      nextUrl: new URL('http://example.com/essentials/plan-details'),
+      defaultShouldRevalidate: true,
+    } as any);
+
+    expect(result).toBe(true);
   });
 });

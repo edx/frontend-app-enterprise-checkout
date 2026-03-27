@@ -3,11 +3,10 @@ import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
 import { queryBffContext } from '@/components/app/data/queries/queries';
-import { validateFormState } from '@/components/app/routes/loaders/utils';
-import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { isEssentialsFlow, validateFormState } from '@/components/app/routes/loaders/utils';
+import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
-
 /**
  * Route loader for Plan Details page.
  *
@@ -29,6 +28,9 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
   const redirectToPlanDetails = !planDetailsMetadata.adminEmail;
   if (redirectToPlanDetails || authenticatedUser) {
     // Redirect to PlanDetails if: (1) adminEmail is missing, or (2) user is already authenticated.
+    if (isEssentialsFlow()) {
+      return redirect(EssentialsPageRoute.PlanDetails);
+    }
     return redirect(CheckoutPageRoute.PlanDetails);
   }
   return null;
@@ -49,6 +51,9 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
 
   if (redirectToPlanDetails || authenticatedUser) {
     // Redirect to PlanDetails if: (1) required metadata is missing, or (2) user is already authenticated.
+    if (isEssentialsFlow()) {
+      return redirect(EssentialsPageRoute.PlanDetails);
+    }
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 

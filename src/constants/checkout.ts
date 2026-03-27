@@ -140,7 +140,7 @@ export const PlanDetailsSchema = (
     )
     .min(
       constraints?.quantity?.min ?? 5,
-      `Must be at least ${constraints?.quantity?.min ?? 5} licenses`,
+      `You must have at least ${constraints?.quantity?.min ?? 5} licenses`,
     )
     .max(
       constraints?.quantity?.max ?? 50,
