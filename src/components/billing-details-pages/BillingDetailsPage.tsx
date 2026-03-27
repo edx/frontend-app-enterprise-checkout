@@ -9,22 +9,26 @@ import {
 import { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
+  CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
+  EssentialsPageRoute,
 } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
+import { isEssentialsFlow } from '../app/routes/loaders/utils';
+
 const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const isEssentials = isEssentialsFlow();
 
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
@@ -59,8 +63,6 @@ const BillingDetailsPage: React.FC = () => {
     setFormData(DataStoreKey.BillingDetails, data);
   };
 
-  const basePath = location.pathname.includes('essentials') ? '/essentials' : '';
-
   const eventKey = CheckoutStepKey.BillingDetails;
 
   return (
@@ -77,7 +79,11 @@ const BillingDetailsPage: React.FC = () => {
           <Stepper.ActionRow eventKey={eventKey}>
             <Button
               variant="outline-primary"
-              onClick={() => navigate(`${basePath}/account-details`)} // ✅ FIXED
+              onClick={() => navigate(
+                isEssentials
+                  ? EssentialsPageRoute.AccountDetails
+                  : CheckoutPageRoute.AccountDetails,
+              )}
             >
               <FormattedMessage
                 id="checkout.back"

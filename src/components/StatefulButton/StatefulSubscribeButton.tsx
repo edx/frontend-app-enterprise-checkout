@@ -139,7 +139,6 @@ const StatefulSubscribeButton = () => {
             ? EssentialsPageRoute.BillingDetailsSuccess
             : CheckoutPageRoute.BillingDetailsSuccess,
         );
-        navigate(CheckoutPageRoute.BillingDetailsSuccess);
       } else {
         // Fallback if the payment succeeded but the intent
         // status is not complete or paymentStatus is not paid. from Stripe.
