@@ -1099,3 +1099,39 @@ describe('PlanDetailsPage – Essentials navigation', () => {
     });
   });
 });
+
+describe('PlanDetailsPage – Back button visibility', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    setupBFFContextMock();
+  });
+
+  it('does NOT show Back button on Teams PlanDetails page', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetails);
+
+    expect(
+      screen.queryByRole('button', { name: /back/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does NOT show Back button on Essentials PlanDetails page', () => {
+    renderStepperRoute('/essentials/plan-details');
+
+    expect(
+      screen.queryByRole('button', { name: /back/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows Back button on non PlanDetails pages', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin);
+
+    expect(
+      screen.getByRole('button', { name: /back/i }),
+    ).toBeInTheDocument();
+  });
+});

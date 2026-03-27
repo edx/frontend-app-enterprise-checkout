@@ -4,10 +4,10 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { camelCasedCheckoutContextResponseFactory, checkoutContextCheckoutIntentFactory } from '@/components/app/data/services/__factories__';
 import { makeCheckoutStepperLoader } from '@/components/app/routes/loaders';
-import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
+import * as utils from '@/components/app/routes/loaders/utils';
+import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { generateTestPermutations } from '@/utils/tests';
-
 // Avoid relying on Response implementation in Jest env for non-Essentials tests
 jest.mock('react-router-dom', () => ({
   redirect: jest.fn((to: string) => ({
@@ -351,5 +351,52 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       { params: { step: 'not-a-real-step' } as any, request: makeReq('/not/a/real/path') },
     );
     expect(r).toBeNull();
+  });
+});
+describe('Essentials flow redirects', () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  beforeEach(() => {
+    jest.spyOn(utils, 'isEssentialsFlow').mockReturnValue(true);
+    populateValidPlanDetails('price_valid_123');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('PlanDetailsLogin redirects to Essentials PlanDetails when authenticated', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(
+        CheckoutStepKey.PlanDetails,
+        CheckoutSubstepKey.Login,
+        '/essentials/plan-details/login',
+      ),
+    );
+
+    expect(result).not.toBeNull();
+    expect((result as any).headers.get('Location')).toBe(
+      EssentialsPageRoute.PlanDetails,
+    );
+  });
+
+  it('PlanDetailsRegister redirects to Essentials PlanDetails when authenticated', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(
+        CheckoutStepKey.PlanDetails,
+        CheckoutSubstepKey.Register,
+        '/essentials/plan-details/register',
+      ),
+    );
+
+    expect(result).not.toBeNull();
+    expect((result as any).headers.get('Location')).toBe(
+      EssentialsPageRoute.PlanDetails,
+    );
   });
 });
