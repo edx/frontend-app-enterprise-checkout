@@ -220,6 +220,9 @@ const makeRootLoader = (
 
   // Successful intent → Success page
   if (existingSuccessfulCheckoutIntent) {
+    if (isEssentialsPath) {
+      return redirectOrNull(EssentialsPageRoute.BillingDetailsSuccess);
+    }
     return redirectOrNull(CheckoutPageRoute.BillingDetailsSuccess);
   }
 

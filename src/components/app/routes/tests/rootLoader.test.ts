@@ -149,6 +149,24 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(res.headers.get('Location')).toBe(CheckoutPageRoute.BillingDetailsSuccess);
   });
 
+  it('redirects to Essentials Billing Details Success for successful intent on essentials path', async () => {
+    const authenticatedUser = { email: 'a@b.com', name: 'Alice', username: 'alice', country: 'US' };
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
+    (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
+      existingSuccessfulCheckoutIntent: true,
+      expiredCheckoutIntent: false,
+    });
+    ensureSpy.mockResolvedValue({ checkoutIntent: { state: 'paid' } } as any);
+
+    const loader = makeRootLoader(queryClient);
+    const result = await loader({ request: makeRequest(EssentialsPageRoute.PlanDetails) } as any);
+
+    expect(result).not.toBeNull();
+    const res = result as any;
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe(EssentialsPageRoute.BillingDetailsSuccess);
+  });
+
   it('does not self-redirect when already on Billing Details Success path', async () => {
     const authenticatedUser = { email: 'a@b.com', name: 'Alice', username: 'alice', country: 'US' };
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);

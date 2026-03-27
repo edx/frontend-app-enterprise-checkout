@@ -9,13 +9,12 @@ import {
 import { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
-  CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
 } from '@/constants/checkout';
@@ -25,6 +24,8 @@ import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
@@ -46,9 +47,8 @@ const BillingDetailsPage: React.FC = () => {
     resolver: zodResolver(billingDetailsSchema),
     defaultValues: billingDetailsData,
   });
-  const {
-    handleSubmit,
-  } = form;
+
+  const { handleSubmit } = form;
 
   const onSubmit = async (data: BillingDetailsData) => {
     sendEnterpriseCheckoutTrackingEvent({
@@ -59,7 +59,10 @@ const BillingDetailsPage: React.FC = () => {
     setFormData(DataStoreKey.BillingDetails, data);
   };
 
+  const basePath = location.pathname.includes('essentials') ? '/essentials' : '';
+
   const eventKey = CheckoutStepKey.BillingDetails;
+
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Billing Details" />
@@ -69,11 +72,12 @@ const BillingDetailsPage: React.FC = () => {
             <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
+
         {stepperActionButtonMessage && (
           <Stepper.ActionRow eventKey={eventKey}>
             <Button
               variant="outline-primary"
-              onClick={() => navigate(CheckoutPageRoute.AccountDetails)}
+              onClick={() => navigate(`${basePath}/account-details`)} // ✅ FIXED
             >
               <FormattedMessage
                 id="checkout.back"
@@ -81,6 +85,7 @@ const BillingDetailsPage: React.FC = () => {
                 description="Button to go back to the previous step"
               />
             </Button>
+
             <Stepper.ActionRow.Spacer />
             <StatefulSubscribeButton />
           </Stepper.ActionRow>
@@ -89,4 +94,5 @@ const BillingDetailsPage: React.FC = () => {
     </Form>
   );
 };
+
 export default BillingDetailsPage;
