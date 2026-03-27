@@ -134,6 +134,22 @@ describe('BillingDetailsPage', () => {
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Account Details');
     sessionStorage.removeItem('isEssentials');
   });
+
+  it('navigates back to account details in checkout flow', async () => {
+    const user = userEvent.setup();
+    sessionStorage.removeItem('isEssentials');
+
+    renderStepperRoute(CheckoutPageRoute.BillingDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    } as any);
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+
+    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Account Details');
+  });
 });
 
 describe('BillingDetailsSuccessPage', () => {
