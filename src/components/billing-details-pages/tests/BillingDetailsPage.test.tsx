@@ -9,7 +9,7 @@ import {
   usePolledAuthenticatedUser,
   usePolledCheckoutIntent,
 } from '@/components/app/data';
-import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
@@ -116,6 +116,23 @@ describe('BillingDetailsPage', () => {
       checkoutIntentId: 'test-checkout-intent-id',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED,
     });
+  });
+
+  it('navigates back to account details in essentials flow', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('isEssentials', 'true');
+
+    renderStepperRoute(EssentialsPageRoute.BillingDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    } as any);
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+
+    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Account Details');
+    sessionStorage.removeItem('isEssentials');
   });
 });
 

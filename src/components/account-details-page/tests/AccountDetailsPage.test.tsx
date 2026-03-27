@@ -1,8 +1,9 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 
 import { useFormValidationConstraints } from '@/components/app/data';
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@/components/app/data', () => ({
@@ -62,5 +63,22 @@ describe('AccountDetailsPage', () => {
       },
     });
     validateText('Create a custom URL for your team');
+  });
+
+  it('navigates back to plan details in essentials flow', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('isEssentials', 'true');
+
+    renderStepperRoute(EssentialsPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+
+    expect(screen.getByTestId('stepper-title')).toHaveTextContent('Plan Details');
+    sessionStorage.removeItem('isEssentials');
   });
 });
