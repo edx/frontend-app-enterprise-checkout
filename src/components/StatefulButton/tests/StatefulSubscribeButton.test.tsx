@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { termsAndConditions } from '@/components/app/data/constants';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
+import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
@@ -59,6 +60,11 @@ jest.mock('@/utils/common', () => ({
 
 jest.mock('@/components/app/data/services/checkout-intent', () => ({
   patchCheckoutIntent: jest.fn(),
+}));
+
+jest.mock('@/components/app/routes/loaders/utils', () => ({
+  ...jest.requireActual('@/components/app/routes/loaders/utils'),
+  isEssentialsFlow: jest.fn(),
 }));
 
 // Mock functions that we'll reuse across tests
@@ -123,6 +129,7 @@ describe('StatefulSubscribeButton', () => {
     mockConfirm.mockClear();
     mockInvalidateQueries.mockClear();
     mockSetCheckoutSessionStatus.mockClear();
+    (isEssentialsFlow as jest.Mock).mockReturnValue(false);
   });
 
   describe('Basic rendering', () => {
@@ -322,6 +329,28 @@ describe('StatefulSubscribeButton', () => {
   });
 
   describe('Success flow navigation', () => {
+    it('navigates to essentials success path when essentials flow is active', async () => {
+      (isEssentialsFlow as jest.Mock).mockReturnValue(true);
+      mockConfirm.mockResolvedValue({ type: 'success' });
+      setup({
+        useCheckout: {
+          canConfirm: true,
+          status: { type: 'complete', paymentStatus: 'paid' },
+          confirm: mockConfirm,
+        },
+      });
+
+      const button = screen.getByRole('button');
+
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/essentials/billing-details/success');
+      });
+    });
+
     it('calls navigate when button succeeds and status is complete with paid payment', async () => {
       // Set up with success response and complete/paid status
       mockConfirm.mockResolvedValue({ type: 'success' });
