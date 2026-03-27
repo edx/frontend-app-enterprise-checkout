@@ -127,4 +127,26 @@ describe('ErrorPage', () => {
     renderComponent();
     validateText("We're sorry, something went wrong");
   });
+
+  it('displays error detail from plain object route error', () => {
+    (useRouteError as jest.Mock).mockReturnValue({ detail: 'Detailed object error' });
+    renderComponent();
+    validateText('Detailed object error');
+  });
+
+  it('displays JSON string when plain object has no message or detail', () => {
+    (useRouteError as jest.Mock).mockReturnValue({ code: 'E_SOMETHING' });
+    renderComponent();
+    validateText('"code": "E_SOMETHING"', { exact: false });
+  });
+
+  it('falls back to provided message when route error processing throws', () => {
+    const fallbackMessage = 'Fallback prop message';
+    (isRouteErrorResponse as unknown as jest.Mock).mockImplementation(() => {
+      throw new Error('route parsing failed');
+    });
+    (useRouteError as jest.Mock).mockReturnValue({ status: 500, statusText: 'Boom' });
+    renderComponent({ message: fallbackMessage });
+    validateText(fallbackMessage);
+  });
 });

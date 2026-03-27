@@ -270,9 +270,40 @@ export const AccountDetailsSchema = (
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraints) => (
   z.object({
+    fullName: z.string().trim()
+      .min(
+        constraints?.fullName?.minLength ?? 1,
+        'Please provide your full name.',
+      )
+      .max(
+        constraints?.fullName?.maxLength ?? 150,
+        `Name is too long. It must contain no more than ${constraints?.fullName?.maxLength ?? 150} characters.`,
+      ),
+
+    country: z.string().trim()
+      .min(
+        constraints?.country?.minLength ?? 2,
+        'Country is required',
+      ),
+
+    line1: z.string().trim()
+      .min(1, 'Address line 1 is required'),
+
+    line2: z.string().trim().optional(),
+
+    city: z.string().trim()
+      .min(1, 'City is required'),
+
+    state: z.string().trim()
+      .min(1, 'State is required'),
+
+    zip: z.string().trim()
+      .min(1, 'ZIP code is required'),
+
     confirmTnC: z.boolean().refine((value) => value, {
       message: 'Please accept the terms.',
     }),
+
     confirmSubscription: z.boolean().refine((value) => value, {
       message: 'Please confirm organization subscription.',
     }),
