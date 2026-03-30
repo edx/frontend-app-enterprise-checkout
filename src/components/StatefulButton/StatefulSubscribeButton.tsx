@@ -12,10 +12,12 @@ import { useCheckoutIntent } from '@/components/app/data';
 import { termsAndConditions } from '@/components/app/data/constants';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
-import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+
+import { isEssentialsFlow } from '../app/routes/loaders/utils';
 
 const variants = {
   default: 'secondary',
@@ -131,7 +133,12 @@ const StatefulSubscribeButton = () => {
           checkoutIntentId: checkoutIntent?.id ?? null,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
         });
-        navigate(CheckoutPageRoute.BillingDetailsSuccess);
+        const isEssentials = isEssentialsFlow();
+        navigate(
+          isEssentials
+            ? EssentialsPageRoute.BillingDetailsSuccess
+            : CheckoutPageRoute.BillingDetailsSuccess,
+        );
       } else {
         // Fallback if the payment succeeded but the intent
         // status is not complete or paymentStatus is not paid. from Stripe.
