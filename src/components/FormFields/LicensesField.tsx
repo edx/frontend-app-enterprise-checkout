@@ -4,8 +4,8 @@ import { useContext } from 'react';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
-import { CheckoutStepKey } from '@/constants/checkout';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import Field from './Field';
@@ -21,6 +21,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
     <FieldContainer>
@@ -58,7 +59,8 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
         className="mr-0 mt-3"
         onBlur={() => trackFieldBlur({
           fieldName: TRACKED_FIELDS.NUM_LICENSES,
-          step: CheckoutStepKey.PlanDetails,
+          step: currentStepKey,
+          substep: currentSubstepKey,
           checkoutIntentId,
           additionalProperties: {
             plan_type: PLAN_TYPE.TEAMS,

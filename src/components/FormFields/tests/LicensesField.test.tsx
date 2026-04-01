@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
+import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
 
 import LicensesField from '../LicensesField';
 
@@ -20,6 +21,15 @@ const mockForm = {
 // Mock tracking
 jest.mock('@/hooks/useFieldTracking', () => ({
   trackFieldBlur: jest.fn(),
+}));
+
+// Mock useCurrentStep
+jest.mock('@/hooks/useCurrentStep', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    currentStepKey: 'plan-details',
+    currentSubstepKey: 'login',
+  })),
 }));
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
 
@@ -92,6 +102,17 @@ describe('LicensesField', () => {
     const blurTrigger = screen.getByTestId('blur-trigger');
     blurTrigger.click();
     expect(mockTrackFieldBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it('should pass correct step and substep keys from useCurrentStep on blur', () => {
+    renderComponent();
+    const blurTrigger = screen.getByTestId('blur-trigger');
+    blurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Login,
+    }));
   });
 
   it('should pass null checkoutIntentId for unauthenticated user', () => {

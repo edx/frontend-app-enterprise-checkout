@@ -7,6 +7,7 @@ import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
 interface TrackFieldBlurParams {
   fieldName: string;
   step: CheckoutStepKey | CheckoutSubstepKey;
+  substep?: CheckoutSubstepKey | null;
   checkoutIntentId: number | null;
   additionalProperties?: Record<string, any>;
 }
@@ -27,6 +28,7 @@ interface TrackFieldBlurParams {
 export const trackFieldBlur = ({
   fieldName,
   step,
+  substep,
   checkoutIntentId = null,
   additionalProperties = {},
 }: TrackFieldBlurParams): void => {
@@ -36,6 +38,7 @@ export const trackFieldBlur = ({
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step,
+        ...(substep != null ? { substep } : {}),
         field_name: fieldName,
         ...additionalProperties,
       },

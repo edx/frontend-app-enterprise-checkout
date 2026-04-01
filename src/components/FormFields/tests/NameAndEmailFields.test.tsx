@@ -6,12 +6,22 @@ import '@testing-library/jest-dom';
 
 import { useCountryOptions } from '@/components/app/data/hooks';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
+import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
 
 import NameAndEmailFields from '../NameAndEmailFields';
 
 // Mock tracking
 jest.mock('@/hooks/useFieldTracking', () => ({
   trackFieldBlur: jest.fn(),
+}));
+
+// Mock useCurrentStep
+jest.mock('@/hooks/useCurrentStep', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    currentStepKey: 'plan-details',
+    currentSubstepKey: 'login',
+  })),
 }));
 
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
@@ -206,6 +216,18 @@ describe('NameAndEmailFields', () => {
     const options = JSON.parse(optionsElement.textContent || '[]');
 
     expect(options).toEqual([]);
+  });
+
+  it('should pass correct step and substep keys from useCurrentStep on blur', () => {
+    mockedUseCountryOptions.mockReturnValue([]);
+    renderComponent();
+    const blurTrigger = screen.getByTestId('fullName-blur-trigger');
+    blurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Login,
+    }));
   });
 
   it('should call tracking handler on blur', () => {

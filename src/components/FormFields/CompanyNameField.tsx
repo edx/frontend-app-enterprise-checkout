@@ -7,8 +7,8 @@ import { type UseFormReturn } from 'react-hook-form';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { CheckoutStepKey } from '@/constants/checkout';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 interface CompanyNameFieldProps {
@@ -20,6 +20,7 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
     <FieldContainer>
@@ -48,7 +49,8 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
           controlClassName="mr-0 mt-3"
           onBlur={() => trackFieldBlur({
             fieldName: TRACKED_FIELDS.COMPANY_NAME,
-            step: CheckoutStepKey.AccountDetails,
+            step: currentStepKey,
+            substep: currentSubstepKey,
             checkoutIntentId,
             additionalProperties: {
               plan_type: PLAN_TYPE.TEAMS,

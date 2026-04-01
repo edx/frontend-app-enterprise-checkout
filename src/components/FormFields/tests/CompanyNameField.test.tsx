@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
+import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
 
 import CompanyNameField from '../CompanyNameField';
 
@@ -20,6 +21,15 @@ const createMockForm = (errors = {}) => ({
 // Mock tracking
 jest.mock('@/hooks/useFieldTracking', () => ({
   trackFieldBlur: jest.fn(),
+}));
+
+// Mock useCurrentStep
+jest.mock('@/hooks/useCurrentStep', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    currentStepKey: 'account-details',
+    currentSubstepKey: undefined,
+  })),
 }));
 
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
@@ -104,6 +114,17 @@ describe('CompanyNameField', () => {
     expect(mockTrackFieldBlur).toHaveBeenCalledTimes(1);
     expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
       fieldName: 'companyName',
+    }));
+  });
+
+  it('should pass correct step and substep keys from useCurrentStep on blur', () => {
+    renderComponent();
+    const blurTrigger = screen.getByTestId('blur-trigger');
+    blurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      step: CheckoutStepKey.AccountDetails,
+      substep: undefined,
     }));
   });
 

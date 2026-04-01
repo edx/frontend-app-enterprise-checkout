@@ -155,4 +155,34 @@ describe('trackFieldBlur', () => {
       },
     });
   });
+
+  it('should include substep in properties when provided', () => {
+    trackFieldBlur({
+      fieldName: 'quantity',
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Login,
+      checkoutIntentId: 123,
+    });
+
+    expect(mockSendEvent).toHaveBeenCalledWith({
+      checkoutIntentId: 123,
+      eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
+      properties: {
+        step: CheckoutStepKey.PlanDetails,
+        substep: CheckoutSubstepKey.Login,
+        field_name: 'quantity',
+      },
+    });
+  });
+
+  it('should omit substep from properties when not provided', () => {
+    trackFieldBlur({
+      fieldName: 'quantity',
+      step: CheckoutStepKey.PlanDetails,
+      checkoutIntentId: 123,
+    });
+
+    const calledProperties = mockSendEvent.mock.calls[0][0].properties;
+    expect(calledProperties).not.toHaveProperty('substep');
+  });
 });
