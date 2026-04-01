@@ -5,8 +5,8 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useCountryOptions } from '@/components/app/data/hooks';
-import { trackFieldBlur } from '@/hooks/useFieldTracking';
 import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import NameAndEmailFields from '../NameAndEmailFields';
 

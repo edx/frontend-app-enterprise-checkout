@@ -119,7 +119,7 @@ describe('trackFieldBlur', () => {
     // Verify error was logged
     expect(mockLogError).toHaveBeenCalledTimes(1);
     expect(mockLogError).toHaveBeenCalledWith(
-      'Failed to send tracking event for field: password',
+      `Failed to send tracking event for field: password on step: ${CheckoutSubstepKey.Register}`,
       mockError,
     );
   });
@@ -184,5 +184,31 @@ describe('trackFieldBlur', () => {
 
     const calledProperties = mockSendEvent.mock.calls[0][0].properties;
     expect(calledProperties).not.toHaveProperty('substep');
+  });
+
+  it('should strip password value from additionalProperties', () => {
+    trackFieldBlur({
+      fieldName: 'password',
+      step: CheckoutSubstepKey.Register,
+      checkoutIntentId: 123,
+      additionalProperties: { password: 'secret123', plan_type: 'teams' },
+    });
+
+    const calledProperties = mockSendEvent.mock.calls[0][0].properties;
+    expect(calledProperties).not.toHaveProperty('password');
+    expect(calledProperties).toHaveProperty('plan_type', 'teams');
+  });
+
+  it('should strip adminEmail value from additionalProperties', () => {
+    trackFieldBlur({
+      fieldName: 'adminEmail',
+      step: CheckoutStepKey.PlanDetails,
+      checkoutIntentId: 123,
+      additionalProperties: { adminEmail: 'user@example.com', plan_type: 'teams' },
+    });
+
+    const calledProperties = mockSendEvent.mock.calls[0][0].properties;
+    expect(calledProperties).not.toHaveProperty('adminEmail');
+    expect(calledProperties).toHaveProperty('plan_type', 'teams');
   });
 });

@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { trackFieldBlur } from '@/hooks/useFieldTracking';
 import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import LicensesField from '../LicensesField';
 

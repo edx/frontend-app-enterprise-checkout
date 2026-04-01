@@ -1,8 +1,13 @@
 import { logError } from '@edx/frontend-platform/logging';
 
 import { CheckoutStepKey, CheckoutSubstepKey } from '../constants/checkout';
-import EVENT_NAMES from '../constants/events';
+import EVENT_NAMES, { TRACKED_FIELDS } from '../constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
+
+const SENSITIVE_FIELDS = new Set<string>([
+  TRACKED_FIELDS.PASSWORD,
+  TRACKED_FIELDS.ADMIN_EMAIL,
+]);
 
 interface TrackFieldBlurParams {
   fieldName: string;
@@ -33,6 +38,10 @@ export const trackFieldBlur = ({
   additionalProperties = {},
 }: TrackFieldBlurParams): void => {
   try {
+    const sanitizedProperties = Object.fromEntries(
+      Object.entries(additionalProperties).filter(([key]) => !SENSITIVE_FIELDS.has(key)),
+    );
+
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
@@ -40,10 +49,10 @@ export const trackFieldBlur = ({
         step,
         ...(substep != null ? { substep } : {}),
         field_name: fieldName,
-        ...additionalProperties,
+        ...sanitizedProperties,
       },
     });
   } catch (error) {
-    logError(`Failed to send tracking event for field: ${fieldName}`, error);
+    logError(`Failed to send tracking event for field: ${fieldName} on step: ${step}`, error);
   }
 };
