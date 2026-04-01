@@ -22,6 +22,7 @@ import {
   CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
+  EssentialsPageRoute,
 } from '@/constants/checkout';
 import EVENT_NAMES, {
   PLAN_TYPE,
@@ -32,15 +33,19 @@ import {
 } from '@/hooks/index';
 import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
+import { isEssentialsFlow } from '../app/routes/loaders/utils';
+
 import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 
 const AccountDetailsPage: React.FC = () => {
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
   const location = useLocation();
+
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
+
   const { data: checkoutIntent } = useCheckoutIntent();
   const queryClient = useQueryClient();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
@@ -128,16 +133,21 @@ const AccountDetailsPage: React.FC = () => {
 
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
 
-      // Invalidate any queries that might be impacted by the creation of a checkout session.
+      const isEssentials = isEssentialsFlow();
+
       const queryKeysToInvalidate = [
-        queryBffContext(lmsUserId).queryKey, // Includes a serialized CheckoutIntent with checkout session ID.
-        queryBffSuccess(lmsUserId).queryKey, // Includes a serialized CheckoutIntent with checkout session ID.
+        queryBffContext(lmsUserId).queryKey,
+        queryBffSuccess(lmsUserId).queryKey,
       ];
       queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
 
-      // Move on to the next page where useCheckoutSession() will power the Stripe components.
-      navigate(CheckoutPageRoute.BillingDetails);
+      navigate(
+        isEssentials
+          ? EssentialsPageRoute.BillingDetails
+          : CheckoutPageRoute.BillingDetails,
+      );
     },
+
     onError: (fieldErrors) => {
       if (!fieldErrors) {
         setError('root.serverError', {
@@ -146,10 +156,11 @@ const AccountDetailsPage: React.FC = () => {
         });
         return;
       }
-      // Test that fieldErrors are a subset of fields on this page.
+
       const isProblemOnThisPage = Object.keys(fieldErrors!).every(
         field => Object.keys(accountDetailsFormData).includes(field),
       );
+
       if (isProblemOnThisPage) {
         Object.entries(fieldErrors!).forEach(([fieldKey, fieldError]) => {
           setError(fieldKey, {
@@ -166,47 +177,26 @@ const AccountDetailsPage: React.FC = () => {
     },
   });
 
-  // Reset the mutation when form fields change AFTER a mutation has run once
-  // already but the user revisited this page via the back button.
-  //
-  // This causes the Continue button to change appearance by removing the
-  // success checkmark, and it unlocks the onSubmit callback to perform
-  // side-effects again.
   const { isSuccess: mutationIsSuccess, reset: resetMutation } = createCheckoutSessionMutation;
+
   useEffect(() => {
-    // Only allow resetting if the last call was successful.
-    if (!mutationIsSuccess) {
-      return;
-    }
-    // Only reset the mutation when the form has changed since the last submission attempt.
-    if (formIsDirty) {
-      resetMutation();
-    }
-  }, [
-    formIsDirty,
-    mutationIsSuccess,
-    resetMutation,
-  ]);
+    if (!mutationIsSuccess) { return; }
+    if (formIsDirty) { resetMutation(); }
+  }, [formIsDirty, mutationIsSuccess, resetMutation]);
 
-  // Handle whenever the Continue button is clicked.
   const onSubmit = (data: AccountDetailsData) => {
-    // Update persisted form state with new field values.
     setFormData(DataStoreKey.AccountDetails, data);
-
-    // Also reset the form itself to make formIsDirty=false again.
     formReset(data);
 
-    // Emit Segment event representing the account details page continue button was clicked.
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId: checkoutIntent?.id ?? null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED,
     });
 
-    // Don't perform side-effect when the mutation has already succeeded.
     if (!createCheckoutSessionMutation.isSuccess) {
-      // Create a new checkout session needed for the billing details page (next).
       const { companyName, enterpriseSlug } = data;
       const { quantity, adminEmail, stripePriceId } = planDetailsFormData;
+
       createCheckoutSessionMutation.mutate({
         stripePriceId,
         adminEmail,
@@ -215,8 +205,12 @@ const AccountDetailsPage: React.FC = () => {
         quantity,
       });
     } else {
-      // We won't perform side-effect, so just proceed to next page.
-      navigate(CheckoutPageRoute.BillingDetails);
+      const isEssentials = isEssentialsFlow();
+      navigate(
+        isEssentials
+          ? EssentialsPageRoute.BillingDetails
+          : CheckoutPageRoute.BillingDetails,
+      );
     }
   };
 
@@ -232,26 +226,36 @@ const AccountDetailsPage: React.FC = () => {
             <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
+
         {stepperActionButtonMessage && (
-        <Stepper.ActionRow eventKey={eventKey}>
-          <Button
-            variant="outline-primary"
-            onClick={() => navigate(CheckoutPageRoute.PlanDetails)}
-          >
-            <FormattedMessage
-              id="checkout.back"
-              defaultMessage="Back"
-              description="Button to go back to the previous step"
+          <Stepper.ActionRow eventKey={eventKey}>
+            <Button
+              variant="outline-primary"
+              onClick={() => {
+                const isEssentials = isEssentialsFlow();
+                navigate(
+                  isEssentials
+                    ? EssentialsPageRoute.PlanDetails
+                    : CheckoutPageRoute.PlanDetails,
+                );
+              }}
+            >
+              <FormattedMessage
+                id="checkout.back"
+                defaultMessage="Back"
+                description="Button to go back to the previous step"
+              />
+            </Button>
+
+            <Stepper.ActionRow.Spacer />
+
+            <AccountDetailsSubmitButton
+              formIsValid={formIsValid}
+              submissionIsPending={createCheckoutSessionMutation.isPending}
+              submissionIsSuccess={createCheckoutSessionMutation.isSuccess}
+              submissionIsError={createCheckoutSessionMutation.isError}
             />
-          </Button>
-          <Stepper.ActionRow.Spacer />
-          <AccountDetailsSubmitButton
-            formIsValid={formIsValid}
-            submissionIsPending={createCheckoutSessionMutation.isPending}
-            submissionIsSuccess={createCheckoutSessionMutation.isSuccess}
-            submissionIsError={createCheckoutSessionMutation.isError}
-          />
-        </Stepper.ActionRow>
+          </Stepper.ActionRow>
         )}
       </Stack>
     </Form>

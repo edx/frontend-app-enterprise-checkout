@@ -18,13 +18,18 @@ import {
   CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
+  EssentialsPageRoute,
 } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
+import { isEssentialsFlow } from '../app/routes/loaders/utils';
+
 const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
+  const isEssentials = isEssentialsFlow();
+
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
@@ -46,9 +51,8 @@ const BillingDetailsPage: React.FC = () => {
     resolver: zodResolver(billingDetailsSchema),
     defaultValues: billingDetailsData,
   });
-  const {
-    handleSubmit,
-  } = form;
+
+  const { handleSubmit } = form;
 
   const onSubmit = async (data: BillingDetailsData) => {
     sendEnterpriseCheckoutTrackingEvent({
@@ -60,6 +64,7 @@ const BillingDetailsPage: React.FC = () => {
   };
 
   const eventKey = CheckoutStepKey.BillingDetails;
+
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Helmet title="Billing Details" />
@@ -69,11 +74,16 @@ const BillingDetailsPage: React.FC = () => {
             <StepperContent form={form} />
           </Stack>
         </Stepper.Step>
+
         {stepperActionButtonMessage && (
           <Stepper.ActionRow eventKey={eventKey}>
             <Button
               variant="outline-primary"
-              onClick={() => navigate(CheckoutPageRoute.AccountDetails)}
+              onClick={() => navigate(
+                isEssentials
+                  ? EssentialsPageRoute.AccountDetails
+                  : CheckoutPageRoute.AccountDetails,
+              )}
             >
               <FormattedMessage
                 id="checkout.back"
@@ -81,6 +91,7 @@ const BillingDetailsPage: React.FC = () => {
                 description="Button to go back to the previous step"
               />
             </Button>
+
             <Stepper.ActionRow.Spacer />
             <StatefulSubscribeButton />
           </Stepper.ActionRow>
@@ -89,4 +100,5 @@ const BillingDetailsPage: React.FC = () => {
     </Form>
   );
 };
+
 export default BillingDetailsPage;
