@@ -4,11 +4,11 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { CheckoutPageRoute, CheckoutStepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { renderStepperRoute } from '@/utils/tests';
@@ -33,7 +33,7 @@ jest.mock('@edx/frontend-platform/analytics', () => ({
   sendTrackEvent: jest.fn(),
   sendPageEvent: jest.fn(),
 }));
-    
+
 jest.mock('@tanstack/react-query', () => ({
   ...jest.requireActual('@tanstack/react-query'),
   useQueryClient: jest.fn(),
