@@ -205,7 +205,7 @@ interface PrerequisiteCheck<T> {
     stripePriceId: CheckoutContextPrice['id'],
     adminEmail?: string,
   ) => (values: any, ctx?: any, opts?: any) => any;
-  failRoute: CheckoutPageRouteValue | `/essentials${CheckoutPageRouteValue}`;
+  getFailRoute: () => CheckoutPageRouteValue | `/essentials${CheckoutPageRouteValue}`;
 }
 
 /**
@@ -219,21 +219,21 @@ export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
       getResolver: (constraints, stripePriceId) => makeResolvers(constraints, stripePriceId).planDetailsResolver,
-      failRoute: isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails,
+      getFailRoute: () => (isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails),
     },
   ],
   BillingDetails: [
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
       getResolver: (constraints, stripePriceId) => makeResolvers(constraints, stripePriceId).planDetailsResolver,
-      failRoute: isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails,
+      getFailRoute: () => (isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails),
     },
     {
       pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
       getResolver: (constraints, stripePriceId, adminEmail) => (
         makeResolvers(constraints, stripePriceId, adminEmail).accountDetailsResolver
       ),
-      failRoute: isEssentialsFlow() ? EssentialsPageRoute.AccountDetails : CheckoutPageRoute.AccountDetails,
+      getFailRoute: () => (isEssentialsFlow() ? EssentialsPageRoute.AccountDetails : CheckoutPageRoute.AccountDetails),
     },
   ],
 };
@@ -279,11 +279,11 @@ const validateFormState = async ({
   const adminEmail = (formData[DataStoreKey.PlanDetails] as PlanDetailsData)?.adminEmail;
 
   // Build all validation promises up front, check against the defined zod resolver
-  const validationPromises = checks.map(async ({ pick, getResolver, failRoute }) => {
+  const validationPromises = checks.map(async ({ pick, getResolver, getFailRoute }) => {
     const values = pick(formData);
     const resolver = getResolver(constraints, stripePriceId, adminEmail);
     const { errors } = await resolver(values, undefined, { criteriaMode: 'all' });
-    return { failRoute, hasErrors: errors && Object.keys(errors).length > 0 };
+    return { failRoute: getFailRoute(), hasErrors: errors && Object.keys(errors).length > 0 };
   });
 
   const results = await Promise.all(validationPromises);

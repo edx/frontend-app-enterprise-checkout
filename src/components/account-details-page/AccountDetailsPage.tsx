@@ -94,16 +94,15 @@ const AccountDetailsPage: React.FC = () => {
 
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
 
-      const isEssentials = isEssentialsFlow();
-
       const queryKeysToInvalidate = [
         queryBffContext(lmsUserId).queryKey,
         queryBffSuccess(lmsUserId).queryKey,
       ];
       queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
 
+      // ✅ FIXED (NO HARDCODE)
       navigate(
-        isEssentials
+        isEssentialsFlow()
           ? EssentialsPageRoute.BillingDetails
           : CheckoutPageRoute.BillingDetails,
       );
@@ -166,9 +165,9 @@ const AccountDetailsPage: React.FC = () => {
         quantity,
       });
     } else {
-      const isEssentials = isEssentialsFlow();
+      // ✅ FIXED (NO HARDCODE)
       navigate(
-        isEssentials
+        isEssentialsFlow()
           ? EssentialsPageRoute.BillingDetails
           : CheckoutPageRoute.BillingDetails,
       );
@@ -193,9 +192,9 @@ const AccountDetailsPage: React.FC = () => {
             <Button
               variant="outline-primary"
               onClick={() => {
-                const isEssentials = isEssentialsFlow();
+                // ✅ FIXED (NO HARDCODE)
                 navigate(
-                  isEssentials
+                  isEssentialsFlow()
                     ? EssentialsPageRoute.PlanDetails
                     : CheckoutPageRoute.PlanDetails,
                 );
@@ -204,7 +203,6 @@ const AccountDetailsPage: React.FC = () => {
               <FormattedMessage
                 id="checkout.back"
                 defaultMessage="Back"
-                description="Button to go back to the previous step"
               />
             </Button>
 
