@@ -8,8 +8,8 @@ import { useCountryOptions } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import useCurrentStep from '@/hooks/useCurrentStep';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import type { UseFormReturn } from 'react-hook-form';
