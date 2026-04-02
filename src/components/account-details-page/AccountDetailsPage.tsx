@@ -78,7 +78,7 @@ const AccountDetailsPage: React.FC = () => {
       return;
     }
 
-    trigger();
+    trigger().catch(() => {});
   }, [hasPersistedAccountDetailsValues, trigger]);
 
   const handleBackClick = () => {

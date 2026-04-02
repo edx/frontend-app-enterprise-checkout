@@ -87,7 +87,7 @@ const PlanDetailsPage = () => {
       return;
     }
 
-    trigger();
+    trigger().catch(() => {});
   }, [hasPersistedPlanDetailsValues, trigger]);
 
   const loginMutation = useLoginMutation({
