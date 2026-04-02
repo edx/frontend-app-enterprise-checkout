@@ -104,13 +104,15 @@ describe('BillingDetailsSuccessContent', () => {
   });
 
   it('renders BillingDetailsHeadingMessage, StatefulProvisioningButton and OrderDetails by default', () => {
+    // Set session to Teams flow (not Essentials)
+    sessionStorage.removeItem('isEssentials');
     renderComponent();
 
     // BillingDetailsHeadingMessage renders with celebration image
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
     // OrderDetails renders its content
     validateText('Order details');
-    validateText('You have purchased an edX team\'s subscription.');
+    validateText('You have purchased an edX Team subscription.');
   });
 
   it('renders PendingHeading when checkout intent state is "paid"', () => {
@@ -128,7 +130,7 @@ describe('BillingDetailsSuccessContent', () => {
 
     renderComponent();
 
-    validateText(/Welcome to edX for Teams! Your account is currently being configured/);
+    validateText(/Welcome to edX for Team! Your account is currently being configured/);
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
     expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
   });
@@ -148,9 +150,9 @@ describe('BillingDetailsSuccessContent', () => {
 
     renderComponent();
 
-    validateText(/Welcome to edX for Teams!/);
+    validateText(/Welcome to edX for Team/);
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
-    expect(screen.queryByText('We\'re sorry, something went wrong')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
   });
 
   it.each([
@@ -173,7 +175,7 @@ describe('BillingDetailsSuccessContent', () => {
     renderComponent();
 
     validateText('Account Setup is Taking Longer Than Expected');
-    validateText("We're experiencing a brief delay in setting up your edX Teams account. We'll send you a confirmation email immediately once your account is fully operational. Thank you for your patience!");
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
+    validateText("We're experiencing a brief delay in setting up your edX Team account. We'll send you a confirmation email immediately once your account is fully operational. Thank you for your patience!");
+    expect(screen.queryByText(/Welcome to edX for Team/)).not.toBeInTheDocument();
   });
 });

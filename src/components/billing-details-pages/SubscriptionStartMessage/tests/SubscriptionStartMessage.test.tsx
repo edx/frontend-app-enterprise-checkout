@@ -65,7 +65,7 @@ describe('SubscriptionStartMessage', () => {
 
   it('renders the title correctly', () => {
     renderComponent();
-    validateText('Your free 14-day trial for edX Team\'s subscription has started.');
+    validateText('Your free 14-day trial for edX Team subscription has started.');
   });
 
   it('renders the description message correctly', () => {

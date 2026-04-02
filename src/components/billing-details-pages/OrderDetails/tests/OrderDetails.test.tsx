@@ -109,7 +109,7 @@ describe('OrderDetails', () => {
   describe('Basic rendering', () => {
     it.each([
       ['the title', 'Order details'],
-      ['the description', "You have purchased an edX team's subscription."],
+      ['the description', 'You have purchased an edX Team subscription.'],
     ])('renders %s correctly', (_label, expectedText) => {
       renderComponent();
       validateText(expectedText);

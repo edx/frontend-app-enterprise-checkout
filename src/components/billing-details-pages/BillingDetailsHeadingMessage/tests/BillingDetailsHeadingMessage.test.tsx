@@ -53,7 +53,7 @@ describe('BillingDetailsHeadingMessage', () => {
     } as any);
 
     renderComponent();
-    expect(screen.getByText(/Welcome to edX for Teams!/)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
     expect(screen.getByText(/Go to your administrator dashboard/)).toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe('BillingDetailsHeadingMessage', () => {
     } as any);
 
     renderComponent();
-    expect(screen.getByText(/Welcome to edX for Teams!/)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
     expect(screen.getByText(/Your account is currently being configured/)).toBeInTheDocument();
   });
 
