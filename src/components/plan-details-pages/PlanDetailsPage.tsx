@@ -8,7 +8,7 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -77,7 +77,18 @@ const PlanDetailsPage = () => {
     handleSubmit,
     formState: { isValid },
     setError,
+    trigger,
   } = form;
+
+  const hasPersistedPlanDetailsValues = Object.keys(planDetailsFormData).length > 0;
+
+  useEffect(() => {
+    if (!hasPersistedPlanDetailsValues) {
+      return;
+    }
+
+    trigger();
+  }, [hasPersistedPlanDetailsValues, trigger]);
 
   const loginMutation = useLoginMutation({
     onSuccess: () => {
