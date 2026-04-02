@@ -28,7 +28,6 @@ import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageRoute,
   CheckoutStepKey,
-  CheckoutSubstepKey,
   DataStoreKey,
   EssentialsPageRoute,
   SubmitCallbacks,
@@ -39,6 +38,7 @@ import {
   useCurrentPage,
   useCurrentPageDetails,
 } from '@/hooks/index';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
@@ -74,29 +74,13 @@ const PlanDetailsPage = () => {
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
 
   const lastTrackedPathRef = useRef<string | null>(null);
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   // Fire page view tracking event whenever the current page changes
   useEffect(() => {
-    // Ensure that the current URL matches one of the handled routes before firing the event
-    const handledRoutes = [
-      CheckoutPageRoute.PlanDetails as string,
-      CheckoutPageRoute.PlanDetailsLogin as string,
-      CheckoutPageRoute.PlanDetailsRegister as string,
-    ];
-
-    if (!handledRoutes.includes(location.pathname) || lastTrackedPathRef.current === location.pathname) {
+    // Ensure that the current page is active in the stepper before firing the event
+    if (currentStepKey !== CheckoutStepKey.PlanDetails || lastTrackedPathRef.current === location.pathname) {
       return;
-    }
-
-    let step: string;
-    switch (location.pathname) {
-      case CheckoutPageRoute.PlanDetailsRegister:
-        step = CheckoutSubstepKey.Register;
-        break;
-      case CheckoutPageRoute.PlanDetails:
-      case CheckoutPageRoute.PlanDetailsLogin:
-      default:
-        step = CheckoutStepKey.PlanDetails;
     }
 
     try {
@@ -105,7 +89,8 @@ const PlanDetailsPage = () => {
         category: 'enterprise_checkout',
         name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
-          step,
+          step: currentStepKey,
+          substep: currentSubstepKey,
           plan_type: PLAN_TYPE.TEAMS,
           path: location.pathname,
         },
@@ -115,7 +100,7 @@ const PlanDetailsPage = () => {
     } catch (error) {
       logError(`Failed to send page view tracking event for ${location.pathname}`, error);
     }
-  }, [checkoutIntentId, location.pathname]);
+  }, [checkoutIntentId, currentStepKey, currentSubstepKey, location.pathname]);
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
@@ -156,7 +141,8 @@ const PlanDetailsPage = () => {
           checkoutIntentId,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
           properties: {
-            step: CheckoutSubstepKey.Register,
+            step: currentStepKey,
+            substep: currentSubstepKey,
             plan_type: PLAN_TYPE.TEAMS,
           },
         });

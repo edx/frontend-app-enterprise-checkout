@@ -126,7 +126,8 @@ describe('trackDebouncedFieldBlur', () => {
   it('should handle null checkoutIntentId', () => {
     trackDebouncedFieldBlur({
       fieldName: 'testField',
-      step: CheckoutSubstepKey.Register,
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Register,
       checkoutIntentId: null,
     });
 
@@ -136,7 +137,8 @@ describe('trackDebouncedFieldBlur', () => {
       checkoutIntentId: null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
-        step: CheckoutSubstepKey.Register,
+        step: CheckoutStepKey.PlanDetails,
+        substep: CheckoutSubstepKey.Register,
         field_name: 'testField',
       },
     });

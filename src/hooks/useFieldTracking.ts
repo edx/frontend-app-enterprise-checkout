@@ -11,7 +11,7 @@ const SENSITIVE_FIELDS = new Set<string>([
 
 interface TrackFieldBlurParams {
   fieldName: string;
-  step: CheckoutStepKey | CheckoutSubstepKey | undefined;
+  step: CheckoutStepKey | undefined;
   substep?: CheckoutSubstepKey | null;
   checkoutIntentId: number | null;
   additionalProperties?: Record<string, any>;

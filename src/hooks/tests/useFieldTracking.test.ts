@@ -63,15 +63,16 @@ describe('trackFieldBlur', () => {
   it('should handle null checkoutIntentId', () => {
     trackFieldBlur({
       fieldName: 'email',
-      step: CheckoutSubstepKey.Register,
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Register,
       checkoutIntentId: null,
     });
-
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
-        step: CheckoutSubstepKey.Register,
+        step: CheckoutStepKey.PlanDetails,
+        substep: CheckoutSubstepKey.Register,
         field_name: 'email',
       },
     });
@@ -111,15 +112,15 @@ describe('trackFieldBlur', () => {
     // Should not throw error
     expect(() => trackFieldBlur({
       fieldName: 'password',
-      step: CheckoutSubstepKey.Register,
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Register,
       checkoutIntentId: 123,
       additionalProperties: { interaction: 'blur' },
     })).not.toThrow();
-
     // Verify error was logged
     expect(mockLogError).toHaveBeenCalledTimes(1);
     expect(mockLogError).toHaveBeenCalledWith(
-      `Failed to send tracking event for field: password on step: ${CheckoutSubstepKey.Register}`,
+      `Failed to send tracking event for field: password on step: ${CheckoutStepKey.PlanDetails}`,
       mockError,
     );
   });
@@ -142,15 +143,16 @@ describe('trackFieldBlur', () => {
   it('should work without additional properties', () => {
     trackFieldBlur({
       fieldName: 'username',
-      step: CheckoutSubstepKey.Register,
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Register,
       checkoutIntentId: 200,
     });
-
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 200,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
-        step: CheckoutSubstepKey.Register,
+        step: CheckoutStepKey.PlanDetails,
+        substep: CheckoutSubstepKey.Register,
         field_name: 'username',
       },
     });
@@ -189,7 +191,8 @@ describe('trackFieldBlur', () => {
   it('should strip password value from additionalProperties', () => {
     trackFieldBlur({
       fieldName: 'password',
-      step: CheckoutSubstepKey.Register,
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Register,
       checkoutIntentId: 123,
       additionalProperties: { password: 'secret123', plan_type: 'teams' },
     });

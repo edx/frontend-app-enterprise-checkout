@@ -6,7 +6,8 @@ import { sendEnterpriseCheckoutTrackingEvent } from '../utils/common';
 
 interface TrackDebouncedFieldBlurParams {
   fieldName: string;
-  step: CheckoutStepKey | CheckoutSubstepKey;
+  step: CheckoutStepKey | undefined;
+  substep?: CheckoutSubstepKey | null;
   checkoutIntentId: number | null;
   additionalProperties?: Record<string, any>;
   debounceMs?: number;
@@ -33,6 +34,7 @@ let timeoutId: NodeJS.Timeout | null = null;
 export const trackDebouncedFieldBlur = ({
   fieldName,
   step,
+  substep,
   checkoutIntentId,
   additionalProperties = {},
   debounceMs = 500,
@@ -50,6 +52,7 @@ export const trackDebouncedFieldBlur = ({
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
         properties: {
           step,
+          ...(substep != null ? { substep } : {}),
           field_name: fieldName,
           ...additionalProperties,
         },

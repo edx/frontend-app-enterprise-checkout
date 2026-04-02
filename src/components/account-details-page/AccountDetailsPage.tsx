@@ -31,6 +31,7 @@ import {
   useCheckoutFormStore,
   useCurrentPageDetails,
 } from '@/hooks/index';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { isEssentialsFlow } from '../app/routes/loaders/utils';
@@ -57,16 +58,12 @@ const AccountDetailsPage: React.FC = () => {
   } = useCurrentPageDetails();
 
   const lastTrackedPathRef = useRef<string | null>(null);
+  const { currentStepKey } = useCurrentStep();
 
-  // Fire page view tracking event whenever the URL changes
+  // Fire page view tracking event whenever the current step changes
   useEffect(() => {
-    // Ensure that the current URL matches the expected route before firing the event
-    if (location.pathname !== CheckoutPageRoute.AccountDetails) {
-      return;
-    }
-
-    // Avoid double counting: only fire once per pathname
-    if (lastTrackedPathRef.current === location.pathname) {
+    // Ensure that the current step is active in the stepper before firing the event
+    if (currentStepKey !== CheckoutStepKey.AccountDetails || lastTrackedPathRef.current === location.pathname) {
       return;
     }
 
@@ -76,7 +73,7 @@ const AccountDetailsPage: React.FC = () => {
         category: 'enterprise_checkout',
         name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
-          step: CheckoutStepKey.AccountDetails,
+          step: currentStepKey,
           plan_type: PLAN_TYPE.TEAMS,
           path: location.pathname,
         },
@@ -85,11 +82,11 @@ const AccountDetailsPage: React.FC = () => {
       lastTrackedPathRef.current = location.pathname;
     } catch (error) {
       logError(
-        `Failed to send page view tracking event for ${CheckoutStepKey.AccountDetails}`,
+        `Failed to send page view tracking event for ${currentStepKey}`,
         error,
       );
     }
-  }, [checkoutIntent?.id, location.pathname]);
+  }, [checkoutIntent?.id, currentStepKey, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.adminEmail)

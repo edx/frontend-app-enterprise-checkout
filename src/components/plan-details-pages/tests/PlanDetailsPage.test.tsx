@@ -190,7 +190,8 @@ describe('PlanDetailsPage', () => {
       'enterprise_checkout',
       EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
       expect.objectContaining({
-        step: CheckoutSubstepKey.Register,
+        step: CheckoutStepKey.PlanDetails,
+        substep: CheckoutSubstepKey.Register,
         plan_type: PLAN_TYPE.TEAMS,
       }),
     );

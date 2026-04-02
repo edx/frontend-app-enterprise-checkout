@@ -8,7 +8,7 @@ import { useCountryOptions } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
-import { CheckoutSubstepKey } from '@/constants/checkout';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
@@ -114,6 +114,7 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
     <Field
@@ -134,7 +135,8 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
       controlClassName="mr-0"
       onBlur={() => trackFieldBlur({
         fieldName: TRACKED_FIELDS.USERNAME,
-        step: CheckoutSubstepKey.Register,
+        step: currentStepKey,
+        substep: currentSubstepKey,
         checkoutIntentId,
         additionalProperties: {
           plan_type: PLAN_TYPE.TEAMS,
@@ -152,6 +154,7 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
   const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
     <Field
@@ -185,7 +188,8 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
       }}
       onBlur={() => trackFieldBlur({
         fieldName: TRACKED_FIELDS.PASSWORD,
-        step: CheckoutSubstepKey.Register,
+        step: currentStepKey,
+        substep: currentSubstepKey,
         checkoutIntentId,
         additionalProperties: {
           plan_type: PLAN_TYPE.TEAMS,
