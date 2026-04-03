@@ -279,10 +279,16 @@ export const BillingDetailsSchema = (constraints: CheckoutContextFieldConstraint
   })
 );
 
-// Simple empty schema - no validation needed for coming soon page
+// Schema for capturing academy name in Essentials flow
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const AcademicSelectionSchema = (constraints: CheckoutContextFieldConstraints) => (z.object({}));
+export const AcademicSelectionSchema = (constraints: CheckoutContextFieldConstraints) => (
+  z.object({
+    academyName: z.string().trim()
+      .min(1, 'Academy name is required')
+      .max(255, 'Academy name must be no more than 255 characters'),
+  })
+);
 
 export const CheckoutPageRoute = {
   PlanDetails: `/${CheckoutStepKey.PlanDetails}`,
@@ -422,6 +428,7 @@ export const authenticatedSteps = [
 ] as const;
 
 export enum DataStoreKey {
+  AcademySelection = 'AcademySelection',
   PlanDetails = 'PlanDetails',
   AccountDetails = 'AccountDetails',
   BillingDetails = 'BillingDetails',

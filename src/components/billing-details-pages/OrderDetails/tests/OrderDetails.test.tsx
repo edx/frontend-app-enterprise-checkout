@@ -27,6 +27,11 @@ jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
+jest.mock('@/components/app/routes/loaders/utils', () => ({
+  ...jest.requireActual('@/components/app/routes/loaders/utils'),
+  isEssentialsFlow: jest.fn(() => false),
+}));
+
 const { useFirstBillableInvoice, useCheckoutIntent } = jest.requireMock('@/components/app/data');
 
 describe('OrderDetails', () => {
@@ -347,6 +352,43 @@ describe('OrderDetails', () => {
         checkoutIntentId: mockCheckoutIntentId,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CONTACT_SUPPORT_LINK_CLICKED,
       });
+    });
+  });
+
+  describe('Academy Name (Essentials flow)', () => {
+    it('displays Academy Name label with placeholder dash when in Essentials flow', () => {
+      const { isEssentialsFlow } = jest.requireMock('@/components/app/routes/loaders/utils');
+      (isEssentialsFlow as jest.Mock).mockReturnValue(true);
+
+      (useFirstBillableInvoice as jest.Mock).mockReturnValue({
+        data: {
+          last4: mockLast4,
+          cardBrand: 'visa',
+          hasCardDetails: true,
+        },
+        isLoading: false,
+      });
+
+      renderComponent();
+      validateText('Academy Name');
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('does not display Academy Name section when not in Essentials flow', () => {
+      const { isEssentialsFlow } = jest.requireMock('@/components/app/routes/loaders/utils');
+      (isEssentialsFlow as jest.Mock).mockReturnValue(false);
+
+      (useFirstBillableInvoice as jest.Mock).mockReturnValue({
+        data: {
+          last4: mockLast4,
+          cardBrand: 'visa',
+          hasCardDetails: true,
+        },
+        isLoading: false,
+      });
+
+      renderComponent();
+      expect(screen.queryByText('Academy Name')).not.toBeInTheDocument();
     });
   });
 });

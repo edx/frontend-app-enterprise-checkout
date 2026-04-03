@@ -16,8 +16,11 @@ const OrderDetailsHeading: React.FC = () => {
       <p className="fs-4 text-muted mb-3 font-weight-light">
         <FormattedMessage
           id="checkout.orderDetails.description"
-          defaultMessage={isEssentials ? 'You have purchased an edX Essentials subscription.' : 'You have purchased an edX Team subscription.'}
+          defaultMessage="You have purchased an edX {productName} subscription."
           description="Description text explaining the order details"
+          values={{
+            productName: isEssentials ? 'Essentials' : 'Team',
+          }}
         />
       </p>
     </>

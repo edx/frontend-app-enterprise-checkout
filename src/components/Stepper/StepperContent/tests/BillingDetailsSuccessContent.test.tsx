@@ -70,6 +70,8 @@ describe('BillingDetailsSuccessContent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset sessionStorage between tests
+    sessionStorage.clear();
 
     // Set default mock values for all hooks
     (mockUseBFFSuccess as jest.Mock).mockReturnValue({
@@ -113,6 +115,18 @@ describe('BillingDetailsSuccessContent', () => {
     // OrderDetails renders its content
     validateText('Order details');
     validateText('You have purchased an edX Team subscription.');
+  });
+
+  it('renders Essentials-specific content when isEssentials is set', () => {
+    // Set session to Essentials flow
+    sessionStorage.setItem('isEssentials', 'true');
+    renderComponent();
+
+    // BillingDetailsHeadingMessage renders with celebration image
+    expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
+    // OrderDetails renders Essentials-specific content
+    validateText('Order details');
+    validateText('You have purchased an edX Essentials subscription.');
   });
 
   it('renders PendingHeading when checkout intent state is "paid"', () => {

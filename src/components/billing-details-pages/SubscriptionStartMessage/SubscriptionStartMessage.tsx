@@ -55,10 +55,11 @@ const SubscriptionStartMessage = () => {
         <h3>
           <FormattedMessage
             id="checkout.freeTrialSubscriptionStartMessage.title"
-            defaultMessage={isEssentials ? 'Your free {trialDays}-day trial for edX Essentials subscription has started.' : 'Your free {trialDays}-day trial for edX Team subscription has started.'}
+            defaultMessage="Your free {trialDays}-day trial for {productName} subscription has started."
             description="Title for the free trial success field section"
             values={{
               trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
+              productName: isEssentials ? 'edX Essentials' : 'edX Team',
             }}
           />
         </h3>

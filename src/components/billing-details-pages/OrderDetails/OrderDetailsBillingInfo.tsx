@@ -3,6 +3,7 @@ import { Col, Row, Stack } from '@openedx/paragon';
 import { capitalize } from 'lodash-es';
 
 import { useFirstBillableInvoice } from '@/components/app/data';
+import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -10,6 +11,7 @@ const OrderDetailsBillingInfo = () => {
   const { data: firstBillableInvoice } = useFirstBillableInvoice();
   const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const { adminEmail } = planDetailsData;
+  const isEssentials = isEssentialsFlow();
 
   if (!firstBillableInvoice) {
     return null;
@@ -26,8 +28,25 @@ const OrderDetailsBillingInfo = () => {
 
   return (
     <>
-      <Row>
-        <Col xs={12} md={6} className="mb-4">
+      {/* Academy Name - Essentials only */}
+      {isEssentials && (
+        <Row className="mb-4">
+          <Col xs={12}>
+            <h3 className="h5 mb-2">
+              <FormattedMessage
+                id="checkout.orderDetails.academyName"
+                defaultMessage="Academy Name"
+                description="Label for academy name section"
+              />
+            </h3>
+            <p className="text-muted mb-0">—</p>
+          </Col>
+        </Row>
+      )}
+
+      {/* Admin Contact and Payment Method */}
+      <Row className="mb-4">
+        <Col xs={12} md={6} className="mb-4 mb-md-0">
           <h3 className="h5 mb-2">
             <FormattedMessage
               id="checkout.orderDetails.adminContactInfo"
@@ -37,7 +56,7 @@ const OrderDetailsBillingInfo = () => {
           </h3>
           <p className="text-muted mb-0">{adminEmail}</p>
         </Col>
-        <Col xs={12} md={6} className="mb-4">
+        <Col xs={12} md={6}>
           <h3 className="h5 mb-2">
             <FormattedMessage
               id="checkout.orderDetails.paymentMethod"
@@ -59,9 +78,9 @@ const OrderDetailsBillingInfo = () => {
             </span>
           </div>
         </Col>
-
       </Row>
 
+      {/* Billing Address */}
       <div className="mb-4">
         <h3 className="h5 mb-2">
           <FormattedMessage
