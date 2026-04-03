@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import useTestimonials from '@/components/app/data/hooks/useTestimonials';
+import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
@@ -24,12 +25,15 @@ const PurchaseSummary = () => {
     (state) => state.formData[DataStoreKey.AccountDetails]?.companyName,
   );
 
-  const {
-    yearlySubscriptionCostForQuantity,
-    yearlyCostPerSubscriptionPerUser,
-  } = usePurchaseSummaryPricing();
+  const { yearlyCostPerSubscriptionPerUser } = usePurchaseSummaryPricing();
 
   const normalizedQuantity = parseInt(quantity, 10) === 0 ? null : quantity;
+
+  const isEssentials = isEssentialsFlow();
+
+  // For Essentials, hardcode price to $149
+  const pricePerUser = isEssentials ? 149 : yearlyCostPerSubscriptionPerUser;
+  const totalPerYear = normalizedQuantity && normalizedQuantity > 0 && pricePerUser ? normalizedQuantity * pricePerUser : null;
 
   // ✅ Move testimonials API call to client hook
   const { data: testimonials = [] } = useTestimonials();
@@ -58,38 +62,57 @@ const PurchaseSummary = () => {
   }, [testimonials]);
 
   return (
-    <Card>
-      <PurchaseSummaryHeader companyName={companyName} />
+    <Stack gap={3}>
+      <Card className="border border-secondary">
+        <PurchaseSummaryHeader companyName={companyName} isEssentials={isEssentials} />
 
-      <Card.Section className="pt-2">
-        <Stack gap={3}>
-          <PricePerUserRow pricePerUser={yearlyCostPerSubscriptionPerUser} />
-          <LicensesRow quantity={normalizedQuantity} />
+        <Card.Section className="pt-2">
+          <Stack gap={3}>
+            <PricePerUserRow pricePerUser={pricePerUser} isEssentials={isEssentials} />
+            <LicensesRow quantity={normalizedQuantity} />
 
-          <hr className="w-100" />
+            <hr className="w-100" />
 
-          <TotalAfterTrialRow
-            quantity={normalizedQuantity}
-            totalPerYear={yearlySubscriptionCostForQuantity}
-          />
+            <TotalAfterTrialRow
+              quantity={normalizedQuantity}
+              totalPerYear={totalPerYear}
+            />
 
-          <AutoRenewNotice
-            quantity={normalizedQuantity}
-            totalPerYear={yearlySubscriptionCostForQuantity}
-          />
+            <AutoRenewNotice
+              quantity={normalizedQuantity}
+              totalPerYear={totalPerYear}
+            />
 
-          <DueTodayRow amountDue={0} />
+            <DueTodayRow amountDue={0} />
 
-          {currentTestimonial && (
-            <TestimonialCard testimonial={currentTestimonial} />
-          )}
-        </Stack>
-      </Card.Section>
+            {currentTestimonial && !isEssentials && (
+              <TestimonialCard testimonial={currentTestimonial} />
+            )}
+          </Stack>
+        </Card.Section>
 
-      <Card.Footer>
-        <PurchaseSummaryCardButton />
-      </Card.Footer>
-    </Card>
+        <Card.Footer>
+          <PurchaseSummaryCardButton isEssentials={isEssentials} />
+        </Card.Footer>
+      </Card>
+
+      {isEssentials && (
+        <Card className="bg-light border">
+          <Card.Body className="text-center">
+            <p className="mb-0">
+              Not sure which plan is right for you?{' '}
+              <a
+                href="https://business.edx.org/course-library-compare-plans/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Compare plans
+              </a>
+            </p>
+          </Card.Body>
+        </Card>
+      )}
+    </Stack>
   );
 };
 
