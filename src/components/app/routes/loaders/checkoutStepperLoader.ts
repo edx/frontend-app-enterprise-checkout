@@ -134,7 +134,6 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
   }
 
   const checkoutSessionClientSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
-  console.log('checkoutSession', checkoutSessionClientSecret);
   if (!checkoutSessionClientSecret) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
