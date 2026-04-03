@@ -31,13 +31,13 @@ const TotalAfterTrialRowComponent: React.FC<TotalAfterTrialRowProps> = ({ quanti
             'font-weight-bold': !!quantity && quantity > 0,
           })}
         >
-          {quantity
+          {quantity && quantity > 0
             ? (
               <span>
                 <DisplayPrice value={totalPerYear ?? 0} /> USD
               </span>
             )
-            : ('-')}/yr
+            : ''}/yr
         </div>
       )}
       className={classNames({ 'pb-4.5': !quantity })}
