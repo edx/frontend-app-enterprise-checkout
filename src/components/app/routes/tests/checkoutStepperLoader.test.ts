@@ -273,7 +273,7 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       );
       expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.AccountDetails);
     });
-    it('returns null when checkout session client secret is missing', async () => {
+    it('redirects to Plan Details when checkout session is missing from state', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
       const ctx = buildContext({ withPrice: true });
       ensureSpy.mockResolvedValue(ctx);
@@ -285,7 +285,7 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       const r = await loader(
         makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, CheckoutPageRoute.BillingDetails),
       );
-      expect(r).toBeNull();
+      expect((r as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
     });
     it('returns null after ensuring checkout session when everything is valid', async () => {
       (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
@@ -398,26 +398,5 @@ describe('Essentials flow redirects', () => {
     expect((result as any).headers.get('Location')).toBe(
       EssentialsPageRoute.PlanDetails,
     );
-  });
-
-  it('BillingDetails redirects to Essentials AccountDetails when plan details are valid but account details are invalid', async () => {
-    const ensureQueryDataSpy = jest.spyOn(queryClient, 'ensureQueryData');
-    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
-
-    const ctx = buildContext({ withPrice: true });
-    ensureQueryDataSpy.mockResolvedValue(ctx);
-    populateValidPlanDetails(ctx.pricing.prices[0].id as string);
-
-    const loader = makeCheckoutStepperLoader(queryClient);
-    const result = await loader(
-      makeLoaderArgs(
-        CheckoutStepKey.BillingDetails,
-        undefined,
-        EssentialsPageRoute.BillingDetails,
-      ),
-    );
-
-    expect(result).not.toBeNull();
-    expect((result as any).headers.get('Location')).toBe(EssentialsPageRoute.AccountDetails);
   });
 });

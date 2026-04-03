@@ -94,15 +94,20 @@ const AccountDetailsPage: React.FC = () => {
 
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
 
-      const queryKeysToInvalidate = [
-        queryBffContext(lmsUserId).queryKey,
-        queryBffSuccess(lmsUserId).queryKey,
-      ];
-      queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
+      const isEssentials = isEssentialsFlow();
+      //     Removed the invalidateQueries() call
+      //  The cache is already updated with the secret via setQueryData()
+      //  Secret is now persisted in the store
+      //  To avoid unnecessary refetch that loses the data
+      //
+      // const queryKeysToInvalidate = [
+      //   queryBffContext(lmsUserId).queryKey,
+      //   queryBffSuccess(lmsUserId).queryKey,
+      // ];
+      // queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
 
-      // ✅ FIXED (NO HARDCODE)
       navigate(
-        isEssentialsFlow()
+        isEssentials
           ? EssentialsPageRoute.BillingDetails
           : CheckoutPageRoute.BillingDetails,
       );
@@ -165,9 +170,9 @@ const AccountDetailsPage: React.FC = () => {
         quantity,
       });
     } else {
-      // ✅ FIXED (NO HARDCODE)
+      const isEssentials = isEssentialsFlow();
       navigate(
-        isEssentialsFlow()
+        isEssentials
           ? EssentialsPageRoute.BillingDetails
           : CheckoutPageRoute.BillingDetails,
       );
@@ -192,9 +197,9 @@ const AccountDetailsPage: React.FC = () => {
             <Button
               variant="outline-primary"
               onClick={() => {
-                // ✅ FIXED (NO HARDCODE)
+                const isEssentials = isEssentialsFlow();
                 navigate(
-                  isEssentialsFlow()
+                  isEssentials
                     ? EssentialsPageRoute.PlanDetails
                     : CheckoutPageRoute.PlanDetails,
                 );
@@ -203,6 +208,7 @@ const AccountDetailsPage: React.FC = () => {
               <FormattedMessage
                 id="checkout.back"
                 defaultMessage="Back"
+                description="Button to go back to the previous step"
               />
             </Button>
 

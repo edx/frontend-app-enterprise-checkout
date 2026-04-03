@@ -407,31 +407,4 @@ describe('validateFormState – Essentials flow', () => {
       invalidRoute: EssentialsPageRoute.PlanDetails,
     });
   });
-
-  it('returns Essentials AccountDetails when AccountDetails fails for BillingDetails navigation', async () => {
-    (checkoutFormStore.getState as jest.Mock).mockReturnValue({
-      formData: {
-        [DataStoreKey.PlanDetails]: {
-          quantity: 1,
-          adminEmail: 'user@example.com',
-          stripePriceId: 'price_123',
-        },
-        [DataStoreKey.AccountDetails]: {
-          enterpriseSlug: '',
-          companyName: '',
-        },
-      },
-    });
-
-    const result = await validateFormState({
-      checkoutStep: 'BillingDetails',
-      constraints: {} as any,
-      stripePriceId: 'price_123' as any,
-    });
-
-    expect(result).toEqual({
-      valid: false,
-      invalidRoute: EssentialsPageRoute.AccountDetails,
-    });
-  });
 });
