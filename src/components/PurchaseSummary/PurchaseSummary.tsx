@@ -33,7 +33,9 @@ const PurchaseSummary = () => {
 
   // For Essentials, hardcode price to $149
   const pricePerUser = isEssentials ? 149 : yearlyCostPerSubscriptionPerUser;
-  const totalPerYear = normalizedQuantity && normalizedQuantity > 0 && pricePerUser ? normalizedQuantity * pricePerUser : null;
+  const totalPerYear = normalizedQuantity && normalizedQuantity > 0 && pricePerUser
+    ? normalizedQuantity * pricePerUser
+    : null;
 
   // ✅ Move testimonials API call to client hook
   const { data: testimonials = [] } = useTestimonials();
