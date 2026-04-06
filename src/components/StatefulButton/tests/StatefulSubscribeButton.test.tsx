@@ -347,7 +347,7 @@ describe('StatefulSubscribeButton', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/essentials/billing-details/success');
+        expect(mockNavigate).toHaveBeenCalledWith('/essentials/billing-details/success', { replace: true });
       });
     });
 
@@ -376,7 +376,7 @@ describe('StatefulSubscribeButton', () => {
           checkoutIntentId: 1234,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
         });
-        expect(mockNavigate).toHaveBeenCalledWith('/billing-details/success');
+        expect(mockNavigate).toHaveBeenCalledWith('/billing-details/success', { replace: true });
       });
     });
 

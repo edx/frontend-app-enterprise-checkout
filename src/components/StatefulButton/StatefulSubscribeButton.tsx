@@ -61,7 +61,7 @@ const StatefulSubscribeButton = () => {
   const [errorMessageKey, setErrorMessageKey] = useState('fallback');
   const { data: checkoutIntent } = useCheckoutIntent();
   const intl = useIntl();
-  const hasNavigatedRef= useRef(false);
+  const hasNavigatedRef = useRef(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
@@ -117,49 +117,38 @@ const StatefulSubscribeButton = () => {
     }
   };
 
-  
- useEffect(() => {
-    if (
-      statefulButtonState !== 'success' ||
-      hasNavigatedRef.current
-    ) {
+  useEffect(() => {
+    if (statefulButtonState !== 'success' || hasNavigatedRef.current) {
       return;
     }
- 
-    if (
-      status.type === 'complete' &&
-      status.paymentStatus === 'paid'
-    ) {
+
+    if (status.type === 'complete' && status.paymentStatus === 'paid') {
       hasNavigatedRef.current = true;
- 
+
       // 1. Persist checkout completion
       setCheckoutSessionStatus(status);
- 
+
       // 2. Refresh BFF context
       queryClient
         .invalidateQueries({
-          queryKey: queryBffContext(
-            authenticatedUser.userId ?? null,
-          ).queryKey,
+          queryKey: queryBffContext(authenticatedUser.userId ?? null).queryKey,
         })
-        .catch(error => logError(error));
- 
+        .catch((error) => logError(error));
+
       // 3. Tracking
       sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
-        eventName:
-          EVENT_NAMES.SUBSCRIPTION_CHECKOUT
-            .PAYMENT_PROCESSED_SUCCESSFULLY,
+        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
       });
- 
+
       // 4. Navigate ONCE
       const isEssentials = isEssentialsFlow();
- 
+
       navigate(
         isEssentials
           ? EssentialsPageRoute.BillingDetailsSuccess
           : CheckoutPageRoute.BillingDetailsSuccess,
-        { replace: true }, // important
+        { replace: true },
       );
     } else {
       // Stripe fallback
@@ -175,8 +164,6 @@ const StatefulSubscribeButton = () => {
     checkoutIntent?.id,
     navigate,
   ]);
- 
-
 
   const props = {
     labels: {
