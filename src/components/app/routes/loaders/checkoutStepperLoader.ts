@@ -72,7 +72,7 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
-  
+
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );

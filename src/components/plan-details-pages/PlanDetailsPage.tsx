@@ -39,7 +39,7 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
-import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import { sendEnterpriseCheckoutPageEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
