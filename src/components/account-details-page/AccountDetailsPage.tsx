@@ -64,10 +64,35 @@ const AccountDetailsPage: React.FC = () => {
 
   const {
     handleSubmit,
-    formState: { isDirty: formIsDirty, isValid: formIsValid },
+    formState: { isDirty: formIsDirty, isValid: formIsValid, touchedFields },
     setError,
     reset: formReset,
+    getValues,
+    trigger,
   } = form;
+
+  const hasPersistedAccountDetailsValues = Object.keys(accountDetailsFormData).length > 0;
+
+  useEffect(() => {
+    if (!hasPersistedAccountDetailsValues) {
+      return;
+    }
+
+    trigger().catch(() => {});
+  }, [hasPersistedAccountDetailsValues, trigger]);
+
+  const handleBackClick = () => {
+    if (formIsDirty || Object.keys(touchedFields).length > 0) {
+      setFormData(DataStoreKey.AccountDetails, getValues());
+    }
+
+    const isEssentials = isEssentialsFlow();
+    navigate(
+      isEssentials
+        ? EssentialsPageRoute.PlanDetails
+        : CheckoutPageRoute.PlanDetails,
+    );
+  };
 
   const createCheckoutSessionMutation = useCreateCheckoutSessionMutation({
     onSuccess: (responseData) => {
@@ -196,14 +221,7 @@ const AccountDetailsPage: React.FC = () => {
           <Stepper.ActionRow eventKey={eventKey}>
             <Button
               variant="outline-primary"
-              onClick={() => {
-                const isEssentials = isEssentialsFlow();
-                navigate(
-                  isEssentials
-                    ? EssentialsPageRoute.PlanDetails
-                    : CheckoutPageRoute.PlanDetails,
-                );
-              }}
+              onClick={handleBackClick}
             >
               <FormattedMessage
                 id="checkout.back"

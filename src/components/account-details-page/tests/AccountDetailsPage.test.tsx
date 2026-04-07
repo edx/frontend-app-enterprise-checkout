@@ -192,6 +192,52 @@ describe('AccountDetailsPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.PlanDetails);
   });
 
+  it('persists touched account details values on back and restores validation on revisit', async () => {
+    const user = userEvent.setup();
+
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.AccountDetails]: {},
+      },
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    const companyNameInput = screen.getByPlaceholderText('Enter your company name');
+    const enterpriseSlugInput = screen.getByPlaceholderText('URL name');
+
+    await user.click(companyNameInput);
+    await user.click(enterpriseSlugInput);
+    await user.type(enterpriseSlugInput, 'invalid slug!');
+    await user.click(companyNameInput);
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+
+    expect(checkoutFormStore.getState().formData[DataStoreKey.AccountDetails]).toEqual({
+      companyName: '',
+      enterpriseSlug: 'invalid slug!',
+    });
+
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Company name is required')).toBeInTheDocument();
+      expect(screen.getByText('Only alphanumeric lowercase characters and hyphens are allowed.')).toBeInTheDocument();
+    });
+  });
+
   it('navigates to essentials billing details on successful checkout session creation in essentials flow', () => {
     sessionStorage.setItem('isEssentials', 'true');
 
