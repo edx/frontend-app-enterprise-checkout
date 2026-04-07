@@ -95,12 +95,16 @@ const AccountDetailsPage: React.FC = () => {
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
 
       const isEssentials = isEssentialsFlow();
-
-      const queryKeysToInvalidate = [
-        queryBffContext(lmsUserId).queryKey,
-        queryBffSuccess(lmsUserId).queryKey,
-      ];
-      queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
+      //     Removed the invalidateQueries() call
+      //  The cache is already updated with the secret via setQueryData()
+      //  Secret is now persisted in the store
+      //  To avoid unnecessary refetch that loses the data
+      //
+      // const queryKeysToInvalidate = [
+      //   queryBffContext(lmsUserId).queryKey,
+      //   queryBffSuccess(lmsUserId).queryKey,
+      // ];
+      // queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
 
       navigate(
         isEssentials
