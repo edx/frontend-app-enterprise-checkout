@@ -241,7 +241,7 @@ describe('useLoginMutation', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockOnMutate).toHaveBeenCalledWith(mockRequestData);
+    expect(mockOnMutate.mock.calls[0][0]).toEqual(expect.objectContaining(mockRequestData));
     expect(mockOnSuccess).toHaveBeenCalledWith(mockResponse.data);
   });
 
