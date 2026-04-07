@@ -149,7 +149,7 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       makeLoaderArgs(CheckoutStepKey.PlanDetails, CheckoutSubstepKey.Login, CheckoutPageRoute.PlanDetailsLogin),
     );
     expect(r2).not.toBeNull();
-    expect((r2 as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+    expect((r2 as any).headers.get('Location')).toBe(CheckoutPageRoute.AccountDetails);
   });
   it('PlanDetailsRegister redirects when authenticated, null otherwise', async () => {
     const loader = makeCheckoutStepperLoader(queryClient);
@@ -164,7 +164,7 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       makeLoaderArgs(CheckoutStepKey.PlanDetails, CheckoutSubstepKey.Register, CheckoutPageRoute.PlanDetailsRegister),
     );
     expect(r2).not.toBeNull();
-    expect((r2 as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+    expect((r2 as any).headers.get('Location')).toBe(CheckoutPageRoute.AccountDetails);
   });
   it.each(generateTestPermutations({
     authenticatedUser: [{ userId: 1 }, null],
@@ -187,7 +187,7 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
       makeLoaderArgs(CheckoutStepKey.PlanDetails, loaderArguments.subStep, loaderArguments.route),
     );
     expect(r1).not.toBeNull();
-    expect((r1 as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+    expect((r1 as any).headers.get('Location')).toBe(CheckoutPageRoute.AccountDetails);
   });
   describe('AccountDetails loader', () => {
     it('redirects unauthenticated users to Plan Details', async () => {
@@ -378,7 +378,7 @@ describe('Essentials flow redirects', () => {
 
     expect(result).not.toBeNull();
     expect((result as any).headers.get('Location')).toBe(
-      EssentialsPageRoute.PlanDetails,
+      EssentialsPageRoute.AccountDetails,
     );
   });
 
@@ -396,7 +396,7 @@ describe('Essentials flow redirects', () => {
 
     expect(result).not.toBeNull();
     expect((result as any).headers.get('Location')).toBe(
-      EssentialsPageRoute.PlanDetails,
+      EssentialsPageRoute.AccountDetails,
     );
   });
 });

@@ -29,9 +29,9 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
   if (redirectToPlanDetails || authenticatedUser) {
     // Redirect to PlanDetails if: (1) adminEmail is missing, or (2) user is already authenticated.
     if (isEssentialsFlow()) {
-      return redirect(EssentialsPageRoute.PlanDetails);
+      return redirect(EssentialsPageRoute.AccountDetails);
     }
-    return redirect(CheckoutPageRoute.PlanDetails);
+    return redirect(CheckoutPageRoute.AccountDetails);
   }
   return null;
 }
@@ -52,9 +52,9 @@ async function planDetailsRegisterLoader(): Promise<Response | null> {
   if (redirectToPlanDetails || authenticatedUser) {
     // Redirect to PlanDetails if: (1) required metadata is missing, or (2) user is already authenticated.
     if (isEssentialsFlow()) {
-      return redirect(EssentialsPageRoute.PlanDetails);
+      return redirect(EssentialsPageRoute.AccountDetails);
     }
-    return redirect(CheckoutPageRoute.PlanDetails);
+    return redirect(CheckoutPageRoute.AccountDetails);
   }
 
   return null;
@@ -72,7 +72,7 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
     // If the user is NOT authenticated, redirect to PlanDetails Page.
     return redirect(CheckoutPageRoute.PlanDetails);
   }
-
+  
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );

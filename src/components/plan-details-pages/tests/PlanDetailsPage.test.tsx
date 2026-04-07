@@ -1068,7 +1068,7 @@ describe('PlanDetailsPage – Essentials navigation', () => {
 
     // Assert the essentials-prefixed navigation happened
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details');
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/account-details');
     });
   });
 
@@ -1096,7 +1096,7 @@ describe('PlanDetailsPage – Essentials navigation', () => {
     await user.click(screen.getByTestId('stepper-submit-button'));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details');
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/account-details');
     });
   });
 });

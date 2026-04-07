@@ -117,62 +117,6 @@ const PlanDetailsPage = () => {
     setError,
   } = form;
 
-  const loginMutation = useLoginMutation({
-    onSuccess: () => {
-      setIsSubmitting(false);
-      navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
-    },
-    onError: (errorMessage) => {
-      setIsSubmitting(false);
-      setError('password', {
-        type: 'manual',
-        message: errorMessage,
-      });
-    },
-  });
-
-  const registerMutation = useRegisterMutation({
-    onSuccess: () => {
-      setIsSubmitting(false);
-
-      // Fire registration success tracking event
-      try {
-        sendEnterpriseCheckoutTrackingEvent({
-          checkoutIntentId,
-          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
-          properties: {
-            step: currentStepKey,
-            substep: currentSubstepKey,
-            plan_type: PLAN_TYPE.TEAMS,
-          },
-        });
-      } catch (error) {
-        logError('Failed to send registration success tracking event', error);
-      }
-
-      navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
-    },
-    onError: (errorMessage, errorData) => {
-      // Check if the response contains field-level validation errors for email
-      const emailErrorMessage = errorData?.errorCode === 'validation-error'
-        ? errorData?.email?.[0]?.userMessage
-        : null;
-
-      if (emailErrorMessage) {
-        setError('adminEmail', {
-          type: 'manual',
-          message: emailErrorMessage,
-        });
-      }
-
-      setIsSubmitting(false);
-      setError('root.serverError', {
-        type: 'manual',
-        message: errorMessage || 'Registration failed',
-      });
-    },
-  });
-
   // Use existing checkout intent if already created (avoid duplicate POST)
   async function queryClientInvalidate(userId?: number) {
     if (!userId) {
@@ -209,6 +153,54 @@ const PlanDetailsPage = () => {
           message: 'Server Error',
         });
       }
+    },
+  });
+
+  const loginMutation = useLoginMutation({
+    onSuccess: () => {
+      // setIsSubmitting(false);
+      createCheckoutIntentMutation.mutate({
+        quantity: planDetailsFormData.quantity,
+        country: planDetailsFormData.country,
+      });
+      navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
+    },
+    onError: (errorMessage) => {
+      setIsSubmitting(false);
+      setError('password', {
+        type: 'manual',
+        message: errorMessage,
+      });
+    },
+  });
+
+  const registerMutation = useRegisterMutation({
+    onSuccess: () => {
+      setIsSubmitting(false);
+      sessionStorage.setItem('postRegister', 'true');
+      createCheckoutIntentMutation.mutate({
+        quantity: planDetailsFormData.quantity,
+        country: planDetailsFormData.country,
+      });
+    },
+    onError: (errorMessage, errorData) => {
+      // Check if the response contains field-level validation errors for email
+      const emailErrorMessage = errorData?.errorCode === 'validation-error'
+        ? errorData?.email?.[0]?.userMessage
+        : null;
+
+      if (emailErrorMessage) {
+        setError('adminEmail', {
+          type: 'manual',
+          message: emailErrorMessage,
+        });
+      }
+
+      setIsSubmitting(false);
+      setError('root.serverError', {
+        type: 'manual',
+        message: errorMessage || 'Registration failed',
+      });
     },
   });
 

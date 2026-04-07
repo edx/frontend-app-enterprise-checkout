@@ -199,6 +199,20 @@ const makeRootLoader = (
     return redirectOrNull(CheckoutPageRoute.PlanDetails);
   }
 
+  const postRegister = sessionStorage.getItem('postRegister') === 'true';
+
+  const isPlanDetails = currentPath === CheckoutPageRoute.PlanDetails
+  || currentPath === EssentialsPageRoute.PlanDetails;
+
+  if (authenticatedUser && postRegister && isPlanDetails) {
+    sessionStorage.removeItem('postRegister');
+    return redirectOrNull(
+      isEssentialsPath
+        ? EssentialsPageRoute.AccountDetails
+        : CheckoutPageRoute.AccountDetails,
+    );
+  }
+
   const { checkoutIntent, pricing } = contextMetadata;
 
   const {
