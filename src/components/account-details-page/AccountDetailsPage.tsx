@@ -67,6 +67,7 @@ const AccountDetailsPage: React.FC = () => {
       return;
     }
 
+    // Avoid double counting: only fire once per pathname
     try {
       sendEnterpriseCheckoutPageEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
