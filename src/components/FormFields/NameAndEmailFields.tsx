@@ -1,8 +1,14 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
+import { useContext } from 'react';
 
 import { useCountryOptions } from '@/components/app/data/hooks';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import useCurrentStep from '@/hooks/useCurrentStep';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import Field from './Field';
 
@@ -15,6 +21,10 @@ interface NameAndEmailFieldsProps {
 const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
   const intl = useIntl();
   const countryOptions = useCountryOptions();
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
     <FieldContainer>
@@ -51,6 +61,15 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
           })}
           controlClassName="mr-0"
           className="bg-light-300"
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.FULL_NAME,
+            step: currentStepKey,
+            substep: currentSubstepKey,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
 
         <Field
@@ -68,6 +87,15 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             description: 'Placeholder for the work email input field',
           })}
           controlClassName="mr-0"
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.ADMIN_EMAIL,
+            step: currentStepKey,
+            substep: currentSubstepKey,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
         <Field
           form={form}
@@ -85,6 +113,15 @@ const NameAndEmailFields = ({ form }: NameAndEmailFieldsProps) => {
             description: 'Placeholder for the country of residence dropdown field',
           })}
           controlClassName="mr-0"
+          onBlur={() => trackFieldBlur({
+            fieldName: TRACKED_FIELDS.COUNTRY,
+            step: currentStepKey,
+            substep: currentSubstepKey,
+            checkoutIntentId,
+            additionalProperties: {
+              plan_type: PLAN_TYPE.TEAMS,
+            },
+          })}
         />
       </Stack>
     </FieldContainer>

@@ -161,7 +161,6 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const { ref: registerRef, ...registerFieldOptions } = register(name, {
     ...registerOptions,
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
-      // Only manage state in store if manageState is true
       if (manageState) {
         setFormData(currentStep as keyof StepDataMap, {
           ...stepData,

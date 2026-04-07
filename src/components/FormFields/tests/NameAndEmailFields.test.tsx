@@ -1,14 +1,42 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useCountryOptions } from '@/components/app/data/hooks';
+import { CheckoutStepKey, CheckoutSubstepKey } from '@/constants/checkout';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import NameAndEmailFields from '../NameAndEmailFields';
+
+// Mock tracking
+jest.mock('@/hooks/useFieldTracking', () => ({
+  trackFieldBlur: jest.fn(),
+}));
+
+// Mock useCurrentStep
+jest.mock('@/hooks/useCurrentStep', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    currentStepKey: 'plan-details',
+    currentSubstepKey: 'login',
+  })),
+}));
+
+const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
+
+// Mock BFF context hook
+const mockUseBFFContext = jest.fn(() => ({
+  data: {
+    checkoutIntent: { id: 123 },
+  },
+}));
 
 // Mock the useCountryOptions hook
 jest.mock('@/components/app/data/hooks', () => ({
   useCountryOptions: jest.fn(),
+  useBFFContext: jest.fn((...args: any[]) => (mockUseBFFContext as any)(...args)),
 }));
 
 const mockedUseCountryOptions = useCountryOptions as jest.Mock;
@@ -16,7 +44,7 @@ const mockedUseCountryOptions = useCountryOptions as jest.Mock;
 // Mock the Field component
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
-  default: ({ floatingLabel, placeholder, form, name, type, options }) => {
+  default: ({ floatingLabel, placeholder, form, name, type, options, onBlur }) => {
     const error = form?.formState?.errors[name];
     return (
       <div data-testid={`field-${name}`}>
@@ -29,6 +57,7 @@ jest.mock('@/components/FormFields/Field', () => ({
           </div>
         )}
         {error && <div data-testid={`${name}-error-message`}>{error.message}</div>}
+        <button type="button" onClick={onBlur} data-testid={`${name}-blur-trigger`}>Trigger Blur</button>
       </div>
     );
   },
@@ -44,14 +73,29 @@ const createMockForm = (errors = {}) => ({
 });
 
 describe('NameAndEmailFields', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  const mockAuthenticatedUser = {
+    userId: 1,
+    username: 'test-user',
+    roles: [],
+    administrator: false,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const renderComponent = (errors = {}) => render(
-    <IntlProvider locale="en">
-      <NameAndEmailFields form={createMockForm(errors) as any} />
-    </IntlProvider>,
+    <QueryClientProvider client={queryClient}>
+      <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+        <IntlProvider locale="en">
+          <NameAndEmailFields form={createMockForm(errors) as any} />
+        </IntlProvider>
+      </AppContext.Provider>
+    </QueryClientProvider>,
   );
 
   it('renders the title and description correctly', () => {
@@ -172,5 +216,71 @@ describe('NameAndEmailFields', () => {
     const options = JSON.parse(optionsElement.textContent || '[]');
 
     expect(options).toEqual([]);
+  });
+
+  it('should pass correct step and substep keys from useCurrentStep on blur', () => {
+    mockedUseCountryOptions.mockReturnValue([]);
+    renderComponent();
+    const blurTrigger = screen.getByTestId('fullName-blur-trigger');
+    blurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      step: CheckoutStepKey.PlanDetails,
+      substep: CheckoutSubstepKey.Login,
+    }));
+  });
+
+  it('should call tracking handler on blur', () => {
+    mockedUseCountryOptions.mockReturnValue([]);
+    renderComponent();
+    const blurTrigger = screen.getByTestId('fullName-blur-trigger');
+    blurTrigger.click();
+    expect(mockTrackFieldBlur).toHaveBeenCalledTimes(1);
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'fullName',
+    }));
+  });
+
+  it('should pass null checkoutIntentId for unauthenticated user', () => {
+    // Reset mocks
+    jest.clearAllMocks();
+
+    mockedUseCountryOptions.mockReturnValue([]);
+    // Mock unauthenticated user and no bff context data
+    mockUseBFFContext.mockReturnValue({ data: null } as any);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: null }}>
+          <IntlProvider locale="en">
+            <NameAndEmailFields form={createMockForm() as any} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    const fullNameBlurTrigger = screen.getByTestId('fullName-blur-trigger');
+    fullNameBlurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'fullName',
+      checkoutIntentId: null,
+    }));
+
+    const adminEmailBlurTrigger = screen.getByTestId('adminEmail-blur-trigger');
+    adminEmailBlurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'adminEmail',
+      checkoutIntentId: null,
+    }));
+
+    const countryBlurTrigger = screen.getByTestId('country-blur-trigger');
+    countryBlurTrigger.click();
+
+    expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      fieldName: 'country',
+      checkoutIntentId: null,
+    }));
   });
 });
