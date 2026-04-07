@@ -32,17 +32,13 @@ const mockUsePolledAuthenticatedUser = (
   usePolledAuthenticatedUser as jest.MockedFunction<typeof usePolledAuthenticatedUser>
 );
 
-// Mock window.location.href and window.open
-const originalLocation = window.location;
+// Mock window.open
 const originalOpen = window.open;
 beforeAll(() => {
-  delete (window as any).location;
-  window.location = { ...originalLocation, href: '' };
   window.open = jest.fn();
 });
 
 afterAll(() => {
-  window.location = originalLocation;
   window.open = originalOpen!;
 });
 
@@ -56,7 +52,6 @@ describe('StatefulProvisioningButton', () => {
       data: null,
       refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
     });
-    window.location.href = '';
   });
 
   const renderComponent = () => render(
