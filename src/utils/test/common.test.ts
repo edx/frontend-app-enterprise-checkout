@@ -85,7 +85,7 @@ describe('isExpired', () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: false });
-    jest.setSystemTime(fixedNow);
+    jest.setSystemTime(fixedNow.getTime());
   });
 
   afterEach(() => {
