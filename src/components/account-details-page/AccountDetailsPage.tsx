@@ -71,7 +71,6 @@ const AccountDetailsPage: React.FC = () => {
 
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
 
-
   const createCheckoutSessionMutation = useCreateCheckoutSessionMutation({
     onSuccess: (responseData) => {
       const applyCheckoutSessionClientSecretToCache = (secret: string) => {
