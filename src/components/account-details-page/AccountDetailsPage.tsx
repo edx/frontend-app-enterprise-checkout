@@ -69,6 +69,9 @@ const AccountDetailsPage: React.FC = () => {
     reset: formReset,
   } = form;
 
+  const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
+
+
   const createCheckoutSessionMutation = useCreateCheckoutSessionMutation({
     onSuccess: (responseData) => {
       const applyCheckoutSessionClientSecretToCache = (secret: string) => {
@@ -93,6 +96,7 @@ const AccountDetailsPage: React.FC = () => {
       };
 
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
+      setCheckoutSessionClientSecret(responseData.checkoutSessionClientSecret);
 
       const isEssentials = isEssentialsFlow();
       //     Removed the invalidateQueries() call
