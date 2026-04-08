@@ -386,18 +386,18 @@ describe('makeRootLoader (rootLoader) tests', () => {
       username: 'alice',
       country: 'US',
     };
-  
+
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
-  
+
     // Simulate post-registration flag
     sessionStorage.setItem('postRegister', 'true');
-  
+
     const loader = makeRootLoader(queryClient);
-  
+
     const result = await loader({
       request: makeRequest(CheckoutPageRoute.PlanDetails),
     } as any);
-  
+
     // Redirect happens
     expect(result).not.toBeNull();
     const res = result as any;
@@ -405,7 +405,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(res.headers.get('Location')).toBe(
       CheckoutPageRoute.AccountDetails,
     );
-  
+
     // postRegister is cleared
     expect(sessionStorage.getItem('postRegister')).toBeNull();
   });
@@ -416,9 +416,9 @@ describe('makeRootLoader (rootLoader) tests', () => {
       username: 'alice',
       country: 'US',
     };
-  
+
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
-  
+
     // ✅ ENABLE essentials feature for this test
     (getConfig as jest.Mock).mockReturnValue({
       FEATURE_SELF_SERVICE_PURCHASING: true,
@@ -427,22 +427,22 @@ describe('makeRootLoader (rootLoader) tests', () => {
       FEATURE_SELF_SERVICE_ESSENTIALS_KEY: null,
       FEATURE_SELF_SERVICE_SITE_KEY: null,
     });
-  
+
     sessionStorage.setItem('postRegister', 'true');
-  
+
     const loader = makeRootLoader(queryClient);
-  
+
     const result = await loader({
       request: makeRequest(EssentialsPageRoute.PlanDetails),
     } as any);
-  
+
     expect(result).not.toBeNull();
     const res = result as any;
     expect(res.status).toBe(302);
     expect(res.headers.get('Location')).toBe(
       EssentialsPageRoute.AccountDetails,
     );
-  
+
     expect(sessionStorage.getItem('postRegister')).toBeNull();
   });
   it('does not redirect when postRegister is true but path is not PlanDetails', async () => {
@@ -452,31 +452,30 @@ describe('makeRootLoader (rootLoader) tests', () => {
       username: 'alice',
       country: 'US',
     };
-  
+
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
-  
+
     (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
       existingSuccessfulCheckoutIntent: false,
       expiredCheckoutIntent: false,
     });
-  
+
     ensureSpy.mockResolvedValue({
       checkoutIntent: { state: 'requires_payment' },
     } as any);
-  
+
     sessionStorage.setItem('postRegister', 'true');
-  
+
     const loader = makeRootLoader(queryClient);
-  
+
     const result = await loader({
       request: makeRequest(CheckoutPageRoute.BillingDetails),
     } as any);
-  
+
     expect(result).toBeNull();
-  
+
     expect(sessionStorage.getItem('postRegister')).toBe('true');
   });
-  
 });
 
 describe('AppShell route shouldRevalidate', () => {
