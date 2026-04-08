@@ -163,7 +163,6 @@ const PlanDetailsPage = () => {
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
       });
-      navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
     },
     onError: (errorMessage) => {
       setIsSubmitting(false);
@@ -176,7 +175,6 @@ const PlanDetailsPage = () => {
 
   const registerMutation = useRegisterMutation({
     onSuccess: () => {
-      setIsSubmitting(false);
       sessionStorage.setItem('postRegister', 'true');
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
