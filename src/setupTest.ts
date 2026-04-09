@@ -29,6 +29,7 @@ const CONSOLE_FILTERS = {
   ],
   error: [
     'Support for defaultProps will be removed from function components',
+    'Warning: An update to',
   ],
 };
 
