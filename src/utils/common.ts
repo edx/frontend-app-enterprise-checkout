@@ -138,6 +138,12 @@ const sendEnterpriseCheckoutPageEvent = ({
   );
 };
 
+/**
+ * Returns true when the current session is operating in the Essentials flow.
+ * Reads from sessionStorage so it is safe to call from any client-side module.
+ */
+const isEssentialsFlow = (): boolean => sessionStorage.getItem('isEssentials') === 'true';
+
 // Feature flag validation
 const isFeatureEnabled = (enabled: boolean, featureKey?: string | null): boolean => {
   const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
@@ -164,4 +170,5 @@ export {
   sendEnterpriseCheckoutTrackingEvent,
   sendEnterpriseCheckoutPageEvent,
   isFeatureEnabled,
+  isEssentialsFlow,
 };
