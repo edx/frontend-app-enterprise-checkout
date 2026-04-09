@@ -11,7 +11,11 @@ const ErrorHeading = () => {
   return (
     <>
       <h2 className="text-center font-weight-normal mb-0">
-        Account Setup is Taking Longer Than Expected
+        <FormattedMessage
+          id="checkout.success.error.heading"
+          defaultMessage="Account Setup is Taking Longer Than Expected"
+          description="Heading text for delayed account setup"
+        />
       </h2>
       <p className="h4 font-weight-light text-center">
         <FormattedMessage
