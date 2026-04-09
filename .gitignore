@@ -20,5 +20,5 @@ temp/babel-plugin-react-intl
 /.vscode
 
 # LLMs and stuff
-CLAUDE.md
-.ralph/fix_plan.md
+.ralph/*
+.claude/settings.local.json
