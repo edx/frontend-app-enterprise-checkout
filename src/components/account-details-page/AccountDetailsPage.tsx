@@ -1,4 +1,5 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -8,10 +9,10 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
@@ -23,12 +24,15 @@ import {
   DataStoreKey,
   EssentialsPageRoute,
 } from '@/constants/checkout';
-import EVENT_NAMES from '@/constants/events';
+import EVENT_NAMES, {
+  PLAN_TYPE,
+} from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPageDetails,
 } from '@/hooks/index';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import useCurrentStep from '@/hooks/useCurrentStep';
+import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { isEssentialsFlow } from '../app/routes/loaders/utils';
 
@@ -37,6 +41,7 @@ import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 const AccountDetailsPage: React.FC = () => {
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
@@ -51,6 +56,38 @@ const AccountDetailsPage: React.FC = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+
+  const lastTrackedPathRef = useRef<string | null>(null);
+  const { currentStepKey } = useCurrentStep();
+
+  // Fire page view tracking event whenever the current step changes
+  useEffect(() => {
+    // Ensure that the current step is active in the stepper before firing the event
+    if (currentStepKey !== CheckoutStepKey.AccountDetails || lastTrackedPathRef.current === location.pathname) {
+      return;
+    }
+
+    // Avoid double counting: only fire once per pathname
+    try {
+      sendEnterpriseCheckoutPageEvent({
+        checkoutIntentId: checkoutIntent?.id ?? null,
+        category: 'enterprise_checkout',
+        name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+        properties: {
+          step: currentStepKey,
+          plan_type: PLAN_TYPE.TEAMS,
+          path: location.pathname,
+        },
+      });
+
+      lastTrackedPathRef.current = location.pathname;
+    } catch (error) {
+      logError(
+        `Failed to send page view tracking event for ${currentStepKey}`,
+        error,
+      );
+    }
+  }, [checkoutIntent?.id, currentStepKey, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.adminEmail)
@@ -95,12 +132,16 @@ const AccountDetailsPage: React.FC = () => {
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
 
       const isEssentials = isEssentialsFlow();
-
-      const queryKeysToInvalidate = [
-        queryBffContext(lmsUserId).queryKey,
-        queryBffSuccess(lmsUserId).queryKey,
-      ];
-      queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
+      //     Removed the invalidateQueries() call
+      //  The cache is already updated with the secret via setQueryData()
+      //  Secret is now persisted in the store
+      //  To avoid unnecessary refetch that loses the data
+      //
+      // const queryKeysToInvalidate = [
+      //   queryBffContext(lmsUserId).queryKey,
+      //   queryBffSuccess(lmsUserId).queryKey,
+      // ];
+      // queryKeysToInvalidate.forEach(queryKey => queryClient.invalidateQueries({ queryKey }));
 
       navigate(
         isEssentials

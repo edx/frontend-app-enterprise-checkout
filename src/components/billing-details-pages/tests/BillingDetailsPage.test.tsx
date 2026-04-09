@@ -31,6 +31,10 @@ jest.mock('@/components/app/data', () => ({
   useFirstBillableInvoice: jest.fn(),
 }));
 
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
+
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 const { useCheckoutIntent, useFirstBillableInvoice } = jest.requireMock('@/components/app/data');
 
