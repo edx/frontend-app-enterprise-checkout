@@ -14,7 +14,7 @@ describe('PurchaseSummaryHeader', () => {
     validateText('Purchase summary');
   });
 
-  it('renders dash when company name is absent', () => {
+  it('renders purchase summary when company name is absent', () => {
     renderWithI18n(<PurchaseSummaryHeader companyName={undefined} isEssentials />);
     validateText('Purchase summary');
   });
