@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import useTestimonials from '@/components/app/data/hooks/useTestimonials';
-import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
+import { isEssentialsFlow } from '@/utils/common';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 

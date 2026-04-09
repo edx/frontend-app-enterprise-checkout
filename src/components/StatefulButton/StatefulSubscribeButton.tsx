@@ -17,7 +17,7 @@ import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
-import { isEssentialsFlow } from '../app/routes/loaders/utils';
+import { isEssentialsFlow } from '@/utils/common';
 
 const variants = {
   default: 'secondary',
