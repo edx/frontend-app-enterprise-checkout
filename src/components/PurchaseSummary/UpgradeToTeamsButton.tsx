@@ -8,6 +8,7 @@ const UpgradeToTeamsButton: React.FC = () => (
     variant="primary"
     className="w-100"
     data-testid="upgrade-to-teams-button"
+    disabled
   >
     <Icon src={Lock} className="me-2" />
     <FormattedMessage
