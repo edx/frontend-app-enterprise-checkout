@@ -148,7 +148,6 @@ describe('OrderDetails', () => {
     });
   });
 
-
   describe('Admin contact information', () => {
     it('displays admin email from plan details form data', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
