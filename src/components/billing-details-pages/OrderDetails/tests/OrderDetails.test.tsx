@@ -112,6 +112,16 @@ describe('OrderDetails', () => {
   );
 
   describe('Basic rendering', () => {
+    it('returns null when firstBillableInvoice data is not available', () => {
+      (useFirstBillableInvoice as jest.Mock).mockReturnValue({
+        data: null,
+        isLoading: false,
+      });
+
+      const { container } = renderComponent();
+      expect(container.firstChild).toBeNull();
+    });
+
     it.each([
       ['the title', 'Order details'],
       ['the description', 'You have purchased an edX Team subscription.'],
@@ -137,6 +147,7 @@ describe('OrderDetails', () => {
       validateText('Billing address');
     });
   });
+
 
   describe('Admin contact information', () => {
     it('displays admin email from plan details form data', () => {
