@@ -1,11 +1,16 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
 import { Lock, Visibility, VisibilityOff } from '@openedx/paragon/icons';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 import { useCountryOptions } from '@/components/app/data';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { FieldContainer } from '@/components/FieldContainer';
 import Field from '@/components/FormFields/Field';
+import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
+import useCurrentStep from '@/hooks/useCurrentStep';
+import { trackFieldBlur } from '@/hooks/useFieldTracking';
 
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -106,6 +111,11 @@ export const RegisterAccountFullName = ({ form }: { form: UseFormReturn<PlanDeta
 // Username field (basic field only; suggestions handled elsewhere if needed)
 export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDetailsRegisterPageData> }) => {
   const intl = useIntl();
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
+
   return (
     <Field
       form={form}
@@ -123,6 +133,15 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
         description: 'Placeholder for the username input field',
       })}
       controlClassName="mr-0"
+      onBlur={() => trackFieldBlur({
+        fieldName: TRACKED_FIELDS.USERNAME,
+        step: currentStepKey,
+        substep: currentSubstepKey,
+        checkoutIntentId,
+        additionalProperties: {
+          plan_type: PLAN_TYPE.TEAMS,
+        },
+      })}
     />
   );
 };
@@ -132,6 +151,11 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
   const intl = useIntl();
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword((s) => !s);
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
+  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
+
   return (
     <Field
       form={form}
@@ -162,6 +186,15 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
           }
         },
       }}
+      onBlur={() => trackFieldBlur({
+        fieldName: TRACKED_FIELDS.PASSWORD,
+        step: currentStepKey,
+        substep: currentSubstepKey,
+        checkoutIntentId,
+        additionalProperties: {
+          plan_type: PLAN_TYPE.TEAMS,
+        },
+      })}
     />
   );
 };

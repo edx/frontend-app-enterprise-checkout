@@ -5,7 +5,7 @@ import { StatefulButton } from '@openedx/paragon';
 import { CheckoutContextValue, useCheckout } from '@stripe/react-stripe-js';
 import { StripeCheckoutStatus } from '@stripe/stripe-js';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent } from '@/components/app/data';
@@ -61,7 +61,7 @@ const StatefulSubscribeButton = () => {
   const [errorMessageKey, setErrorMessageKey] = useState('fallback');
   const { data: checkoutIntent } = useCheckoutIntent();
   const intl = useIntl();
-
+  const hasNavigatedRef = useRef(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
@@ -118,42 +118,51 @@ const StatefulSubscribeButton = () => {
   };
 
   useEffect(() => {
-    if (statefulButtonState === 'success') {
-      // If the payment succeeded, update the checkout session status.
-      if (status.type === 'complete' && status.paymentStatus === 'paid') {
-        setCheckoutSessionStatus(status);
-        queryClient.invalidateQueries({
-          queryKey: queryBffContext(
-            authenticatedUser.userId ?? null,
-          ).queryKey,
+    if (statefulButtonState !== 'success' || hasNavigatedRef.current) {
+      return;
+    }
+
+    if (status.type === 'complete' && status.paymentStatus === 'paid') {
+      hasNavigatedRef.current = true;
+
+      // 1. Persist checkout completion
+      setCheckoutSessionStatus(status);
+
+      // 2. Refresh BFF context
+      queryClient
+        .invalidateQueries({
+          queryKey: queryBffContext(authenticatedUser.userId ?? null).queryKey,
         })
-          .then(data => data)
-          .catch(error => logError(error));
-        sendEnterpriseCheckoutTrackingEvent({
-          checkoutIntentId: checkoutIntent?.id ?? null,
-          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
-        });
-        const isEssentials = isEssentialsFlow();
-        navigate(
-          isEssentials
-            ? EssentialsPageRoute.BillingDetailsSuccess
-            : CheckoutPageRoute.BillingDetailsSuccess,
-        );
-      } else {
-        // Fallback if the payment succeeded but the intent
-        // status is not complete or paymentStatus is not paid. from Stripe.
-        setStatefulButtonState('error');
-        setErrorMessageKey('fallback');
-      }
+        .catch((error) => logError(error));
+
+      // 3. Tracking
+      sendEnterpriseCheckoutTrackingEvent({
+        checkoutIntentId: checkoutIntent?.id ?? null,
+        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
+      });
+
+      // 4. Navigate ONCE
+      const isEssentials = isEssentialsFlow();
+
+      navigate(
+        isEssentials
+          ? EssentialsPageRoute.BillingDetailsSuccess
+          : CheckoutPageRoute.BillingDetailsSuccess,
+        { replace: true },
+      );
+    } else {
+      // Stripe fallback
+      setStatefulButtonState('error');
+      setErrorMessageKey('fallback');
     }
   }, [
     statefulButtonState,
     status,
     setCheckoutSessionStatus,
     queryClient,
-    authenticatedUser,
-    navigate,
+    authenticatedUser?.userId,
     checkoutIntent?.id,
+    navigate,
   ]);
 
   const props = {

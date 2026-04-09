@@ -11,7 +11,7 @@ import {
 /**
  * Determines the step identifiers from the given URL params.
  */
-function getStepFromParams(params) {
+export function getStepFromParams(params) {
   const {
     step: currentStepKey,
     substep: currentSubstepKey,
@@ -32,7 +32,7 @@ function getStepFromParams(params) {
 /**
  * Determines the current checkout page name & details based on the step names.
  */
-function getCheckoutPageDetails(
+export function getCheckoutPageDetails(
   {
     step,
     substep,
@@ -51,24 +51,17 @@ function getCheckoutPageDetails(
   return null;
 }
 
-const extractPriceObject = (pricing: CheckoutContextPricing): CheckoutContextPrice | null => {
+export const extractPriceObject = (pricing: CheckoutContextPricing): CheckoutContextPrice | null => {
   if (!pricing.prices.length) {
     return null;
   }
   return pricing.prices.find((price) => price.lookupKey.includes(pricing.defaultByLookupKey)) ?? null;
 };
 
-const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContextPrice['id'] | null => {
+export const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContextPrice['id'] | null => {
   if (!pricing.prices.length) {
     return null;
   }
   const matched = extractPriceObject(pricing);
   return matched?.id ?? null;
-};
-
-export {
-  getStepFromParams,
-  getCheckoutPageDetails,
-  extractPriceId,
-  extractPriceObject,
 };

@@ -2,12 +2,15 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+// eslint-disable-next-line import/order
+import { sendPageEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { CheckoutPageRoute, DataStoreKey } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { renderStepperRoute } from '@/utils/tests';
 
@@ -70,21 +73,26 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@edx/frontend-platform/config', () => ({
-  getConfig: jest.fn().mockReturnValue({
+  getConfig: jest.fn(() => ({
     TERMS_OF_SERVICE_URL: 'https://example.com/terms',
     PRIVACY_POLICY_URL: 'https://example.com/privacy',
     RECAPTCHA_SITE_KEY_WEB: 'test-recaptcha-key',
-  }),
-}));
-
-jest.mock('@edx/frontend-platform/config', () => ({
-  getConfig: jest.fn(() => ({
     FEATURE_SELF_SERVICE_PURCHASING: true,
     FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test-key',
     FEATURE_SELF_SERVICE_ESSENTIALS: true,
     FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
     FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
   })),
+}));
+
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+  logInfo: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({
+  sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 jest.mock('@/components/app/data/hooks/useBFFContext');
@@ -159,6 +167,34 @@ describe('PlanDetailsPage', () => {
   it('renders the title correctly', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetails);
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Plan Details');
+  });
+
+  it('fires page view tracking event for PlanDetails step', () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetails);
+
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutStepKey.PlanDetails,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
+  });
+
+  it('fires page view tracking event for Registration step (Register)', () => {
+    // Navigate to Register substep
+    renderStepperRoute(`${CheckoutPageRoute.PlanDetails}/register`);
+
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutStepKey.PlanDetails,
+        substep: CheckoutSubstepKey.Register,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
   });
 
   it('renders the continue button correctly', () => {

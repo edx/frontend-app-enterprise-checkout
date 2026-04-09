@@ -1,3 +1,4 @@
+import { sendPageEvent } from '@edx/frontend-platform/analytics';
 import { useQueryClient } from '@tanstack/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -6,7 +7,8 @@ import userEvent from '@testing-library/user-event';
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutStepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
+import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { renderStepperRoute } from '@/utils/tests';
@@ -20,6 +22,16 @@ jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useCheckoutIntent: jest.fn(),
   useFormValidationConstraints: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+  logInfo: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({
+  sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 jest.mock('@tanstack/react-query', () => ({
@@ -373,6 +385,14 @@ describe('AccountDetailsPage', () => {
       },
     });
 
+    expect(sendPageEvent).toHaveBeenCalledWith(
+      'enterprise_checkout',
+      EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+      expect.objectContaining({
+        step: CheckoutStepKey.AccountDetails,
+        plan_type: PLAN_TYPE.TEAMS,
+      }),
+    );
     await user.click(screen.getByTestId('stepper-submit-button'));
 
     await waitFor(() => {
