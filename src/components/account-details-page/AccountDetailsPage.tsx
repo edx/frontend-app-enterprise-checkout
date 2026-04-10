@@ -32,9 +32,7 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
-import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
-
-import { isEssentialsFlow } from '../app/routes/loaders/utils';
+import { isEssentialsFlow, sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
 

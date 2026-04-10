@@ -5,10 +5,12 @@ import { CheckoutPageRoute } from '@/constants/checkout';
 
 import EditPlanButton from './EditPlanButton';
 import ReceiptButton from './ReceiptButton';
+import UpgradeToTeamsButton from './UpgradeToTeamsButton';
 
 const BUTTON_TYPES = {
   EDIT: 'edit',
   RECEIPT: 'receipt',
+  UPGRADE: 'upgrade',
   NONE: 'none',
 } as const;
 
@@ -26,15 +28,25 @@ const ROUTE_BUTTON_MAP: Record<string, ButtonType> = {
 const BUTTON_COMPONENTS: Record<ButtonType, React.ComponentType | null> = {
   [BUTTON_TYPES.EDIT]: EditPlanButton,
   [BUTTON_TYPES.RECEIPT]: ReceiptButton,
+  [BUTTON_TYPES.UPGRADE]: UpgradeToTeamsButton,
   [BUTTON_TYPES.NONE]: null,
 };
 
-const PurchaseSummaryCardButton: React.FC = () => {
+interface PurchaseSummaryCardButtonProps {
+  isEssentials?: boolean;
+}
+
+const PurchaseSummaryCardButton: React.FC<PurchaseSummaryCardButtonProps> = ({ isEssentials }) => {
   const location = useLocation();
 
   const buttonType = useMemo(
-    (): ButtonType => ROUTE_BUTTON_MAP[location.pathname] ?? BUTTON_TYPES.NONE,
-    [location.pathname],
+    (): ButtonType => {
+      if (isEssentials) {
+        return BUTTON_TYPES.UPGRADE;
+      }
+      return ROUTE_BUTTON_MAP[location.pathname] ?? BUTTON_TYPES.NONE;
+    },
+    [location.pathname, isEssentials],
   );
 
   const ButtonComponent = BUTTON_COMPONENTS[buttonType];

@@ -7,11 +7,18 @@ import SummaryRow from './SummaryRow';
 
 interface PricePerUserRowProps {
   pricePerUser?: number | null;
+  isEssentials?: boolean;
 }
 
-const PricePerUserRowComponent: React.FC<PricePerUserRowProps> = ({ pricePerUser }) => (
+const PricePerUserRowComponent: React.FC<PricePerUserRowProps> = ({ pricePerUser, isEssentials }) => (
   <SummaryRow
-    label={(
+    label={isEssentials ? (
+      <FormattedMessage
+        id="checkout.purchaseSummary.essentialsPricePerUser.text"
+        defaultMessage="Essentials subscription, price per user, paid yearly"
+        description="Label for the essentials plan per user per year"
+      />
+    ) : (
       <FormattedMessage
         id="checkout.purchaseSummary.yearlyPricePerUser.text"
         defaultMessage="Team Subscription, price per user, paid yearly"

@@ -22,9 +22,7 @@ import {
 } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
-
-import { isEssentialsFlow } from '../app/routes/loaders/utils';
+import { isEssentialsFlow, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const BillingDetailsPage: React.FC = () => {
   const navigate = useNavigate();

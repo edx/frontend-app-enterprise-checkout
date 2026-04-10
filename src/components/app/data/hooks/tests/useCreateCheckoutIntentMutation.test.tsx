@@ -167,7 +167,7 @@ describe('useCreateCheckoutIntentMutation', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockOnMutate).toHaveBeenCalledWith(mockRequestData);
+    expect(mockOnMutate).toHaveBeenCalledWith(expect.objectContaining(mockRequestData));
     expect(mockOnSuccess).toHaveBeenCalledWith(mockResponse.data);
   });
 

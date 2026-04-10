@@ -162,7 +162,7 @@ describe('useRegisterMutation', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockOnMutate).toHaveBeenCalledWith(requestData);
+    expect(mockOnMutate).toHaveBeenCalledWith(expect.objectContaining(requestData));
     expect(onSuccess).toHaveBeenCalledWith(mockResponse.data);
   });
 

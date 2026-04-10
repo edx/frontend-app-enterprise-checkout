@@ -11,6 +11,9 @@ import {
   PlanDetailsSchema,
 } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { isEssentialsFlow } from '@/utils/common';
+
+export { isEssentialsFlow };
 
 /**
  * Parameters for populateInitialApplicationState.
@@ -37,9 +40,6 @@ interface DetermineExistingPaidCheckoutIntent {
    */
   expiredCheckoutIntent: boolean;
 }
-
-// For Essentials flow check
-export const isEssentialsFlow = (): boolean => sessionStorage.getItem('isEssentials') === 'true';
 
 /**
  * Computes a compact state object from an optional checkout intent.

@@ -60,7 +60,7 @@ describe('PurchaseSummary', () => {
     renderWithProviders();
 
     expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    expect(screen.getByText('For Acme')).toBeInTheDocument();
+    expect(screen.getByText('Acme • Team subscription, price per user, paid yearly.')).toBeInTheDocument();
     expect(screen.getByText('Team Subscription, price per user, paid yearly')).toBeInTheDocument();
     expect(screen.getByText('$50 USD')).toBeInTheDocument();
     expect(screen.getByText('Number of licenses')).toBeInTheDocument();
