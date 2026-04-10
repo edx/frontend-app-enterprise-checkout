@@ -14,6 +14,7 @@ interface TrackFieldBlurParams {
   step: CheckoutStepKey | undefined;
   substep?: CheckoutSubstepKey | null;
   checkoutIntentId: number | null;
+  checkoutIntentUuid: string | null;
   additionalProperties?: Record<string, any>;
 }
 
@@ -27,6 +28,7 @@ interface TrackFieldBlurParams {
  *   fieldName: 'fullName',
  *   step: 'plan_details',
  *   checkoutIntentId: 123,
+ *   checkoutIntentUuid: 'abc-123-def-456',
  *   additionalProperties: { plan_type: 'teams' }
  * })} />
  */
@@ -35,6 +37,7 @@ export const trackFieldBlur = ({
   step,
   substep,
   checkoutIntentId = null,
+  checkoutIntentUuid = null,
   additionalProperties = {},
 }: TrackFieldBlurParams): void => {
   try {
@@ -44,6 +47,7 @@ export const trackFieldBlur = ({
 
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId,
+      checkoutIntentUuid,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step,

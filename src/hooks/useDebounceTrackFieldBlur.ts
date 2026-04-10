@@ -9,6 +9,7 @@ interface TrackDebouncedFieldBlurParams {
   step: CheckoutStepKey | undefined;
   substep?: CheckoutSubstepKey | null;
   checkoutIntentId: number | null;
+  checkoutIntentUuid: string | null;
   additionalProperties?: Record<string, any>;
   debounceMs?: number;
 }
@@ -27,6 +28,7 @@ let timeoutId: NodeJS.Timeout | null = null;
  *   fieldName: 'urlSlug',
  *   step: 'account_details',
  *   checkoutIntentId: 123,
+ *   checkoutIntentUuid: 'abc-123-def-456',
  *   additionalProperties: { plan_type: 'teams', org_slug: 'my-org' },
  *   debounceMs: 500
  * })} />
@@ -36,6 +38,7 @@ export const trackDebouncedFieldBlur = ({
   step,
   substep,
   checkoutIntentId,
+  checkoutIntentUuid,
   additionalProperties = {},
   debounceMs = 500,
 }: TrackDebouncedFieldBlurParams): void => {
@@ -49,6 +52,7 @@ export const trackDebouncedFieldBlur = ({
     try {
       sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId,
+        checkoutIntentUuid,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
         properties: {
           step,

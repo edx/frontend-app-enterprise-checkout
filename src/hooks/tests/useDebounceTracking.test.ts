@@ -33,6 +33,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 456,
+      checkoutIntentUuid: 'test-uuid-456',
       additionalProperties: { plan_type: 'teams', org_slug: 'my-org' },
     });
 
@@ -52,6 +53,7 @@ describe('trackDebouncedFieldBlur', () => {
     expect(mockSendEvent).toHaveBeenCalledTimes(1);
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 456,
+      checkoutIntentUuid: 'test-uuid-456',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.AccountDetails,
@@ -67,6 +69,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'customField',
       step: CheckoutStepKey.PlanDetails,
       checkoutIntentId: 789,
+      checkoutIntentUuid: 'test-uuid-789',
       debounceMs: 1000,
     });
 
@@ -89,6 +92,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 100,
+      checkoutIntentUuid: 'test-uuid-100',
       debounceMs: 500,
     });
 
@@ -98,6 +102,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 100,
+      checkoutIntentUuid: 'test-uuid-100',
       debounceMs: 500,
     });
 
@@ -107,6 +112,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 100,
+      checkoutIntentUuid: 'test-uuid-100',
       debounceMs: 500,
     });
 
@@ -129,12 +135,14 @@ describe('trackDebouncedFieldBlur', () => {
       step: CheckoutStepKey.PlanDetails,
       substep: CheckoutSubstepKey.Register,
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
     });
 
     jest.advanceTimersByTime(500);
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -154,6 +162,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 200,
+      checkoutIntentUuid: 'test-uuid-200',
     });
 
     jest.advanceTimersByTime(500);
@@ -171,12 +180,14 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'simpleField',
       step: CheckoutStepKey.PlanDetails,
       checkoutIntentId: 400,
+      checkoutIntentUuid: 'test-uuid-400',
     });
 
     jest.advanceTimersByTime(500);
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 400,
+      checkoutIntentUuid: 'test-uuid-400',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -191,6 +202,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 700,
+      checkoutIntentUuid: 'test-uuid-700',
       debounceMs: 300,
     });
 
@@ -203,6 +215,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 700,
+      checkoutIntentUuid: 'test-uuid-700',
       debounceMs: 300,
     });
 
@@ -215,6 +228,7 @@ describe('trackDebouncedFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 700,
+      checkoutIntentUuid: 'test-uuid-700',
       debounceMs: 300,
     });
 

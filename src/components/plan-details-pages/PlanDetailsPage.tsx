@@ -71,7 +71,8 @@ const PlanDetailsPage = () => {
 
   // Get checkout context for tracking
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
-  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const checkoutIntentId = bffContext?.checkoutIntent?.id ?? null;
+  const checkoutIntentUuid = bffContext?.checkoutIntent?.uuid ?? null;
 
   const lastTrackedPathRef = useRef<string | null>(null);
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
@@ -86,6 +87,7 @@ const PlanDetailsPage = () => {
     try {
       sendEnterpriseCheckoutPageEvent({
         checkoutIntentId,
+        checkoutIntentUuid,
         category: 'enterprise_checkout',
         name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
@@ -100,7 +102,7 @@ const PlanDetailsPage = () => {
     } catch (error) {
       logError(`Failed to send page view tracking event for ${location.pathname}`, error);
     }
-  }, [checkoutIntentId, currentStepKey, currentSubstepKey, location.pathname]);
+  }, [checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname]);
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
@@ -139,6 +141,7 @@ const PlanDetailsPage = () => {
       try {
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId,
+          checkoutIntentUuid,
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
           properties: {
             step: currentStepKey,

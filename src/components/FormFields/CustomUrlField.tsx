@@ -19,7 +19,8 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
   const intl = useIntl();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
-  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const checkoutIntentId = bffContext?.checkoutIntent?.id ?? null;
+  const checkoutIntentUuid = bffContext?.checkoutIntent?.uuid ?? null;
 
   // Get the current value of the enterpriseSlug field for org_slug property
   const enterpriseSlugValue = form.watch('enterpriseSlug') || '';
@@ -60,6 +61,7 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
               fieldName: TRACKED_FIELDS.URL_SLUG,
               step: CheckoutStepKey.AccountDetails,
               checkoutIntentId,
+              checkoutIntentUuid,
               additionalProperties: {
                 plan_type: PLAN_TYPE.TEAMS,
                 org_slug: enterpriseSlugValue,
