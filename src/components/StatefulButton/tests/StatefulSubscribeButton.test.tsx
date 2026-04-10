@@ -374,6 +374,7 @@ describe('StatefulSubscribeButton', () => {
         expect(mockInvalidateQueries).toHaveBeenCalled();
         expect(jest.mocked(sendEnterpriseCheckoutTrackingEvent)).toHaveBeenCalledWith({
           checkoutIntentId: 1234,
+          checkoutIntentUuid: 'test-intent-uuid',
           eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
         });
         expect(mockNavigate).toHaveBeenCalledWith('/billing-details/success', { replace: true });

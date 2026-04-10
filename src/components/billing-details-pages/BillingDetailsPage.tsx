@@ -57,6 +57,7 @@ const BillingDetailsPage: React.FC = () => {
   const onSubmit = async (data: BillingDetailsData) => {
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId: checkoutIntent?.id ?? null,
+      checkoutIntentUuid: checkoutIntent?.uuid ?? null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED,
     });
 

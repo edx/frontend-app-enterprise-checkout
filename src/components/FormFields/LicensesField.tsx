@@ -20,7 +20,8 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
   const intl = useIntl();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
-  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const checkoutIntentId = bffContext?.checkoutIntent?.id ?? null;
+  const checkoutIntentUuid = bffContext?.checkoutIntent?.uuid ?? null;
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
@@ -62,6 +63,7 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
           step: currentStepKey,
           substep: currentSubstepKey,
           checkoutIntentId,
+          checkoutIntentUuid,
           additionalProperties: {
             plan_type: PLAN_TYPE.TEAMS,
           },

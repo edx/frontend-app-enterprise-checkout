@@ -138,6 +138,7 @@ const StatefulSubscribeButton = () => {
       // 3. Tracking
       sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
+        checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
       });
 
@@ -162,6 +163,7 @@ const StatefulSubscribeButton = () => {
     queryClient,
     authenticatedUser?.userId,
     checkoutIntent?.id,
+    checkoutIntent?.uuid,
     navigate,
   ]);
 

@@ -77,6 +77,7 @@ const SubscriptionStartMessage = () => {
                 <a
                   onClick={() => sendEnterpriseCheckoutTrackingEvent({
                     checkoutIntentId: checkoutIntent?.id ?? null,
+                    checkoutIntentUuid: checkoutIntent?.uuid ?? null,
                     eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
                     properties: {
                       billingPortalSessionUrl: billingPortalSession?.url,

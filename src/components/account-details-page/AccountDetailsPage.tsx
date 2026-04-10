@@ -77,6 +77,7 @@ const AccountDetailsPage: React.FC = () => {
     try {
       sendEnterpriseCheckoutPageEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
+        checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         category: 'enterprise_checkout',
         name: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
         properties: {
@@ -93,7 +94,7 @@ const AccountDetailsPage: React.FC = () => {
         error,
       );
     }
-  }, [checkoutIntent?.id, currentStepKey, location.pathname]);
+  }, [checkoutIntent?.id, checkoutIntent?.uuid, currentStepKey, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, planDetailsFormData.adminEmail)
@@ -234,6 +235,7 @@ const AccountDetailsPage: React.FC = () => {
 
     sendEnterpriseCheckoutTrackingEvent({
       checkoutIntentId: checkoutIntent?.id ?? null,
+      checkoutIntentUuid: checkoutIntent?.uuid ?? null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.ACCOUNT_DETAILS_CONTINUE_BUTTON_CLICKED,
     });
 
