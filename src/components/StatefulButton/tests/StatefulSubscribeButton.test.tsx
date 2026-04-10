@@ -9,10 +9,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { termsAndConditions } from '@/components/app/data/constants';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
-import { isEssentialsFlow } from '@/utils/common';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import { isEssentialsFlow, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import StatefulSubscribeButton from '../StatefulSubscribeButton';
 
