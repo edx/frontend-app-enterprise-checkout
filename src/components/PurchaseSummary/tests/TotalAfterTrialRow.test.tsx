@@ -20,7 +20,7 @@ describe('TotalAfterTrialRow', () => {
   }: { quantity?: number | null, totalPerYear?: number | null }) => {
     renderWithI18n(<TotalAfterTrialRow quantity={quantity} totalPerYear={totalPerYear} />);
     validateText(`Total after ${SUBSCRIPTION_TRIAL_LENGTH_DAYS}-day free trial`);
-    validateText('-/yr');
+    validateText(/-\/yr/);
   });
 
   it('shows formatted total with USD and /yr when quantity > 0', () => {
