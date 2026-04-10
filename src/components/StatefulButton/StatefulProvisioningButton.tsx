@@ -46,8 +46,8 @@ const StatefulProvisioningButton = () => {
     // Should read adminPortalUrl from polledCheckoutIntent once it is updated to include it.
     const adminRegisterUrl = `${checkoutIntent!.adminPortalUrl}/admin/subscriptions/manage-learners/`;
     sendEnterpriseCheckoutTrackingEvent({
-      // TODO: Transition to tracking CheckoutIntent UUID instead of ID.
       checkoutIntentId: checkoutIntent?.id ?? null,
+      checkoutIntentUuid: checkoutIntent?.uuid ?? null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.GO_TO_DASHBOARD_BUTTON_CLICKED,
       properties: {
         adminPortalUrl: adminRegisterUrl,

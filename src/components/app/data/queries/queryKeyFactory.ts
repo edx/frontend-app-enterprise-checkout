@@ -28,11 +28,14 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
     queryKey: [fields],
     queryFn: () => createCheckoutSession(payload),
   }),
-  checkoutIntent: (idOrUuid) => ({
-    queryKey: [idOrUuid],
+  // CheckoutIntent lookup by UUID (preferred) or ID (legacy fallback).
+  // UUID is preferred for security (IDs are sequential/guessable).
+  // Detects UUID by checking if the identifier is a string containing '-'.
+  checkoutIntent: (uuidOrId) => ({
+    queryKey: [uuidOrId],
     queryFn: () => {
-      const isUuid = typeof idOrUuid === 'string' && idOrUuid.includes('-');
-      return fetchCheckoutIntent(isUuid ? { uuid: idOrUuid } : { id: idOrUuid });
+      const isUuid = typeof uuidOrId === 'string' && uuidOrId.includes('-');
+      return fetchCheckoutIntent(isUuid ? { uuid: uuidOrId } : { id: uuidOrId });
     },
   }),
   createBillingPortalSession: (checkoutIntentId) => ({

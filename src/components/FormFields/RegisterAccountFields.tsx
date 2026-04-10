@@ -113,7 +113,8 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
   const intl = useIntl();
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
-  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const checkoutIntentId = bffContext?.checkoutIntent?.id ?? null;
+  const checkoutIntentUuid = bffContext?.checkoutIntent?.uuid ?? null;
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
@@ -138,6 +139,7 @@ export const RegisterAccountUsername = ({ form }: { form: UseFormReturn<PlanDeta
         step: currentStepKey,
         substep: currentSubstepKey,
         checkoutIntentId,
+        checkoutIntentUuid,
         additionalProperties: {
           plan_type: PLAN_TYPE.TEAMS,
         },
@@ -153,7 +155,8 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
   const togglePasswordVisibility = () => setShowPassword((s) => !s);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const { data: bffContext } = useBFFContext(authenticatedUser?.userId || null);
-  const checkoutIntentId = bffContext?.checkoutIntent?.id || null;
+  const checkoutIntentId = bffContext?.checkoutIntent?.id ?? null;
+  const checkoutIntentUuid = bffContext?.checkoutIntent?.uuid ?? null;
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
 
   return (
@@ -191,6 +194,7 @@ export const RegisterAccountPassword = ({ form }: { form: UseFormReturn<PlanDeta
         step: currentStepKey,
         substep: currentSubstepKey,
         checkoutIntentId,
+        checkoutIntentUuid,
         additionalProperties: {
           plan_type: PLAN_TYPE.TEAMS,
         },

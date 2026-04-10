@@ -51,6 +51,7 @@ describe('TermsAndConditionsCheckboxes', () => {
     (useCheckoutIntent as jest.Mock).mockReturnValue({
       data: {
         id: 1,
+        uuid: 'test-uuid-1',
         foo: 'bar',
       },
     });
@@ -84,6 +85,7 @@ describe('TermsAndConditionsCheckboxes', () => {
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
       checkoutIntentId: 1,
+      checkoutIntentUuid: 'test-uuid-1',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       properties: expect.objectContaining({
         checkbox_checked: true,
@@ -99,6 +101,7 @@ describe('TermsAndConditionsCheckboxes', () => {
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
       checkoutIntentId: 1,
+      checkoutIntentUuid: 'test-uuid-1',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_SUBSCRIPTION_TERMS,
       properties: expect.objectContaining({
         checkbox_checked: true,
@@ -117,6 +120,7 @@ describe('TermsAndConditionsCheckboxes', () => {
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.TOGGLE_TNC_TERMS,
       properties: expect.objectContaining({
         checkbox_checked: true,
