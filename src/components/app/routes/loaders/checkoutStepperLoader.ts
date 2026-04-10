@@ -133,7 +133,10 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
     return redirect(invalidRoute);
   }
 
-  const checkoutSessionClientSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
+  // const checkoutSessionClientSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
+  const formStoreSecret = checkoutFormStore.getState().checkoutSessionClientSecret;
+  const contextSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
+  const checkoutSessionClientSecret = formStoreSecret || contextSecret;
   if (!checkoutSessionClientSecret) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
