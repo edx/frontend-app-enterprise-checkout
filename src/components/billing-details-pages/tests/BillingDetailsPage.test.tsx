@@ -232,7 +232,7 @@ describe('BillingDetailsSuccessPage', () => {
       },
     });
     validateText('Order details');
-    validateText('You have purchased an edX team\'s subscription.');
+    validateText('You have purchased an edX Team subscription.');
   });
 
   it('renders the SuccessHeading component', async () => {
@@ -242,7 +242,7 @@ describe('BillingDetailsSuccessPage', () => {
         userId: 12345,
       },
     });
-    await waitFor(() => validateText((content) => content.includes('Welcome to edX for Teams!')));
+    await waitFor(() => validateText((content) => content.includes('Welcome to edX for Team')));
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
   });
 });

@@ -28,6 +28,8 @@ const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFuncti
 
 describe('SubscriptionStartMessage', () => {
   beforeEach(() => {
+    // Reset sessionStorage between tests
+    sessionStorage.clear();
     // Mock the hook to return data that will render "June 9th, 2025"
     (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
       data: {
@@ -63,9 +65,15 @@ describe('SubscriptionStartMessage', () => {
     </IntlProvider>,
   );
 
-  it('renders the title correctly', () => {
+  it('renders the title correctly for Teams flow', () => {
     renderComponent();
-    validateText('Your free 14-day trial for edX Team\'s subscription has started.');
+    validateText('Your free 14-day trial for edX Team subscription has started.');
+  });
+
+  it('renders the title correctly for Essentials flow', () => {
+    sessionStorage.setItem('isEssentials', 'true');
+    renderComponent();
+    validateText('Your free 14-day trial for edX Essentials subscription has started.');
   });
 
   it('renders the description message correctly', () => {

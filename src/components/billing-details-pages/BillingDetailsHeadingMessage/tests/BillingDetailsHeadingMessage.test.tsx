@@ -53,7 +53,7 @@ describe('BillingDetailsHeadingMessage', () => {
     } as any);
 
     renderComponent();
-    expect(screen.getByText(/Welcome to edX for Teams!/)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
     expect(screen.getByText(/Go to your administrator dashboard/)).toBeInTheDocument();
   });
 
@@ -66,7 +66,20 @@ describe('BillingDetailsHeadingMessage', () => {
     } as any);
 
     renderComponent();
-    expect(screen.getByText(/Welcome to edX for Teams!/)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
+    expect(screen.getByText(/Your account is currently being configured/)).toBeInTheDocument();
+  });
+
+  it('renders PendingHeading when checkout is created and user is active', () => {
+    mockUsePolledCheckoutIntent.mockReturnValue({
+      polledCheckoutIntent: { state: 'created' },
+    } as any);
+    mockUsePolledAuthenticatedUser.mockReturnValue({
+      polledAuthenticatedUser: { isActive: true },
+    } as any);
+
+    renderComponent();
+    expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
     expect(screen.getByText(/Your account is currently being configured/)).toBeInTheDocument();
   });
 
@@ -119,7 +132,8 @@ describe('BillingDetailsHeadingMessage', () => {
     renderComponent();
     // Should only render the image, no heading text
     expect(screen.getByRole('img')).toBeInTheDocument();
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Go to your administrator dashboard/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Your account is currently being configured/)).not.toBeInTheDocument();
   });
 
   it('renders nothing when checkout intent is undefined', () => {
@@ -133,6 +147,7 @@ describe('BillingDetailsHeadingMessage', () => {
     renderComponent();
     // Should only render the image, no heading text
     expect(screen.getByRole('img')).toBeInTheDocument();
-    expect(screen.queryByText(/Welcome to edX for Teams!/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Go to your administrator dashboard/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Your account is currently being configured/)).not.toBeInTheDocument();
   });
 });

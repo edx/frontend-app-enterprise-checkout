@@ -8,6 +8,7 @@ import {
   usePurchaseSummaryPricing,
 } from '@/components/app/data';
 import { LONG_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
+import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { DisplayPrice } from '@/components/DisplayPrice';
 import { FieldContainer } from '@/components/FieldContainer';
 import EVENT_NAMES from '@/constants/events';
@@ -27,6 +28,7 @@ const messages = defineMessages({
 
 const SubscriptionStartMessage = () => {
   const intl = useIntl();
+  const isEssentials = isEssentialsFlow();
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
   // TODO: Add this endpoint to the success page loader
   const { data: billingPortalSession } = useCreateBillingPortalSession();
@@ -53,10 +55,11 @@ const SubscriptionStartMessage = () => {
         <h3>
           <FormattedMessage
             id="checkout.freeTrialSubscriptionStartMessage.title"
-            defaultMessage="Your free {trialDays}-day trial for edX Team's subscription has started."
+            defaultMessage="Your free {trialDays}-day trial for {productName} subscription has started."
             description="Title for the free trial success field section"
             values={{
               trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
+              productName: isEssentials ? 'edX Essentials' : 'edX Team',
             }}
           />
         </h3>
