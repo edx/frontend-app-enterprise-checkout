@@ -342,9 +342,10 @@ describe('OrderDetails', () => {
     it('sends tracking event when contact support link is clicked', () => {
       const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
       const mockCheckoutIntentId = 'test-checkout-intent-123';
+      const mockCheckoutIntentUuid = 'test-checkout-intent-uuid-123';
 
       (useCheckoutIntent as jest.Mock).mockReturnValue({
-        data: { id: mockCheckoutIntentId },
+        data: { id: mockCheckoutIntentId, uuid: mockCheckoutIntentUuid },
         isLoading: false,
       });
 
@@ -360,6 +361,7 @@ describe('OrderDetails', () => {
 
       expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
         checkoutIntentId: mockCheckoutIntentId,
+        checkoutIntentUuid: mockCheckoutIntentUuid,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CONTACT_SUPPORT_LINK_CLICKED,
       });
     });

@@ -56,6 +56,7 @@ describe('BillingDetailsPage', () => {
     (useCheckoutIntent as jest.Mock).mockReturnValue({
       data: {
         id: 'test-checkout-intent-id',
+        uuid: 'test-checkout-intent-uuid',
         foo: 'bar',
       },
     });
@@ -118,6 +119,7 @@ describe('BillingDetailsPage', () => {
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalledWith({
       checkoutIntentId: 'test-checkout-intent-id',
+      checkoutIntentUuid: 'test-checkout-intent-uuid',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.BILLING_DETAILS_SUBSCRIBE_BUTTON_CLICKED,
     });
   });

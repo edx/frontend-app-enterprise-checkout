@@ -24,6 +24,7 @@ const ContactSupport = () => {
                 rel="noopener noreferrer"
                 onClick={() => sendEnterpriseCheckoutTrackingEvent({
                   checkoutIntentId: checkoutIntent?.id ?? null,
+                  checkoutIntentUuid: checkoutIntent?.uuid ?? null,
                   eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CONTACT_SUPPORT_LINK_CLICKED,
                 })}
                 showLaunchIcon={false}

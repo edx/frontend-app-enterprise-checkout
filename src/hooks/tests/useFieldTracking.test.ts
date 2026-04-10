@@ -27,10 +27,12 @@ describe('trackFieldBlur', () => {
       fieldName: 'testField',
       step: CheckoutStepKey.PlanDetails,
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
     });
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -44,6 +46,7 @@ describe('trackFieldBlur', () => {
       fieldName: 'fullName',
       step: CheckoutStepKey.PlanDetails,
       checkoutIntentId: 456,
+      checkoutIntentUuid: 'test-uuid-456',
       additionalProperties: { plan_type: 'teams' },
     });
 
@@ -51,6 +54,7 @@ describe('trackFieldBlur', () => {
     expect(mockSendEvent).toHaveBeenCalledTimes(1);
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 456,
+      checkoutIntentUuid: 'test-uuid-456',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -66,9 +70,11 @@ describe('trackFieldBlur', () => {
       step: CheckoutStepKey.PlanDetails,
       substep: CheckoutSubstepKey.Register,
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
     });
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: null,
+      checkoutIntentUuid: null,
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -83,6 +89,7 @@ describe('trackFieldBlur', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
       checkoutIntentId: 789,
+      checkoutIntentUuid: 'test-uuid-789',
       additionalProperties: {
         plan_type: 'teams',
         org_slug: 'my-org',
@@ -92,6 +99,7 @@ describe('trackFieldBlur', () => {
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 789,
+      checkoutIntentUuid: 'test-uuid-789',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.AccountDetails,
@@ -115,6 +123,7 @@ describe('trackFieldBlur', () => {
       step: CheckoutStepKey.PlanDetails,
       substep: CheckoutSubstepKey.Register,
       checkoutIntentId: 123,
+      checkoutIntentUuid: 'test-uuid-123',
       additionalProperties: { interaction: 'blur' },
     })).not.toThrow();
     // Verify error was logged
@@ -128,8 +137,9 @@ describe('trackFieldBlur', () => {
   it('should call tracking event multiple times when function is called multiple times', () => {
     const params = {
       fieldName: 'testField',
-      step: CheckoutStepKey.PlanDetails,
+      step: CheckoutStepKey.PlanDetails as const,
       checkoutIntentId: 100,
+      checkoutIntentUuid: 'test-uuid-100',
     };
 
     // Call function 3 times
@@ -146,9 +156,11 @@ describe('trackFieldBlur', () => {
       step: CheckoutStepKey.PlanDetails,
       substep: CheckoutSubstepKey.Register,
       checkoutIntentId: 200,
+      checkoutIntentUuid: 'test-uuid-200',
     });
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 200,
+      checkoutIntentUuid: 'test-uuid-200',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -164,10 +176,12 @@ describe('trackFieldBlur', () => {
       step: CheckoutStepKey.PlanDetails,
       substep: CheckoutSubstepKey.Login,
       checkoutIntentId: 123,
+      checkoutIntentUuid: 'test-uuid-123',
     });
 
     expect(mockSendEvent).toHaveBeenCalledWith({
       checkoutIntentId: 123,
+      checkoutIntentUuid: 'test-uuid-123',
       eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_FIELD_BLURRED,
       properties: {
         step: CheckoutStepKey.PlanDetails,
@@ -182,6 +196,7 @@ describe('trackFieldBlur', () => {
       fieldName: 'quantity',
       step: CheckoutStepKey.PlanDetails,
       checkoutIntentId: 123,
+      checkoutIntentUuid: 'test-uuid-123',
     });
 
     const calledProperties = mockSendEvent.mock.calls[0][0].properties;
@@ -194,6 +209,7 @@ describe('trackFieldBlur', () => {
       step: CheckoutStepKey.PlanDetails,
       substep: CheckoutSubstepKey.Register,
       checkoutIntentId: 123,
+      checkoutIntentUuid: 'test-uuid-123',
       additionalProperties: { password: 'secret123', plan_type: 'teams' },
     });
 
@@ -207,6 +223,7 @@ describe('trackFieldBlur', () => {
       fieldName: 'adminEmail',
       step: CheckoutStepKey.PlanDetails,
       checkoutIntentId: 123,
+      checkoutIntentUuid: 'test-uuid-123',
       additionalProperties: { adminEmail: 'user@example.com', plan_type: 'teams' },
     });
 

@@ -20,6 +20,7 @@ const ReceiptButton: React.FC = () => {
       rel="noopener noreferrer"
       onClick={() => sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
+        checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.VIEW_RECEIPT_BUTTON_CLICKED,
         properties: {
           billingPortalSessionUrl: billingPortalSession?.url,

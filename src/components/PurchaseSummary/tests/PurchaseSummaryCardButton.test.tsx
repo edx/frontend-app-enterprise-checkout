@@ -15,7 +15,7 @@ jest.mock('@/components/app/data', () => ({
     data: { url: 'https://billing.example.com/portal' },
   })),
   useCheckoutIntent: jest.fn(() => ({
-    data: { id: 123 },
+    data: { id: 123, uuid: 'test-uuid-123' },
   })),
 }));
 
@@ -150,6 +150,7 @@ describe('PurchaseSummaryCardButton', () => {
 
       expect(mockSendTrackingEvent).toHaveBeenCalledWith({
         checkoutIntentId: 123,
+        checkoutIntentUuid: 'test-uuid-123',
         eventName: 'edx.ui.enterprise.checkout.self_service_subscription_checkout.billing_details_success.view_receipt_button.clicked',
         properties: {
           billingPortalSessionUrl: 'https://billing.example.com/portal',

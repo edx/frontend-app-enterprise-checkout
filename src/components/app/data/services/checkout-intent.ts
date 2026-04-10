@@ -124,9 +124,16 @@ async function createCheckoutIntent(
 
 /**
  * fetchCheckoutIntent
- * GET /api/v1/checkout-intent/<id>
+ * GET /api/v1/checkout-intent/<identifier>/
+ *
+ * Retrieves a CheckoutIntent by UUID (preferred) or ID (legacy fallback).
+ * UUID is preferred for security reasons (IDs are sequential/guessable).
+ * The backend accepts either format in the URL path.
  *
  * Only callable for an authenticated user.
+ *
+ * @param uuid - The UUID of the checkout intent (preferred)
+ * @param id - The numeric ID of the checkout intent (legacy fallback)
  */
 async function fetchCheckoutIntent({
   id,
@@ -135,9 +142,10 @@ async function fetchCheckoutIntent({
   id?: number,
   uuid?: string,
 }): Promise<AxiosResponse<CheckoutIntentRetrieveSuccessResponseSchema>> {
-  const idCoalesced = uuid || id;
+  // Prefer UUID over ID for security (UUIDs are not guessable)
+  const identifier = uuid ?? id;
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${idCoalesced}/`;
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${identifier}/`;
 
   // Normalize the default transformers into something can be concat()'ed to.
   const defaultTransforms: AxiosResponseTransformer[] = (
@@ -178,6 +186,17 @@ async function fetchCheckoutIntent({
   }
  */
 
+/**
+ * patchCheckoutIntent
+ * PATCH /api/v1/checkout-intent/<identifier>/
+ *
+ * Updates a CheckoutIntent by UUID (preferred) or ID (legacy fallback).
+ * UUID is preferred for security reasons (IDs are sequential/guessable).
+ *
+ * @param uuid - The UUID of the checkout intent (preferred)
+ * @param id - The numeric ID of the checkout intent (legacy fallback)
+ * @param requestData - The data to update on the checkout intent
+ */
 async function patchCheckoutIntent({
   id,
   uuid,
@@ -187,9 +206,10 @@ async function patchCheckoutIntent({
   uuid?: string,
   requestData: CheckoutIntentPatchRequestSchema,
 }): Promise<AxiosResponse<CheckoutIntentPatchSuccessResponseSchema>> {
-  const idCoalesced = uuid || id;
+  // Prefer UUID over ID for security (UUIDs are not guessable)
+  const identifier = uuid ?? id;
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${idCoalesced}/`;
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/checkout-intent/${identifier}/`;
   const requestPayload: CheckoutIntentPatchRequestPayload = snakeCaseObject(requestData);
 
   // Normalize the default transformers into something can be concat()'ed to.

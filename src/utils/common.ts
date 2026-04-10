@@ -92,12 +92,17 @@ const formatPrice = (price: number, options = {}) => {
 
 const isExpired = (date:string) => dayjs(date).isBefore(dayjs());
 
+interface CheckoutIntentIdentifiers {
+  checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null;
+  checkoutIntentUuid: CheckoutContextCheckoutIntent['uuid'] | null;
+}
+
 const sendEnterpriseCheckoutTrackingEvent = ({
   checkoutIntentId,
+  checkoutIntentUuid,
   eventName,
   properties = {},
-}: {
-  checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null;
+}: CheckoutIntentIdentifiers & {
   eventName: string;
   properties?: Record<string, any>;
 }) => {
@@ -105,13 +110,13 @@ const sendEnterpriseCheckoutTrackingEvent = ({
     eventName,
     {
       checkoutIntentId,
+      checkoutIntentUuid,
       ...properties,
     },
   );
 };
 
-interface SendEnterpriseCheckoutPageEventArgs {
-  checkoutIntentId: CheckoutContextCheckoutIntent['id'] | null;
+interface SendEnterpriseCheckoutPageEventArgs extends CheckoutIntentIdentifiers {
   category: string;
   name: string;
   properties?: Record<string, any>;
@@ -119,6 +124,7 @@ interface SendEnterpriseCheckoutPageEventArgs {
 
 const sendEnterpriseCheckoutPageEvent = ({
   checkoutIntentId,
+  checkoutIntentUuid,
   category,
   name,
   properties = {},
@@ -128,6 +134,7 @@ const sendEnterpriseCheckoutPageEvent = ({
     name,
     {
       checkoutIntentId,
+      checkoutIntentUuid,
       ...properties,
     },
   );

@@ -8,9 +8,14 @@ import { queryCheckoutIntent } from '@/components/app/data/queries/queries';
 const usePolledCheckoutIntent = (): { polledCheckoutIntent: CheckoutIntent | undefined } => {
   const { data: checkoutIntent } = useCheckoutIntent();
 
+  // Use UUID as the primary identifier for CheckoutIntent lookups.
+  // UUID is preferred over ID for security (IDs are sequential/guessable).
+  // Falls back to ID only for legacy records that might lack a UUID.
+  const checkoutIntentIdentifier = checkoutIntent?.uuid ?? checkoutIntent?.id;
+
   const polledCheckoutIntentQuery = useQuery(
     queryOptions({
-      ...queryCheckoutIntent(checkoutIntent!.uuid || checkoutIntent!.id),
+      ...queryCheckoutIntent(checkoutIntentIdentifier!),
       // Begin refetching the CheckoutIntent once it becomes known.
       enabled: !!checkoutIntent,
       // Terminate refetching the CheckoutIntent once it becomes fulfilled.
