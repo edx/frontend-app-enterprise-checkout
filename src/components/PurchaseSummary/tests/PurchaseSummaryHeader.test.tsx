@@ -8,14 +8,15 @@ import PurchaseSummaryHeader from '../PurchaseSummaryHeader';
 describe('PurchaseSummaryHeader', () => {
   const renderWithI18n = (ui: React.ReactElement) => render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
-  it('renders subtitle with company name when provided', () => {
-    renderWithI18n(<PurchaseSummaryHeader companyName="Acme Corp" isEssentials />);
-    validateText('Acme Corp');
+  it('renders essentials subtitle with academy name when provided', () => {
+    renderWithI18n(<PurchaseSummaryHeader headerName="AI Academy" isEssentials />);
+    validateText('AI Academy');
     validateText('Purchase summary');
   });
 
-  it('renders purchase summary when company name is absent', () => {
-    renderWithI18n(<PurchaseSummaryHeader companyName={undefined} isEssentials />);
+  it('renders teams subtitle when header name is absent', () => {
+    renderWithI18n(<PurchaseSummaryHeader headerName={undefined} />);
+    validateText('Team subscription, price per user, paid yearly.');
     validateText('Purchase summary');
   });
 });
