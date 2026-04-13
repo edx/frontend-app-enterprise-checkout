@@ -33,20 +33,20 @@ const BUTTON_COMPONENTS: Record<ButtonType, React.ComponentType | null> = {
 };
 
 interface PurchaseSummaryCardButtonProps {
-  isEssentials?: boolean;
+  variant?: 'teams' | 'essentials';
 }
 
-const PurchaseSummaryCardButton: React.FC<PurchaseSummaryCardButtonProps> = ({ isEssentials }) => {
+const PurchaseSummaryCardButton: React.FC<PurchaseSummaryCardButtonProps> = ({ variant }) => {
   const location = useLocation();
 
   const buttonType = useMemo(
     (): ButtonType => {
-      if (isEssentials) {
+      if (variant === 'essentials') {
         return BUTTON_TYPES.UPGRADE;
       }
       return ROUTE_BUTTON_MAP[location.pathname] ?? BUTTON_TYPES.NONE;
     },
-    [location.pathname, isEssentials],
+    [location.pathname, variant],
   );
 
   const ButtonComponent = BUTTON_COMPONENTS[buttonType];

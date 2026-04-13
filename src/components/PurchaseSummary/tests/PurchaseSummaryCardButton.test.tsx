@@ -29,10 +29,10 @@ jest.mock('react-router', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-const renderWithRouter = (initialRoute: string) => render(
+const renderWithRouter = (initialRoute: string, variant?: 'teams' | 'essentials') => render(
   <IntlProvider locale="en">
     <MemoryRouter initialEntries={[initialRoute]}>
-      <PurchaseSummaryCardButton />
+      <PurchaseSummaryCardButton variant={variant} />
     </MemoryRouter>
   </IntlProvider>,
 );
@@ -102,6 +102,15 @@ describe('PurchaseSummaryCardButton', () => {
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
       expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Essentials Variant', () => {
+    it('renders upgrade button for essentials variant', () => {
+      renderWithRouter(CheckoutPageRoute.PlanDetails, 'essentials');
+
+      expect(screen.getByTestId('upgrade-to-teams-button')).toBeInTheDocument();
+      expect(screen.getByText('Upgrade to Teams')).toBeInTheDocument();
     });
   });
 
