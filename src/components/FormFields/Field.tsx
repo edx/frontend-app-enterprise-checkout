@@ -177,7 +177,7 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const commonProps = {
     ...registerFieldOptions,
     onBlur: (event: React.FocusEvent<FormControlElement>) => {
-      registerOnBlur(event);
+      Promise.resolve(registerOnBlur(event)).catch(() => {});
       if (externalOnBlur) {
         externalOnBlur(event);
       }

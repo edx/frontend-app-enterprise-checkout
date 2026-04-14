@@ -9,7 +9,13 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -196,17 +202,17 @@ const AccountDetailsPage: React.FC = () => {
   const persistedValuesOnMountRef = useRef(accountDetailsFormData);
   const previousPathRef = useRef(location.pathname);
 
-  const restorePersistedValidationState = (values: Partial<AccountDetailsData>) => {
+  const restorePersistedValidationState = useCallback((values: Partial<AccountDetailsData>) => {
     formReset(values);
     trigger().catch(() => {});
-  };
+  }, [formReset, trigger]);
 
   useEffect(() => {
     if (!hadPersistedValuesOnMount.current) {
       return;
     }
     restorePersistedValidationState(persistedValuesOnMountRef.current);
-  }, [formReset, trigger]);
+  }, [restorePersistedValidationState]);
 
   useEffect(() => {
     const didPathChange = previousPathRef.current !== location.pathname;
@@ -220,7 +226,7 @@ const AccountDetailsPage: React.FC = () => {
     }
 
     previousPathRef.current = location.pathname;
-  }, [accountDetailsFormData, formReset, hasPersistedAccountDetailsValues, location.pathname, trigger]);
+  }, [accountDetailsFormData, hasPersistedAccountDetailsValues, location.pathname, restorePersistedValidationState]);
 
   const onSubmit = (data: AccountDetailsData) => {
     setFormData(DataStoreKey.AccountDetails, data);
