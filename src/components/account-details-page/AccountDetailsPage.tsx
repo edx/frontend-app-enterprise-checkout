@@ -193,13 +193,34 @@ const AccountDetailsPage: React.FC = () => {
 
   const hasPersistedAccountDetailsValues = Object.keys(accountDetailsFormData).length > 0;
   const hadPersistedValuesOnMount = useRef(hasPersistedAccountDetailsValues);
+  const persistedValuesOnMountRef = useRef(accountDetailsFormData);
+  const previousPathRef = useRef(location.pathname);
+
+  const restorePersistedValidationState = (values: Partial<AccountDetailsData>) => {
+    formReset(values);
+    trigger().catch(() => {});
+  };
 
   useEffect(() => {
     if (!hadPersistedValuesOnMount.current) {
       return;
     }
-    trigger().catch(() => {});
-  }, [trigger]);
+    restorePersistedValidationState(persistedValuesOnMountRef.current);
+  }, [formReset, trigger]);
+
+  useEffect(() => {
+    const didPathChange = previousPathRef.current !== location.pathname;
+    const isAccountDetailsPath = (
+      location.pathname === CheckoutPageRoute.AccountDetails
+      || location.pathname === EssentialsPageRoute.AccountDetails
+    );
+
+    if (didPathChange && isAccountDetailsPath && hasPersistedAccountDetailsValues) {
+      restorePersistedValidationState(accountDetailsFormData);
+    }
+
+    previousPathRef.current = location.pathname;
+  }, [accountDetailsFormData, formReset, hasPersistedAccountDetailsValues, location.pathname, trigger]);
 
   const onSubmit = (data: AccountDetailsData) => {
     setFormData(DataStoreKey.AccountDetails, data);

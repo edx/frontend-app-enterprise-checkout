@@ -204,6 +204,73 @@ describe('AccountDetailsPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.PlanDetails);
   });
 
+  it('shows validation messages for invalid account details input in checkout flow', async () => {
+    const user = userEvent.setup();
+
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.AccountDetails]: {},
+      },
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    const companyNameInput = screen.getByPlaceholderText('Enter your company name');
+    const enterpriseSlugInput = screen.getByPlaceholderText('URL name');
+
+    await user.click(companyNameInput);
+    await user.click(enterpriseSlugInput);
+    await user.type(enterpriseSlugInput, 'invalid slug!');
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.getByText('Company name is required')).toBeInTheDocument();
+      expect(screen.getByText('Only alphanumeric lowercase characters and hyphens are allowed.')).toBeInTheDocument();
+    });
+  });
+
+  it('shows validation messages for invalid account details input in essentials flow', async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem('isEssentials', 'true');
+
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.AccountDetails]: {},
+      },
+    }));
+
+    renderStepperRoute(EssentialsPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    const companyNameInput = screen.getByPlaceholderText('Enter your company name');
+    const enterpriseSlugInput = screen.getByPlaceholderText('URL name');
+
+    await user.click(companyNameInput);
+    await user.click(enterpriseSlugInput);
+    await user.type(enterpriseSlugInput, 'invalid slug!');
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.getByText('Company name is required')).toBeInTheDocument();
+      expect(screen.getByText('Only alphanumeric lowercase characters and hyphens are allowed.')).toBeInTheDocument();
+    });
+
+    sessionStorage.removeItem('isEssentials');
+  });
+
   it('persists touched account details values on back and restores validation on revisit', async () => {
     const user = userEvent.setup();
 
