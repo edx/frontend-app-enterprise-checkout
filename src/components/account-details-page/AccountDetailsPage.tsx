@@ -9,7 +9,13 @@ import {
   Stepper,
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -104,6 +110,8 @@ const AccountDetailsPage: React.FC = () => {
     formState: { isDirty: formIsDirty, isValid: formIsValid },
     setError,
     reset: formReset,
+    getValues,
+    trigger,
   } = form;
 
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
@@ -189,6 +197,37 @@ const AccountDetailsPage: React.FC = () => {
     if (formIsDirty) { resetMutation(); }
   }, [formIsDirty, mutationIsSuccess, resetMutation]);
 
+  const hasPersistedAccountDetailsValues = Object.keys(accountDetailsFormData).length > 0;
+  const hadPersistedValuesOnMount = useRef(hasPersistedAccountDetailsValues);
+  const persistedValuesOnMountRef = useRef(accountDetailsFormData);
+  const previousPathRef = useRef(location.pathname);
+
+  const restorePersistedValidationState = useCallback((values: Partial<AccountDetailsData>) => {
+    formReset(values);
+    trigger().catch(() => {});
+  }, [formReset, trigger]);
+
+  useEffect(() => {
+    if (!hadPersistedValuesOnMount.current) {
+      return;
+    }
+    restorePersistedValidationState(persistedValuesOnMountRef.current);
+  }, [restorePersistedValidationState]);
+
+  useEffect(() => {
+    const didPathChange = previousPathRef.current !== location.pathname;
+    const isAccountDetailsPath = (
+      location.pathname === CheckoutPageRoute.AccountDetails
+      || location.pathname === EssentialsPageRoute.AccountDetails
+    );
+
+    if (didPathChange && isAccountDetailsPath && hasPersistedAccountDetailsValues) {
+      restorePersistedValidationState(accountDetailsFormData);
+    }
+
+    previousPathRef.current = location.pathname;
+  }, [accountDetailsFormData, hasPersistedAccountDetailsValues, location.pathname, restorePersistedValidationState]);
+
   const onSubmit = (data: AccountDetailsData) => {
     setFormData(DataStoreKey.AccountDetails, data);
     formReset(data);
@@ -219,6 +258,20 @@ const AccountDetailsPage: React.FC = () => {
     }
   };
 
+  const handleBackClick = () => {
+    setFormData(DataStoreKey.AccountDetails, {
+      ...accountDetailsFormData,
+      ...getValues(),
+    });
+
+    const isEssentials = isEssentialsFlow();
+    navigate(
+      isEssentials
+        ? EssentialsPageRoute.PlanDetails
+        : CheckoutPageRoute.PlanDetails,
+    );
+  };
+
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.AccountDetails;
 
@@ -236,14 +289,7 @@ const AccountDetailsPage: React.FC = () => {
           <Stepper.ActionRow eventKey={eventKey}>
             <Button
               variant="outline-primary"
-              onClick={() => {
-                const isEssentials = isEssentialsFlow();
-                navigate(
-                  isEssentials
-                    ? EssentialsPageRoute.PlanDetails
-                    : CheckoutPageRoute.PlanDetails,
-                );
-              }}
+              onClick={handleBackClick}
             >
               <FormattedMessage
                 id="checkout.back"
