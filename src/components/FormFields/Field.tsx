@@ -154,11 +154,12 @@ const DefaultFormControlBase = <T extends FieldValues>(
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { register } = form;
   const { onChange } = registerOptions;
+  const { onBlur: externalOnBlur, ...controlRest } = rest;
 
   // Forward the controlRef to the parent component via ref
   useImperativeHandle(ref, () => controlRef.current);
 
-  const { ref: registerRef, ...registerFieldOptions } = register(name, {
+  const { ref: registerRef, onBlur: registerOnBlur, ...registerFieldOptions } = register(name, {
     ...registerOptions,
     onChange: (event: React.ChangeEvent<FormControlElement>) => {
       if (manageState) {
@@ -175,9 +176,15 @@ const DefaultFormControlBase = <T extends FieldValues>(
 
   const commonProps = {
     ...registerFieldOptions,
+    onBlur: (event: React.FocusEvent<FormControlElement>) => {
+      Promise.resolve(registerOnBlur(event)).catch(() => {});
+      if (externalOnBlur) {
+        externalOnBlur(event);
+      }
+    },
     // Only use stored value if managing state
     defaultValue: manageState ? currentValue : defaultValue,
-    ...rest,
+    ...controlRest,
   };
 
   switch (type) {
