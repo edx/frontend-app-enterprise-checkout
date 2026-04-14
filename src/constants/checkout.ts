@@ -213,58 +213,79 @@ export const PlanDetailsSchema = (
   stripePriceId: z.string().trim().optional().nullable(),
 }));
 
+const stringRequired = (min: number, max: number, requiredMsg: string, maxMsg: string) => z.preprocess(
+  (val) => val ?? '',
+  z.string()
+    .trim()
+    .min(min, requiredMsg)
+    .max(max, maxMsg),
+);
+
 export const AccountDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,
   adminEmail?: string,
-) => (z.object({
-  companyName: z.string().trim()
-    .min(
-      constraints?.companyName?.minLength ?? 1,
-      'Company name is required',
-    )
-    .max(
-      constraints?.companyName?.maxLength ?? 255,
-      `Maximum ${constraints?.companyName?.maxLength ?? 255} characters`,
-    )
-    .superRefine(async (companyName, ctx) => {
-      const { isValid, validationDecisions } = await validateFieldDetailed(
-        'companyName',
-        companyName,
-      );
-      if (!isValid && validationDecisions?.companyName) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: serverValidationError('companyName', validationDecisions, CheckoutErrorMessagesByField),
-        });
-      }
-    }),
-  enterpriseSlug: z.string().trim()
-    .min(
-      constraints?.enterpriseSlug?.minLength ?? 1,
-      'Company Url is required',
-    )
-    .max(
-      constraints?.enterpriseSlug?.maxLength ?? 255,
-      `Maximum ${constraints?.enterpriseSlug?.maxLength ?? 255} characters`,
-    )
-    .regex(
-      new RegExp(constraints?.enterpriseSlug?.pattern ?? '^[a-z0-9-]+$'),
-      'Only alphanumeric lowercase characters and hyphens are allowed.',
-    )
-    .superRefine(async (enterpriseSlug, ctx) => {
-      const { isValid, validationDecisions } = await validateFieldDetailed(
-        'enterpriseSlug',
-        enterpriseSlug,
-        { adminEmail: adminEmail || '' },
-      );
-      if (!isValid && validationDecisions?.enterpriseSlug) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: serverValidationError('enterpriseSlug', validationDecisions, CheckoutErrorMessagesByField),
-        });
-      }
-    }),
-}));
+) => z.object({
+  companyName: stringRequired(
+    constraints?.companyName?.minLength ?? 1,
+    constraints?.companyName?.maxLength ?? 255,
+    'Company name is required',
+    `Maximum ${constraints?.companyName?.maxLength ?? 255} characters`,
+  ).superRefine(async (companyName, ctx) => {
+    if (!companyName) { return; }
+
+    const { isValid, validationDecisions } = await validateFieldDetailed(
+      'companyName',
+      companyName,
+    );
+
+    if (!isValid && validationDecisions?.companyName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: serverValidationError(
+          'companyName',
+          validationDecisions,
+          CheckoutErrorMessagesByField,
+        ),
+      });
+    }
+  }),
+  enterpriseSlug: z.preprocess(
+    (val) => val ?? '',
+    z.string()
+      .trim()
+      .min(
+        constraints?.enterpriseSlug?.minLength ?? 1,
+        'Company Url is required',
+      )
+      .max(
+        constraints?.enterpriseSlug?.maxLength ?? 255,
+        `Maximum ${constraints?.enterpriseSlug?.maxLength ?? 255} characters`,
+      )
+      .regex(
+        new RegExp(constraints?.enterpriseSlug?.pattern ?? '^[a-z0-9-]+$'),
+        'Only alphanumeric lowercase characters and hyphens are allowed.',
+      ),
+  ).superRefine(async (enterpriseSlug, ctx) => {
+    if (!enterpriseSlug) { return; }
+
+    const { isValid, validationDecisions } = await validateFieldDetailed(
+      'enterpriseSlug',
+      enterpriseSlug,
+      { adminEmail: adminEmail || '' },
+    );
+
+    if (!isValid && validationDecisions?.enterpriseSlug) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: serverValidationError(
+          'enterpriseSlug',
+          validationDecisions,
+          CheckoutErrorMessagesByField,
+        ),
+      });
+    }
+  }),
+});
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
