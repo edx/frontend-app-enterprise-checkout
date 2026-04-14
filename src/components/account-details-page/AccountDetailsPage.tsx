@@ -104,6 +104,8 @@ const AccountDetailsPage: React.FC = () => {
     formState: { isDirty: formIsDirty, isValid: formIsValid },
     setError,
     reset: formReset,
+    getValues,
+    trigger,
   } = form;
 
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
@@ -189,6 +191,16 @@ const AccountDetailsPage: React.FC = () => {
     if (formIsDirty) { resetMutation(); }
   }, [formIsDirty, mutationIsSuccess, resetMutation]);
 
+  const hasPersistedAccountDetailsValues = Object.keys(accountDetailsFormData).length > 0;
+  const hadPersistedValuesOnMount = useRef(hasPersistedAccountDetailsValues);
+
+  useEffect(() => {
+    if (!hadPersistedValuesOnMount.current) {
+      return;
+    }
+    trigger().catch(() => {});
+  }, [trigger]);
+
   const onSubmit = (data: AccountDetailsData) => {
     setFormData(DataStoreKey.AccountDetails, data);
     formReset(data);
@@ -219,6 +231,20 @@ const AccountDetailsPage: React.FC = () => {
     }
   };
 
+  const handleBackClick = () => {
+    setFormData(DataStoreKey.AccountDetails, {
+      ...accountDetailsFormData,
+      ...getValues(),
+    });
+
+    const isEssentials = isEssentialsFlow();
+    navigate(
+      isEssentials
+        ? EssentialsPageRoute.PlanDetails
+        : CheckoutPageRoute.PlanDetails,
+    );
+  };
+
   const StepperContent = useStepperContent();
   const eventKey = CheckoutStepKey.AccountDetails;
 
@@ -236,14 +262,7 @@ const AccountDetailsPage: React.FC = () => {
           <Stepper.ActionRow eventKey={eventKey}>
             <Button
               variant="outline-primary"
-              onClick={() => {
-                const isEssentials = isEssentialsFlow();
-                navigate(
-                  isEssentials
-                    ? EssentialsPageRoute.PlanDetails
-                    : CheckoutPageRoute.PlanDetails,
-                );
-              }}
+              onClick={handleBackClick}
             >
               <FormattedMessage
                 id="checkout.back"
