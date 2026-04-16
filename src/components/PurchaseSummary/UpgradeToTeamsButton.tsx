@@ -5,12 +5,11 @@ import { FormattedMessage } from 'react-intl';
 
 const UpgradeToTeamsButton: React.FC = () => (
   <Button
-    variant="primary"
-    className="w-100"
+    variant="outline-danger"
+    className="w-100 text-danger"
     data-testid="upgrade-to-teams-button"
-    disabled
   >
-    <Icon src={Lock} className="me-2" />
+    <Icon src={Lock} className="me-2" style={{ color: '#dc3545' }} />
     <FormattedMessage
       id="components.PurchaseSummary.UpgradeToTeamsButton.upgradeToTeams"
       defaultMessage="Upgrade to Teams"
