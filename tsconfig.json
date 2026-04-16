@@ -3,7 +3,6 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
-    "skipLibCheck": true,
     "paths": {
       "@/components/*": ["./src/components/*"],
       "@/hooks/*": ["./src/hooks/*"],
