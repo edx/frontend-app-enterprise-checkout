@@ -11,9 +11,6 @@ import {
   PlanDetailsSchema,
 } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { isEssentialsFlow } from '@/utils/common';
-
-export { isEssentialsFlow };
 
 /**
  * Parameters for populateInitialApplicationState.
@@ -40,6 +37,9 @@ interface DetermineExistingPaidCheckoutIntent {
    */
   expiredCheckoutIntent: boolean;
 }
+
+// For Essentials flow check
+export const isEssentialsFlow = (): boolean => sessionStorage.getItem('isEssentials') === 'true';
 
 /**
  * Computes a compact state object from an optional checkout intent.
@@ -205,7 +205,7 @@ interface PrerequisiteCheck<T> {
     stripePriceId: CheckoutContextPrice['id'],
     adminEmail?: string,
   ) => (values: any, ctx?: any, opts?: any) => any;
-  failRoute: () => CheckoutPageRouteValue | `/essentials${CheckoutPageRouteValue}`;
+  failRoute: CheckoutPageRouteValue | `/essentials${CheckoutPageRouteValue}`;
 }
 
 /**
@@ -219,21 +219,21 @@ export const prerequisiteSpec: Record<CheckoutStep, Array<PrerequisiteCheck<any>
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
       getResolver: (constraints, stripePriceId) => makeResolvers(constraints, stripePriceId).planDetailsResolver,
-      failRoute: () => (isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails),
+      failRoute: isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails,
     },
   ],
   BillingDetails: [
     {
       pick: (formData) => formData[DataStoreKey.PlanDetails] as PlanDetailsData,
       getResolver: (constraints, stripePriceId) => makeResolvers(constraints, stripePriceId).planDetailsResolver,
-      failRoute: () => (isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails),
+      failRoute: isEssentialsFlow() ? EssentialsPageRoute.PlanDetails : CheckoutPageRoute.PlanDetails,
     },
     {
       pick: (formData) => formData[DataStoreKey.AccountDetails] as AccountDetailsData,
       getResolver: (constraints, stripePriceId, adminEmail) => (
         makeResolvers(constraints, stripePriceId, adminEmail).accountDetailsResolver
       ),
-      failRoute: () => (isEssentialsFlow() ? EssentialsPageRoute.AccountDetails : CheckoutPageRoute.AccountDetails),
+      failRoute: isEssentialsFlow() ? EssentialsPageRoute.AccountDetails : CheckoutPageRoute.AccountDetails,
     },
   ],
 };
@@ -283,7 +283,7 @@ const validateFormState = async ({
     const values = pick(formData);
     const resolver = getResolver(constraints, stripePriceId, adminEmail);
     const { errors } = await resolver(values, undefined, { criteriaMode: 'all' });
-    return { failRoute: failRoute(), hasErrors: errors && Object.keys(errors).length > 0 };
+    return { failRoute, hasErrors: errors && Object.keys(errors).length > 0 };
   });
 
   const results = await Promise.all(validationPromises);
