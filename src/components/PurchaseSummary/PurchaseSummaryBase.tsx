@@ -33,8 +33,8 @@ const PurchaseSummaryBase = ({
   footerContent,
   extraContent,
 }: PurchaseSummaryBaseProps) => (
-  <Stack gap={3}>
-    <Card className="border border-secondary">
+  <Stack gap={3} className="purchase-summary-layout">
+    <Card className="border border-secondary purchase-summary-card">
       <PurchaseSummaryHeader headerName={headerName} isEssentials={isEssentials} />
 
       <Card.Section className="pt-2">

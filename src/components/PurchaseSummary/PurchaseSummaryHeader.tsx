@@ -23,7 +23,7 @@ const PurchaseSummaryHeaderComponent: React.FC<PurchaseSummaryHeaderProps> = ({
   return (
     <Card.Header
       title={<span className="font-weight-bold">Purchase summary</span>}
-      subtitle={subtitle}
+      subtitle={subtitle && <span className="purchase-summary-header-name">{subtitle}</span>}
       size="md"
     />
   );

@@ -41,7 +41,7 @@ const PricePerUserRowComponent: React.FC<PricePerUserRowProps> = ({
         </span>
       )}
     boldRight
-    className="mb-3"
+    className="mb-3 price-per-user-row"
   />
 );
 
