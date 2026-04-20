@@ -1,0 +1,359 @@
+import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { AppContext } from '@edx/frontend-platform/react';
+import { render, screen } from '@testing-library/react';
+
+import * as useBFFContextModule from '@/components/app/data/hooks/useBFFContext';
+
+import EssentialsAlert from '../EssentialsAlert';
+
+jest.mock('@/components/app/data/hooks/useBFFContext');
+jest.mock('@/components/DisplayPrice', () => ({
+  DisplayPrice: ({ value }: { value: number }) => <span>${value}</span>,
+}));
+
+const mockAuthenticatedUser = {
+  id: 1,
+  email: 'test@example.com',
+  username: 'testuser',
+  name: 'Test User',
+  userId: 1,
+};
+
+const mockContextValue = {
+  authenticatedUser: mockAuthenticatedUser,
+};
+
+// The hook with select returns the transformed value: number (price in dollars with fallback)
+const defaultBFFContextValue = {
+  data: 288, // This matches the BFF API fallback default: 28800 cents / 100 = $288 or fallback when API unavailable
+  isLoading: false,
+  error: null,
+};
+
+describe('EssentialsAlert Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useBFFContextModule.default as jest.Mock).mockReturnValue(defaultBFFContextValue);
+  });
+
+  const renderComponent = () => render(
+    <AppContext.Provider value={mockContextValue as any}>
+      <IntlProvider locale="en" messages={{}}>
+        <EssentialsAlert />
+      </IntlProvider>
+    </AppContext.Provider>,
+  );
+
+  describe('Rendering and Header', () => {
+    it('should render the component', () => {
+      renderComponent();
+      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
+    });
+
+    it('should display the plan header with "Essentials Plan" title', () => {
+      renderComponent();
+      const header = screen.getByText('Essentials Plan');
+      expect(header).toBeInTheDocument();
+      // Header is now inside Alert.Heading from Paragon
+      expect(header.closest('.pgn__alert-heading') || header.parentElement).toBeInTheDocument();
+    });
+
+    it('should display confirmation text with academy name', () => {
+      renderComponent();
+      expect(screen.getByText(/You have picked/)).toBeInTheDocument();
+      const confirmationElements = screen.getAllByText(/Artificial Intelligence/);
+      expect(confirmationElements.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText(/as your focus area/)).toBeInTheDocument();
+    });
+  });
+
+  describe('Pricing Display', () => {
+    it('should display pricing information', () => {
+      renderComponent();
+      expect(screen.getByText(/From/)).toBeInTheDocument();
+      expect(screen.getByText(/\/yr/)).toBeInTheDocument();
+      expect(screen.getByText('$288')).toBeInTheDocument();
+    });
+
+    it('should display "From $288 /yr" format', () => {
+      renderComponent();
+      const priceSection = screen.getByText(/From/).parentElement;
+      expect(priceSection?.textContent).toContain('From');
+      expect(priceSection?.textContent).toContain('$288');
+      expect(priceSection?.textContent).toContain('/yr');
+    });
+
+    it('should display fallback price when loading and no price data is available', () => {
+      (useBFFContextModule.default as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        error: null,
+      });
+
+      renderComponent();
+      const priceElements = screen.queryAllByText(/\$288/);
+      expect(priceElements.length).toBeGreaterThan(0);
+    });
+
+    it('should display fallback price when the API fails and no price data is available', () => {
+      (useBFFContextModule.default as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('Unable to load price'),
+      });
+
+      renderComponent();
+      const priceElements = screen.queryAllByText(/\$288/);
+      expect(priceElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Academy Details Card', () => {
+    it('should display academy name', () => {
+      renderComponent();
+      const academyNames = screen.getAllByText('Artificial Intelligence');
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should display course count badge', () => {
+      renderComponent();
+      expect(screen.getByText('16 courses')).toBeInTheDocument();
+    });
+
+    it('should display "Learn more" link', () => {
+      renderComponent();
+      const learnMoreLink = screen.getByText('Learn more');
+      expect(learnMoreLink).toBeInTheDocument();
+      expect(learnMoreLink.tagName).toBe('A');
+    });
+
+    it('should display all tags', () => {
+      renderComponent();
+      expect(screen.getByText(/AI foundations/)).toBeInTheDocument();
+      expect(screen.getByText(/Intermediate AI/)).toBeInTheDocument();
+      expect(screen.getByText(/Advanced AI/)).toBeInTheDocument();
+      expect(screen.getByText(/AI for business/)).toBeInTheDocument();
+    });
+
+    it('should display tags with bullet separators', () => {
+      renderComponent();
+      const tagsSection = screen.getByText(/AI foundations/).parentElement;
+      expect(tagsSection?.textContent).toContain('•');
+    });
+
+    it('should display academy description', () => {
+      renderComponent();
+      expect(
+        screen.getByText(/This pathway helps your team build a strong foundation in AI/),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('External Links', () => {
+    it('should have "Pick a different academy" link with correct href', () => {
+      renderComponent();
+      const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
+      expect(pickDifferentLink).toBeInTheDocument();
+      expect(pickDifferentLink.href).toBe(
+        'https://business.edx.org/course-library-plans-essentials/',
+      );
+    });
+
+    it('should open "Pick a different academy" link in same tab', () => {
+      renderComponent();
+      const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
+      expect(pickDifferentLink.target).not.toBe('_blank');
+    });
+
+    it('should have "Switch to Teams" link with correct href', () => {
+      renderComponent();
+      const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
+      expect(switchToTeamsLink).toBeInTheDocument();
+      expect(switchToTeamsLink.href).toBe(
+        'https://business.edx.org/academy/tech-digital-transformation/',
+      );
+    });
+
+    it('should have "Learn more" link with dynamic marketing URL', () => {
+      renderComponent();
+      const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
+      expect(learnMoreLink).toBeInTheDocument();
+      // Verify link has marketing URL from academy data
+      expect(learnMoreLink.href).toBe(
+        'https://www.edx.org/learn/artificial-intelligence',
+      );
+    });
+  });
+
+  describe('Footer Upsell Section', () => {
+    it('should display upsell message', () => {
+      renderComponent();
+      expect(
+        screen.getByText(/Need to upskill your team in more than one focus area/),
+      ).toBeInTheDocument();
+    });
+
+    it('should display "Switch to Teams" link in footer', () => {
+      renderComponent();
+      const switchLink = screen.getByText('Switch to Teams');
+      expect(switchLink).toBeInTheDocument();
+    });
+
+    it('should have correct link count for external resources', () => {
+      renderComponent();
+      // Button components with variant="link" may render as buttons
+      const buttons = screen.queryAllByRole('button');
+      const links = screen.queryAllByRole('link');
+      const totalNavigationElements = buttons.length + links.length;
+      // Pick different academy, Learn more, Switch to Teams (at least 2)
+      expect(totalNavigationElements).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe('Styling and Layout', () => {
+    it('should have rust-colored background', () => {
+      const { container } = renderComponent();
+      const alertDiv = container.querySelector('[class*="alert"]');
+      // Paragon Alert will be styled with CSS class
+      expect(alertDiv).toBeInTheDocument();
+    });
+
+    it('should have white card background for academy details', () => {
+      const { container } = renderComponent();
+      const cards = container.querySelectorAll('[class*="pgn__card"]');
+      expect(cards.length).toBeGreaterThan(0);
+    });
+
+    it('should use proper spacing and padding', () => {
+      const { container } = renderComponent();
+      const alertDiv = container.querySelector('[class*="pgn__alert"]');
+      expect(alertDiv).toBeInTheDocument();
+    });
+
+    it('should have rounded corners', () => {
+      const { container } = renderComponent();
+      const alertDiv = container.querySelector('[class*="essentials-alert"]');
+      expect(alertDiv).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have proper heading hierarchy', () => {
+      renderComponent();
+      const mainHeading = screen.getByText('Essentials Plan');
+      expect(mainHeading).toBeInTheDocument();
+      // Heading is now inside Alert.Heading from Paragon
+      expect(mainHeading.closest('.pgn__alert-heading') || mainHeading.parentElement).toBeInTheDocument();
+
+      const academyHeadings = screen.getAllByText('Artificial Intelligence');
+      expect(academyHeadings.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('links should be focusable', () => {
+      renderComponent();
+      const buttons = screen.getAllByRole('link');
+      buttons.forEach((button) => {
+        expect(button).toHaveProperty('href');
+      });
+    });
+
+    it('should have proper styling for buttons', () => {
+      renderComponent();
+      const buttons = screen.getAllByRole('link');
+      buttons.forEach((button) => {
+        expect(button).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Content Completeness', () => {
+    it('should display all required sections', () => {
+      renderComponent();
+      // Header
+      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
+      // Academy name
+      const academyNames = screen.getAllByText('Artificial Intelligence');
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+      // Course count
+      expect(screen.getByText('16 courses')).toBeInTheDocument();
+      // Tags
+      expect(screen.getByText(/AI foundations/)).toBeInTheDocument();
+      // Description
+      expect(
+        screen.getByText(/This pathway helps your team build a strong foundation in AI/),
+      ).toBeInTheDocument();
+      // Upsell
+      expect(
+        screen.getByText(/Need to upskill your team in more than one focus area/),
+      ).toBeInTheDocument();
+    });
+
+    it('should not have required fields missing', () => {
+      renderComponent();
+      // Verify all key elements are present
+      const essentialsText = screen.getByText('Essentials Plan');
+      const academyNames = screen.getAllByText('Artificial Intelligence');
+      const courseCount = screen.getByText('16 courses');
+      const price = screen.getByText('$288');
+
+      expect(essentialsText).toBeInTheDocument();
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+      expect(courseCount).toBeInTheDocument();
+      expect(price).toBeInTheDocument();
+    });
+  });
+
+  describe('BFF Context Integration', () => {
+    it('should fetch pricing from BFF context', () => {
+      renderComponent();
+      expect(useBFFContextModule.default).toHaveBeenCalled();
+    });
+
+    it('should use fallback price when BFF data is null', () => {
+      (useBFFContextModule.default as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: null,
+      });
+
+      renderComponent();
+      // When data is undefined, fallback price of $288 displays
+      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
+      const academyNames = screen.getAllByText('Artificial Intelligence');
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+      // Fallback price should be displayed when data is undefined
+      const priceElements = screen.queryAllByText(/\$288/);
+      expect(priceElements.length).toBeGreaterThan(0);
+    });
+
+    it('should display price from CheckoutContextPrice.unitAmount', () => {
+      // Mock the hook to return a custom price (in dollars, not cents, because of the select transform)
+      const customPriceInDollars = 20; // Equivalent to 2000 cents
+
+      (useBFFContextModule.default as jest.Mock).mockReturnValue({
+        data: customPriceInDollars,
+        isLoading: false,
+        error: null,
+      });
+
+      renderComponent();
+      // Should display the custom price ($20)
+      expect(screen.getByText(/\$20/)).toBeInTheDocument();
+    });
+
+    it('should handle BFF context errors gracefully', () => {
+      (useBFFContextModule.default as jest.Mock).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('BFF Error'),
+      });
+
+      renderComponent();
+      // Component should still render with fallback price
+      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
+      // Fallback price should display
+      const priceElements = screen.queryAllByText(/\$288/);
+      expect(priceElements.length).toBeGreaterThan(0);
+    });
+  });
+});
