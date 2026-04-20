@@ -1,4 +1,5 @@
 import { getConfig } from '@edx/frontend-platform/config';
+import { QueryClient } from '@tanstack/react-query';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -96,6 +97,22 @@ jest.mock('@edx/frontend-platform/analytics', () => ({
 }));
 
 jest.mock('@/components/app/data/hooks/useBFFContext');
+
+jest.mock('@edx/frontend-platform/auth', () => ({
+  fetchAuthenticatedUser: jest.fn().mockResolvedValue(undefined),
+  hydrateAuthenticatedUser: jest.fn().mockResolvedValue(undefined),
+  getAuthenticatedUser: jest.fn(() => ({
+    userId: 123,
+    email: 'test@example.com',
+    username: 'testuser',
+    country: 'US',
+  })),
+
+  getAuthenticatedHttpClient: jest.fn(() => ({
+    post: jest.fn().mockResolvedValue({ data: {} }),
+  })),
+
+}));
 
 const mockedUseBFFContext = useBFFContext as unknown as jest.Mock;
 
@@ -1019,8 +1036,8 @@ describe('PlanDetailsPage – Essentials navigation', () => {
     });
   });
 
-  it('PlanDetailsLogin (essentials): successful login → navigates back to /essentials/plan-details', async () => {
-    jest.clearAllMocks();
+  it('PlanDetailsLogin (essentials): successful login → navigates to /essentials/account-details', async () => {
+    // const user = userEvent.setup();
 
     // Provide safe constraints so form schema resolves
     (useFormValidationConstraints as jest.Mock).mockReturnValue({
@@ -1046,8 +1063,8 @@ describe('PlanDetailsPage – Essentials navigation', () => {
       },
     }));
 
-    // Mock useLoginMutation so mutate() immediately calls onSuccess -> triggers navigate()
-    const useLoginMutation = (await import('@/components/app/data/hooks/useLoginMutation')).default as unknown as jest.Mock;
+    // mock login success
+    const useLoginMutation = (await import('@/components/app/data/hooks/useLoginMutation')).default as jest.Mock;
 
     useLoginMutation.mockImplementation(({ onSuccess }: any) => ({
       mutate: jest.fn(() => onSuccess?.()),
@@ -1056,7 +1073,17 @@ describe('PlanDetailsPage – Essentials navigation', () => {
       isError: false,
     }));
 
-    // Render directly on the essentials login route
+    // ✅ mock checkout intent success (THIS WAS MISSING)
+    const useCreateCheckoutIntentMutation = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation'))
+      .default as jest.Mock;
+
+    useCreateCheckoutIntentMutation.mockImplementation(({ onSuccess }) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
     renderStepperRoute('/essentials/plan-details/login', {
       config: {},
       authenticatedUser: null,
@@ -1065,14 +1092,12 @@ describe('PlanDetailsPage – Essentials navigation', () => {
     // Click submit to trigger mutate -> onSuccess -> navigate()
     const submitButton = await screen.findByTestId('stepper-submit-button');
     await userEvent.click(submitButton);
-
-    // Assert the essentials-prefixed navigation happened
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details');
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/account-details');
     });
   });
 
-  it('PlanDetailsRegister (essentials): successful registration → navigates back to /essentials/plan-details', async () => {
+  it('PlanDetailsRegister (essentials): successful registration → navigates to /essentials/account-details', async () => {
     const user = userEvent.setup();
 
     // Registration success should navigate back to PlanDetails (essentials)
@@ -1096,7 +1121,7 @@ describe('PlanDetailsPage – Essentials navigation', () => {
     await user.click(screen.getByTestId('stepper-submit-button'));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/essentials/plan-details');
+      expect(mockNavigate).toHaveBeenCalledWith('/essentials/account-details');
     });
   });
 });
@@ -1134,5 +1159,236 @@ describe('PlanDetailsPage – Back button visibility', () => {
     expect(
       screen.getByRole('button', { name: /back/i }),
     ).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// loginMutation & registerMutation – success and error paths
+// ---------------------------------------------------------------------------
+
+describe('PlanDetailsPage – loginMutation success/error paths', () => {
+  let invalidateQueriesSpy: jest.SpyInstance;
+  let fetchQuerySpy: jest.SpyInstance;
+  let removeQueriesSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    invalidateQueriesSpy = jest.spyOn(QueryClient.prototype, 'invalidateQueries').mockResolvedValue(undefined as any);
+    fetchQuerySpy = jest.spyOn(QueryClient.prototype, 'fetchQuery').mockResolvedValue(undefined as any);
+    removeQueriesSpy = jest.spyOn(QueryClient.prototype, 'removeQueries').mockImplementation(() => undefined);
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    setupBFFContextMock();
+
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'user@example.com',
+          password: 'Password123!',
+          fullName: 'Test User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+  });
+
+  it('calls invalidateQueries and fetchQuery after successful login and checkout intent creation', async () => {
+    const useLoginMutationMock = (await import('@/components/app/data/hooks/useLoginMutation')).default as jest.Mock;
+    const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
+
+    // login success → immediately fires checkout intent
+    useLoginMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    // checkout intent success → triggers navigation and cache invalidation
+    useCreateCheckoutIntentMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin, { config: {}, authenticatedUser: null });
+
+    await userEvent.click(await screen.findByTestId('stepper-submit-button'));
+
+    // Auth helpers called
+    const { fetchAuthenticatedUser, hydrateAuthenticatedUser, getAuthenticatedUser } = await import('@edx/frontend-platform/auth');
+    await waitFor(() => expect(fetchAuthenticatedUser).toHaveBeenCalled());
+    await waitFor(() => expect(hydrateAuthenticatedUser).toHaveBeenCalled());
+
+    // Cache should be invalidated with the logged-in user's id
+    await waitFor(() => expect(invalidateQueriesSpy).toHaveBeenCalled());
+    await waitFor(() => expect(removeQueriesSpy).toHaveBeenCalled());
+
+    // BFF context should be eagerly refetched by userId returned from getAuthenticatedUser
+    await waitFor(() => {
+      expect(getAuthenticatedUser).toHaveBeenCalled();
+      expect(fetchQuerySpy).toHaveBeenCalled();
+    });
+
+    // Navigation to Account Details
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
+    });
+  });
+
+  it('sets password field error on login failure', async () => {
+    const useLoginMutationMock = (await import('@/components/app/data/hooks/useLoginMutation')).default as jest.Mock;
+
+    useLoginMutationMock.mockImplementation(({ onError }: any) => ({
+      mutate: jest.fn(() => onError?.('Invalid email or password')),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin, { config: {}, authenticatedUser: null });
+
+    await userEvent.click(await screen.findByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid email or password')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('PlanDetailsPage – registerMutation success/error paths', () => {
+  let invalidateQueriesSpy: jest.SpyInstance;
+  let fetchQuerySpy: jest.SpyInstance;
+  let removeQueriesSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    invalidateQueriesSpy = jest.spyOn(QueryClient.prototype, 'invalidateQueries').mockResolvedValue(undefined as any);
+    fetchQuerySpy = jest.spyOn(QueryClient.prototype, 'fetchQuery').mockResolvedValue(undefined as any);
+    removeQueriesSpy = jest.spyOn(QueryClient.prototype, 'removeQueries').mockImplementation(() => undefined);
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    const { useRecaptchaToken } = jest.requireMock('@/components/app/data');
+    (useRecaptchaToken as jest.Mock).mockReturnValue(
+      { getToken: jest.fn().mockResolvedValue('test-token'), isLoading: false, isReady: true },
+    );
+
+    setupBFFContextMock();
+
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'newuser@example.com',
+          fullName: 'New User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+  });
+
+  it('calls invalidateQueries and fetchQuery after successful registration and checkout intent creation', async () => {
+    const useRegisterMutationMock = (await import('@/components/app/data/hooks/useRegisterMutation')).default as jest.Mock;
+    const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
+
+    useRegisterMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    useCreateCheckoutIntentMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    await userEvent.type(screen.getByLabelText(/public username/i), 'newuser');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/confirm password/i), 'Password123!');
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    const { fetchAuthenticatedUser, hydrateAuthenticatedUser, getAuthenticatedUser } = await import('@edx/frontend-platform/auth');
+    await waitFor(() => expect(fetchAuthenticatedUser).toHaveBeenCalled());
+    await waitFor(() => expect(hydrateAuthenticatedUser).toHaveBeenCalled());
+
+    await waitFor(() => expect(invalidateQueriesSpy).toHaveBeenCalled());
+    await waitFor(() => expect(removeQueriesSpy).toHaveBeenCalled());
+
+    await waitFor(() => {
+      expect(getAuthenticatedUser).toHaveBeenCalled();
+      expect(fetchQuerySpy).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
+    });
+  });
+
+  it('sets adminEmail field error when server returns a validation-error for email', async () => {
+    const useRegisterMutationMock = (await import('@/components/app/data/hooks/useRegisterMutation')).default as jest.Mock;
+
+    useRegisterMutationMock.mockImplementation(({ onError }: any) => ({
+      mutate: jest.fn(() => onError?.('Registration failed', {
+        errorCode: 'validation-error',
+        email: [{ userMessage: 'Enter a valid email address.' }],
+      })),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    await userEvent.type(screen.getByLabelText(/public username/i), 'newuser');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/confirm password/i), 'Password123!');
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Enter a valid email address.')).toBeInTheDocument();
+    });
+  });
+
+  it('handles registration failure without email-specific validation error', async () => {
+    const useRegisterMutationMock = (await import('@/components/app/data/hooks/useRegisterMutation')).default as jest.Mock;
+    const mutateSpy = jest.fn();
+
+    useRegisterMutationMock.mockImplementation(({ onError }: any) => ({
+      mutate: mutateSpy.mockImplementation(() => onError?.('Registration failed')),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    await userEvent.type(screen.getByLabelText(/public username/i), 'newuser');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/confirm password/i), 'Password123!');
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(mutateSpy).toHaveBeenCalled();
+    });
+
+    expect(screen.queryByText('Enter a valid email address.')).not.toBeInTheDocument();
+    expect(mockNavigate).not.toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
   });
 });

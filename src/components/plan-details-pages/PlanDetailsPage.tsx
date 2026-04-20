@@ -1,3 +1,8 @@
+import {
+  fetchAuthenticatedUser,
+  getAuthenticatedUser,
+  hydrateAuthenticatedUser,
+} from '@edx/frontend-platform/auth';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
@@ -39,11 +44,11 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
-import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import { sendEnterpriseCheckoutPageEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
-import '../Stepper/Steps/css/PriceAlert.css';
+// import '../Stepper/Steps/css/PriceAlert.css'
 
 const PlanDetailsPage = () => {
   const location = useLocation();
@@ -76,6 +81,21 @@ const PlanDetailsPage = () => {
 
   const lastTrackedPathRef = useRef<string | null>(null);
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+
+  async function invalidateCheckoutQueries(client) {
+    const userId = getAuthenticatedUser()?.userId;
+
+    // 1) Remove anonymous cached context so it can’t be reused by accident
+    client.removeQueries({ queryKey: queryBffContext(null).queryKey, exact: true });
+
+    // 2) Invalidate the logged-in user context so next ensureQueryData refetches
+    if (userId) {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: queryBffContext(userId).queryKey }),
+        client.invalidateQueries({ queryKey: queryBffSuccess(userId).queryKey }),
+      ]);
+    }
+  }
 
   // Fire page view tracking event whenever the current page changes
   useEffect(() => {
@@ -119,63 +139,6 @@ const PlanDetailsPage = () => {
     setError,
   } = form;
 
-  const loginMutation = useLoginMutation({
-    onSuccess: () => {
-      setIsSubmitting(false);
-      navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
-    },
-    onError: (errorMessage) => {
-      setIsSubmitting(false);
-      setError('password', {
-        type: 'manual',
-        message: errorMessage,
-      });
-    },
-  });
-
-  const registerMutation = useRegisterMutation({
-    onSuccess: () => {
-      setIsSubmitting(false);
-
-      // Fire registration success tracking event
-      try {
-        sendEnterpriseCheckoutTrackingEvent({
-          checkoutIntentId,
-          checkoutIntentUuid,
-          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
-          properties: {
-            step: currentStepKey,
-            substep: currentSubstepKey,
-            plan_type: PLAN_TYPE.TEAMS,
-          },
-        });
-      } catch (error) {
-        logError('Failed to send registration success tracking event', error);
-      }
-
-      navigate(buildCheckoutPath(CheckoutPageRoute.PlanDetails));
-    },
-    onError: (errorMessage, errorData) => {
-      // Check if the response contains field-level validation errors for email
-      const emailErrorMessage = errorData?.errorCode === 'validation-error'
-        ? errorData?.email?.[0]?.userMessage
-        : null;
-
-      if (emailErrorMessage) {
-        setError('adminEmail', {
-          type: 'manual',
-          message: emailErrorMessage,
-        });
-      }
-
-      setIsSubmitting(false);
-      setError('root.serverError', {
-        type: 'manual',
-        message: errorMessage || 'Registration failed',
-      });
-    },
-  });
-
   // Use existing checkout intent if already created (avoid duplicate POST)
   async function queryClientInvalidate(userId?: number) {
     if (!userId) {
@@ -191,6 +154,7 @@ const PlanDetailsPage = () => {
     onSuccess: async () => {
       // Invalidate BFF context queries so downstream pages see the new intent.
       await queryClientInvalidate(authenticatedUser?.userId);
+
       setIsSubmitting(false);
       navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
     },
@@ -212,6 +176,69 @@ const PlanDetailsPage = () => {
           message: 'Server Error',
         });
       }
+    },
+  });
+
+  const loginMutation = useLoginMutation({
+    onSuccess: async () => {
+      setIsSubmitting(false);
+      await fetchAuthenticatedUser();
+      await hydrateAuthenticatedUser();
+      createCheckoutIntentMutation.mutate({
+        quantity: planDetailsFormData.quantity,
+        country: planDetailsFormData.country,
+      });
+      await invalidateCheckoutQueries(queryClient);
+      const userId = getAuthenticatedUser()?.userId;
+      if (userId) {
+        await queryClient.fetchQuery(queryBffContext(userId));
+      }
+    },
+    onError: (errorMessage) => {
+      setIsSubmitting(false);
+      setError('password', {
+        type: 'manual',
+        message: errorMessage,
+      });
+    },
+  });
+
+  const registerMutation = useRegisterMutation({
+    onSuccess: async () => {
+      setIsSubmitting(false);
+      await fetchAuthenticatedUser();
+      await hydrateAuthenticatedUser();
+
+      createCheckoutIntentMutation.mutate({
+        quantity: planDetailsFormData.quantity,
+        country: planDetailsFormData.country,
+      });
+      // Now refresh context cache used by rootLoader/loaders
+      await invalidateCheckoutQueries(queryClient);
+      // Optional hard guarantee: force a network read immediately
+      const userId = getAuthenticatedUser()?.userId;
+      if (userId) {
+        await queryClient.fetchQuery(queryBffContext(userId));
+      }
+    },
+    onError: (errorMessage, errorData) => {
+      // Check if the response contains field-level validation errors for email
+      const emailErrorMessage = errorData?.errorCode === 'validation-error'
+        ? errorData?.email?.[0]?.userMessage
+        : null;
+
+      if (emailErrorMessage) {
+        setError('adminEmail', {
+          type: 'manual',
+          message: emailErrorMessage,
+        });
+      }
+
+      setIsSubmitting(false);
+      setError('root.serverError', {
+        type: 'manual',
+        message: errorMessage || 'Registration failed',
+      });
     },
   });
 
@@ -293,7 +320,7 @@ const PlanDetailsPage = () => {
       case SubmitCallbacks.PlanDetailsRegister:
         return registerMutation;
       default:
-        // Safe fallback if currentPage is undefined or unexpected.
+        // Safe fallback if currentPage is undefined or unexpected.<<
         return { isPending: false, isSuccess: false, isError: false } as {
           isPending: boolean; isSuccess: boolean; isError: boolean;
         };
