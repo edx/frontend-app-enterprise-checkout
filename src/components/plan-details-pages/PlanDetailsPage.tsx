@@ -48,7 +48,7 @@ import { sendEnterpriseCheckoutPageEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
-// import '../Stepper/Steps/css/PriceAlert.css'
+import '../Stepper/Steps/css/PriceAlert.css'
 
 const PlanDetailsPage = () => {
   const location = useLocation();
