@@ -320,7 +320,7 @@ const PlanDetailsPage = () => {
       case SubmitCallbacks.PlanDetailsRegister:
         return registerMutation;
       default:
-        // Safe fallback if currentPage is undefined or unexpected.<<
+        // Safe fallback if currentPage is undefined or unexpected.
         return { isPending: false, isSuccess: false, isError: false } as {
           isPending: boolean; isSuccess: boolean; isError: boolean;
         };

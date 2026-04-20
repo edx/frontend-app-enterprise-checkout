@@ -109,6 +109,9 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
+    if (isEssentialsFlow()) {
+      return redirect(EssentialsPageRoute.PlanDetails);
+    }
     return redirect(CheckoutPageRoute.PlanDetails);
   }
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
