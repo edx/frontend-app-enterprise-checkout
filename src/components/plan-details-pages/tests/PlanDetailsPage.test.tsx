@@ -1392,3 +1392,192 @@ describe('PlanDetailsPage – registerMutation success/error paths', () => {
     expect(mockNavigate).not.toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
   });
 });
+
+// ---------------------------------------------------------------------------
+// registerMutation.onSuccess – registration tracking event
+// ---------------------------------------------------------------------------
+
+describe('PlanDetailsPage – registerMutation tracking event', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(QueryClient.prototype, 'invalidateQueries').mockResolvedValue(undefined as any);
+    jest.spyOn(QueryClient.prototype, 'fetchQuery').mockResolvedValue(undefined as any);
+    jest.spyOn(QueryClient.prototype, 'removeQueries').mockImplementation(() => undefined);
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    const { useRecaptchaToken } = jest.requireMock('@/components/app/data');
+    (useRecaptchaToken as jest.Mock).mockReturnValue(
+      { getToken: jest.fn().mockResolvedValue('test-token'), isLoading: false, isReady: true },
+    );
+
+    setupBFFContextMock();
+
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'newuser@example.com',
+          fullName: 'New User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+  });
+
+  it('sends CHECKOUT_REGISTRATION_SUCCESS tracking event after successful registration', async () => {
+    const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+
+    const useRegisterMutationMock = (await import('@/components/app/data/hooks/useRegisterMutation')).default as jest.Mock;
+    const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
+
+    useRegisterMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    useCreateCheckoutIntentMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    await userEvent.type(screen.getByLabelText(/public username/i), 'newuser');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/confirm password/i), 'Password123!');
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(sendTrackEvent).toHaveBeenCalledWith(
+        EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
+        expect.objectContaining({
+          plan_type: PLAN_TYPE.TEAMS,
+        }),
+      );
+    });
+  });
+
+  it('catches and logs tracking event error without breaking navigation', async () => {
+    const { logError } = await import('@edx/frontend-platform/logging');
+    const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+    // Only throw for the registration success event; let field-blur tracking pass through
+    (sendTrackEvent as jest.Mock).mockImplementation((eventName: string) => {
+      if (eventName === EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS) {
+        throw new Error('tracking boom');
+      }
+    });
+
+    const useRegisterMutationMock = (await import('@/components/app/data/hooks/useRegisterMutation')).default as jest.Mock;
+    const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
+
+    useRegisterMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    useCreateCheckoutIntentMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => onSuccess?.()),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsRegister);
+
+    await userEvent.type(screen.getByLabelText(/public username/i), 'newuser');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/confirm password/i), 'Password123!');
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(logError).toHaveBeenCalledWith(
+        'Failed to send registration success tracking event',
+        expect.any(Error),
+      );
+    });
+
+    // Navigation still proceeds despite tracking failure
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createCheckoutIntentMutation – onError paths
+// ---------------------------------------------------------------------------
+
+describe('PlanDetailsPage – createCheckoutIntentMutation error paths', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useFormValidationConstraints as jest.Mock).mockReturnValue({
+      data: { quantity: { min: 5, max: 30 } },
+    });
+
+    setupBFFContextMock();
+
+    checkoutFormStore.setState((state: any) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.PlanDetails]: {
+          adminEmail: 'admin@example.com',
+          fullName: 'Admin User',
+          country: 'US',
+          quantity: 10,
+        },
+      },
+    }));
+  });
+
+  it('sets quantity field error when server returns quantity errorCode', async () => {
+    const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
+
+    useCreateCheckoutIntentMutationMock.mockImplementation(({ onError }: any) => ({
+      mutate: jest.fn(() => onError?.({ quantity: { errorCode: 'quantity_exceeds_limit' } })),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetails, { config: {}, authenticatedUser: { userId: 1 } });
+
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByText('quantity_exceeds_limit')).toBeInTheDocument();
+    });
+  });
+
+  it('sets root server error when checkout intent fails with a non-object error', async () => {
+    const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
+    const mutateSpy = jest.fn();
+
+    useCreateCheckoutIntentMutationMock.mockImplementation(({ onError }: any) => ({
+      mutate: mutateSpy.mockImplementation(() => onError?.(null)),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetails, { config: {}, authenticatedUser: { userId: 1 } });
+
+    await userEvent.click(screen.getByTestId('stepper-submit-button'));
+
+    await waitFor(() => expect(mutateSpy).toHaveBeenCalled());
+    // Navigation must not have occurred
+    expect(mockNavigate).not.toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
+  });
+});
