@@ -2,13 +2,12 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
 
+import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
 import { EssentialsAlert } from '@/components/plan-details-pages/EssentialsAlert';
 import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
 import { TermsAndConditionsText } from '@/components/TermsAndConditionsText';
 import { isFeatureEnabled } from '@/utils/common';
-
-import { isEssentialsFlow } from '../../app/routes/loaders/utils';
 
 import type { UseFormReturn } from 'react-hook-form';
 

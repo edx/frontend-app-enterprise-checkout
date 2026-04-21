@@ -11,6 +11,11 @@ import { extractPriceObject } from '@/utils/checkout';
 
 import './essentials-alert.scss';
 
+// Constants for URLs and default values
+const ESSENTIALS_PRICE_FALLBACK = 288; // Default price in dollars when API is unavailable
+const PICK_DIFFERENT_ACADEMY_URL = 'https://business.edx.org/course-library-plans-essentials/';
+const SWITCH_TO_TEAMS_URL = 'https://business.edx.org/academy/tech-digital-transformation/';
+
 interface AcademyData {
   id?: string;
   name: string;
@@ -53,14 +58,14 @@ const EssentialsAlert = () => {
     {
       select: (contextData): number => {
         const priceObject = extractPriceObject(contextData?.pricing);
-        // Return price in dollars, or 288 if no price in BFF context
-        return priceObject ? priceObject.unitAmount / 100 : 288;
+        // Return price in dollars, or fallback if no price in BFF context
+        return priceObject ? priceObject.unitAmount / 100 : ESSENTIALS_PRICE_FALLBACK;
       },
     },
   );
 
   // Ensure fallback price displays when API is unavailable (data is undefined during loading/error)
-  const displayPrice = pricePerYear ?? 288;
+  const displayPrice = pricePerYear ?? ESSENTIALS_PRICE_FALLBACK;
 
   // TODO: Fetch academy data from API when endpoint is available
   // For now using default academy data
@@ -112,7 +117,7 @@ const EssentialsAlert = () => {
         </p>
         <Button
           variant="link"
-          href="https://business.edx.org/course-library-plans-essentials/"
+          href={PICK_DIFFERENT_ACADEMY_URL}
           className="essentials-alert__link"
         >
           <FormattedMessage
@@ -178,7 +183,7 @@ const EssentialsAlert = () => {
               switchToTeamsLink: (
                 <Button
                   variant="link"
-                  href="https://business.edx.org/academy/tech-digital-transformation/"
+                  href={SWITCH_TO_TEAMS_URL}
                   className="essentials-alert__footer-link"
                 >
                   <FormattedMessage

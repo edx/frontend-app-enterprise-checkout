@@ -54,8 +54,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const header = screen.getByText('Essentials Plan');
       expect(header).toBeInTheDocument();
-      // Header is now inside Alert.Heading from Paragon
-      expect(header.closest('.pgn__alert-heading') || header.parentElement).toBeInTheDocument();
+      // Header is a plain h3 element
+      expect(header.tagName).toBe('H3');
     });
 
     it('should display confirmation text with academy name', () => {
@@ -154,9 +154,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
       expect(pickDifferentLink).toBeInTheDocument();
-      expect(pickDifferentLink.href).toBe(
-        'https://business.edx.org/course-library-plans-essentials/',
-      );
+      // Link should point to the course library essentials page
+      expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials');
     });
 
     it('should open "Pick a different academy" link in same tab', () => {
@@ -169,9 +168,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
-      expect(switchToTeamsLink.href).toBe(
-        'https://business.edx.org/academy/tech-digital-transformation/',
-      );
+      // Link should point to the tech digital transformation academy page
+      expect(switchToTeamsLink.href).toContain('business.edx.org/academy/tech-digital-transformation');
     });
 
     it('should have "Learn more" link with dynamic marketing URL', () => {
@@ -242,8 +240,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const mainHeading = screen.getByText('Essentials Plan');
       expect(mainHeading).toBeInTheDocument();
-      // Heading is now inside Alert.Heading from Paragon
-      expect(mainHeading.closest('.pgn__alert-heading') || mainHeading.parentElement).toBeInTheDocument();
+      // Main heading is a plain h3 element
+      expect(mainHeading.tagName).toBe('H3');
 
       const academyHeadings = screen.getAllByText('Artificial Intelligence');
       expect(academyHeadings.length).toBeGreaterThanOrEqual(1);

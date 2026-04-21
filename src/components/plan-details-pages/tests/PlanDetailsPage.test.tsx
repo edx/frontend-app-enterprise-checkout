@@ -243,9 +243,6 @@ describe('PlanDetailsPage', () => {
     expect(
       screen.queryByTestId('price-alert'),
     ).not.toBeInTheDocument();
-
-    // Cleanup
-    sessionStorage.removeItem('isEssentials');
   });
 
   it('hides PriceAlert for Essentials even when purchasing feature is enabled', () => {
@@ -267,8 +264,9 @@ describe('PlanDetailsPage', () => {
     expect(
       screen.queryByTestId('price-alert'),
     ).not.toBeInTheDocument();
+  });
 
-    // Cleanup
+  afterEach(() => {
     sessionStorage.removeItem('isEssentials');
   });
 });
