@@ -44,7 +44,7 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
-import { sendEnterpriseCheckoutPageEvent } from '@/utils/common';
+import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
 
@@ -219,6 +219,20 @@ const PlanDetailsPage = () => {
       const userId = getAuthenticatedUser()?.userId;
       if (userId) {
         await queryClient.fetchQuery(queryBffContext(userId));
+      }
+      try {
+        sendEnterpriseCheckoutTrackingEvent({
+          checkoutIntentId,
+          checkoutIntentUuid,
+          eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_REGISTRATION_SUCCESS,
+          properties: {
+            step: currentStepKey,
+            substep: currentSubstepKey,
+            plan_type: PLAN_TYPE.TEAMS,
+          },
+        });
+      } catch (error) {
+        logError('Failed to send registration success tracking event', error);
       }
     },
     onError: (errorMessage, errorData) => {
