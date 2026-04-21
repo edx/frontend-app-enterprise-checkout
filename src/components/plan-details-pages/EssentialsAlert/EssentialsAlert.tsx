@@ -83,25 +83,25 @@ const EssentialsAlert = () => {
           />
         </h3>
         {displayPrice != null && (
-        <div className="essentials-alert__price-wrapper">
-          <h3 className="essentials-alert__price-text">
-            <span className="font-weight-light">
-              <FormattedMessage
-                id="checkout.essentialsAlert.from"
-                defaultMessage="From"
-                description="Text indicating the starting price of a subscription"
-              />
-            </span>{' '}
-            <DisplayPrice value={displayPrice} />
-            <span className="font-weight-light">
-              <FormattedMessage
-                id="checkout.essentialsAlert.perYear"
-                defaultMessage="/yr"
-                description="Abbreviation for 'per year' in pricing display"
-              />
-            </span>
-          </h3>
-        </div>
+          <div className="essentials-alert__price-wrapper">
+            <h3 className="essentials-alert__price-text">
+              <span className="font-weight-light">
+                <FormattedMessage
+                  id="checkout.essentialsAlert.from"
+                  defaultMessage="From"
+                  description="Text indicating the starting price of a subscription"
+                />
+              </span>{' '}
+              <DisplayPrice value={displayPrice} />
+              <span className="font-weight-light">
+                <FormattedMessage
+                  id="checkout.essentialsAlert.perYear"
+                  defaultMessage="/yr"
+                  description="Abbreviation for 'per year' in pricing display"
+                />
+              </span>
+            </h3>
+          </div>
         )}
       </div>
 
