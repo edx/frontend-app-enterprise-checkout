@@ -203,16 +203,20 @@ const AccountDetailsPage: React.FC = () => {
   // Restore validation errors when returning from back navigation
   useEffect(() => {
     const shouldRestoreValidation = sessionStorage.getItem(ACCOUNT_DETAILS_RESTORE_ERRORS_KEY) === 'true';
-    if (!shouldRestoreValidation || !hasPersistedAccountDetailsValues) {
-      return;
-    }
-
     let isActive = true;
+
+    if (!shouldRestoreValidation || !hasPersistedAccountDetailsValues) {
+      return () => {
+        isActive = false;
+      };
+    }
 
     const restoreValidationErrors = async () => {
       try {
         const result = await accountDetailsSchema.safeParseAsync(accountDetailsFormData);
-        if (!isActive || result.success) return;
+        if (!isActive || result.success) {
+          return;
+        }
 
         result.error.issues.forEach((issue) => {
           const fieldName = issue.path[0];
@@ -228,7 +232,9 @@ const AccountDetailsPage: React.FC = () => {
       }
     };
 
-    void restoreValidationErrors();
+    restoreValidationErrors().catch((error) => {
+      logError('Failed to restore validation errors', error);
+    });
 
     return () => {
       isActive = false;

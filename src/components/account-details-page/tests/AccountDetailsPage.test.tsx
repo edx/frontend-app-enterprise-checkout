@@ -13,8 +13,6 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { renderStepperRoute } from '@/utils/tests';
 
-const ACCOUNT_DETAILS_RESTORE_ERRORS_KEY = 'accountDetailsRestoreErrors';
-
 jest.mock('@/utils/common', () => ({
   ...jest.requireActual('@/utils/common'),
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
