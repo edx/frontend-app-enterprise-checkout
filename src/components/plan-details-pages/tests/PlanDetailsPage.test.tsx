@@ -1037,8 +1037,6 @@ describe('PlanDetailsPage – Essentials navigation', () => {
   });
 
   it('PlanDetailsLogin (essentials): successful login → navigates to /essentials/account-details', async () => {
-    // const user = userEvent.setup();
-
     // Provide safe constraints so form schema resolves
     (useFormValidationConstraints as jest.Mock).mockReturnValue({
       data: { quantity: { min: 5, max: 30 } },
