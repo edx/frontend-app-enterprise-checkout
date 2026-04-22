@@ -13,6 +13,8 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { renderStepperRoute } from '@/utils/tests';
 
+const ACCOUNT_DETAILS_RESTORE_ERRORS_KEY = 'accountDetailsRestoreErrors';
+
 jest.mock('@/utils/common', () => ({
   ...jest.requireActual('@/utils/common'),
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
@@ -171,6 +173,27 @@ describe('AccountDetailsPage', () => {
     validateText('Create a custom URL for your team');
   });
 
+  it('does not show validation messages on first visit before user interaction', () => {
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.AccountDetails]: {},
+      },
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+
+    // Verify that validation error messages are NOT displayed without user interaction
+    expect(screen.queryByText('Company name is required')).not.toBeInTheDocument();
+    expect(screen.queryByText('Only alphanumeric lowercase characters and hyphens are allowed.')).not.toBeInTheDocument();
+  });
+
   it('navigates back to plan details in essentials flow', async () => {
     const user = userEvent.setup();
     sessionStorage.setItem('isEssentials', 'true');
@@ -303,6 +326,14 @@ describe('AccountDetailsPage', () => {
       companyName: '',
       enterpriseSlug: 'invalid slug!',
     });
+
+    const firstRender = renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    });
+    firstRender.unmount();
 
     renderStepperRoute(CheckoutPageRoute.AccountDetails, {
       config: {},
