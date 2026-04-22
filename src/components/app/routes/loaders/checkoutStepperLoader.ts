@@ -43,12 +43,10 @@ async function planDetailsLoginLoader(): Promise<Response | null> {
  */
 async function planDetailsRegisterLoader(): Promise<Response | null> {
   const authenticatedUser = getAuthenticatedUser();
-
   const planDetailsMetadata = checkoutFormStore.getState().formData[DataStoreKey.PlanDetails];
   const redirectToPlanDetails = !(
     planDetailsMetadata.adminEmail && planDetailsMetadata.fullName && planDetailsMetadata.country
   );
-
   if (redirectToPlanDetails || authenticatedUser) {
     // Redirect to PlanDetails if: (1) required metadata is missing, or (2) user is already authenticated.
     if (isEssentialsFlow()) {
@@ -70,6 +68,9 @@ async function accountDetailsLoader(queryClient: QueryClient): Promise<Response 
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
+    if (isEssentialsFlow()) {
+      return redirect(EssentialsPageRoute.PlanDetails);
+    }
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 
@@ -108,9 +109,11 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
   const authenticatedUser = getAuthenticatedUser();
   if (!authenticatedUser) {
     // If the user is NOT authenticated, redirect to PlanDetails Page.
+    if (isEssentialsFlow()) {
+      return redirect(EssentialsPageRoute.PlanDetails);
+    }
     return redirect(CheckoutPageRoute.PlanDetails);
   }
-
   const contextMetadata: CheckoutContextResponse = await queryClient.ensureQueryData(
     queryBffContext(authenticatedUser?.userId || null),
   );
@@ -138,6 +141,9 @@ async function billingDetailsLoader(queryClient: QueryClient): Promise<Response 
   const contextSecret = contextMetadata.checkoutIntent?.checkoutSessionClientSecret;
   const checkoutSessionClientSecret = formStoreSecret || contextSecret;
   if (!checkoutSessionClientSecret) {
+    if (isEssentialsFlow()) {
+      return redirect(EssentialsPageRoute.PlanDetails);
+    }
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 

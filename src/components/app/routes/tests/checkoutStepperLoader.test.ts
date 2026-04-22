@@ -399,4 +399,144 @@ describe('Essentials flow redirects', () => {
       EssentialsPageRoute.PlanDetails,
     );
   });
+
+  it('AccountDetails loader redirects unauthenticated users to Essentials PlanDetails', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(CheckoutStepKey.AccountDetails, undefined, EssentialsPageRoute.AccountDetails),
+    );
+    expect(result).not.toBeNull();
+    expect((result as any).headers.get('Location')).toBe(EssentialsPageRoute.PlanDetails);
+  });
+
+  it('BillingDetails loader redirects unauthenticated users to Essentials PlanDetails', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, EssentialsPageRoute.BillingDetails),
+    );
+    expect(result).not.toBeNull();
+    expect((result as any).headers.get('Location')).toBe(EssentialsPageRoute.PlanDetails);
+  });
+
+  it('BillingDetails loader redirects to Plan Details when no Stripe price id found (loader does not check essentials for no-price path)', async () => {
+    const essentialsQueryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+    jest.spyOn(essentialsQueryClient, 'ensureQueryData').mockResolvedValue(
+      buildContext({ withPrice: false }),
+    );
+    const loader = makeCheckoutStepperLoader(essentialsQueryClient);
+    const result = await loader(
+      makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, EssentialsPageRoute.BillingDetails),
+    );
+    expect(result).not.toBeNull();
+    // billingDetailsLoader does not guard the no-price branch with isEssentialsFlow
+    expect((result as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+  });
+
+  it('BillingDetails loader redirects to Essentials PlanDetails when checkout session is missing', async () => {
+    const essentialsQueryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+    const ctx = buildContext({ withPrice: true });
+    jest.spyOn(essentialsQueryClient, 'ensureQueryData').mockResolvedValue(ctx);
+    const { pricing } = ctx;
+    populateValidPlanDetails(pricing.prices[0].id as string);
+    populateValidAccountDetails();
+    const loader = makeCheckoutStepperLoader(essentialsQueryClient);
+    const result = await loader(
+      makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, EssentialsPageRoute.BillingDetails),
+    );
+    expect(result).not.toBeNull();
+    expect((result as any).headers.get('Location')).toBe(EssentialsPageRoute.PlanDetails);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// billingDetailsLoader – formStoreSecret fallback
+// ---------------------------------------------------------------------------
+
+describe('billingDetailsLoader – formStoreSecret fallback', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetFormStore();
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  });
+
+  it('returns null when checkout session secret comes from the Zustand form store (not context)', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+    // Context has NO inline secret
+    const ctx = buildContext({ withPrice: true, includeCheckoutIntent: false });
+    jest.spyOn(queryClient, 'ensureQueryData').mockResolvedValue(ctx);
+    const { pricing } = ctx;
+    const stripePriceId = pricing.prices[0].id as string;
+    populateValidPlanDetails(stripePriceId);
+    populateValidAccountDetails();
+    // Inject secret only via the form store
+    checkoutFormStore.setState(s => ({
+      ...s,
+      checkoutSessionClientSecret: 'cs_test_from_store',
+    }), false);
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(CheckoutStepKey.BillingDetails, undefined, CheckoutPageRoute.BillingDetails),
+    );
+    expect(result).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// billingDetailsSuccessLoader – success (null) paths
+// ---------------------------------------------------------------------------
+
+describe('billingDetailsSuccessLoader – null return paths', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetFormStore();
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  });
+
+  it('returns null when checkoutSessionStatus type is "complete"', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+    const ctx = buildContext({ withPrice: true, includeCheckoutIntent: false });
+    jest.spyOn(queryClient, 'ensureQueryData').mockResolvedValue(ctx);
+    checkoutFormStore.setState(s => ({
+      ...s,
+      checkoutSessionStatus: { type: 'complete', paymentStatus: 'paid' },
+    }), false);
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(
+        CheckoutStepKey.BillingDetails,
+        CheckoutSubstepKey.Success,
+        CheckoutPageRoute.BillingDetailsSuccess,
+      ),
+    );
+    expect(result).toBeNull();
+  });
+
+  it('returns null when context has existingSuccessfulCheckoutIntent', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
+    const ctx = {
+      ...buildContext({ withPrice: true, includeCheckoutIntent: true }),
+      checkoutIntent: {
+        ...buildContext({ withPrice: true, includeCheckoutIntent: true }).checkoutIntent,
+        existingSuccessfulCheckoutIntent: true,
+      },
+    };
+    jest.spyOn(queryClient, 'ensureQueryData').mockResolvedValue(ctx);
+    const loader = makeCheckoutStepperLoader(queryClient);
+    const result = await loader(
+      makeLoaderArgs(
+        CheckoutStepKey.BillingDetails,
+        CheckoutSubstepKey.Success,
+        CheckoutPageRoute.BillingDetailsSuccess,
+      ),
+    );
+    expect(result).toBeNull();
+  });
 });
