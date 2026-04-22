@@ -1,9 +1,10 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { AppContext } from '@edx/frontend-platform/react';
 import { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
 
+import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { AuthenticatedUserField, LicensesField, NameAndEmailFields } from '@/components/FormFields';
+import { EssentialsAlert } from '@/components/plan-details-pages/EssentialsAlert';
 import { PriceAlert } from '@/components/plan-details-pages/PriceAlert';
 import { TermsAndConditionsText } from '@/components/TermsAndConditionsText';
 import { isFeatureEnabled } from '@/utils/common';
@@ -29,20 +30,20 @@ interface PlanDetailsContentProps {
  */
 const PlanDetailsContent = ({ form }: PlanDetailsContentProps) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
-  const location = useLocation();
   const {
     FEATURE_SELF_SERVICE_PURCHASING,
     FEATURE_SELF_SERVICE_PURCHASING_KEY,
   } = getConfig();
-  const inEssentials = location.pathname.startsWith('/essentials/');
+  const isEssentials = isEssentialsFlow();
   const featureCheck = isFeatureEnabled(
     FEATURE_SELF_SERVICE_PURCHASING,
     FEATURE_SELF_SERVICE_PURCHASING_KEY,
   );
   return (
     <>
+      {isEssentials && <EssentialsAlert />}
       {
-        featureCheck && !inEssentials && <PriceAlert />
+        featureCheck && !isEssentials && <PriceAlert />
 }
       <LicensesField form={form} />
       {authenticatedUser

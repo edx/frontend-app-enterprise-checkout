@@ -226,10 +226,17 @@ describe('PlanDetailsPage', () => {
 
   it('does NOT render PriceAlert for Essentials PlanDetails', () => {
     (getConfig as jest.Mock).mockReturnValue({
+      TERMS_OF_SERVICE_URL: 'https://example.com/terms',
+      PRIVACY_POLICY_URL: 'https://example.com/privacy',
       FEATURE_SELF_SERVICE_PURCHASING: 'true',
       FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test_purchasing_key',
       FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
+      FEATURE_SELF_SERVICE_ESSENTIALS: true,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
     });
+
+    // Set sessionStorage flag to indicate essentials flow
+    sessionStorage.setItem('isEssentials', 'true');
 
     renderStepperRoute('/essentials/plan-details');
 
@@ -240,16 +247,27 @@ describe('PlanDetailsPage', () => {
 
   it('hides PriceAlert for Essentials even when purchasing feature is enabled', () => {
     (getConfig as jest.Mock).mockReturnValue({
+      TERMS_OF_SERVICE_URL: 'https://example.com/terms',
+      PRIVACY_POLICY_URL: 'https://example.com/privacy',
       FEATURE_SELF_SERVICE_PURCHASING: true,
       FEATURE_SELF_SERVICE_PURCHASING_KEY: 'test_purchasing_key',
       FEATURE_SELF_SERVICE_SITE_KEY: null,
+      FEATURE_SELF_SERVICE_ESSENTIALS: true,
+      FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
     });
+
+    // Set sessionStorage flag to indicate essentials flow
+    sessionStorage.setItem('isEssentials', 'true');
 
     renderStepperRoute('/essentials/plan-details');
 
     expect(
-      screen.queryByText(/Teams subscription/i),
+      screen.queryByTestId('price-alert'),
     ).not.toBeInTheDocument();
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem('isEssentials');
   });
 });
 
