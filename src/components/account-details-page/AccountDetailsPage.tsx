@@ -10,7 +10,6 @@ import {
 } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -43,6 +42,8 @@ import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } 
 import { isEssentialsFlow } from '../app/routes/loaders/utils';
 
 import AccountDetailsSubmitButton from './AccountDetailsSubmitButton';
+
+const ACCOUNT_DETAILS_RESTORE_ERRORS_KEY = 'accountDetailsRestoreErrors';
 
 const AccountDetailsPage: React.FC = () => {
   const { data: formValidationConstraints } = useFormValidationConstraints();
@@ -108,11 +109,10 @@ const AccountDetailsPage: React.FC = () => {
 
   const {
     handleSubmit,
-    formState: { isDirty: formIsDirty, isValid: formIsValid },
+    formState: { isDirty: formIsDirty, isValid: formIsValid, errors: formErrors },
     setError,
     reset: formReset,
     getValues,
-    trigger,
   } = form;
 
   const setCheckoutSessionClientSecret = useCheckoutFormStore((state) => state.setCheckoutSessionClientSecret);
@@ -199,35 +199,54 @@ const AccountDetailsPage: React.FC = () => {
   }, [formIsDirty, mutationIsSuccess, resetMutation]);
 
   const hasPersistedAccountDetailsValues = Object.keys(accountDetailsFormData).length > 0;
-  const hadPersistedValuesOnMount = useRef(hasPersistedAccountDetailsValues);
-  const persistedValuesOnMountRef = useRef(accountDetailsFormData);
-  const previousPathRef = useRef(location.pathname);
 
-  const restorePersistedValidationState = useCallback((values: Partial<AccountDetailsData>) => {
-    formReset(values);
-    trigger().catch(() => {});
-  }, [formReset, trigger]);
-
+  // Restore validation errors when returning from back navigation
   useEffect(() => {
-    if (!hadPersistedValuesOnMount.current) {
-      return;
-    }
-    restorePersistedValidationState(persistedValuesOnMountRef.current);
-  }, [restorePersistedValidationState]);
+    const shouldRestoreValidation = sessionStorage.getItem(ACCOUNT_DETAILS_RESTORE_ERRORS_KEY) === 'true';
+    let isActive = true;
 
-  useEffect(() => {
-    const didPathChange = previousPathRef.current !== location.pathname;
-    const isAccountDetailsPath = (
-      location.pathname === CheckoutPageRoute.AccountDetails
-      || location.pathname === EssentialsPageRoute.AccountDetails
-    );
-
-    if (didPathChange && isAccountDetailsPath && hasPersistedAccountDetailsValues) {
-      restorePersistedValidationState(accountDetailsFormData);
+    if (!shouldRestoreValidation || !hasPersistedAccountDetailsValues) {
+      return () => {
+        isActive = false;
+      };
     }
 
-    previousPathRef.current = location.pathname;
-  }, [accountDetailsFormData, hasPersistedAccountDetailsValues, location.pathname, restorePersistedValidationState]);
+    const restoreValidationErrors = async () => {
+      try {
+        const result = await accountDetailsSchema.safeParseAsync(accountDetailsFormData);
+        if (!isActive || result.success) {
+          return;
+        }
+
+        result.error.issues.forEach((issue) => {
+          const fieldName = issue.path[0];
+          if (typeof fieldName === 'string') {
+            setError(fieldName as keyof AccountDetailsData, {
+              type: 'manual',
+              message: issue.message,
+            });
+          }
+        });
+      } catch (error) {
+        logError('Failed to restore validation errors', error);
+      }
+    };
+
+    restoreValidationErrors().catch((error) => {
+      logError('Failed to restore validation errors', error);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [accountDetailsFormData, accountDetailsSchema, hasPersistedAccountDetailsValues, setError]);
+
+  // Clear the restore flag when user starts editing (form becomes dirty)
+  useEffect(() => {
+    if (formIsDirty) {
+      sessionStorage.removeItem(ACCOUNT_DETAILS_RESTORE_ERRORS_KEY);
+    }
+  }, [formIsDirty]);
 
   const onSubmit = (data: AccountDetailsData) => {
     setFormData(DataStoreKey.AccountDetails, data);
@@ -261,6 +280,13 @@ const AccountDetailsPage: React.FC = () => {
   };
 
   const handleBackClick = () => {
+    const hasVisibleValidationErrors = Object.keys(formErrors).length > 0;
+    if (hasVisibleValidationErrors) {
+      sessionStorage.setItem(ACCOUNT_DETAILS_RESTORE_ERRORS_KEY, 'true');
+    } else {
+      sessionStorage.removeItem(ACCOUNT_DETAILS_RESTORE_ERRORS_KEY);
+    }
+
     setFormData(DataStoreKey.AccountDetails, {
       ...accountDetailsFormData,
       ...getValues(),
