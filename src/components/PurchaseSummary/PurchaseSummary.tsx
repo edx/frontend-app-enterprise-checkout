@@ -1,8 +1,7 @@
 import { Card, Stack } from '@openedx/paragon';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
-import useTestimonials from '@/components/app/data/hooks/useTestimonials';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
@@ -12,7 +11,6 @@ import LicensesRow from './LicensesRow';
 import PricePerUserRow from './PricePerUserRow';
 import PurchaseSummaryCardButton from './PurchaseSummaryCardButton';
 import PurchaseSummaryHeader from './PurchaseSummaryHeader';
-import TestimonialCard, { Testimonial } from './TestimonialCard';
 import TotalAfterTrialRow from './TotalAfterTrialRow';
 
 const PurchaseSummary = () => {
@@ -30,32 +28,6 @@ const PurchaseSummary = () => {
   } = usePurchaseSummaryPricing();
 
   const normalizedQuantity = parseInt(quantity, 10) === 0 ? null : quantity;
-
-  // ✅ Move testimonials API call to client hook
-  const { data: testimonials = [] } = useTestimonials();
-  const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
-  const shownTestimonialsRef = useRef<string[]>([]);
-
-  useEffect(() => {
-    if (!testimonials.length) { return; }
-
-    let available = testimonials.filter(
-      (t) => t.uuid && !shownTestimonialsRef.current.includes(t.uuid),
-    );
-
-    if (available.length === 0) {
-      available = testimonials;
-      shownTestimonialsRef.current = [];
-    }
-
-    const random = available[Math.floor(Math.random() * available.length)];
-
-    setCurrentTestimonial(random);
-
-    if (random.uuid) {
-      shownTestimonialsRef.current = [...shownTestimonialsRef.current, random.uuid];
-    }
-  }, [testimonials]);
 
   return (
     <Card>
@@ -79,10 +51,6 @@ const PurchaseSummary = () => {
           />
 
           <DueTodayRow amountDue={0} />
-
-          {currentTestimonial && (
-            <TestimonialCard testimonial={currentTestimonial} />
-          )}
         </Stack>
       </Card.Section>
 

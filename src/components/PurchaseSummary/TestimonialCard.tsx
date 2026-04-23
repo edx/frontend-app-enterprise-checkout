@@ -1,4 +1,3 @@
-import { Card, Stack } from '@openedx/paragon';
 import React from 'react';
 
 export interface Testimonial {
@@ -24,29 +23,29 @@ const TestimonialCard = ({ testimonial }: Props) => {
   } = testimonial;
 
   return (
-    <Card className="mt-4 border-light" data-testid="testimonial-card">
-      <Card.Body>
-        <Stack gap={2}>
-          <div className="h3" aria-hidden="true">
-            ❝
-          </div>
+    <div className="testimonial-card mt-4" data-testid="testimonial-card">
+      <div className="testimonial-card__body">
+        <div className="testimonial-card__quote-icon" aria-hidden="true">
+          <span className="testimonial-card__quote-glyph">&#10077;</span>
+        </div>
 
-          <blockquote className="mb-0" data-testid="testimonial-quote">
-            {quoteText}
-          </blockquote>
+        <p className="testimonial-card__quote mt-4" data-testid="testimonial-quote">
+          {quoteText}
+        </p>
 
-          <div className="mt-2">
-            <strong data-testid="testimonial-name">
+        <div className="testimonial-card__attribution mt-5">
+          <span className="testimonial-card__attribution-dash" aria-hidden="true">&#8212;</span>
+          <div className="testimonial-card__attribution-copy">
+            <span className="testimonial-card__name" data-testid="testimonial-name">
               {attributionName}
-            </strong>
-
-            <div className="text-muted" data-testid="testimonial-title">
+            </span>
+            <span className="testimonial-card__title d-block" data-testid="testimonial-title">
               {attributionTitle}
-            </div>
+            </span>
           </div>
-        </Stack>
-      </Card.Body>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 

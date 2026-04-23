@@ -1,7 +1,13 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 
+import useTestimonials, {
+  getShownTestimonialUuids,
+  pickNextTestimonial,
+  setShownTestimonialUuids,
+} from '@/components/app/data/hooks/useTestimonials';
 import { PurchaseSummary } from '@/components/PurchaseSummary';
+import TestimonialCard, { Testimonial } from '@/components/PurchaseSummary/TestimonialCard';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
 import { CheckoutSubstepKey } from '@/constants/checkout';
@@ -17,6 +23,21 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+  const { data: testimonials = [] } = useTestimonials();
+  const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
+
+  useEffect(() => {
+    if (!testimonials.length) {
+      setCurrentTestimonial(null);
+      return;
+    }
+
+    const shownUuids = getShownTestimonialUuids();
+    const nextTestimonial = pickNextTestimonial(testimonials, shownUuids);
+    setShownTestimonialUuids(shownUuids);
+    setCurrentTestimonial(nextTestimonial);
+  }, [currentStepKey, testimonials]);
+
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {
@@ -47,6 +68,7 @@ const CheckoutStepperContainer = (): ReactElement => {
           </Col>
           <Col md={12} lg={4}>
             <PurchaseSummary />
+            <TestimonialCard testimonial={currentTestimonial} />
           </Col>
         </Row>
       </Stack>
