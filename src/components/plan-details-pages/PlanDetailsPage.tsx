@@ -152,8 +152,15 @@ const PlanDetailsPage = () => {
 
   const createCheckoutIntentMutation = useCreateCheckoutIntentMutation({
     onSuccess: async () => {
-      // Invalidate BFF context queries so downstream pages see the new intent.
-      await queryClientInvalidate(authenticatedUser?.userId);
+      // Refresh checkout context after the intent exists so downstream loaders don't reuse stale data.
+      const currentUserId = getAuthenticatedUser()?.userId;
+      await queryClientInvalidate(currentUserId);
+      if (currentUserId) {
+        await queryClient.fetchQuery({
+          ...queryBffContext(currentUserId),
+          staleTime: 0,
+        });
+      }
 
       setIsSubmitting(false);
       navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));

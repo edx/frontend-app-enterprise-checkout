@@ -8,6 +8,7 @@ import { sendPageEvent } from '@edx/frontend-platform/analytics';
 
 import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import { queryBffContext } from '@/components/app/data/queries/queries';
 import { camelCasedCheckoutContextResponseFactory } from '@/components/app/data/services/__factories__';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { CheckoutPageRoute, CheckoutStepKey, CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
@@ -1250,7 +1251,10 @@ describe('PlanDetailsPage – loginMutation success/error paths', () => {
     // BFF context should be eagerly refetched by userId returned from getAuthenticatedUser
     await waitFor(() => {
       expect(getAuthenticatedUser).toHaveBeenCalled();
-      expect(fetchQuerySpy).toHaveBeenCalled();
+      expect(fetchQuerySpy).toHaveBeenCalledWith(expect.objectContaining({
+        queryKey: queryBffContext(123).queryKey,
+        staleTime: 0,
+      }));
     });
 
     // Navigation to Account Details
@@ -1349,7 +1353,10 @@ describe('PlanDetailsPage – registerMutation success/error paths', () => {
 
     await waitFor(() => {
       expect(getAuthenticatedUser).toHaveBeenCalled();
-      expect(fetchQuerySpy).toHaveBeenCalled();
+      expect(fetchQuerySpy).toHaveBeenCalledWith(expect.objectContaining({
+        queryKey: queryBffContext(123).queryKey,
+        staleTime: 0,
+      }));
     });
 
     await waitFor(() => {
