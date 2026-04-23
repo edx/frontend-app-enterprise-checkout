@@ -152,18 +152,22 @@ const PlanDetailsPage = () => {
 
   const createCheckoutIntentMutation = useCreateCheckoutIntentMutation({
     onSuccess: async () => {
-      // Refresh checkout context after the intent exists so downstream loaders don't reuse stale data.
-      const currentUserId = getAuthenticatedUser()?.userId;
-      await queryClientInvalidate(currentUserId);
-      if (currentUserId) {
-        await queryClient.fetchQuery({
-          ...queryBffContext(currentUserId),
-          staleTime: 0,
-        });
+      try {
+        // Refresh checkout context after the intent exists so downstream loaders don't reuse stale data.
+        const currentUserId = getAuthenticatedUser()?.userId;
+        await queryClientInvalidate(currentUserId);
+        if (currentUserId) {
+          await queryClient.fetchQuery({
+            ...queryBffContext(currentUserId),
+            staleTime: 0,
+          });
+        }
+      } catch (error) {
+        logError('Failed to refresh checkout context after intent creation', error);
+      } finally {
+        setIsSubmitting(false);
+        navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
       }
-
-      setIsSubmitting(false);
-      navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
     },
     onError: (errorData) => {
       setIsSubmitting(false);
