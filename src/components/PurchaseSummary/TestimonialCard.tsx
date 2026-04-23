@@ -5,6 +5,7 @@ export interface Testimonial {
   quote_text: string;
   attribution_name: string;
   attribution_title: string;
+  is_active?: boolean;
 }
 
 interface Props {

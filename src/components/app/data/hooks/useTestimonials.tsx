@@ -2,27 +2,66 @@ import { getAuthenticatedHttpClient, getAuthenticatedUser } from '@edx/frontend-
 import { getConfig } from '@edx/frontend-platform/config';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 import { Testimonial } from '@/components/PurchaseSummary/TestimonialCard';
 
-export const DEFAULT_TESTIMONIALS: Testimonial[] = [
+export const SEEDED_ACTIVE_TESTIMONIALS: Testimonial[] = [
   {
-    uuid: 'fallback-1',
-    quote_text: 'The need for qualified IT workers is at an unprecedented level, and our partnership with edX is providing the skills needed to be successful in an IT career.',
-    attribution_name: 'Eric Westphal',
-    attribution_title: 'Leader of Global Workforce Strategy and Economic Development, Cognizant',
+    uuid: 'seed-1',
+    quote_text: 'Our team ramped up on critical cloud skills in weeks, not months, with the flexibility to learn on demand.',
+    attribution_name: 'Nora Patel',
+    attribution_title: 'Head of Workforce Transformation, Atlas Systems',
+    is_active: true,
   },
   {
-    uuid: 'fallback-2',
-    quote_text: 'The subscription has been a game-changer for upskilling our workforce quickly and efficiently.',
-    attribution_name: 'Michael Chen',
-    attribution_title: 'VP of Engineering, Innovate Inc.',
+    uuid: 'seed-2',
+    quote_text: 'The platform made it simple to standardize learning paths across departments while still letting teams choose relevant courses.',
+    attribution_name: 'Daniel Kim',
+    attribution_title: 'Director of L&D, Brightline Health',
+    is_active: true,
   },
   {
-    uuid: 'fallback-3',
-    quote_text: 'Our employees love the flexibility and breadth of courses available on edX.',
-    attribution_name: 'Emily Rodriguez',
-    attribution_title: 'Chief People Officer, GrowthCo',
+    uuid: 'seed-3',
+    quote_text: 'We launched a company-wide upskilling initiative with confidence because reporting and course quality were both strong.',
+    attribution_name: 'Aisha Morgan',
+    attribution_title: 'Chief People Officer, North Harbor Group',
+    is_active: true,
+  },
+  {
+    uuid: 'seed-4',
+    quote_text: 'In just one quarter, we aligned technical upskilling goals across three business units and saw stronger project delivery outcomes.',
+    attribution_name: 'Lena Brooks',
+    attribution_title: 'VP, Talent Strategy, Meridian Digital',
+    is_active: true,
+  },
+  {
+    uuid: 'seed-5',
+    quote_text: 'We needed practical, job-relevant learning at scale. This gave our teams confidence to apply new skills immediately.',
+    attribution_name: 'Rahul Mehta',
+    attribution_title: 'Senior Director, Engineering Enablement, Apex Mobility',
+    is_active: true,
+  },
+  {
+    uuid: 'seed-6',
+    quote_text: 'Managers finally had a consistent way to guide development conversations with measurable learning milestones.',
+    attribution_name: 'Carla Jimenez',
+    attribution_title: 'Head of Learning Operations, Vertex Retail',
+    is_active: true,
+  },
+  {
+    uuid: 'seed-7',
+    quote_text: 'The breadth of content let us support both early-career hires and senior specialists without changing platforms.',
+    attribution_name: 'Owen Clarke',
+    attribution_title: 'Chief Technology Officer, Redstone Analytics',
+    is_active: true,
+  },
+  {
+    uuid: 'seed-8',
+    quote_text: 'This became a core part of our workforce transformation roadmap, especially for data and AI readiness.',
+    attribution_name: 'Priya Shah',
+    attribution_title: 'Director, Organizational Capability, Harbor Financial',
+    is_active: true,
   },
 ];
 
@@ -84,14 +123,23 @@ export const pickNextTestimonial = (
 export const fetchTestimonials = async (): Promise<Testimonial[]> => {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`;
+  const fallbackTestimonials = SEEDED_ACTIVE_TESTIMONIALS;
+
   try {
     const user = getAuthenticatedUser();
     const res = user
       ? await getAuthenticatedHttpClient().get(url)
       : await axios.get(url);
-    return res.data?.results?.length ? res.data.results : DEFAULT_TESTIMONIALS;
+
+    const results = res.data?.results;
+    if (!Array.isArray(results)) {
+      return fallbackTestimonials;
+    }
+
+    const activeTestimonials = results.filter((testimonial) => testimonial?.is_active !== false);
+    return activeTestimonials.length ? activeTestimonials : fallbackTestimonials;
   } catch {
-    return DEFAULT_TESTIMONIALS;
+    return fallbackTestimonials;
   }
 };
 
@@ -100,5 +148,24 @@ const useTestimonials = () => useQuery({
   queryFn: fetchTestimonials,
   staleTime: Infinity,
 });
+
+export const useRotatingTestimonial = (rotationKey?: string | number): Testimonial | null => {
+  const { data: testimonials = [] } = useTestimonials();
+  const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
+
+  useEffect(() => {
+    if (!testimonials.length) {
+      setCurrentTestimonial(null);
+      return;
+    }
+
+    const shownUuids = getShownTestimonialUuids();
+    const nextTestimonial = pickNextTestimonial(testimonials, shownUuids);
+    setShownTestimonialUuids(shownUuids);
+    setCurrentTestimonial(nextTestimonial);
+  }, [rotationKey, testimonials]);
+
+  return currentTestimonial;
+};
 
 export default useTestimonials;

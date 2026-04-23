@@ -6,31 +6,14 @@ import {
   Stack,
 } from '@openedx/paragon';
 import { MenuBook } from '@openedx/paragon/icons';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import useTestimonials, {
-  getShownTestimonialUuids,
-  pickNextTestimonial,
-  setShownTestimonialUuids,
-} from '@/components/app/data/hooks/useTestimonials';
+import { useRotatingTestimonial } from '@/components/app/data/hooks/useTestimonials';
 import { PurchaseSummary } from '@/components/PurchaseSummary';
-import TestimonialCard, { Testimonial } from '@/components/PurchaseSummary/TestimonialCard';
+import TestimonialCard from '@/components/PurchaseSummary/TestimonialCard';
 
 const AcademicSelection: React.FC = () => {
-  const { data: testimonials = [] } = useTestimonials();
-  const [currentTestimonial, setCurrentTestimonial] = useState<Testimonial | null>(null);
-
-  useEffect(() => {
-    if (!testimonials.length) {
-      setCurrentTestimonial(null);
-      return;
-    }
-
-    const shownUuids = getShownTestimonialUuids();
-    const nextTestimonial = pickNextTestimonial(testimonials, shownUuids);
-    setShownTestimonialUuids(shownUuids);
-    setCurrentTestimonial(nextTestimonial);
-  }, [testimonials]);
+  const currentTestimonial = useRotatingTestimonial('academic-selection');
 
   return (
     <Container size="lg" className="py-4.5">
