@@ -196,10 +196,6 @@ const PlanDetailsPage = () => {
         country: planDetailsFormData.country,
       });
       await invalidateCheckoutQueries(queryClient);
-      const userId = getAuthenticatedUser()?.userId;
-      if (userId) {
-        await queryClient.fetchQuery(queryBffContext(userId));
-      }
     },
     onError: (errorMessage) => {
       setIsSubmitting(false);
@@ -222,11 +218,7 @@ const PlanDetailsPage = () => {
       });
       // Now refresh context cache used by rootLoader/loaders
       await invalidateCheckoutQueries(queryClient);
-      // Optional hard guarantee: force a network read immediately
-      const userId = getAuthenticatedUser()?.userId;
-      if (userId) {
-        await queryClient.fetchQuery(queryBffContext(userId));
-      }
+
       try {
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId,
