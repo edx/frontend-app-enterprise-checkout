@@ -7,7 +7,6 @@ import 'whatwg-fetch';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
-import useTestimonials from '@/components/app/data/hooks/useTestimonials';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -20,9 +19,6 @@ jest.mock('@/components/app/data', () => ({
   useCreateBillingPortalSession: jest.fn(() => ({ data: { url: null } })),
   useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
 }));
-
-// Mock testimonials hook
-jest.mock('@/components/app/data/hooks/useTestimonials');
 
 const renderWithProviders = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -52,8 +48,6 @@ describe('PurchaseSummary', () => {
       yearlySubscriptionCostForQuantity: 150,
       yearlyCostPerSubscriptionPerUser: 50,
     });
-
-    (useTestimonials as jest.Mock).mockReturnValue({ data: [], isLoading: false });
   });
 
   it('renders header and rows with computed values', () => {
@@ -72,33 +66,11 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$0')).toBeInTheDocument();
   });
 
-  it('renders correctly when testimonials are empty', async () => {
+  it('renders correctly', async () => {
     renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    });
-  });
-
-  it('renders correctly when testimonials exist', async () => {
-    (useTestimonials as jest.Mock).mockReturnValue({
-      data: [
-        {
-          uuid: '123',
-          quote_text: 'Great product!',
-          attribution_name: 'John Doe',
-          attribution_title: 'CEO',
-        },
-      ],
-      isLoading: false,
-    });
-
-    renderWithProviders();
-
-    await waitFor(() => {
-      expect(screen.getByText('Great product!')).toBeInTheDocument();
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('CEO')).toBeInTheDocument();
     });
   });
 });
