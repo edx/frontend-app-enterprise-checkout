@@ -82,7 +82,14 @@ declare global {
     email: string;
     country: string;
     honorCode: boolean;
+<<<<<<< Updated upstream
     captchaToken?: string;
+=======
+    recaptchaToken?: string;
+    // Identifies the flow that originated this registration. Must match an entry on the
+    // LMS allowlist (e.g. `enterprise_sponsor_checkout`) to have any effect server-side.
+    registrationSource?: string;
+>>>>>>> Stashed changes
   }
 
   interface RegistrationCreateSuccessResponseSchema {

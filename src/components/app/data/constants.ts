@@ -45,6 +45,10 @@ const termsAndConditions = {
   agreeToRecurringSubscriptionMessage,
 };
 
+// Identifier sent to the LMS registration API so it can suppress the activation email for
+// learners created via the enterprise sponsor checkout flow. Must match the LMS allowlist.
+const ENTERPRISE_SPONSOR_CHECKOUT_REGISTRATION_SOURCE = 'enterprise_sponsor_checkout';
+
 export {
   baseValidation,
   snakeCaseBaseValidation,
@@ -53,4 +57,5 @@ export {
   SHORT_MONTH_DATE_FORMAT,
   LONG_MONTH_DATE_FORMAT,
   termsAndConditions,
+  ENTERPRISE_SPONSOR_CHECKOUT_REGISTRATION_SOURCE,
 };
