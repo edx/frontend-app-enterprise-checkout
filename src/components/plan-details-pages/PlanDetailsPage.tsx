@@ -152,11 +152,22 @@ const PlanDetailsPage = () => {
 
   const createCheckoutIntentMutation = useCreateCheckoutIntentMutation({
     onSuccess: async () => {
-      // Invalidate BFF context queries so downstream pages see the new intent.
-      await queryClientInvalidate(authenticatedUser?.userId);
-
-      setIsSubmitting(false);
-      navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
+      try {
+        // Refresh checkout context after the intent exists so downstream loaders don't reuse stale data.
+        const currentUserId = getAuthenticatedUser()?.userId;
+        await queryClientInvalidate(currentUserId);
+        if (currentUserId) {
+          await queryClient.fetchQuery({
+            ...queryBffContext(currentUserId),
+            staleTime: 0,
+          });
+        }
+      } catch (error) {
+        logError('Failed to refresh checkout context after intent creation', error);
+      } finally {
+        setIsSubmitting(false);
+        navigate(buildCheckoutPath(CheckoutPageRoute.AccountDetails));
+      }
     },
     onError: (errorData) => {
       setIsSubmitting(false);
@@ -189,10 +200,6 @@ const PlanDetailsPage = () => {
         country: planDetailsFormData.country,
       });
       await invalidateCheckoutQueries(queryClient);
-      const userId = getAuthenticatedUser()?.userId;
-      if (userId) {
-        await queryClient.fetchQuery(queryBffContext(userId));
-      }
     },
     onError: (errorMessage) => {
       setIsSubmitting(false);
@@ -215,11 +222,7 @@ const PlanDetailsPage = () => {
       });
       // Now refresh context cache used by rootLoader/loaders
       await invalidateCheckoutQueries(queryClient);
-      // Optional hard guarantee: force a network read immediately
-      const userId = getAuthenticatedUser()?.userId;
-      if (userId) {
-        await queryClient.fetchQuery(queryBffContext(userId));
-      }
+
       try {
         sendEnterpriseCheckoutTrackingEvent({
           checkoutIntentId,
