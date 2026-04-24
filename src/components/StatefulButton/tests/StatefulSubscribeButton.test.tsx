@@ -9,10 +9,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { termsAndConditions } from '@/components/app/data/constants';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
-import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
+import { isEssentialsFlow, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import StatefulSubscribeButton from '../StatefulSubscribeButton';
 
@@ -56,15 +55,11 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
 
 jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
+  isEssentialsFlow: jest.fn(),
 }));
 
 jest.mock('@/components/app/data/services/checkout-intent', () => ({
   patchCheckoutIntent: jest.fn(),
-}));
-
-jest.mock('@/components/app/routes/loaders/utils', () => ({
-  ...jest.requireActual('@/components/app/routes/loaders/utils'),
-  isEssentialsFlow: jest.fn(),
 }));
 
 // Mock functions that we'll reuse across tests

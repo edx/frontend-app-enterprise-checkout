@@ -21,6 +21,7 @@ jest.mock('@/components/app/data', () => ({
 }));
 
 jest.mock('@/utils/common', () => ({
+  ...jest.requireActual('@/utils/common'),
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
