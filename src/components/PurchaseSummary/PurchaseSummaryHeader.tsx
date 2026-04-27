@@ -15,15 +15,15 @@ const PurchaseSummaryHeaderComponent: React.FC<PurchaseSummaryHeaderProps> = ({
   if (isEssentials) {
     subtitle = headerName || undefined;
   } else {
-    subtitle = headerName
-      ? `${headerName} • Team subscription, price per user, paid yearly.`
-      : 'Team subscription, price per user, paid yearly.';
+    subtitle = headerName ? `For ${headerName}` : '-';
   }
 
   return (
     <Card.Header
-      title={<span className="font-weight-bold">Purchase summary</span>}
-      subtitle={subtitle && <span className="purchase-summary-header-name">{subtitle}</span>}
+      title={isEssentials ? <span className="font-weight-bold">Purchase summary</span> : 'Purchase summary'}
+      subtitle={isEssentials
+        ? (subtitle && <span className="purchase-summary-header-name">{subtitle}</span>)
+        : subtitle}
       size="md"
     />
   );

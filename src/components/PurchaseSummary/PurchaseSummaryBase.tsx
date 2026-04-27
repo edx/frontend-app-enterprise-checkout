@@ -32,9 +32,9 @@ const PurchaseSummaryBase = ({
   actionButton,
   footerContent,
   extraContent,
-}: PurchaseSummaryBaseProps) => (
-  <Stack gap={3} className="purchase-summary-layout">
-    <Card className="border border-secondary purchase-summary-card">
+}: PurchaseSummaryBaseProps) => {
+  const card = (
+    <Card className={isEssentials ? 'border border-secondary purchase-summary-card' : undefined}>
       <PurchaseSummaryHeader headerName={headerName} isEssentials={isEssentials} />
 
       <Card.Section className="pt-2">
@@ -58,9 +58,18 @@ const PurchaseSummaryBase = ({
         </Card.Footer>
       )}
     </Card>
+  );
 
-    {footerContent}
-  </Stack>
-);
+  if (!isEssentials && !footerContent) {
+    return card;
+  }
+
+  return (
+    <Stack gap={3} className="purchase-summary-layout">
+      {card}
+      {footerContent}
+    </Stack>
+  );
+};
 
 export default React.memo(PurchaseSummaryBase);

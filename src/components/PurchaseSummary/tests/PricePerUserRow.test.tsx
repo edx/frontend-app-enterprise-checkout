@@ -10,13 +10,13 @@ describe('PricePerUserRow', () => {
 
   it('renders dash when pricePerUser is null/undefined', () => {
     renderWithI18n(<PricePerUserRow pricePerUser={null} />);
-    validateText('Price per user, paid yearly');
+    validateText('Team Subscription, price per user, paid yearly');
     validateText('-');
   });
 
   it('renders formatted price when pricePerUser is provided', () => {
     renderWithI18n(<PricePerUserRow pricePerUser={50} />);
-    validateText('Price per user, paid yearly');
+    validateText('Team Subscription, price per user, paid yearly');
     validateText('$50 USD');
   });
 });

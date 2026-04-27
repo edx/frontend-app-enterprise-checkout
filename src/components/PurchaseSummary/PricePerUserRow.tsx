@@ -17,9 +17,9 @@ const PricePerUserRowComponent: React.FC<PricePerUserRowProps> = ({
   <SummaryRow
     label={label ?? (
       <FormattedMessage
-        id="checkout.purchaseSummary.pricePerUser.label"
-        defaultMessage="Price per user, paid yearly"
-        description="Label for the per-user annual subscription price"
+        id="checkout.purchaseSummary.yearlyPricePerUser.text"
+        defaultMessage="Team Subscription, price per user, paid yearly"
+        description="Label for the team plan per user per year"
       />
     )}
     right={pricePerUser == null

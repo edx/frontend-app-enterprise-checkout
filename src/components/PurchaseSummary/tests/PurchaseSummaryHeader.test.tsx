@@ -16,7 +16,7 @@ describe('PurchaseSummaryHeader', () => {
 
   it('renders teams subtitle when header name is absent', () => {
     renderWithI18n(<PurchaseSummaryHeader headerName={undefined} />);
-    validateText('Team subscription, price per user, paid yearly.');
+    validateText('-');
     validateText('Purchase summary');
   });
 });
