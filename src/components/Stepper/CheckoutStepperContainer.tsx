@@ -1,7 +1,9 @@
 import { Col, Row, Stack, Stepper } from '@openedx/paragon';
 import { ReactElement, useEffect } from 'react';
 
+import { useRotatingTestimonial } from '@/components/app/data/hooks/useTestimonials';
 import { PurchaseSummary } from '@/components/PurchaseSummary';
+import TestimonialCard from '@/components/PurchaseSummary/TestimonialCard';
 import { StepperTitle } from '@/components/Stepper/StepperTitle';
 import { AccountDetails, BillingDetails, PlanDetails } from '@/components/Stepper/Steps';
 import { CheckoutSubstepKey } from '@/constants/checkout';
@@ -17,6 +19,8 @@ const Steps = (): ReactElement => (
 
 const CheckoutStepperContainer = (): ReactElement => {
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+  const currentTestimonial = useRotatingTestimonial(currentStepKey ?? 'checkout-step');
+
   useEffect(() => {
     const preventUnload = (e: BeforeUnloadEvent) => {
       if (currentSubstepKey !== CheckoutSubstepKey.Success) {
@@ -47,6 +51,7 @@ const CheckoutStepperContainer = (): ReactElement => {
           </Col>
           <Col md={12} lg={4}>
             <PurchaseSummary />
+            <TestimonialCard testimonial={currentTestimonial} />
           </Col>
         </Row>
       </Stack>
