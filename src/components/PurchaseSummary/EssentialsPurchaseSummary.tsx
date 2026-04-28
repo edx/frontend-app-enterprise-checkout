@@ -56,7 +56,7 @@ const EssentialsPurchaseSummary = () => {
       priceLabel="Essentials subscription, price per user, paid yearly."
       quantity={normalizedQuantity}
       totalPerYear={totalPerYear}
-      actionButton={<PurchaseSummaryCardButton variant="essentials" />}
+      actionButton={<PurchaseSummaryCardButton />}
       footerContent={<ComparePlansBox />}
     />
   );

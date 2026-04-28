@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 
 import EditPlanButton from './EditPlanButton';
 import ReceiptButton from './ReceiptButton';
@@ -23,6 +23,11 @@ const ROUTE_BUTTON_MAP: Record<string, ButtonType> = {
   [CheckoutPageRoute.PlanDetails]: BUTTON_TYPES.NONE,
   [CheckoutPageRoute.PlanDetailsLogin]: BUTTON_TYPES.NONE,
   [CheckoutPageRoute.PlanDetailsRegister]: BUTTON_TYPES.NONE,
+  [EssentialsPageRoute.AcademicSelection]: BUTTON_TYPES.UPGRADE,
+  [EssentialsPageRoute.PlanDetails]: BUTTON_TYPES.UPGRADE,
+  [EssentialsPageRoute.AccountDetails]: BUTTON_TYPES.UPGRADE,
+  [EssentialsPageRoute.BillingDetails]: BUTTON_TYPES.UPGRADE,
+  [EssentialsPageRoute.BillingDetailsSuccess]: BUTTON_TYPES.RECEIPT,
 };
 
 const BUTTON_COMPONENTS: Record<ButtonType, React.ComponentType | null> = {
@@ -32,21 +37,12 @@ const BUTTON_COMPONENTS: Record<ButtonType, React.ComponentType | null> = {
   [BUTTON_TYPES.NONE]: null,
 };
 
-interface PurchaseSummaryCardButtonProps {
-  variant?: 'teams' | 'essentials';
-}
-
-const PurchaseSummaryCardButton: React.FC<PurchaseSummaryCardButtonProps> = ({ variant }) => {
+const PurchaseSummaryCardButton: React.FC = () => {
   const location = useLocation();
 
   const buttonType = useMemo(
-    (): ButtonType => {
-      if (variant === 'essentials') {
-        return BUTTON_TYPES.UPGRADE;
-      }
-      return ROUTE_BUTTON_MAP[location.pathname] ?? BUTTON_TYPES.NONE;
-    },
-    [location.pathname, variant],
+    (): ButtonType => ROUTE_BUTTON_MAP[location.pathname] ?? BUTTON_TYPES.NONE,
+    [location.pathname],
   );
 
   const ButtonComponent = BUTTON_COMPONENTS[buttonType];

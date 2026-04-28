@@ -32,12 +32,7 @@ const PricePerUserRowComponent: React.FC<PricePerUserRowProps> = ({
       )
       : (
         <span>
-          <DisplayPrice value={pricePerUser} />{' '}
-          <FormattedMessage
-            id="checkout.purchaseSummary.currencyCode.usd"
-            defaultMessage="USD"
-            description="ISO currency code shown after formatted prices"
-          />
+          <DisplayPrice value={pricePerUser} /> USD
         </span>
       )}
     boldRight

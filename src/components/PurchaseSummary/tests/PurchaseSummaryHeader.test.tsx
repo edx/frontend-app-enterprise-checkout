@@ -5,17 +5,30 @@ import React from 'react';
 
 import PurchaseSummaryHeader from '../PurchaseSummaryHeader';
 
-describe('PurchaseSummaryHeader', () => {
-  const renderWithI18n = (ui: React.ReactElement) => render(<IntlProvider locale="en">{ui}</IntlProvider>);
+const MockPurchaseSummaryHeader = ({
+  headerName = null,
+  isEssentials = false,
+}: {
+  headerName?: string | null;
+  isEssentials?: boolean;
+}) => (
+  <IntlProvider locale="en">
+    <PurchaseSummaryHeader
+      headerName={headerName}
+      isEssentials={isEssentials}
+    />
+  </IntlProvider>
+);
 
+describe('PurchaseSummaryHeader', () => {
   it('renders essentials subtitle with academy name when provided', () => {
-    renderWithI18n(<PurchaseSummaryHeader headerName="AI Academy" isEssentials />);
+    render(<MockPurchaseSummaryHeader headerName="AI Academy" isEssentials />);
     validateText('AI Academy');
     validateText('Purchase summary');
   });
 
   it('renders teams subtitle when header name is absent', () => {
-    renderWithI18n(<PurchaseSummaryHeader headerName={undefined} />);
+    render(<MockPurchaseSummaryHeader />);
     validateText('-');
     validateText('Purchase summary');
   });

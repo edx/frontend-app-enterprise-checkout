@@ -18,7 +18,6 @@ type PurchaseSummaryBaseProps = {
   amountDue?: number;
   actionButton?: ReactNode;
   footerContent?: ReactNode;
-  extraContent?: ReactNode;
 };
 
 const PurchaseSummaryBase = ({
@@ -31,7 +30,6 @@ const PurchaseSummaryBase = ({
   amountDue = 0,
   actionButton,
   footerContent,
-  extraContent,
 }: PurchaseSummaryBaseProps) => {
   const card = (
     <Card className={isEssentials ? 'border border-secondary purchase-summary-card' : undefined}>
@@ -47,8 +45,6 @@ const PurchaseSummaryBase = ({
           <TotalAfterTrialRow quantity={quantity} totalPerYear={totalPerYear} />
           <AutoRenewNotice quantity={quantity} totalPerYear={totalPerYear} />
           <DueTodayRow amountDue={amountDue} />
-
-          {extraContent}
         </Stack>
       </Card.Section>
 

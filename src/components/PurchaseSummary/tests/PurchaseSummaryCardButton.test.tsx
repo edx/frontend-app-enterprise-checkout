@@ -5,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 
 import PurchaseSummaryCardButton from '../PurchaseSummaryCardButton';
 
@@ -29,10 +29,10 @@ jest.mock('react-router', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-const renderWithRouter = (initialRoute: string, variant?: 'teams' | 'essentials') => render(
+const renderWithRouter = (initialRoute: string) => render(
   <IntlProvider locale="en">
     <MemoryRouter initialEntries={[initialRoute]}>
-      <PurchaseSummaryCardButton variant={variant} />
+      <PurchaseSummaryCardButton />
     </MemoryRouter>
   </IntlProvider>,
 );
@@ -105,12 +105,19 @@ describe('PurchaseSummaryCardButton', () => {
     });
   });
 
-  describe('Essentials Variant', () => {
-    it('renders upgrade button for essentials variant', () => {
-      renderWithRouter(CheckoutPageRoute.PlanDetails, 'essentials');
+  describe('Essentials Routes', () => {
+    it('renders upgrade button for essentials plan details route', () => {
+      renderWithRouter(EssentialsPageRoute.PlanDetails);
 
       expect(screen.getByTestId('upgrade-to-teams-button')).toBeInTheDocument();
       expect(screen.getByText('Upgrade to Teams')).toBeInTheDocument();
+    });
+
+    it('renders receipt button on essentials billing success route', () => {
+      renderWithRouter(EssentialsPageRoute.BillingDetailsSuccess);
+
+      expect(screen.getByText('View receipt')).toBeInTheDocument();
+      expect(screen.queryByTestId('upgrade-to-teams-button')).not.toBeInTheDocument();
     });
   });
 

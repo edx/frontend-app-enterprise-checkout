@@ -13,7 +13,7 @@ const PurchaseSummaryHeaderComponent: React.FC<PurchaseSummaryHeaderProps> = ({
   let subtitle: string | undefined;
 
   if (isEssentials) {
-    subtitle = headerName || undefined;
+    subtitle = headerName || '-';
   } else {
     subtitle = headerName ? `For ${headerName}` : '-';
   }

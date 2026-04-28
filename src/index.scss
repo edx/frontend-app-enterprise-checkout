@@ -65,58 +65,6 @@ main {
   min-height: 425px;
 }
 
-.upgrade-to-teams-btn {
-  width: min(100%, 353px);
-  height: 44px;
-  gap: 8px;
-  border-color: #f28b8b !important;
-}
-
-.upgrade-to-teams-label {
-  display: inline-block;
-  width: min(100%, 159px);
-  height: 24px;
-  font-family: Inter, sans-serif;
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 24px;
-  letter-spacing: 0;
-  color: #333333;
-}
-
-.compare-plans-box {
-  width: min(100%, 401px);
-  min-height: 120px;
-  max-width: 768px;
-  border-radius: 15px !important;
-  border: 1px solid #EAE6E5 !important;
-  padding: 32px !important;
-  background-color: #F2F0EF !important;
-
-  .pgn__card-body {
-    gap: 20px;
-  }
-}
-
-.compare-plans-text {
-  width: min(100%, 337px);
-  min-height: 56px;
-  font-family: Inter, sans-serif;
-  font-weight: 400;
-  font-size: 22px;
-  line-height: 28px;
-  letter-spacing: 0;
-  color: #000000;
-}
-
-.compare-plans-link {
-  text-decoration: underline;
-  text-decoration-style: solid;
-  text-underline-offset: auto;
-  text-decoration-thickness: auto;
-  text-decoration-skip-ink: auto;
-}
-
 .price-per-user-row {
   width: min(100%, 353px);
   min-height: 56px;
