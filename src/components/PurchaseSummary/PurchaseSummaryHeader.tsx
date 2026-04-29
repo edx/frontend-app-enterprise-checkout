@@ -1,6 +1,6 @@
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { Card } from '@openedx/paragon';
 import classNames from 'classnames';
- import { Card } from '@openedx/paragon';
- import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import React from 'react';
 
 interface PurchaseSummaryHeaderProps {
@@ -20,12 +20,13 @@ const PurchaseSummaryHeaderComponent: React.FC<PurchaseSummaryHeaderProps> = ({
     subtitle = headerName ? `For ${headerName}` : '-';
   }
 
-  const subtitleClassName = classNames({
-    'purchase-summary-header-name': isEssentials,
+  const headerClassName = classNames({
+    'purchase-summary-header--essentials': isEssentials,
   });
 
   return (
     <Card.Header
+      className={headerClassName}
       title={(
         <FormattedMessage
           id="checkout.purchaseSummary.header.title"
@@ -33,7 +34,7 @@ const PurchaseSummaryHeaderComponent: React.FC<PurchaseSummaryHeaderProps> = ({
           description="Header title for purchase summary card"
         />
       )}
-      subtitle={subtitle ? <span className={subtitleClassName}>{subtitle}</span> : undefined}
+      subtitle={subtitle}
       size="md"
     />
   );

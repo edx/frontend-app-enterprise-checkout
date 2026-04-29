@@ -19,20 +19,12 @@ type PlanDetailsWithAcademy = {
   academyName?: string;
 };
 
-type AccountDetailsWithCompany = {
-  companyName?: string;
-};
-
 const EssentialsPurchaseSummary = () => {
   const planDetailsData = useCheckoutFormStore(
     (state) => state.formData[DataStoreKey.PlanDetails] as PlanDetailsWithAcademy,
   );
 
   const quantity = planDetailsData?.quantity;
-
-  const accountDetailsData = useCheckoutFormStore(
-    (state) => state.formData[DataStoreKey.AccountDetails] as AccountDetailsWithCompany,
-  );
 
   const academySelectionData = useCheckoutFormStore(
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],

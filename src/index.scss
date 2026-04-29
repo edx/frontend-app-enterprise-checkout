@@ -41,4 +41,18 @@ main {
   direction: rtl;
 }
 
+.purchase-summary-header--essentials {
+  .pgn__card-header-subtitle-md {
+    display: block;
+    width: min(100%, 353px);
+    min-height: 28px;
+    font-family: Inter, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: 0;
+    color: #454545;
+  }
+}
+
 .disabled-opacity { opacity: 0.5 !important; }
