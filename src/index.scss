@@ -42,31 +42,3 @@ main {
 }
 
 .disabled-opacity { opacity: 0.5 !important; }
-
-// Purchase Summary Figma specs
-.purchase-summary-header-name {
-  display: block;
-  width: min(100%, 353px);
-  height: 28px;
-  font-family: Inter, sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 28px;
-  letter-spacing: 0;
-  color: #454545;
-}
-
-.purchase-summary-layout {
-  gap: 24px !important;
-}
-
-.purchase-summary-card {
-  width: min(100%, 401px);
-  min-height: 425px;
-}
-
-.price-per-user-row {
-  width: min(100%, 353px);
-  min-height: 56px;
-  justify-content: space-between;
-}

@@ -7,6 +7,7 @@ import ComparePlansBox from './ComparePlansBox';
 import PurchaseSummaryBase from './PurchaseSummaryBase';
 import PurchaseSummaryCardButton from './PurchaseSummaryCardButton';
 
+// TODO: Remove this hardcoded price once it correctly propagates from the Stripe API
 const ESSENTIALS_PRICE_PER_USER = 149;
 
 type AcademySelectionData = {
@@ -37,10 +38,7 @@ const EssentialsPurchaseSummary = () => {
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
   );
 
-  const academyName = academySelectionData?.academyName
-    ?? planDetailsData?.academyName
-    ?? accountDetailsData?.companyName
-    ?? null;
+  const academyName = academySelectionData?.academyName ?? null;
 
   const normalizedQuantity = quantity && Number(quantity) > 0 ? Number(quantity) : null;
 
@@ -49,16 +47,18 @@ const EssentialsPurchaseSummary = () => {
     : null;
 
   return (
-    <PurchaseSummaryBase
-      headerName={academyName}
-      isEssentials
-      pricePerUser={ESSENTIALS_PRICE_PER_USER}
-      priceLabel="Essentials subscription, price per user, paid yearly."
-      quantity={normalizedQuantity}
-      totalPerYear={totalPerYear}
-      actionButton={<PurchaseSummaryCardButton />}
-      footerContent={<ComparePlansBox />}
-    />
+    <>
+      <PurchaseSummaryBase
+        headerName={academyName}
+        isEssentials
+        pricePerUser={ESSENTIALS_PRICE_PER_USER}
+        priceLabel="Essentials subscription, price per user, paid yearly."
+        quantity={normalizedQuantity}
+        totalPerYear={totalPerYear}
+        actionButton={<PurchaseSummaryCardButton />}
+      />
+      <ComparePlansBox />
+    </>
   );
 };
 

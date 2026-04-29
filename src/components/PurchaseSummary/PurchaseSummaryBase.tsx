@@ -17,7 +17,6 @@ type PurchaseSummaryBaseProps = {
   totalPerYear?: number | null;
   amountDue?: number;
   actionButton?: ReactNode;
-  footerContent?: ReactNode;
 };
 
 const PurchaseSummaryBase = ({
@@ -29,10 +28,9 @@ const PurchaseSummaryBase = ({
   totalPerYear,
   amountDue = 0,
   actionButton,
-  footerContent,
 }: PurchaseSummaryBaseProps) => {
   const card = (
-    <Card className={isEssentials ? 'border border-secondary purchase-summary-card' : undefined}>
+    <Card className={isEssentials ? 'border border-secondary' : undefined}>
       <PurchaseSummaryHeader headerName={headerName} isEssentials={isEssentials} />
 
       <Card.Section className="pt-2">
@@ -56,16 +54,7 @@ const PurchaseSummaryBase = ({
     </Card>
   );
 
-  if (!isEssentials && !footerContent) {
-    return card;
-  }
-
-  return (
-    <Stack gap={3} className="purchase-summary-layout">
-      {card}
-      {footerContent}
-    </Stack>
-  );
+  return card;
 };
 
 export default React.memo(PurchaseSummaryBase);
