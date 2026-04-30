@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { DataStoreKey } from '@/constants/checkout';
-import { useCheckoutFormStore } from '@/hooks/index';
+import { CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
+import { useCheckoutFormStore, useCurrentStep } from '@/hooks/index';
 
 import ComparePlansBox from './ComparePlansBox';
 import PurchaseSummaryBase from './PurchaseSummaryBase';
@@ -20,6 +20,7 @@ type PlanDetailsWithAcademy = {
 };
 
 const EssentialsPurchaseSummary = () => {
+  const { currentSubstepKey } = useCurrentStep();
   const planDetailsData = useCheckoutFormStore(
     (state) => state.formData[DataStoreKey.PlanDetails] as PlanDetailsWithAcademy,
   );
@@ -38,6 +39,8 @@ const EssentialsPurchaseSummary = () => {
     ? normalizedQuantity * ESSENTIALS_PRICE_PER_USER
     : null;
 
+  const isSuccessPage = currentSubstepKey === CheckoutSubstepKey.Success;
+
   return (
     <>
       <PurchaseSummaryBase
@@ -49,7 +52,7 @@ const EssentialsPurchaseSummary = () => {
         totalPerYear={totalPerYear}
         actionButton={<PurchaseSummaryCardButton />}
       />
-      <ComparePlansBox />
+      {!isSuccessPage && <ComparePlansBox />}
     </>
   );
 };
