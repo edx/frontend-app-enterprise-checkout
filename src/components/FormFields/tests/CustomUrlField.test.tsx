@@ -35,10 +35,12 @@ jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
 
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
-  default: ({ floatingLabel, placeholder, onBlur }) => (
+  default: ({ floatingLabel, placeholder, onBlur, readOnly, disabled }) => (
     <div data-testid="field-mock">
       <div data-testid="floating-label">{floatingLabel}</div>
       <div data-testid="placeholder">{placeholder}</div>
+      {readOnly && <div data-testid="field-readonly">Read-only</div>}
+      {disabled && <div data-testid="field-disabled">Disabled</div>}
       <button type="button" onClick={onBlur} data-testid="blur-trigger">Trigger Blur</button>
     </div>
   ),
@@ -90,5 +92,15 @@ describe('CustomUrlField', () => {
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
     }));
+  });
+
+  it('renders the field as read-only', () => {
+    renderComponent();
+    expect(screen.getByTestId('field-readonly')).toBeInTheDocument();
+  });
+
+  it('renders the field as disabled', () => {
+    renderComponent();
+    expect(screen.getByTestId('field-disabled')).toBeInTheDocument();
   });
 });
