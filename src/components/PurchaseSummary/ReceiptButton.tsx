@@ -27,11 +27,13 @@ const ReceiptButton: React.FC = () => {
         },
       })}
     >
-      <FormattedMessage
-        id="components.PurchaseSummary.ReceiptButton.viewReceipt"
-        defaultMessage="View receipt"
-        description="Button text to view the receipt for the purchase"
-      />
+      <strong>
+        <FormattedMessage
+          id="components.PurchaseSummary.ReceiptButton.viewReceipt"
+          defaultMessage="View Receipt"
+          description="Button text to view the receipt for the purchase"
+        />
+      </strong>
     </Button>
   );
 };
