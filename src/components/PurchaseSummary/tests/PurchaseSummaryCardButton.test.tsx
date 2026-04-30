@@ -5,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 
 import PurchaseSummaryCardButton from '../PurchaseSummaryCardButton';
 
@@ -102,6 +102,22 @@ describe('PurchaseSummaryCardButton', () => {
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
       expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Essentials Routes', () => {
+    it('renders upgrade button for essentials plan details route', () => {
+      renderWithRouter(EssentialsPageRoute.PlanDetails);
+
+      expect(screen.getByTestId('upgrade-to-teams-button')).toBeInTheDocument();
+      expect(screen.getByText('Upgrade to Teams')).toBeInTheDocument();
+    });
+
+    it('renders receipt button on essentials billing success route', () => {
+      renderWithRouter(EssentialsPageRoute.BillingDetailsSuccess);
+
+      expect(screen.getByText('View receipt')).toBeInTheDocument();
+      expect(screen.queryByTestId('upgrade-to-teams-button')).not.toBeInTheDocument();
     });
   });
 
