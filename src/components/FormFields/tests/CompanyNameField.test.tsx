@@ -5,25 +5,47 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { CheckoutStepKey } from '@/constants/checkout';
+import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
+import { findAvailableSlug, generateSlugFromCompanyName } from '@/utils/checkout';
 
 import CompanyNameField from '../CompanyNameField';
 
-// Mock the form object
-const createMockForm = (errors = {}) => ({
+const createMockForm = ({
+  errors = {},
+  companyName = 'Acme Corp',
+  enterpriseSlug = '',
+} = {}) => ({
   formState: {
     errors,
     touchedFields: { companyName: true },
   },
   register: jest.fn().mockReturnValue({}),
+  getValues: jest.fn((fieldName: string) => {
+    if (fieldName === 'companyName') {
+      return companyName;
+    }
+    if (fieldName === 'enterpriseSlug') {
+      return enterpriseSlug;
+    }
+    return undefined;
+  }),
+  setValue: jest.fn(),
 });
 
-// Mock tracking
 jest.mock('@/hooks/useFieldTracking', () => ({
   trackFieldBlur: jest.fn(),
 }));
 
-// Mock useCurrentStep
+jest.mock('@/hooks/useCheckoutFormStore', () => ({
+  useCheckoutFormStore: jest.fn(),
+}));
+
+jest.mock('@/utils/checkout', () => ({
+  findAvailableSlug: jest.fn(),
+  generateSlugFromCompanyName: jest.fn(),
+}));
+
 jest.mock('@/hooks/useCurrentStep', () => ({
   __esModule: true,
   default: jest.fn(() => ({
@@ -33,8 +55,10 @@ jest.mock('@/hooks/useCurrentStep', () => ({
 }));
 
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
+const mockUseCheckoutFormStore = useCheckoutFormStore as unknown as jest.Mock;
+const mockFindAvailableSlug = findAvailableSlug as jest.Mock;
+const mockGenerateSlugFromCompanyName = generateSlugFromCompanyName as jest.Mock;
 
-// Mock BFF context hook
 const mockUseBFFContext = jest.fn(() => ({
   data: {
     checkoutIntent: { id: 123 },
@@ -47,12 +71,13 @@ jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
 
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
-  default: ({ floatingLabel, placeholder, form, name, onBlur }) => {
+  default: ({ floatingLabel, placeholder, form, name, onBlur, disabled }) => {
     const error = form?.formState?.errors[name];
     return (
       <div data-testid="field-mock">
         <div data-testid="floating-label">{floatingLabel}</div>
         <div data-testid="placeholder">{placeholder}</div>
+        <div data-testid="disabled-state">{String(Boolean(disabled))}</div>
         {error && <div data-testid="error-message">{error.message}</div>}
         <button type="button" onClick={onBlur} data-testid="blur-trigger">Trigger Blur</button>
       </div>
@@ -72,11 +97,11 @@ describe('CompanyNameField', () => {
     administrator: false,
   };
 
-  const renderComponent = (errors = {}) => render(
+  const renderComponent = (formOptions = {}) => render(
     <QueryClientProvider client={queryClient}>
       <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
         <IntlProvider locale="en">
-          <CompanyNameField form={createMockForm(errors) as any} />
+          <CompanyNameField form={createMockForm(formOptions) as any} />
         </IntlProvider>
       </AppContext.Provider>
     </QueryClientProvider>,
@@ -84,6 +109,15 @@ describe('CompanyNameField', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCheckoutFormStore.mockImplementation((selector: any) => selector({
+      formData: {
+        PlanDetails: {
+          adminEmail: 'admin@example.com',
+        },
+      },
+    }));
+    mockGenerateSlugFromCompanyName.mockReturnValue('acme-corp');
+    mockFindAvailableSlug.mockResolvedValue('acme-corp-1');
   });
 
   it('renders the title correctly', () => {
@@ -99,9 +133,11 @@ describe('CompanyNameField', () => {
 
   it('displays validation error when companyName is invalid', () => {
     renderComponent({
-      companyName: {
-        type: 'required',
-        message: 'Company name is required',
+      errors: {
+        companyName: {
+          type: 'required',
+          message: 'Company name is required',
+        },
       },
     });
     expect(screen.getByTestId('error-message')).toHaveTextContent('Company name is required');
@@ -151,5 +187,77 @@ describe('CompanyNameField', () => {
     expect(mockTrackFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
       checkoutIntentId: null,
     }));
+  });
+
+  it('generates and sets an available slug when company name is blurred and slug is empty', async () => {
+    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: '' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+
+    expect(mockGenerateSlugFromCompanyName).toHaveBeenCalledWith('Acme Corp', 30);
+    expect(mockFindAvailableSlug).toHaveBeenCalledWith('acme-corp', 'admin@example.com', 30);
+
+    await Promise.resolve();
+
+    expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp-1', {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  });
+
+  it('clears the slug when company name is blank on blur', async () => {
+    const form = createMockForm({ companyName: '   ', enterpriseSlug: 'existing-slug' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await Promise.resolve();
+
+    expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', '', {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+    expect(mockGenerateSlugFromCompanyName).not.toHaveBeenCalled();
+  });
+
+  it('does not generate a slug when enterpriseSlug already has a value', async () => {
+    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: 'chosen-slug' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await Promise.resolve();
+
+    expect(mockGenerateSlugFromCompanyName).not.toHaveBeenCalled();
+    expect(mockFindAvailableSlug).not.toHaveBeenCalled();
+    expect(form.setValue).not.toHaveBeenCalled();
   });
 });

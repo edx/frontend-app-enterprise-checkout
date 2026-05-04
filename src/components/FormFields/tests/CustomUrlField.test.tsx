@@ -35,10 +35,12 @@ jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
 
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
-  default: ({ floatingLabel, placeholder, onBlur }) => (
+  default: ({ floatingLabel, placeholder, onBlur, readOnly, disabled }) => (
     <div data-testid="field-mock">
       <div data-testid="floating-label">{floatingLabel}</div>
       <div data-testid="placeholder">{placeholder}</div>
+      <div data-testid="readonly-state">{String(Boolean(readOnly))}</div>
+      <div data-testid="disabled-state">{String(Boolean(disabled))}</div>
       <button type="button" onClick={onBlur} data-testid="blur-trigger">Trigger Blur</button>
     </div>
   ),
@@ -89,6 +91,24 @@ describe('CustomUrlField', () => {
     expect(mockTrackDebouncedFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
       fieldName: 'urlSlug',
       step: CheckoutStepKey.AccountDetails,
+    }));
+  });
+
+  it('renders the field as read-only and disabled', () => {
+    renderComponent();
+
+    expect(screen.getByTestId('readonly-state')).toHaveTextContent('true');
+    expect(screen.getByTestId('disabled-state')).toHaveTextContent('true');
+  });
+
+  it('passes the current slug value in the tracking payload', () => {
+    renderComponent();
+    screen.getByTestId('blur-trigger').click();
+
+    expect(mockTrackDebouncedFieldBlur).toHaveBeenCalledWith(expect.objectContaining({
+      additionalProperties: expect.objectContaining({
+        org_slug: 'test-slug',
+      }),
     }));
   });
 });
