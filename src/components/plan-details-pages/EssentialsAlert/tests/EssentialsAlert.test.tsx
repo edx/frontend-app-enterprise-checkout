@@ -1,12 +1,18 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 import * as useBFFContextModule from '@/components/app/data/hooks/useBFFContext';
+import { DataStoreKey } from '@/constants/checkout';
+import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import EssentialsAlert from '../EssentialsAlert';
 
 jest.mock('@/components/app/data/hooks/useBFFContext');
+jest.mock('@/hooks/useCheckoutFormStore', () => ({
+  useCheckoutFormStore: jest.fn(),
+}));
 jest.mock('@/components/DisplayPrice', () => ({
   DisplayPrice: ({ value }: { value: number }) => <span>${value}</span>,
 }));
@@ -25,23 +31,48 @@ const mockContextValue = {
 
 // The hook with select returns the transformed value: number (price in dollars with fallback)
 const defaultBFFContextValue = {
-  data: 288, // This matches the BFF API fallback default: 28800 cents / 100 = $288 or fallback when API unavailable
+  data: {
+    pricing: {
+      defaultByLookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+      prices: [{
+        id: 'price_bff_context',
+        product: 'prod_bff_context',
+        lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+        recurring: {
+          interval: 'year',
+          intervalCount: 1,
+        },
+        currency: 'usd',
+        unitAmount: 28800,
+        unitAmountDecimal: '288.00',
+      }],
+    },
+  },
   isLoading: false,
   error: null,
+};
+
+const defaultCheckoutFormState = {
+  formData: {
+    [DataStoreKey.PlanDetails]: {},
+  },
 };
 
 describe('EssentialsAlert Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useBFFContextModule.default as jest.Mock).mockReturnValue(defaultBFFContextValue);
+    jest.mocked(useCheckoutFormStore).mockImplementation((selector) => selector(defaultCheckoutFormState as any));
   });
 
-  const renderComponent = () => render(
-    <AppContext.Provider value={mockContextValue as any}>
-      <IntlProvider locale="en" messages={{}}>
-        <EssentialsAlert />
-      </IntlProvider>
-    </AppContext.Provider>,
+  const renderComponent = (initialEntry = '/essentials/plan-details') => render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <AppContext.Provider value={mockContextValue as any}>
+        <IntlProvider locale="en" messages={{}}>
+          <EssentialsAlert />
+        </IntlProvider>
+      </AppContext.Provider>
+    </MemoryRouter>,
   );
 
   describe('Rendering and Header', () => {
@@ -72,14 +103,14 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       expect(screen.getByText(/From/)).toBeInTheDocument();
       expect(screen.getByText(/\/yr/)).toBeInTheDocument();
-      expect(screen.getByText('$288')).toBeInTheDocument();
+      expect(screen.getByText('$149')).toBeInTheDocument();
     });
 
-    it('should display "From $288 /yr" format', () => {
+    it('should display "From $149 /yr" format', () => {
       renderComponent();
       const priceSection = screen.getByText(/From/).parentElement;
       expect(priceSection?.textContent).toContain('From');
-      expect(priceSection?.textContent).toContain('$288');
+      expect(priceSection?.textContent).toContain('$149');
       expect(priceSection?.textContent).toContain('/yr');
     });
 
@@ -91,7 +122,7 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
 
@@ -103,8 +134,14 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
+    });
+
+    it('should use the mocked academy price instead of the checkout context price', () => {
+      renderComponent();
+      expect(screen.getByText('$149')).toBeInTheDocument();
+      expect(screen.queryByText('$288')).not.toBeInTheDocument();
     });
   });
 
@@ -180,6 +217,21 @@ describe('EssentialsAlert Component', () => {
       expect(learnMoreLink.href).toBe(
         'https://www.edx.org/learn/artificial-intelligence',
       );
+    });
+
+    it('should render the academy matched by the product_key query param', () => {
+      renderComponent('/essentials/plan-details?product_key=essentials_management_subscription_license_yearly');
+
+      expect(screen.getByText(/You have picked Management as your focus area/)).toBeInTheDocument();
+      expect(screen.getByText('Management')).toBeInTheDocument();
+      expect(screen.queryByText('Learn more')).not.toBeInTheDocument();
+    });
+
+    it('should match non-yearly essentials product keys from the url param', () => {
+      renderComponent('/essentials/plan-details?product_key=essentials_tech_and_digital_transformation');
+
+      expect(screen.getByText(/You have picked Tech and Digital Transformation as your focus area/)).toBeInTheDocument();
+      expect(screen.getByText('Tech and Digital Transformation')).toBeInTheDocument();
     });
   });
 
@@ -292,7 +344,7 @@ describe('EssentialsAlert Component', () => {
       const essentialsText = screen.getByText('Essentials Plan');
       const academyNames = screen.getAllByText('Artificial Intelligence');
       const courseCount = screen.getByText('16 courses');
-      const price = screen.getByText('$288');
+      const price = screen.getByText('$149');
 
       expect(essentialsText).toBeInTheDocument();
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
@@ -315,28 +367,40 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      // When data is undefined, fallback price of $288 displays
+      // When data is undefined, fallback price of $149 displays from the mocked academy data
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
       const academyNames = screen.getAllByText('Artificial Intelligence');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
-      // Fallback price should be displayed when data is undefined
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
 
-    it('should display price from CheckoutContextPrice.unitAmount', () => {
-      // Mock the hook to return a custom price (in dollars, not cents, because of the select transform)
-      const customPriceInDollars = 20; // Equivalent to 2000 cents
-
+    it('should ignore checkout context price when a mocked academy match is available', () => {
       (useBFFContextModule.default as jest.Mock).mockReturnValue({
-        data: customPriceInDollars,
+        data: {
+          pricing: {
+            defaultByLookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+            prices: [{
+              id: 'price_custom',
+              product: 'prod_custom',
+              lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+              recurring: {
+                interval: 'year',
+                intervalCount: 1,
+              },
+              currency: 'usd',
+              unitAmount: 2000,
+              unitAmountDecimal: '20.00',
+            }],
+          },
+        },
         isLoading: false,
         error: null,
       });
 
       renderComponent();
-      // Should display the custom price ($20)
-      expect(screen.getByText(/\$20/)).toBeInTheDocument();
+      expect(screen.getByText(/\$149/)).toBeInTheDocument();
+      expect(screen.queryByText(/\$20/)).not.toBeInTheDocument();
     });
 
     it('should handle BFF context errors gracefully', () => {
@@ -347,10 +411,8 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      // Component should still render with fallback price
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      // Fallback price should display
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
   });
