@@ -260,4 +260,51 @@ describe('CompanyNameField', () => {
     expect(mockFindAvailableSlug).not.toHaveBeenCalled();
     expect(form.setValue).not.toHaveBeenCalled();
   });
+
+  it('does not call availability check when generated base slug is empty', async () => {
+    mockGenerateSlugFromCompanyName.mockReturnValue('');
+    const form = createMockForm({ companyName: '!!!', enterpriseSlug: '' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await Promise.resolve();
+
+    expect(mockGenerateSlugFromCompanyName).toHaveBeenCalledWith('!!!', 30);
+    expect(mockFindAvailableSlug).not.toHaveBeenCalled();
+    expect(form.setValue).not.toHaveBeenCalledWith('enterpriseSlug', expect.anything(), expect.anything());
+  });
+
+  it('passes undefined adminEmail to availability check when plan details email is unavailable', async () => {
+    mockUseCheckoutFormStore.mockImplementation((selector: any) => selector({
+      formData: {
+        PlanDetails: {},
+      },
+    }));
+
+    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: '' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await Promise.resolve();
+
+    expect(mockFindAvailableSlug).toHaveBeenCalledWith('acme-corp', undefined, 30);
+  });
 });
