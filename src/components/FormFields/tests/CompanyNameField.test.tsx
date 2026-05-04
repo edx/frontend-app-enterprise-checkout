@@ -1,9 +1,11 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { CheckoutStepKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
@@ -41,9 +43,12 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
   useCheckoutFormStore: jest.fn(),
 }));
 
-jest.mock('@/utils/checkout', () => ({
-  findAvailableSlug: jest.fn(),
-  generateSlugFromCompanyName: jest.fn(),
+jest.mock('@/components/app/data/services/validation', () => ({
+  validateFieldDetailed: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
 }));
 
 jest.mock('@/hooks/useCurrentStep', () => ({
@@ -56,8 +61,8 @@ jest.mock('@/hooks/useCurrentStep', () => ({
 
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
 const mockUseCheckoutFormStore = useCheckoutFormStore as unknown as jest.Mock;
-const mockFindAvailableSlug = findAvailableSlug as jest.Mock;
-const mockGenerateSlugFromCompanyName = generateSlugFromCompanyName as jest.Mock;
+const mockValidateFieldDetailed = validateFieldDetailed as jest.Mock;
+const mockLogError = logError as jest.Mock;
 
 const mockUseBFFContext = jest.fn(() => ({
   data: {
@@ -116,8 +121,10 @@ describe('CompanyNameField', () => {
         },
       },
     }));
-    mockGenerateSlugFromCompanyName.mockReturnValue('acme-corp');
-    mockFindAvailableSlug.mockResolvedValue('acme-corp-1');
+    mockValidateFieldDetailed.mockResolvedValue({
+      isValid: true,
+      validationDecisions: {},
+    });
   });
 
   it('renders the title correctly', () => {
@@ -204,15 +211,18 @@ describe('CompanyNameField', () => {
 
     screen.getByTestId('blur-trigger').click();
 
-    expect(mockGenerateSlugFromCompanyName).toHaveBeenCalledWith('Acme Corp', 30);
-    expect(mockFindAvailableSlug).toHaveBeenCalledWith('acme-corp', 'admin@example.com', 30);
-
-    await Promise.resolve();
-
-    expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp-1', {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
+    await waitFor(() => {
+      expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
+        'enterpriseSlug',
+        'acme-corp',
+        { adminEmail: 'admin@example.com' },
+        true,
+      );
+      expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
     });
   });
 
@@ -230,14 +240,14 @@ describe('CompanyNameField', () => {
     );
 
     screen.getByTestId('blur-trigger').click();
-    await Promise.resolve();
-
-    expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', '', {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
+    await waitFor(() => {
+      expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', '', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
     });
-    expect(mockGenerateSlugFromCompanyName).not.toHaveBeenCalled();
+    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
   });
 
   it('does not generate a slug when enterpriseSlug already has a value', async () => {
@@ -254,15 +264,15 @@ describe('CompanyNameField', () => {
     );
 
     screen.getByTestId('blur-trigger').click();
-    await Promise.resolve();
+    await waitFor(() => {
+      expect(mockTrackFieldBlur).toHaveBeenCalled();
+    });
 
-    expect(mockGenerateSlugFromCompanyName).not.toHaveBeenCalled();
-    expect(mockFindAvailableSlug).not.toHaveBeenCalled();
+    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
     expect(form.setValue).not.toHaveBeenCalled();
   });
 
   it('does not call availability check when generated base slug is empty', async () => {
-    mockGenerateSlugFromCompanyName.mockReturnValue('');
     const form = createMockForm({ companyName: '!!!', enterpriseSlug: '' }) as any;
 
     render(
@@ -276,10 +286,11 @@ describe('CompanyNameField', () => {
     );
 
     screen.getByTestId('blur-trigger').click();
-    await Promise.resolve();
+    await waitFor(() => {
+      expect(mockTrackFieldBlur).toHaveBeenCalled();
+    });
 
-    expect(mockGenerateSlugFromCompanyName).toHaveBeenCalledWith('!!!', 30);
-    expect(mockFindAvailableSlug).not.toHaveBeenCalled();
+    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
     expect(form.setValue).not.toHaveBeenCalledWith('enterpriseSlug', expect.anything(), expect.anything());
   });
 
@@ -303,8 +314,223 @@ describe('CompanyNameField', () => {
     );
 
     screen.getByTestId('blur-trigger').click();
-    await Promise.resolve();
+    await waitFor(() => {
+      expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
+        'enterpriseSlug',
+        'acme-corp',
+        undefined,
+        true,
+      );
+    });
+  });
 
-    expect(mockFindAvailableSlug).toHaveBeenCalledWith('acme-corp', undefined, 30);
+  it('retries with numeric suffixes for taken and reserved slugs', async () => {
+    mockValidateFieldDetailed
+      .mockResolvedValueOnce({
+        isValid: false,
+        validationDecisions: {
+          enterpriseSlug: { errorCode: 'existing_enterprise_customer' },
+        },
+      })
+      .mockResolvedValueOnce({
+        isValid: false,
+        validationDecisions: {
+          enterpriseSlug: { errorCode: 'slug_reserved' },
+        },
+      })
+      .mockResolvedValueOnce({
+        isValid: true,
+        validationDecisions: {},
+      });
+
+    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: '' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await waitFor(() => {
+      expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+        1,
+        'enterpriseSlug',
+        'acme-corp',
+        { adminEmail: 'admin@example.com' },
+        true,
+      );
+      expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+        2,
+        'enterpriseSlug',
+        'acme-corp-1',
+        { adminEmail: 'admin@example.com' },
+        true,
+      );
+      expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+        3,
+        'enterpriseSlug',
+        'acme-corp-2',
+        { adminEmail: 'admin@example.com' },
+        true,
+      );
+      expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp-2', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    });
+  });
+
+  it('logs and returns the generated slug for non-retryable validation errors', async () => {
+    mockValidateFieldDetailed.mockResolvedValue({
+      isValid: false,
+      validationDecisions: {
+        enterpriseSlug: { errorCode: 'invalid_format' },
+      },
+    });
+
+    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: '' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await waitFor(() => {
+      expect(mockLogError).toHaveBeenCalledWith(
+        'Slug validation returned a non-retryable error for acme-corp: invalid_format',
+      );
+      expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    });
+  });
+
+  it('logs and returns the generated slug when validation throws', async () => {
+    mockValidateFieldDetailed.mockRejectedValue(new Error('network'));
+
+    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: '' }) as any;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    screen.getByTestId('blur-trigger').click();
+    await waitFor(() => {
+      expect(mockLogError).toHaveBeenCalledWith(
+        'Slug validation failed for acme-corp',
+        expect.any(Error),
+      );
+      expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    });
+  });
+});
+
+describe('checkout slug helpers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns an empty slug for invalid company names', () => {
+    expect(generateSlugFromCompanyName('')).toBe('');
+    expect(generateSlugFromCompanyName(null as unknown as string)).toBe('');
+  });
+
+  it('returns the base slug immediately when no slug is provided', async () => {
+    await expect(findAvailableSlug('')).resolves.toBe('');
+    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
+  });
+
+  it('returns the candidate when validation has no enterpriseSlug decision', async () => {
+    mockValidateFieldDetailed.mockResolvedValue({
+      isValid: false,
+      validationDecisions: {},
+    });
+
+    await expect(findAvailableSlug('acme-corp', 'admin@example.com')).resolves.toBe('acme-corp');
+
+    expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
+      'enterpriseSlug',
+      'acme-corp',
+      { adminEmail: 'admin@example.com' },
+      true,
+    );
+    expect(mockLogError).not.toHaveBeenCalled();
+  });
+
+  it('truncates long base slugs when retrying with numeric suffixes', async () => {
+    mockValidateFieldDetailed
+      .mockResolvedValueOnce({
+        isValid: false,
+        validationDecisions: {
+          enterpriseSlug: { errorCode: 'existing_enterprise_customer' },
+        },
+      })
+      .mockResolvedValueOnce({
+        isValid: true,
+        validationDecisions: {},
+      });
+
+    await expect(findAvailableSlug('abcdefghijklmnopqrstuvwxyzabcd', 'admin@example.com')).resolves.toBe('abcdefghijklmnopqrstuvwxyzab-1');
+
+    expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+      1,
+      'enterpriseSlug',
+      'abcdefghijklmnopqrstuvwxyzabcd',
+      { adminEmail: 'admin@example.com' },
+      true,
+    );
+    expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+      2,
+      'enterpriseSlug',
+      'abcdefghijklmnopqrstuvwxyzab-1',
+      { adminEmail: 'admin@example.com' },
+      true,
+    );
+  });
+
+  it('logs and returns the last candidate when slug generation exceeds max attempts', async () => {
+    mockValidateFieldDetailed.mockResolvedValue({
+      isValid: false,
+      validationDecisions: {
+        enterpriseSlug: { errorCode: 'existing_enterprise_customer' },
+      },
+    });
+
+    await expect(findAvailableSlug('acme-corp', 'admin@example.com')).resolves.toBe('acme-corp-20');
+
+    expect(mockValidateFieldDetailed).toHaveBeenCalledTimes(20);
+    expect(mockValidateFieldDetailed).toHaveBeenLastCalledWith(
+      'enterpriseSlug',
+      'acme-corp-19',
+      { adminEmail: 'admin@example.com' },
+      true,
+    );
+    expect(mockLogError).toHaveBeenCalledWith(
+      'Slug generation exceeded max attempts for base slug acme-corp',
+    );
   });
 });
