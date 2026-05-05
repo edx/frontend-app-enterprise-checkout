@@ -6,7 +6,6 @@ import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const ReceiptButton: React.FC = () => {
-  // TODO: Add this endpoint to the success page loader
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
 

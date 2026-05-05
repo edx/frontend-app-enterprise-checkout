@@ -2,7 +2,7 @@ import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClient } from '@tanstack/react-query';
 import { redirect } from 'react-router-dom';
 
-import { queryBffContext } from '@/components/app/data/queries/queries';
+import { queryBffContext, queryBffSuccess, queryCreateBillingPortalSession } from '@/components/app/data/queries/queries';
 import { isEssentialsFlow, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -174,6 +174,18 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
 
   if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent) {
     return redirect(CheckoutPageRoute.PlanDetails);
+  }
+
+  // Preload the BFF success context and billing portal session for better UX
+  const successContext: CheckoutContextResponse = await queryClient.ensureQueryData(
+    queryBffSuccess(authenticatedUser?.userId || null),
+  );
+
+  // Preload billing portal session if we have a checkout intent ID
+  if (successContext?.checkoutIntent?.id) {
+    await queryClient.ensureQueryData(
+      queryCreateBillingPortalSession(successContext.checkoutIntent.id),
+    );
   }
 
   return null;
