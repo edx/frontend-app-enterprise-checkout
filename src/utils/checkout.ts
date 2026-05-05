@@ -1,7 +1,7 @@
 import { logError } from '@edx/frontend-platform/logging';
 import { Entries } from 'type-fest';
 
-import { validateFieldDetailed } from '@/components/app/data/services/validation';
+import fetchCheckoutValidation from '@/components/app/data/services/validation';
 import {
   CheckoutPageDetails,
   CheckoutStepByKey,
@@ -143,6 +143,18 @@ export const findAvailableSlug = async (
 
   const maxAttempts = 20; // Safety limit to prevent long client-side retry loops
 
+  const validateSlugCandidate = async (candidateSlug: string) => {
+    const response = await fetchCheckoutValidation({
+      enterprise_slug: candidateSlug,
+      admin_email: adminEmail || '',
+    });
+    const validationDecisions = response?.validationDecisions ?? {};
+    return {
+      isValid: !validationDecisions.enterpriseSlug,
+      validationDecisions,
+    };
+  };
+
   const nextCandidateForSuffix = (suffix: number): string => {
     const suffixStr = `-${suffix}`;
     const maxBaseLength = maxLength - suffixStr.length;
@@ -160,19 +172,15 @@ export const findAvailableSlug = async (
     candidateSlug: string,
     suffix: number,
     attempt: number,
+    lastValidatedCandidate: string = candidateSlug,
   ): Promise<string> => {
     if (attempt >= maxAttempts) {
       logError(`Slug generation exceeded max attempts for base slug ${baseSlug}`);
-      return candidateSlug;
+      return lastValidatedCandidate;
     }
 
     try {
-      const { isValid, validationDecisions } = await validateFieldDetailed(
-        'enterpriseSlug',
-        candidateSlug,
-        { adminEmail: adminEmail || '' },
-        true, // forceValidate to bypass cache
-      );
+      const { isValid, validationDecisions } = await validateSlugCandidate(candidateSlug);
 
       // If valid (no error), we found an available slug
       if (isValid || !validationDecisions?.enterpriseSlug) {
@@ -188,7 +196,7 @@ export const findAvailableSlug = async (
       }
 
       const nextSuffix = suffix + 1;
-      return await resolveCandidate(nextCandidateForSuffix(nextSuffix), nextSuffix, attempt + 1);
+      return await resolveCandidate(nextCandidateForSuffix(nextSuffix), nextSuffix, attempt + 1, candidateSlug);
     } catch (error) {
       logError(`Slug validation failed for ${candidateSlug}`, error);
       return candidateSlug;

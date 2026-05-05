@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { validateFieldDetailed } from '@/components/app/data/services/validation';
+import fetchCheckoutValidation from '@/components/app/data/services/validation';
 import { CheckoutStepKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
@@ -44,7 +44,8 @@ jest.mock('@/hooks/useCheckoutFormStore', () => ({
 }));
 
 jest.mock('@/components/app/data/services/validation', () => ({
-  validateFieldDetailed: jest.fn(),
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock('@edx/frontend-platform/logging', () => ({
@@ -61,7 +62,7 @@ jest.mock('@/hooks/useCurrentStep', () => ({
 
 const mockTrackFieldBlur = trackFieldBlur as jest.Mock;
 const mockUseCheckoutFormStore = useCheckoutFormStore as unknown as jest.Mock;
-const mockValidateFieldDetailed = validateFieldDetailed as jest.Mock;
+const mockFetchCheckoutValidation = fetchCheckoutValidation as jest.Mock;
 const mockLogError = logError as jest.Mock;
 
 const mockUseBFFContext = jest.fn(() => ({
@@ -121,8 +122,7 @@ describe('CompanyNameField', () => {
         },
       },
     }));
-    mockValidateFieldDetailed.mockResolvedValue({
-      isValid: true,
+    mockFetchCheckoutValidation.mockResolvedValue({
       validationDecisions: {},
     });
   });
@@ -212,12 +212,10 @@ describe('CompanyNameField', () => {
     screen.getByTestId('blur-trigger').click();
 
     await waitFor(() => {
-      expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
-        'enterpriseSlug',
-        'acme-corp',
-        { adminEmail: 'admin@example.com' },
-        true,
-      );
+      expect(mockFetchCheckoutValidation).toHaveBeenCalledWith({
+        enterprise_slug: 'acme-corp',
+        admin_email: 'admin@example.com',
+      });
       expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp', {
         shouldValidate: true,
         shouldDirty: true,
@@ -247,7 +245,7 @@ describe('CompanyNameField', () => {
         shouldTouch: true,
       });
     });
-    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
+    expect(mockFetchCheckoutValidation).not.toHaveBeenCalled();
   });
 
   it('does not generate a slug when enterpriseSlug already has a value', async () => {
@@ -268,7 +266,7 @@ describe('CompanyNameField', () => {
       expect(mockTrackFieldBlur).toHaveBeenCalled();
     });
 
-    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
+    expect(mockFetchCheckoutValidation).not.toHaveBeenCalled();
     expect(form.setValue).not.toHaveBeenCalled();
   });
 
@@ -290,7 +288,7 @@ describe('CompanyNameField', () => {
       expect(mockTrackFieldBlur).toHaveBeenCalled();
     });
 
-    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
+    expect(mockFetchCheckoutValidation).not.toHaveBeenCalled();
     expect(form.setValue).not.toHaveBeenCalledWith('enterpriseSlug', expect.anything(), expect.anything());
   });
 
@@ -315,31 +313,26 @@ describe('CompanyNameField', () => {
 
     screen.getByTestId('blur-trigger').click();
     await waitFor(() => {
-      expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
-        'enterpriseSlug',
-        'acme-corp',
-        { adminEmail: '' },
-        true,
-      );
+      expect(mockFetchCheckoutValidation).toHaveBeenCalledWith({
+        enterprise_slug: 'acme-corp',
+        admin_email: '',
+      });
     });
   });
 
   it('retries with numeric suffixes for taken and reserved slugs', async () => {
-    mockValidateFieldDetailed
+    mockFetchCheckoutValidation
       .mockResolvedValueOnce({
-        isValid: false,
         validationDecisions: {
           enterpriseSlug: { errorCode: 'existing_enterprise_customer' },
         },
       })
       .mockResolvedValueOnce({
-        isValid: false,
         validationDecisions: {
           enterpriseSlug: { errorCode: 'slug_reserved' },
         },
       })
       .mockResolvedValueOnce({
-        isValid: true,
         validationDecisions: {},
       });
 
@@ -357,26 +350,26 @@ describe('CompanyNameField', () => {
 
     screen.getByTestId('blur-trigger').click();
     await waitFor(() => {
-      expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+      expect(mockFetchCheckoutValidation).toHaveBeenNthCalledWith(
         1,
-        'enterpriseSlug',
-        'acme-corp',
-        { adminEmail: 'admin@example.com' },
-        true,
+        {
+          enterprise_slug: 'acme-corp',
+          admin_email: 'admin@example.com',
+        },
       );
-      expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+      expect(mockFetchCheckoutValidation).toHaveBeenNthCalledWith(
         2,
-        'enterpriseSlug',
-        'acme-corp-1',
-        { adminEmail: 'admin@example.com' },
-        true,
+        {
+          enterprise_slug: 'acme-corp-1',
+          admin_email: 'admin@example.com',
+        },
       );
-      expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+      expect(mockFetchCheckoutValidation).toHaveBeenNthCalledWith(
         3,
-        'enterpriseSlug',
-        'acme-corp-2',
-        { adminEmail: 'admin@example.com' },
-        true,
+        {
+          enterprise_slug: 'acme-corp-2',
+          admin_email: 'admin@example.com',
+        },
       );
       expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp-2', {
         shouldValidate: true,
@@ -387,8 +380,7 @@ describe('CompanyNameField', () => {
   });
 
   it('logs and returns the generated slug for non-retryable validation errors', async () => {
-    mockValidateFieldDetailed.mockResolvedValue({
-      isValid: false,
+    mockFetchCheckoutValidation.mockResolvedValue({
       validationDecisions: {
         enterpriseSlug: { errorCode: 'invalid_format' },
       },
@@ -420,7 +412,7 @@ describe('CompanyNameField', () => {
   });
 
   it('logs and returns the generated slug when validation throws', async () => {
-    mockValidateFieldDetailed.mockRejectedValue(new Error('network'));
+    mockFetchCheckoutValidation.mockRejectedValue(new Error('network'));
 
     const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: '' }) as any;
 
@@ -461,74 +453,66 @@ describe('checkout slug helpers', () => {
 
   it('returns the base slug immediately when no slug is provided', async () => {
     await expect(findAvailableSlug('')).resolves.toBe('');
-    expect(mockValidateFieldDetailed).not.toHaveBeenCalled();
+    expect(mockFetchCheckoutValidation).not.toHaveBeenCalled();
   });
 
   it('returns the candidate when validation has no enterpriseSlug decision', async () => {
-    mockValidateFieldDetailed.mockResolvedValue({
-      isValid: false,
+    mockFetchCheckoutValidation.mockResolvedValue({
       validationDecisions: {},
     });
 
     await expect(findAvailableSlug('acme-corp', 'admin@example.com')).resolves.toBe('acme-corp');
 
-    expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
-      'enterpriseSlug',
-      'acme-corp',
-      { adminEmail: 'admin@example.com' },
-      true,
-    );
+    expect(mockFetchCheckoutValidation).toHaveBeenCalledWith({
+      enterprise_slug: 'acme-corp',
+      admin_email: 'admin@example.com',
+    });
     expect(mockLogError).not.toHaveBeenCalled();
   });
 
   it('truncates long base slugs when retrying with numeric suffixes', async () => {
-    mockValidateFieldDetailed
+    mockFetchCheckoutValidation
       .mockResolvedValueOnce({
-        isValid: false,
         validationDecisions: {
           enterpriseSlug: { errorCode: 'existing_enterprise_customer' },
         },
       })
       .mockResolvedValueOnce({
-        isValid: true,
         validationDecisions: {},
       });
 
     await expect(findAvailableSlug('abcdefghijklmnopqrstuvwxyzabcd', 'admin@example.com')).resolves.toBe('abcdefghijklmnopqrstuvwxyzab-1');
 
-    expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+    expect(mockFetchCheckoutValidation).toHaveBeenNthCalledWith(
       1,
-      'enterpriseSlug',
-      'abcdefghijklmnopqrstuvwxyzabcd',
-      { adminEmail: 'admin@example.com' },
-      true,
+      {
+        enterprise_slug: 'abcdefghijklmnopqrstuvwxyzabcd',
+        admin_email: 'admin@example.com',
+      },
     );
-    expect(mockValidateFieldDetailed).toHaveBeenNthCalledWith(
+    expect(mockFetchCheckoutValidation).toHaveBeenNthCalledWith(
       2,
-      'enterpriseSlug',
-      'abcdefghijklmnopqrstuvwxyzab-1',
-      { adminEmail: 'admin@example.com' },
-      true,
+      {
+        enterprise_slug: 'abcdefghijklmnopqrstuvwxyzab-1',
+        admin_email: 'admin@example.com',
+      },
     );
   });
 
   it('logs and returns the last candidate when slug generation exceeds max attempts', async () => {
-    mockValidateFieldDetailed.mockResolvedValue({
-      isValid: false,
+    mockFetchCheckoutValidation.mockResolvedValue({
       validationDecisions: {
         enterpriseSlug: { errorCode: 'existing_enterprise_customer' },
       },
     });
 
-    await expect(findAvailableSlug('acme-corp', 'admin@example.com')).resolves.toBe('acme-corp-20');
+    await expect(findAvailableSlug('acme-corp', 'admin@example.com')).resolves.toBe('acme-corp-19');
 
-    expect(mockValidateFieldDetailed).toHaveBeenCalledTimes(20);
-    expect(mockValidateFieldDetailed).toHaveBeenLastCalledWith(
-      'enterpriseSlug',
-      'acme-corp-19',
-      { adminEmail: 'admin@example.com' },
-      true,
-    );
+    expect(mockFetchCheckoutValidation).toHaveBeenCalledTimes(20);
+    expect(mockFetchCheckoutValidation).toHaveBeenLastCalledWith({
+      enterprise_slug: 'acme-corp-19',
+      admin_email: 'admin@example.com',
+    });
     expect(mockLogError).toHaveBeenCalledWith(
       'Slug generation exceeded max attempts for base slug acme-corp',
     );
