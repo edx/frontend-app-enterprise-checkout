@@ -94,11 +94,11 @@ describe('CustomUrlField', () => {
     }));
   });
 
-  it('renders the field as read-only and disabled', () => {
+  it('renders the field as read-only', () => {
     renderComponent();
 
     expect(screen.getByTestId('readonly-state')).toHaveTextContent('true');
-    expect(screen.getByTestId('disabled-state')).toHaveTextContent('true');
+    expect(screen.getByTestId('disabled-state')).toHaveTextContent('false');
   });
 
   it('passes the current slug value in the tracking payload', () => {

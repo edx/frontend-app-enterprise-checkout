@@ -170,7 +170,7 @@ export const findAvailableSlug = async (
       const { isValid, validationDecisions } = await validateFieldDetailed(
         'enterpriseSlug',
         candidateSlug,
-        adminEmail ? { adminEmail } : undefined,
+        { adminEmail: adminEmail || '' },
         true, // forceValidate to bypass cache
       );
 

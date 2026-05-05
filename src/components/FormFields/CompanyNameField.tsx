@@ -74,7 +74,7 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
       // Find an available slug (handles collisions)
       const availableSlug = await findAvailableSlug(
         baseSlug,
-        planDetailsFormData.adminEmail,
+        planDetailsFormData.adminEmail || '',
         30,
       );
 

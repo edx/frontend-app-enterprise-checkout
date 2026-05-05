@@ -318,7 +318,7 @@ describe('CompanyNameField', () => {
       expect(mockValidateFieldDetailed).toHaveBeenCalledWith(
         'enterpriseSlug',
         'acme-corp',
-        undefined,
+        { adminEmail: '' },
         true,
       );
     });
