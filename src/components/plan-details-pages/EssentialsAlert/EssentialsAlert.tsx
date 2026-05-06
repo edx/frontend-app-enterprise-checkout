@@ -7,12 +7,11 @@ import { useContext } from 'react';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DisplayPrice } from '@/components/DisplayPrice';
-import { extractPriceObject } from '@/utils/checkout';
 
 import './essentials-alert.scss';
 
 // Constants for URLs and default values
-const ESSENTIALS_PRICE_FALLBACK = 288; // Default price in dollars when API is unavailable
+const ESSENTIALS_PRICE_FALLBACK = 149; // Default price in dollars when API is unavailable
 const PICK_DIFFERENT_ACADEMY_URL = 'https://business.edx.org/course-library-plans-essentials/';
 const SWITCH_TO_TEAMS_URL = 'https://business.edx.org/academy/tech-digital-transformation/';
 
@@ -51,16 +50,11 @@ const EssentialsAlert = () => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
 
   // Fetch pricing from BFF context
-  // Price from BFF is in cents (e.g., 28800 for $288.00)
-  // Select function converts cents to dollars
+  // For Essentials flow, always use $149 per user
   const { data: pricePerYear } = useBFFContext(
     authenticatedUser?.userId ?? null,
     {
-      select: (contextData): number => {
-        const priceObject = extractPriceObject(contextData?.pricing);
-        // Return price in dollars, or fallback if no price in BFF context
-        return priceObject ? priceObject.unitAmount / 100 : ESSENTIALS_PRICE_FALLBACK;
-      },
+      select: (): number => ESSENTIALS_PRICE_FALLBACK,
     },
   );
 

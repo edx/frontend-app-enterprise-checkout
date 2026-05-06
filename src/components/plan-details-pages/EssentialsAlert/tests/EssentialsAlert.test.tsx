@@ -25,7 +25,7 @@ const mockContextValue = {
 
 // The hook with select returns the transformed value: number (price in dollars with fallback)
 const defaultBFFContextValue = {
-  data: 288, // This matches the BFF API fallback default: 28800 cents / 100 = $288 or fallback when API unavailable
+  data: 149, // This matches the BFF API fallback default: 14900 cents / 100 = $149 or fallback when API unavailable
   isLoading: false,
   error: null,
 };
@@ -72,14 +72,14 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       expect(screen.getByText(/From/)).toBeInTheDocument();
       expect(screen.getByText(/\/yr/)).toBeInTheDocument();
-      expect(screen.getByText('$288')).toBeInTheDocument();
+      expect(screen.getByText('$149')).toBeInTheDocument();
     });
 
-    it('should display "From $288 /yr" format', () => {
+    it('should display "From $149 /yr" format', () => {
       renderComponent();
       const priceSection = screen.getByText(/From/).parentElement;
       expect(priceSection?.textContent).toContain('From');
-      expect(priceSection?.textContent).toContain('$288');
+      expect(priceSection?.textContent).toContain('$149');
       expect(priceSection?.textContent).toContain('/yr');
     });
 
@@ -91,7 +91,7 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
 
@@ -103,7 +103,7 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
   });
@@ -292,7 +292,7 @@ describe('EssentialsAlert Component', () => {
       const essentialsText = screen.getByText('Essentials Plan');
       const academyNames = screen.getAllByText('Artificial Intelligence');
       const courseCount = screen.getByText('16 courses');
-      const price = screen.getByText('$288');
+      const price = screen.getByText('$149');
 
       expect(essentialsText).toBeInTheDocument();
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
@@ -315,12 +315,12 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      // When data is undefined, fallback price of $288 displays
+      // When data is undefined, fallback price of $149 displays
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
       const academyNames = screen.getAllByText('Artificial Intelligence');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
       // Fallback price should be displayed when data is undefined
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
 
@@ -350,7 +350,7 @@ describe('EssentialsAlert Component', () => {
       // Component should still render with fallback price
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
       // Fallback price should display
-      const priceElements = screen.queryAllByText(/\$288/);
+      const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
   });
