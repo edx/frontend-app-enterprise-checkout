@@ -12,7 +12,7 @@ import { extractPriceObject } from '@/utils/checkout';
 import './essentials-alert.scss';
 
 // Constants for URLs and default values
-const ESSENTIALS_PRICE_FALLBACK = 288; // Default price in dollars when API is unavailable
+const ESSENTIALS_PRICE_FALLBACK = 149; // Default price in dollars when API is unavailable
 const PICK_DIFFERENT_ACADEMY_URL = 'https://business.edx.org/course-library-plans-essentials/';
 const SWITCH_TO_TEAMS_URL = 'https://business.edx.org/academy/tech-digital-transformation/';
 
@@ -59,7 +59,7 @@ const EssentialsAlert = () => {
       select: (contextData): number => {
         const priceObject = extractPriceObject(contextData?.pricing);
         // Return price in dollars, or fallback if no price in BFF context
-        return priceObject ? priceObject.unitAmount / 100 : ESSENTIALS_PRICE_FALLBACK;
+        return priceObject ? 149 : ESSENTIALS_PRICE_FALLBACK;
       },
     },
   );
