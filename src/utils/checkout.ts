@@ -100,9 +100,6 @@ export const generateSlugFromCompanyName = (
   // Replace spaces and non-alphanumeric characters with a single dash
   slug = slug.replace(/[^a-z0-9]+/g, '-');
 
-  // Collapse multiple consecutive dashes into one
-  slug = slug.replace(/-+/g, '-');
-
   // Trim leading and trailing dashes
   slug = slug.replace(/^-+|-+$/g, '');
 
