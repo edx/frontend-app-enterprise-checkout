@@ -242,7 +242,7 @@ describe('CompanyNameField', () => {
     });
   });
 
-  it('does not clear the slug on initial load when company name is empty and field is not touched', async () => {
+  it('does not clear the slug on initial load when company name is empty and field is not touched', () => {
     const form = createMockForm({ companyName: '', enterpriseSlug: 'acme-corp' }) as any;
     form.formState = {
       ...form.formState,
@@ -258,11 +258,6 @@ describe('CompanyNameField', () => {
         </AppContext.Provider>
       </QueryClientProvider>,
     );
-
-    // Wait a bit to ensure the useEffect would have run
-    await new Promise(resolve => {
-      setTimeout(resolve, 100);
-    });
 
     // setValue should not have been called to clear the slug
     expect(form.setValue).not.toHaveBeenCalledWith('enterpriseSlug', '', expect.anything());
