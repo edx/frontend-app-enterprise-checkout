@@ -1,7 +1,7 @@
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { Stack } from '@openedx/paragon';
-import { useContext, useState } from 'react';
+import { type KeyboardEvent, useContext, useEffect, useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
@@ -29,6 +29,28 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const [isGeneratingSlug, setIsGeneratingSlug] = useState(false);
 
+  // Watch company name and clear slug when it becomes empty (only after user interaction)
+  const watchedCompanyName = form.watch('companyName');
+  const isTouched = form.formState.touchedFields.companyName;
+
+  useEffect(() => {
+    if (isTouched && (!watchedCompanyName || watchedCompanyName.trim().length === 0)) {
+      form.setValue('enterpriseSlug', '', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    }
+  }, [watchedCompanyName, isTouched, form]);
+
+  const handleCompanyNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      // Keep Enter behavior consistent with blur-triggered slug generation.
+      event.preventDefault();
+      event.currentTarget.blur();
+    }
+  };
+
   const handleCompanyNameBlur = async () => {
     // Track field blur event
     trackFieldBlur({
@@ -52,12 +74,6 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
         shouldDirty: true,
         shouldTouch: true,
       });
-      return;
-    }
-
-    // Don't generate if slug already has a value (to avoid overwriting user's previous selection)
-    const currentSlug = form.getValues('enterpriseSlug');
-    if (currentSlug && currentSlug.trim().length > 0) {
       return;
     }
 
@@ -115,6 +131,7 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
           })}
           controlClassName="mr-0 mt-3"
           onBlur={handleCompanyNameBlur}
+          onKeyDown={handleCompanyNameKeyDown}
           disabled={isGeneratingSlug}
         />
       </Stack>
