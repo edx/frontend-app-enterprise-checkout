@@ -181,11 +181,16 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
     queryBffSuccess(authenticatedUser?.userId || null),
   );
 
-  // Preload billing portal session if we have a checkout intent ID
+  // Preload billing portal session if we have a checkout intent ID.
+  // This is best-effort only; the success page can still render without it.
   if (successContext?.checkoutIntent?.id) {
-    await queryClient.ensureQueryData(
-      queryCreateBillingPortalSession(successContext.checkoutIntent.id),
-    );
+    try {
+      await queryClient.ensureQueryData(
+        queryCreateBillingPortalSession(successContext.checkoutIntent.id),
+      );
+    } catch {
+      // Swallow preload failures so transient Stripe/BFF issues do not block the route.
+    }
   }
 
   return null;
