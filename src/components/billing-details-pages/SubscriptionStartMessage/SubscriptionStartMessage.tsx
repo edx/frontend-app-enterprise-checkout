@@ -30,6 +30,7 @@ const SubscriptionStartMessage = () => {
   const intl = useIntl();
   const isEssentials = isEssentialsFlow();
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
+  // TODO: Add this endpoint to the success page loader
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();

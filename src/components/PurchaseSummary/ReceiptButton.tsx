@@ -11,7 +11,7 @@ const ReceiptButton: React.FC = () => {
 
   return (
     <Button
-      className="w-100 text-primary-500"
+      className="w-100 text-primary-500 font-weight-bold"
       variant="outline-primary"
       disabled={!billingPortalSession?.url}
       href={billingPortalSession?.url}
@@ -26,13 +26,11 @@ const ReceiptButton: React.FC = () => {
         },
       })}
     >
-      <strong>
-        <FormattedMessage
-          id="components.PurchaseSummary.ReceiptButton.viewReceipt"
-          defaultMessage="View Receipt"
-          description="Button text to view the receipt for the purchase"
-        />
-      </strong>
+      <FormattedMessage
+        id="components.PurchaseSummary.ReceiptButton.viewReceipt"
+        defaultMessage="View Receipt"
+        description="Button text to view the receipt for the purchase"
+      />
     </Button>
   );
 };

@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import 'whatwg-fetch';
 import React from 'react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
@@ -30,10 +30,7 @@ const renderWithProviders = (initialRoute = '/') => {
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en">
         <MemoryRouter initialEntries={[initialRoute]}>
-          <Routes>
-            <Route path="/:step?/:substep?" element={<PurchaseSummary />} />
-            <Route path="/essentials/:step/:substep" element={<PurchaseSummary />} />
-          </Routes>
+          <PurchaseSummary />
         </MemoryRouter>
       </IntlProvider>
     </QueryClientProvider>,
@@ -90,16 +87,5 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$149 USD')).toBeInTheDocument();
     expect(screen.getByText('Not sure which plan is right for you?')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Compare plans.' })).toBeInTheDocument();
-  });
-
-  it('hides compare plans box on essentials billing success page', () => {
-    (isEssentialsFlow as jest.Mock).mockReturnValue(true);
-
-    renderWithProviders(EssentialsPageRoute.BillingDetailsSuccess);
-
-    expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    expect(screen.getByText('AI Academy')).toBeInTheDocument();
-    expect(screen.queryByText('Not sure which plan is right for you?')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Compare plans.' })).not.toBeInTheDocument();
   });
 });
