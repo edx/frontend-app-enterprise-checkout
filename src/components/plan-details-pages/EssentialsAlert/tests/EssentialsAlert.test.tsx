@@ -3,6 +3,8 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
 
 import * as useBFFContextModule from '@/components/app/data/hooks/useBFFContext';
+import { DataStoreKey } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import EssentialsAlert from '../EssentialsAlert';
 
@@ -34,6 +36,13 @@ describe('EssentialsAlert Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useBFFContextModule.default as jest.Mock).mockReturnValue(defaultBFFContextValue);
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.AcademySelection]: {},
+      },
+    }));
   });
 
   const renderComponent = () => render(
@@ -109,6 +118,22 @@ describe('EssentialsAlert Component', () => {
   });
 
   describe('Academy Details Card', () => {
+    it('should display selected academy name from user selection when available', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            academyName: 'AI Academy',
+          },
+        },
+      }));
+
+      renderComponent();
+      const academyNames = screen.getAllByText('AI Academy');
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+    });
+
     it('should display academy name', () => {
       renderComponent();
       const academyNames = screen.getAllByText('Artificial Intelligence');

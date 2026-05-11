@@ -7,6 +7,8 @@ import { useContext } from 'react';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DisplayPrice } from '@/components/DisplayPrice';
+import { DataStoreKey } from '@/constants/checkout';
+import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import './essentials-alert.scss';
 
@@ -46,8 +48,15 @@ const DEFAULT_ACADEMY_DATA: AcademyData = {
   marketingUrl: 'https://www.edx.org/learn/artificial-intelligence',
 };
 
+type AcademySelectionData = {
+  academyName?: string;
+};
+
 const EssentialsAlert = () => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const academySelectionData = useCheckoutFormStore(
+    (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
+  );
 
   // Fetch pricing from BFF context
   // For Essentials flow, always use $149 per user
@@ -61,9 +70,7 @@ const EssentialsAlert = () => {
   // Ensure fallback price displays when API is unavailable (data is undefined during loading/error)
   const displayPrice = pricePerYear ?? ESSENTIALS_PRICE_FALLBACK;
 
-  // TODO: Fetch academy data from API when endpoint is available
-  // For now using default academy data
-  const academyData: AcademyData = DEFAULT_ACADEMY_DATA;
+  const academyName = academySelectionData?.academyName?.trim() || DEFAULT_ACADEMY_DATA.name;
 
   return (
     <Alert data-testid="essentials-alert" className="essentials-alert m-0">
@@ -106,7 +113,7 @@ const EssentialsAlert = () => {
             id="checkout.essentialsAlert.description"
             defaultMessage="You have picked {academyName} as your focus area. Changed your mind?"
             description="Description showing selected academy for essentials plan"
-            values={{ academyName: academyData.name }}
+            values={{ academyName }}
           />
         </p>
         <Button
@@ -126,18 +133,18 @@ const EssentialsAlert = () => {
           <Card.Body>
             {/* Academy Name and Course Count */}
             <div className="essentials-alert__academy-header">
-              <h4 className="essentials-alert__academy-name">{academyData.name}</h4>
+              <h4 className="essentials-alert__academy-name">{academyName}</h4>
               <span className="essentials-alert__course-badge">
                 <FormattedMessage
                   id="checkout.essentialsAlert.courseCount"
                   defaultMessage="{count} courses"
                   description="Number of courses in academy"
-                  values={{ count: academyData.courseCount }}
+                  values={{ count: DEFAULT_ACADEMY_DATA.courseCount }}
                 />
               </span>
               <Button
                 variant="link"
-                href={academyData.marketingUrl}
+                href={DEFAULT_ACADEMY_DATA.marketingUrl}
                 className="essentials-alert__learn-more"
               >
                 <FormattedMessage
@@ -150,17 +157,17 @@ const EssentialsAlert = () => {
 
             {/* Tags */}
             <div className="essentials-alert__tags">
-              {academyData.tags.map((tag, index) => (
+              {DEFAULT_ACADEMY_DATA.tags.map((tag, index) => (
                 <span key={tag} className="essentials-alert__tag">
                   {tag}
-                  {index < academyData.tags.length - 1 && ' • '}
+                  {index < DEFAULT_ACADEMY_DATA.tags.length - 1 && ' • '}
                 </span>
               ))}
             </div>
 
             {/* Description */}
             <p className="essentials-alert__description">
-              {academyData.description}
+              {DEFAULT_ACADEMY_DATA.description}
             </p>
           </Card.Body>
         </Card>
