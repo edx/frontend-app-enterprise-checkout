@@ -24,6 +24,7 @@ const createMockForm = ({
   formState: {
     errors,
     touchedFields: { companyName: true },
+    dirtyFields: {},
   },
   register: jest.fn().mockReturnValue({}),
   getValues: jest.fn((fieldName: string) => {
@@ -216,11 +217,11 @@ describe('CompanyNameField', () => {
     expect(enterBlurMock).toHaveBeenCalledTimes(1);
   });
 
-  it('clears the slug when company name becomes empty via watch only after field is touched', async () => {
+  it('clears the slug when company name becomes empty via watch only after field is dirty', async () => {
     const form = createMockForm({ companyName: '', enterpriseSlug: 'acme-corp' }) as any;
     form.formState = {
       ...form.formState,
-      touchedFields: { companyName: true },
+      dirtyFields: { companyName: true },
     };
 
     render(
@@ -242,11 +243,11 @@ describe('CompanyNameField', () => {
     });
   });
 
-  it('does not clear the slug on initial load when company name is empty and field is not touched', () => {
+  it('does not clear the slug on initial load when company name is empty and field is not dirty', () => {
     const form = createMockForm({ companyName: '', enterpriseSlug: 'acme-corp' }) as any;
     form.formState = {
       ...form.formState,
-      touchedFields: {}, // Field not touched on initial load
+      dirtyFields: {}, // Field not dirty on initial load
     };
 
     render(

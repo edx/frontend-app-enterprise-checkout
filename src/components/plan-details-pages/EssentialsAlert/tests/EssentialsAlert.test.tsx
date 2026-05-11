@@ -193,8 +193,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
-      // Link should point to the Teams plans page academy page
-      expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
+      // Link should point to the tech digital transformation academy page
+      expect(switchToTeamsLink.href).toContain('business.edx.org/academy/tech-digital-transformation');
     });
 
     it('should have "Learn more" link with dynamic marketing URL', () => {

@@ -31,17 +31,38 @@ const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
 
   // Watch company name and clear slug when it becomes empty (only after user interaction)
   const watchedCompanyName = form.watch('companyName');
-  const isTouched = form.formState.touchedFields.companyName;
+  const watchedEnterpriseSlug = form.watch('enterpriseSlug');
+  const isCompanyNameDirty = form.formState.dirtyFields.companyName;
+  const isCompanyNameTouched = form.formState.touchedFields.companyName;
 
   useEffect(() => {
-    if (isTouched && (!watchedCompanyName || watchedCompanyName.trim().length === 0)) {
+    if (!isCompanyNameDirty || (watchedCompanyName && watchedCompanyName.trim().length > 0)) {
+      return;
+    }
+
+    if (watchedEnterpriseSlug !== '') {
       form.setValue('enterpriseSlug', '', {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true,
       });
     }
-  }, [watchedCompanyName, isTouched, form]);
+
+    // Mark company name touched and validate on clear so required feedback appears immediately.
+    if (!isCompanyNameTouched) {
+      form.setValue('companyName', watchedCompanyName ?? '', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    }
+  }, [
+    watchedCompanyName,
+    watchedEnterpriseSlug,
+    isCompanyNameDirty,
+    isCompanyNameTouched,
+    form,
+  ]);
 
   const handleCompanyNameKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {

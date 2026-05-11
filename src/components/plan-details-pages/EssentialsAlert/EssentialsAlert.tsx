@@ -15,7 +15,7 @@ import './essentials-alert.scss';
 // Constants for URLs and default values
 const ESSENTIALS_PRICE_FALLBACK = 149; // Default price in dollars when API is unavailable
 const PICK_DIFFERENT_ACADEMY_URL = 'https://business.edx.org/course-library-plans-essentials/';
-const SWITCH_TO_TEAMS_URL = 'https://business.edx.org/course-library-plans-teams/';
+const SWITCH_TO_TEAMS_URL = 'https://business.edx.org/academy/tech-digital-transformation/';
 
 interface AcademyData {
   id?: string;
