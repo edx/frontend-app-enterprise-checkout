@@ -6,7 +6,7 @@ const renderStrong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
 const ComparePlansBox = () => {
   // This URL can be removed once it is configured in environment files.
-  const COMPARE_ENTERPRISE_PLANS_URL  = 'https://business.edx.org/course-library-compare-plans/'; 
+  const COMPARE_ENTERPRISE_PLANS_URL = 'https://business.edx.org/course-library-compare-plans/';
   const comparePlansLink = (
     <Hyperlink
       destination={COMPARE_ENTERPRISE_PLANS_URL}
