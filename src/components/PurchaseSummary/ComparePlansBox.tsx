@@ -1,4 +1,3 @@
-import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Card, Hyperlink } from '@openedx/paragon';
 import React from 'react';
@@ -6,7 +5,8 @@ import React from 'react';
 const renderStrong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
 const ComparePlansBox = () => {
-  const { COMPARE_ENTERPRISE_PLANS_URL } = getConfig();
+  // This URL can be removed once it is configured in environment files.
+  const COMPARE_ENTERPRISE_PLANS_URL  = 'https://business.edx.org/course-library-compare-plans/'; 
   const comparePlansLink = (
     <Hyperlink
       destination={COMPARE_ENTERPRISE_PLANS_URL}
