@@ -13,6 +13,9 @@ import { findAvailableSlug, generateSlugFromCompanyName } from '@/utils/checkout
 
 import CompanyNameField from '../CompanyNameField';
 
+let enterPreventDefaultMock: jest.Mock | null = null;
+let enterBlurMock: jest.Mock | null = null;
+
 const createMockForm = ({
   errors = {},
   companyName = 'Acme Corp',
@@ -21,9 +24,19 @@ const createMockForm = ({
   formState: {
     errors,
     touchedFields: { companyName: true },
+    dirtyFields: {},
   },
   register: jest.fn().mockReturnValue({}),
   getValues: jest.fn((fieldName: string) => {
+    if (fieldName === 'companyName') {
+      return companyName;
+    }
+    if (fieldName === 'enterpriseSlug') {
+      return enterpriseSlug;
+    }
+    return undefined;
+  }),
+  watch: jest.fn((fieldName: string) => {
     if (fieldName === 'companyName') {
       return companyName;
     }
@@ -77,7 +90,15 @@ jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
 
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
-  default: ({ floatingLabel, placeholder, form, name, onBlur, disabled }) => {
+  default: ({
+    floatingLabel,
+    placeholder,
+    form,
+    name,
+    onBlur,
+    onKeyDown,
+    disabled,
+  }) => {
     const error = form?.formState?.errors[name];
     return (
       <div data-testid="field-mock">
@@ -86,6 +107,21 @@ jest.mock('@/components/FormFields/Field', () => ({
         <div data-testid="disabled-state">{String(Boolean(disabled))}</div>
         {error && <div data-testid="error-message">{error.message}</div>}
         <button type="button" onClick={onBlur} data-testid="blur-trigger">Trigger Blur</button>
+        <button
+          type="button"
+          onClick={() => {
+            enterPreventDefaultMock = jest.fn();
+            enterBlurMock = jest.fn();
+            onKeyDown?.({
+              key: 'Enter',
+              preventDefault: enterPreventDefaultMock,
+              currentTarget: { blur: enterBlurMock },
+            });
+          }}
+          data-testid="enter-trigger"
+        >
+          Trigger Enter
+        </button>
       </div>
     );
   },
@@ -115,6 +151,8 @@ describe('CompanyNameField', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    enterPreventDefaultMock = null;
+    enterBlurMock = null;
     mockUseCheckoutFormStore.mockImplementation((selector: any) => selector({
       formData: {
         PlanDetails: {
@@ -169,6 +207,61 @@ describe('CompanyNameField', () => {
       step: CheckoutStepKey.AccountDetails,
       substep: undefined,
     }));
+  });
+
+  it('triggers input blur on Enter keydown', () => {
+    renderComponent();
+    screen.getByTestId('enter-trigger').click();
+
+    expect(enterPreventDefaultMock).toHaveBeenCalledTimes(1);
+    expect(enterBlurMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the slug when company name becomes empty via watch only after field is dirty', async () => {
+    const form = createMockForm({ companyName: '', enterpriseSlug: 'acme-corp' }) as any;
+    form.formState = {
+      ...form.formState,
+      dirtyFields: { companyName: true },
+    };
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => {
+      expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', '', {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    });
+  });
+
+  it('does not clear the slug on initial load when company name is empty and field is not dirty', () => {
+    const form = createMockForm({ companyName: '', enterpriseSlug: 'acme-corp' }) as any;
+    form.formState = {
+      ...form.formState,
+      dirtyFields: {}, // Field not dirty on initial load
+    };
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={{ authenticatedUser: mockAuthenticatedUser }}>
+          <IntlProvider locale="en">
+            <CompanyNameField form={form} />
+          </IntlProvider>
+        </AppContext.Provider>
+      </QueryClientProvider>,
+    );
+
+    // setValue should not have been called to clear the slug
+    expect(form.setValue).not.toHaveBeenCalledWith('enterpriseSlug', '', expect.anything());
   });
 
   it('should pass null checkoutIntentId for unauthenticated user', () => {
@@ -248,8 +341,8 @@ describe('CompanyNameField', () => {
     expect(mockFetchCheckoutValidation).not.toHaveBeenCalled();
   });
 
-  it('does not generate a slug when enterpriseSlug already has a value', async () => {
-    const form = createMockForm({ companyName: 'Acme Corp', enterpriseSlug: 'chosen-slug' }) as any;
+  it('regenerates a slug when company name changes even if enterpriseSlug already has a value', async () => {
+    const form = createMockForm({ companyName: 'Acme Corp Updated', enterpriseSlug: 'acme-corp' }) as any;
 
     render(
       <QueryClientProvider client={queryClient}>
@@ -266,8 +359,15 @@ describe('CompanyNameField', () => {
       expect(mockTrackFieldBlur).toHaveBeenCalled();
     });
 
-    expect(mockFetchCheckoutValidation).not.toHaveBeenCalled();
-    expect(form.setValue).not.toHaveBeenCalled();
+    expect(mockFetchCheckoutValidation).toHaveBeenCalledWith({
+      enterprise_slug: 'acme-corp-updated',
+      admin_email: 'admin@example.com',
+    });
+    expect(form.setValue).toHaveBeenCalledWith('enterpriseSlug', 'acme-corp-updated', {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   });
 
   it('does not call availability check when generated base slug is empty', async () => {
@@ -444,6 +544,8 @@ describe('CompanyNameField', () => {
 describe('checkout slug helpers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchCheckoutValidation.mockReset();
+    mockLogError.mockReset();
   });
 
   it('returns an empty slug for invalid company names', () => {
