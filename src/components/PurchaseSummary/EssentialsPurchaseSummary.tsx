@@ -52,7 +52,7 @@ const EssentialsPurchaseSummary = () => {
         totalPerYear={totalPerYear}
         actionButton={<PurchaseSummaryCardButton />}
       />
-      {!isSuccessPage && <div className="mt-3"><ComparePlansBox /></div>}
+      {!isSuccessPage && <div className="mt-4"><ComparePlansBox /></div>}
     </>
   );
 };
