@@ -73,10 +73,10 @@ const EssentialsAlert = () => {
   const academyName = academySelectionData?.academyName?.trim() || DEFAULT_ACADEMY_DATA.name;
 
   return (
-    <Alert data-testid="essentials-alert" className="essentials-alert m-0">
+    <Alert data-testid="essentials-alert" className="essentials-alert m-0 text-white p-0">
       {/* Top row: Title and Price */}
-      <div className="essentials-alert__header">
-        <h3 className="essentials-alert__title">
+      <div className="essentials-alert__header d-flex justify-content-between align-items-center pt-4 px-4">
+        <h3 className="essentials-alert__title font-weight-bold m-0 text-white">
           <FormattedMessage
             id="checkout.essentialsAlert.title"
             defaultMessage="Essentials Plan"
@@ -84,9 +84,9 @@ const EssentialsAlert = () => {
           />
         </h3>
         {displayPrice != null && (
-          <div className="essentials-alert__price-wrapper">
-            <h3 className="essentials-alert__price-text">
-              <span className="font-weight-light">
+          <div className="essentials-alert__price-wrapper d-flex align-items-center justify-content-end text-right">
+            <h3 className="essentials-alert__price-text font-weight-bold m-0 text-white">
+              <span className="font-weight-normal">
                 <FormattedMessage
                   id="checkout.essentialsAlert.from"
                   defaultMessage="From"
@@ -94,7 +94,7 @@ const EssentialsAlert = () => {
                 />
               </span>{' '}
               <DisplayPrice value={displayPrice} />
-              <span className="font-weight-light">
+              <span className="font-weight-normal">
                 <FormattedMessage
                   id="checkout.essentialsAlert.perYear"
                   defaultMessage="/yr"
@@ -107,8 +107,8 @@ const EssentialsAlert = () => {
       </div>
 
       {/* Middle section: Description, link, and card */}
-      <div className="essentials-alert__body">
-        <p className="h4 essentials-alert__subtitle font-weight-light my-3">
+      <div className="essentials-alert__body pt-0 px-4 pb-4">
+        <p className="h4 essentials-alert__subtitle font-weight-normal m-0 text-white my-3">
           <FormattedMessage
             id="checkout.essentialsAlert.descriptionWithLink"
             defaultMessage="You have picked {academyName} as your focus area. Changed your mind? {pickDifferentLink}"
@@ -119,7 +119,7 @@ const EssentialsAlert = () => {
                 <Button
                   variant="link"
                   href={PICK_DIFFERENT_ACADEMY_URL}
-                  className="essentials-alert__link"
+                  className="essentials-alert__link text-white d-inline-block p-0 mb-0"
                 >
                   <FormattedMessage
                     id="checkout.essentialsAlert.pickDifferentAcademy"
@@ -133,11 +133,11 @@ const EssentialsAlert = () => {
         </p>
 
         {/* Academy Details Card - Full width */}
-        <Card className="essentials-alert__card">
+        <Card className="essentials-alert__card bg-white border-0 m-0 w-100">
           <Card.Body>
             {/* Academy Name and Course Count */}
-            <div className="essentials-alert__academy-header">
-              <h4 className="essentials-alert__academy-name">{academyName}</h4>
+            <div className="essentials-alert__academy-header d-flex align-items-center flex-wrap">
+              <h4 className="essentials-alert__academy-name m-0 font-weight-bold">{academyName}</h4>
               <span className="essentials-alert__course-badge">
                 <FormattedMessage
                   id="checkout.essentialsAlert.courseCount"
@@ -149,7 +149,7 @@ const EssentialsAlert = () => {
               <Button
                 variant="link"
                 href={DEFAULT_ACADEMY_DATA.marketingUrl}
-                className="essentials-alert__learn-more"
+                className="essentials-alert__learn-more ml-auto font-weight-bold"
               >
                 <FormattedMessage
                   id="checkout.essentialsAlert.learnMore"
@@ -160,9 +160,9 @@ const EssentialsAlert = () => {
             </div>
 
             {/* Tags */}
-            <div className="essentials-alert__tags">
+            <div className="essentials-alert__tags mb-3">
               {DEFAULT_ACADEMY_DATA.tags.map((tag, index) => (
-                <span key={tag} className="essentials-alert__tag">
+                <span key={tag} className="essentials-alert__tag d-inline">
                   {tag}
                   {index < DEFAULT_ACADEMY_DATA.tags.length - 1 && ' • '}
                 </span>
@@ -170,7 +170,7 @@ const EssentialsAlert = () => {
             </div>
 
             {/* Description */}
-            <p className="essentials-alert__description">
+            <p className="essentials-alert__description m-0 font-weight-normal">
               {DEFAULT_ACADEMY_DATA.description}
             </p>
           </Card.Body>
@@ -178,8 +178,8 @@ const EssentialsAlert = () => {
       </div>
 
       {/* Footer Upsell - Darker red section */}
-      <div className="essentials-alert__footer-section">
-        <p className="essentials-alert__footer mb-0">
+      <div className="essentials-alert__footer-section m-0 p-4">
+        <p className="essentials-alert__footer m-0 p-0 bg-transparent border-0 text-white font-weight-normal">
           <FormattedMessage
             id="checkout.essentialsAlert.upsell"
             defaultMessage="Need to upskill your team in more than one focus area? {switchToTeamsLink}"
@@ -189,7 +189,7 @@ const EssentialsAlert = () => {
                 <Button
                   variant="link"
                   href={SWITCH_TO_TEAMS_URL}
-                  className="essentials-alert__footer-link"
+                  className="essentials-alert__footer-link p-0 m-0"
                 >
                   <FormattedMessage
                     id="checkout.essentialsAlert.switchToTeams"
