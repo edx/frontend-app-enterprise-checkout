@@ -110,9 +110,9 @@ const EssentialsAlert = () => {
       <div className="essentials-alert__body">
         <p className="h4 essentials-alert__subtitle font-weight-light my-3">
           <FormattedMessage
-            id="checkout.essentialsAlert.description"
+            id="checkout.essentialsAlert.descriptionWithLink"
             defaultMessage="You have picked {academyName} as your focus area. Changed your mind? {pickDifferentLink}"
-            description="Description showing selected academy for essentials plan"
+            description="Description showing selected academy for essentials plan with link to change academy"
             values={{
               academyName: <span className="font-weight-bold">{academyName}</span>,
               pickDifferentLink: (
