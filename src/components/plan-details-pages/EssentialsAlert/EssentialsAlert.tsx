@@ -111,22 +111,26 @@ const EssentialsAlert = () => {
         <p className="h4 essentials-alert__subtitle font-weight-light my-3">
           <FormattedMessage
             id="checkout.essentialsAlert.description"
-            defaultMessage="You have picked {academyName} as your focus area. Changed your mind?"
+            defaultMessage="You have picked {academyName} as your focus area. Changed your mind? {pickDifferentLink}"
             description="Description showing selected academy for essentials plan"
-            values={{ academyName }}
+            values={{
+              academyName: <span className="font-weight-bold">{academyName}</span>,
+              pickDifferentLink: (
+                <Button
+                  variant="link"
+                  href={PICK_DIFFERENT_ACADEMY_URL}
+                  className="essentials-alert__link"
+                >
+                  <FormattedMessage
+                    id="checkout.essentialsAlert.pickDifferentAcademy"
+                    defaultMessage="Pick a different academy"
+                    description="Link to pick a different academy"
+                  />
+                </Button>
+              ),
+            }}
           />
         </p>
-        <Button
-          variant="link"
-          href={PICK_DIFFERENT_ACADEMY_URL}
-          className="essentials-alert__link"
-        >
-          <FormattedMessage
-            id="checkout.essentialsAlert.pickDifferentAcademy"
-            defaultMessage="Pick a different academy"
-            description="Link to pick a different academy"
-          />
-        </Button>
 
         {/* Academy Details Card - Full width */}
         <Card className="essentials-alert__card">

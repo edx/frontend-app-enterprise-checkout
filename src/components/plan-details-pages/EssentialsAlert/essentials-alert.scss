@@ -5,6 +5,7 @@
   border-color: #a45542 !important;
   color: white !important;
   padding: 0 !important;
+  border-radius: 16px !important;
 
   // Text color inheritance
   h3, h4, p {
@@ -36,7 +37,7 @@
   }
 
   &__title {
-    font-size: 18px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 1.3;
     margin: 0 !important;
@@ -51,10 +52,6 @@
     letter-spacing: -0.2px;
     margin: 0 !important;
     color: white !important;
-
-    strong {
-      font-weight: 700;
-    }
   }
 
   &__link {
@@ -62,7 +59,7 @@
     text-decoration: underline !important;
     font-weight: 600;
     padding: 0 !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 0 !important;
     display: inline-block;
     transition: opacity 0.2s ease;
 
@@ -144,7 +141,7 @@
 
   &__academy-name {
     margin: 0;
-    font-size: 16px;
+    font-size: 32px;
     font-weight: 700;
     color: #1a1a1a !important;
   }
@@ -163,12 +160,12 @@
     color: #0066cc !important;
     text-decoration: none !important;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700 !important;
     margin-left: auto;
-    transition: opacity 0.2s ease;
 
     &:hover {
-      opacity: 0.8;
+      color: #0052a3 !important;
+      text-decoration: none !important;
     }
 
     &:focus {
@@ -207,29 +204,51 @@
     background-color: transparent !important;
     border: none;
     color: white !important;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
+    white-space: normal !important;
+    font-weight: 400;
 
     .essentials-alert__footer-link {
-      display: inline;
+      display: inline !important;
       color: white !important;
       text-decoration: underline !important;
-      font-weight: 400;
+      font-weight: 400 !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      background: none !important;
+      vertical-align: baseline !important;
+      white-space: nowrap !important;
+      box-shadow: none !important;
 
       &:hover {
         opacity: 0.85;
+        background: none !important;
+        box-shadow: none !important;
+      }
+
+      &:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 2px;
+        box-shadow: none !important;
       }
     }
   }
 
   &__footer-section {
     background-color: #c65f45 !important;
-    padding: 16px 24px;
+    padding: 24px 24px;
     margin: 0;
     border-top: none;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 
     @media (max-width: 768px) {
-      padding: 12px 24px;
+      padding: 24px 20px;
     }
   }
 }
+ 
