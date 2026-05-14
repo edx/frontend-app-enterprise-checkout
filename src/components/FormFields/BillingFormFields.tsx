@@ -47,7 +47,7 @@ const BillingFormFields = () => {
   };
 
   const paymentElementOptions: StripePaymentElementOptions = {
-    layout: 'tabs', // or 'accordion'
+    layout: 'tabs',
     terms: {
       card: 'never',
     },
