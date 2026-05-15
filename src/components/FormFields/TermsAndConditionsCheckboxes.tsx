@@ -182,7 +182,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
               defaultMessage="I agree to enroll in a recurring annual subscription for {price}/year USD."
               description="Checkbox label to confirm the recurring subscription with price"
               values={{
-                price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
+                price: (<span className="font-weight-bold ml-1"><DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} /></span>),
               }}
             />
           </Form.Checkbox>

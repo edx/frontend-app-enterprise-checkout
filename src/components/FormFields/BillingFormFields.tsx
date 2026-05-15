@@ -1,6 +1,6 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AddressElement, PaymentElement } from '@stripe/react-stripe-js';
-import { StripeAddressElementOptions } from '@stripe/stripe-js';
+import { StripeAddressElementOptions, StripePaymentElementOptions } from '@stripe/stripe-js';
 
 import { FieldContainer } from '@/components/FieldContainer';
 
@@ -45,6 +45,14 @@ const BillingFormFields = () => {
   const addressElementOptions: StripeAddressElementOptions = {
     mode: 'billing',
   };
+
+  const paymentElementOptions: StripePaymentElementOptions = {
+    layout: 'tabs',
+    terms: {
+      card: 'never',
+    },
+  };
+
   return (
     <>
       <FieldContainer>
@@ -55,11 +63,11 @@ const BillingFormFields = () => {
       </FieldContainer>
       <FieldContainer>
         <BillingPaymentTitle />
-        <PaymentElement
-          options={{
-            layout: 'tabs', // or 'accordion'
-          }}
-        />
+        <div className="mt-3">
+          <PaymentElement
+            options={paymentElementOptions}
+          />
+        </div>
       </FieldContainer>
     </>
   );
