@@ -8,6 +8,13 @@ import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import EssentialsAlert from '../EssentialsAlert';
 
+jest.mock('@edx/frontend-platform/config', () => ({
+  getConfig: jest.fn(() => ({
+    PICK_DIFFERENT_ACADEMY_URL: 'https://example.com/pick-different-academy',
+    SWITCH_TO_TEAMS_URL: 'https://example.com/switch-to-teams',
+  })),
+}));
+
 jest.mock('@/components/app/data/hooks/useBFFContext');
 jest.mock('@/components/DisplayPrice', () => ({
   DisplayPrice: ({ value }: { value: number }) => <span>${value}</span>,
@@ -179,8 +186,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
       expect(pickDifferentLink).toBeInTheDocument();
-      // Link should point to the course library essentials page
-      expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials');
+      // Link should point to configured URL
+      expect(pickDifferentLink.href).toContain('example.com/pick-different-academy');
     });
 
     it('should open "Pick a different academy" link in same tab', () => {
@@ -193,8 +200,8 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
-      // Link should point to the tech digital transformation academy page
-      expect(switchToTeamsLink.href).toContain('business.edx.org/academy/tech-digital-transformation');
+      // Link should point to configured URL
+      expect(switchToTeamsLink.href).toContain('example.com/switch-to-teams');
     });
 
     it('should have "Learn more" link with dynamic marketing URL', () => {

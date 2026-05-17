@@ -58,6 +58,9 @@ initialize({
         FEATURE_SELF_SERVICE_ESSENTIALS_KEY: process.env.FEATURE_SELF_SERVICE_ESSENTIALS_KEY || null,
 
         FEATURE_SELF_SERVICE_SITE_KEY: process.env.FEATURE_SELF_SERVICE_SITE_KEY || null,
+
+        PICK_DIFFERENT_ACADEMY_URL: process.env.PICK_DIFFERENT_ACADEMY_URL || null,
+        SWITCH_TO_TEAMS_URL: process.env.SWITCH_TO_TEAMS_URL || null,
       });
     },
   },
