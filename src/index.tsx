@@ -59,8 +59,8 @@ initialize({
 
         FEATURE_SELF_SERVICE_SITE_KEY: process.env.FEATURE_SELF_SERVICE_SITE_KEY || null,
 
-        PICK_DIFFERENT_ACADEMY_URL: process.env.PICK_DIFFERENT_ACADEMY_URL || null,
-        SWITCH_TO_TEAMS_URL: process.env.SWITCH_TO_TEAMS_URL || null,
+        ESSENTIALS_PRODUCT_URL: process.env.ESSENTIALS_PRODUCT_URL || null,
+        TEAMS_PRODUCT_URL: process.env.TEAMS_PRODUCT_URL || null,
       });
     },
   },

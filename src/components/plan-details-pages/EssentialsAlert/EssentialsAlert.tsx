@@ -54,8 +54,8 @@ type AcademySelectionData = {
 const EssentialsAlert = () => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const {
-    PICK_DIFFERENT_ACADEMY_URL,
-    SWITCH_TO_TEAMS_URL,
+    ESSENTIALS_PRODUCT_URL,
+    TEAMS_PRODUCT_URL,
   } = getConfig();
   const academySelectionData = useCheckoutFormStore(
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
@@ -120,7 +120,7 @@ const EssentialsAlert = () => {
               pickDifferentLink: (
                 <Button
                   variant="link"
-                  href={PICK_DIFFERENT_ACADEMY_URL}
+                  href={ESSENTIALS_PRODUCT_URL}
                   className="essentials-alert__link text-white d-inline-block p-0 mb-0"
                 >
                   <FormattedMessage
@@ -190,7 +190,7 @@ const EssentialsAlert = () => {
               switchToTeamsLink: (
                 <Button
                   variant="link"
-                  href={SWITCH_TO_TEAMS_URL}
+                  href={TEAMS_PRODUCT_URL}
                   className="essentials-alert__footer-link p-0 m-0"
                 >
                   <FormattedMessage

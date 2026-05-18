@@ -10,8 +10,8 @@ import EssentialsAlert from '../EssentialsAlert';
 
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(() => ({
-    PICK_DIFFERENT_ACADEMY_URL: 'https://example.com/pick-different-academy',
-    SWITCH_TO_TEAMS_URL: 'https://example.com/switch-to-teams',
+    ESSENTIALS_PRODUCT_URL: 'https://example.com/essentials-product',
+    TEAMS_PRODUCT_URL: 'https://example.com/teams-product',
   })),
 }));
 
@@ -187,7 +187,7 @@ describe('EssentialsAlert Component', () => {
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
       expect(pickDifferentLink).toBeInTheDocument();
       // Link should point to configured URL
-      expect(pickDifferentLink.href).toContain('example.com/pick-different-academy');
+      expect(pickDifferentLink.href).toContain('example.com/essentials-product');
     });
 
     it('should open "Pick a different academy" link in same tab', () => {
@@ -201,7 +201,7 @@ describe('EssentialsAlert Component', () => {
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
       // Link should point to configured URL
-      expect(switchToTeamsLink.href).toContain('example.com/switch-to-teams');
+      expect(switchToTeamsLink.href).toContain('example.com/teams-product');
     });
 
     it('should have "Learn more" link with dynamic marketing URL', () => {
