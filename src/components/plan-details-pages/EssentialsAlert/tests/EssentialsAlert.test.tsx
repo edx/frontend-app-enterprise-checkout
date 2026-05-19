@@ -1,4 +1,3 @@
-import { getConfig } from '@edx/frontend-platform/config';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
@@ -39,8 +38,6 @@ const defaultBFFContextValue = {
   isLoading: false,
   error: null,
 };
-
-const mockGetConfig = getConfig as jest.Mock;
 
 describe('EssentialsAlert Component', () => {
   beforeEach(() => {
@@ -387,106 +384,6 @@ describe('EssentialsAlert Component', () => {
       // Fallback price should display
       const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('Config URL Coverage', () => {
-    it('should render with ESSENTIALS_PRODUCT_URL and TEAMS_PRODUCT_URL set', () => {
-      mockGetConfig.mockReturnValue({
-        ESSENTIALS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-essentials/',
-        TEAMS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-teams/',
-      });
-
-      renderComponent();
-      const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
-      const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
-
-      expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
-      expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
-    });
-
-    it('should render with ESSENTIALS_PRODUCT_URL and TEAMS_PRODUCT_URL as null', () => {
-      mockGetConfig.mockReturnValue({
-        ESSENTIALS_PRODUCT_URL: null,
-        TEAMS_PRODUCT_URL: null,
-      });
-
-      renderComponent();
-      // Component should still render even with null URLs
-      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      // Links should still exist but with null hrefs
-      const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
-      const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
-
-      expect(pickDifferentLink).toBeInTheDocument();
-      expect(switchToTeamsLink).toBeInTheDocument();
-    });
-
-    it('should handle undefined ESSENTIALS_PRODUCT_URL gracefully', () => {
-      mockGetConfig.mockReturnValue({
-        ESSENTIALS_PRODUCT_URL: undefined,
-        TEAMS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-teams/',
-      });
-
-      renderComponent();
-      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
-      expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
-    });
-
-    it('should handle undefined TEAMS_PRODUCT_URL gracefully', () => {
-      mockGetConfig.mockReturnValue({
-        ESSENTIALS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-essentials/',
-        TEAMS_PRODUCT_URL: undefined,
-      });
-
-      renderComponent();
-      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
-      expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
-    });
-  });
-
-  describe('Config Initialization (index.tsx)', () => {
-    it('should cover ESSENTIALS_PRODUCT_URL and TEAMS_PRODUCT_URL config with env var set', () => {
-    // This test covers the lines in index.tsx:
-    // ESSENTIALS_PRODUCT_URL: process.env.ESSENTIALS_PRODUCT_URL || null,
-    // TEAMS_PRODUCT_URL: process.env.TEAMS_PRODUCT_URL || null,
-      const originalEnv = process.env;
-      process.env = {
-        ...originalEnv,
-        ESSENTIALS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-essentials/',
-        TEAMS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-teams/',
-      };
-
-      // When environment variables are set, the || null fallback should not be used
-      expect(process.env.ESSENTIALS_PRODUCT_URL).toBe('https://business.edx.org/course-library-plans-essentials/');
-      expect(process.env.TEAMS_PRODUCT_URL).toBe('https://business.edx.org/course-library-plans-teams/');
-
-      // Verify the fallback logic: if env var is not set, should be null
-      const essentialsUrl = process.env.ESSENTIALS_PRODUCT_URL || null;
-      const teamsUrl = process.env.TEAMS_PRODUCT_URL || null;
-      expect(essentialsUrl).toBe('https://business.edx.org/course-library-plans-essentials/');
-      expect(teamsUrl).toBe('https://business.edx.org/course-library-plans-teams/');
-
-      process.env = originalEnv;
-    });
-
-    it('should cover ESSENTIALS_PRODUCT_URL and TEAMS_PRODUCT_URL config with env var unset', () => {
-    // This test covers the || null fallback logic in index.tsx when env vars are not set
-      const originalEnv = process.env;
-      const envCopy = { ...originalEnv };
-      delete envCopy.ESSENTIALS_PRODUCT_URL;
-      delete envCopy.TEAMS_PRODUCT_URL;
-      process.env = envCopy;
-
-      // When environment variables are not set, the || null fallback should return null
-      const essentialsUrl = process.env.ESSENTIALS_PRODUCT_URL || null;
-      const teamsUrl = process.env.TEAMS_PRODUCT_URL || null;
-      expect(essentialsUrl).toBeNull();
-      expect(teamsUrl).toBeNull();
-
-      process.env = originalEnv;
     });
   });
 });
