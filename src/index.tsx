@@ -58,6 +58,9 @@ initialize({
         FEATURE_SELF_SERVICE_ESSENTIALS_KEY: process.env.FEATURE_SELF_SERVICE_ESSENTIALS_KEY || null,
 
         FEATURE_SELF_SERVICE_SITE_KEY: process.env.FEATURE_SELF_SERVICE_SITE_KEY || null,
+
+        ESSENTIALS_PRODUCT_URL: process.env.ESSENTIALS_PRODUCT_URL || null,
+        TEAMS_PRODUCT_URL: process.env.TEAMS_PRODUCT_URL || null,
       });
     },
   },

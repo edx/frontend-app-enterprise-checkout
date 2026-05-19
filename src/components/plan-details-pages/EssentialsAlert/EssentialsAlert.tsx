@@ -1,3 +1,4 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext, type AppContextValue } from '@edx/frontend-platform/react';
 import {
@@ -14,8 +15,6 @@ import './essentials-alert.scss';
 
 // Constants for URLs and default values
 const ESSENTIALS_PRICE_FALLBACK = 149; // Default price in dollars when API is unavailable
-const PICK_DIFFERENT_ACADEMY_URL = 'https://business.edx.org/course-library-plans-essentials/';
-const SWITCH_TO_TEAMS_URL = 'https://business.edx.org/academy/tech-digital-transformation/';
 
 interface AcademyData {
   id?: string;
@@ -54,6 +53,10 @@ type AcademySelectionData = {
 
 const EssentialsAlert = () => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const {
+    ESSENTIALS_PRODUCT_URL,
+    TEAMS_PRODUCT_URL,
+  } = getConfig();
   const academySelectionData = useCheckoutFormStore(
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
   );
@@ -69,7 +72,6 @@ const EssentialsAlert = () => {
 
   // Ensure fallback price displays when API is unavailable (data is undefined during loading/error)
   const displayPrice = pricePerYear ?? ESSENTIALS_PRICE_FALLBACK;
-
   const academyName = academySelectionData?.academyName?.trim() || DEFAULT_ACADEMY_DATA.name;
 
   return (
@@ -118,7 +120,7 @@ const EssentialsAlert = () => {
               pickDifferentLink: (
                 <Button
                   variant="link"
-                  href={PICK_DIFFERENT_ACADEMY_URL}
+                  href={ESSENTIALS_PRODUCT_URL}
                   className="essentials-alert__link text-white d-inline-block p-0 mb-0"
                 >
                   <FormattedMessage
@@ -188,7 +190,7 @@ const EssentialsAlert = () => {
               switchToTeamsLink: (
                 <Button
                   variant="link"
-                  href={SWITCH_TO_TEAMS_URL}
+                  href={TEAMS_PRODUCT_URL}
                   className="essentials-alert__footer-link p-0 m-0"
                 >
                   <FormattedMessage
