@@ -68,6 +68,7 @@ const CustomUrlField = ({ form }: CustomUrlFieldProps) => {
               },
               debounceMs: 500,
             })}
+            readOnly
           />
         </span>
       </div>

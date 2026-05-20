@@ -12,14 +12,19 @@ interface DueTodayRowProps {
 const DueTodayRowComponent: React.FC<DueTodayRowProps> = ({ amountDue }) => (
   <SummaryRow
     label={(
-      <FormattedMessage
-        id="checkout.purchaseSummary.dueToday.text"
-        defaultMessage="Due today"
-        description="Label for the amount due by the user on successful checkout"
-      />
+      <strong>
+        <FormattedMessage
+          id="checkout.purchaseSummary.dueToday.text"
+          defaultMessage="Due today"
+          description="Label for the amount due by the user on successful checkout"
+        />
+      </strong>
     )}
-    right={<DisplayPrice value={amountDue} />}
-    boldRight
+    right={(
+      <strong>
+        <DisplayPrice value={amountDue} />
+      </strong>
+    )}
     className="justify-content-between"
   />
 );

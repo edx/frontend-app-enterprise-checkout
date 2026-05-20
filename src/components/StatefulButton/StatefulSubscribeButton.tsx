@@ -15,9 +15,7 @@ import { patchCheckoutIntent } from '@/components/app/data/services/checkout-int
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
-
-import { isEssentialsFlow } from '../app/routes/loaders/utils';
+import { isEssentialsFlow, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const variants = {
   default: 'secondary',

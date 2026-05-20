@@ -53,12 +53,17 @@ const PurchaseSummary = () => {
           <DueTodayRow amountDue={0} />
         </Stack>
       </Card.Section>
+import { isEssentialsFlow } from '@/utils/common';
 
-      <Card.Footer>
-        <PurchaseSummaryCardButton />
-      </Card.Footer>
-    </Card>
-  );
+import EssentialsPurchaseSummary from './EssentialsPurchaseSummary';
+import TeamsPurchaseSummary from './TeamsPurchaseSummary';
+
+const PurchaseSummary = () => {
+  const isEssentials = isEssentialsFlow();
+
+  return isEssentials
+    ? <EssentialsPurchaseSummary />
+    : <TeamsPurchaseSummary />;
 };
 
-export default React.memo(PurchaseSummary);
+export default PurchaseSummary;

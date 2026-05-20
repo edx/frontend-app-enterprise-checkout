@@ -6,13 +6,12 @@ import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const ReceiptButton: React.FC = () => {
-  // TODO: Add this endpoint to the success page loader
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
 
   return (
     <Button
-      className="w-100 text-primary-500"
+      className="w-100 text-primary-500 font-weight-bold"
       variant="outline-primary"
       disabled={!billingPortalSession?.url}
       href={billingPortalSession?.url}
@@ -29,7 +28,7 @@ const ReceiptButton: React.FC = () => {
     >
       <FormattedMessage
         id="components.PurchaseSummary.ReceiptButton.viewReceipt"
-        defaultMessage="View receipt"
+        defaultMessage="View Receipt"
         description="Button text to view the receipt for the purchase"
       />
     </Button>

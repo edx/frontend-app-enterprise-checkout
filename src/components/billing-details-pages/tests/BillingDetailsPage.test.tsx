@@ -37,6 +37,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 const { useCheckoutIntent, useFirstBillableInvoice } = jest.requireMock('@/components/app/data');
+const { PaymentElement } = jest.requireMock('@stripe/react-stripe-js');
 
 jest.mock('@/components/app/data/services/checkout-intent', () => ({
   patchCheckoutIntent: jest.fn(),
@@ -100,6 +101,23 @@ describe('BillingDetailsPage', () => {
     validateText('edX Enterprise Terms');
     validateText('I have read and accepted', { exact: false });
     validateText('I confirm I am subscribing', { exact: false });
+  });
+
+  it('passes terms.card=never to PaymentElement', () => {
+    renderStepperRoute(CheckoutPageRoute.BillingDetails, {
+      config: {},
+      authenticatedUser: {
+        userId: 12345,
+      },
+    } as any);
+
+    expect(PaymentElement).toHaveBeenCalled();
+    const paymentElementProps = (PaymentElement as jest.Mock).mock.calls[0][0];
+    expect(paymentElementProps.options).toEqual(expect.objectContaining({
+      terms: expect.objectContaining({
+        card: 'never',
+      }),
+    }));
   });
 
   it('emits tracking event when subscribe button is clicked', async () => {

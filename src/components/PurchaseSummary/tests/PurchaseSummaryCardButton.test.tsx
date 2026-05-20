@@ -5,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
-import { CheckoutPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 
 import PurchaseSummaryCardButton from '../PurchaseSummaryCardButton';
 
@@ -49,7 +49,7 @@ describe('PurchaseSummaryCardButton', () => {
 
       expect(screen.getByTestId('edit-plan-button')).toBeInTheDocument();
       expect(screen.getByText('Edit Plan')).toBeInTheDocument();
-      expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Receipt')).not.toBeInTheDocument();
     });
 
     it('renders EditPlanButton on BillingDetails route', () => {
@@ -65,7 +65,7 @@ describe('PurchaseSummaryCardButton', () => {
     it('renders ReceiptButton on BillingDetailsSuccess route', () => {
       renderWithRouter(CheckoutPageRoute.BillingDetailsSuccess);
 
-      expect(screen.getByText('View receipt')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /view receipt/i })).toBeInTheDocument();
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
     });
@@ -77,7 +77,7 @@ describe('PurchaseSummaryCardButton', () => {
 
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
-      expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Receipt')).not.toBeInTheDocument();
     });
 
     it('renders nothing on PlanDetailsLogin route', () => {
@@ -85,7 +85,7 @@ describe('PurchaseSummaryCardButton', () => {
 
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
-      expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Receipt')).not.toBeInTheDocument();
     });
 
     it('renders nothing on PlanDetailsRegister route', () => {
@@ -93,7 +93,7 @@ describe('PurchaseSummaryCardButton', () => {
 
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
-      expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Receipt')).not.toBeInTheDocument();
     });
 
     it('renders nothing for unknown/unmapped routes', () => {
@@ -101,7 +101,23 @@ describe('PurchaseSummaryCardButton', () => {
 
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
-      expect(screen.queryByText('View receipt')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Receipt')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Essentials Routes', () => {
+    it('renders upgrade button for essentials plan details route', () => {
+      renderWithRouter(EssentialsPageRoute.PlanDetails);
+
+      expect(screen.getByTestId('upgrade-to-teams-button')).toBeInTheDocument();
+      expect(screen.getByText('Upgrade to Teams')).toBeInTheDocument();
+    });
+
+    it('renders receipt button on essentials billing success route', () => {
+      renderWithRouter(EssentialsPageRoute.BillingDetailsSuccess);
+
+      expect(screen.getByRole('link', { name: /view receipt/i })).toBeInTheDocument();
+      expect(screen.queryByTestId('upgrade-to-teams-button')).not.toBeInTheDocument();
     });
   });
 
@@ -145,7 +161,7 @@ describe('PurchaseSummaryCardButton', () => {
 
       renderWithRouter(CheckoutPageRoute.BillingDetailsSuccess);
 
-      const receiptButton = screen.getByText('View receipt');
+      const receiptButton = screen.getByRole('link', { name: /view receipt/i });
       await user.click(receiptButton);
 
       expect(mockSendTrackingEvent).toHaveBeenCalledWith({

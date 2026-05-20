@@ -1,31 +1,41 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import 'whatwg-fetch';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
+feature/ENT-11639-testimonials-all-plans
 import { DataStoreKey } from '@/constants/checkout';
+import { DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
+ main
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import PurchaseSummary from '../PurchaseSummary';
 
-// Mock your custom hooks
 jest.mock('@/components/app/data', () => ({
   __esModule: true,
   usePurchaseSummaryPricing: jest.fn(),
   useCreateBillingPortalSession: jest.fn(() => ({ data: { url: null } })),
   useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
 }));
-
+feature/ENT-11639-testimonials-all-plans
 const renderWithProviders = () => {
+
+jest.mock('@/utils/common', () => ({
+  isEssentialsFlow: jest.fn(),
+}));
+
+const renderWithProviders = (initialRoute = '/') => {
+ main
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en">
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[initialRoute]}>
           <PurchaseSummary />
         </MemoryRouter>
       </IntlProvider>
@@ -34,13 +44,17 @@ const renderWithProviders = () => {
 };
 
 describe('PurchaseSummary', () => {
+  const { isEssentialsFlow } = jest.requireMock('@/utils/common');
+
   beforeEach(() => {
+    jest.clearAllMocks();
     checkoutFormStore.setState((s) => ({
       ...s,
       formData: {
         ...s.formData,
-        [DataStoreKey.PlanDetails]: { quantity: 3 },
+        [DataStoreKey.PlanDetails]: { quantity: 3, academyName: 'AI Academy' },
         [DataStoreKey.AccountDetails]: { companyName: 'Acme' },
+        [DataStoreKey.AcademySelection]: { academyName: 'AI Academy' },
       },
     }));
 
@@ -50,7 +64,9 @@ describe('PurchaseSummary', () => {
     });
   });
 
-  it('renders header and rows with computed values', () => {
+  it('renders teams purchase summary with data-backed rows for non-essentials flow', () => {
+    (isEssentialsFlow as jest.Mock).mockReturnValue(false);
+
     renderWithProviders();
 
     expect(screen.getByText('Purchase summary')).toBeInTheDocument();
@@ -66,11 +82,25 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$0')).toBeInTheDocument();
   });
 
+ feature/ENT-11639-testimonials-all-plans
   it('renders correctly', async () => {
     renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByText('Purchase summary')).toBeInTheDocument();
     });
+
+  it('renders essentials purchase summary with compare plans content for essentials flow', () => {
+    (isEssentialsFlow as jest.Mock).mockReturnValue(true);
+
+    renderWithProviders(EssentialsPageRoute.PlanDetails);
+
+    expect(screen.getByText('Purchase summary')).toBeInTheDocument();
+    expect(screen.getByText('AI Academy')).toBeInTheDocument();
+    expect(screen.getByText('Essentials subscription, price per user, paid yearly.')).toBeInTheDocument();
+    expect(screen.getByText('$149 USD')).toBeInTheDocument();
+    expect(screen.getByText('Not sure which plan is right for you?')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Compare plans.' })).toBeInTheDocument();
+ main
   });
 });

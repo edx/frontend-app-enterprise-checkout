@@ -1,0 +1,207 @@
+// Essentials Alert Styling
+.essentials-alert {
+  // Override Paragon Alert styling for rust color
+  background-color: #a45542 !important;
+  border-color: #a45542 !important;
+  border-radius: 16px !important;
+
+  // Text color inheritance for nested elements
+  h3, h4, p {
+    color: white !important;
+  }
+
+  // Header row: Title and Price
+  &__header {
+    gap: 16px;
+    padding-bottom: 12px; // 12px has no Bootstrap spacing equivalent
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  // Body section: Description, link, and card (full width)
+  &__body {
+    @media (max-width: 768px) {
+      padding: 0 20px 20px 20px;
+    }
+  }
+
+  &__title {
+    font-size: 32px;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.2px;
+  }
+
+  &__link {
+    text-decoration: underline !important;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &:focus {
+      outline: 2px solid rgba(255, 255, 255, 0.5);
+      outline-offset: 2px;
+    }
+  }
+
+  &__price-wrapper {
+    flex-shrink: 0;
+    min-width: max-content;
+
+    @media (max-width: 768px) {
+      justify-content: flex-start;
+      text-align: left;
+      width: 100%;
+    }
+  }
+
+  &__price-text {
+    font-size: 18px;
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+
+    span {
+      color: white !important;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 16px;
+    }
+  }
+
+  // Academy Details Card - White background, full width
+  &__card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+
+    .pgn__card-body {
+      padding: 24px;
+
+      @media (max-width: 768px) {
+        padding: 20px;
+      }
+    }
+
+    h4, p {
+      color: #333 !important;
+    }
+  }
+
+  &__academy-header {
+    gap: 12px;
+    margin-bottom: 12px; // 12px has no Bootstrap spacing equivalent
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__academy-name {
+    font-size: 32px;
+    color: #1a1a1a !important;
+  }
+
+  &__course-badge {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  &__learn-more {
+    color: #0066cc !important;
+    text-decoration: none !important;
+    font-size: 14px;
+
+    &:hover {
+      color: #0052a3 !important;
+      text-decoration: none !important;
+    }
+
+    &:focus {
+      outline: 2px solid #0066cc;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 768px) {
+      margin-left: 0;
+    }
+  }
+
+  &__tags {
+    color: #666 !important;
+  }
+
+  &__tag {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  &__description {
+    color: #333 !important;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  &__footer {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: normal !important;
+
+    .essentials-alert__footer-link {
+      display: inline !important;
+      color: white !important;
+      text-decoration: underline !important;
+      font-weight: 400 !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      border: none !important;
+      background: none !important;
+      vertical-align: baseline !important;
+      white-space: nowrap !important;
+      box-shadow: none !important;
+
+      &:hover {
+        opacity: 0.85;
+        background: none !important;
+        box-shadow: none !important;
+      }
+
+      &:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 2px;
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  &__footer-section {
+    background-color: #c65f45 !important;
+    border-top: none;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+
+    @media (max-width: 768px) {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+}
+ 

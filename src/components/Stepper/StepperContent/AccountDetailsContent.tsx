@@ -1,4 +1,8 @@
+import { AppContext } from '@edx/frontend-platform/react';
+import { useContext } from 'react';
+
 import {
+  AuthenticatedUserField,
   CompanyNameField,
   CustomUrlField,
 } from '@/components/FormFields';
@@ -9,11 +13,20 @@ interface AccountDetailsContentProps {
   form: UseFormReturn<AccountDetailsData>;
 }
 
-const AccountDetailsContent = ({ form }: AccountDetailsContentProps) => (
-  <>
-    <CompanyNameField form={form} />
-    <CustomUrlField form={form} />
-  </>
-);
+const AccountDetailsContent = ({ form }: AccountDetailsContentProps) => {
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  return (
+    <>
+      {authenticatedUser && (
+        <AuthenticatedUserField
+          adminEmail={authenticatedUser.email}
+          fullName={authenticatedUser.name || authenticatedUser.username}
+        />
+      )}
+      <CompanyNameField form={form} />
+      <CustomUrlField form={form} />
+    </>
+  );
+};
 
 export default AccountDetailsContent;
