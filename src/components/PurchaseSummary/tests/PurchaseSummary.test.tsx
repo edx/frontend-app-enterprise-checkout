@@ -8,10 +8,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
-feature/ENT-11639-testimonials-all-plans
-import { DataStoreKey } from '@/constants/checkout';
 import { DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
- main
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import PurchaseSummary from '../PurchaseSummary';
@@ -22,15 +19,12 @@ jest.mock('@/components/app/data', () => ({
   useCreateBillingPortalSession: jest.fn(() => ({ data: { url: null } })),
   useCheckoutIntent: jest.fn(() => ({ data: { id: 123 } })),
 }));
-feature/ENT-11639-testimonials-all-plans
-const renderWithProviders = () => {
 
 jest.mock('@/utils/common', () => ({
   isEssentialsFlow: jest.fn(),
 }));
 
 const renderWithProviders = (initialRoute = '/') => {
- main
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -82,14 +76,6 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$0')).toBeInTheDocument();
   });
 
- feature/ENT-11639-testimonials-all-plans
-  it('renders correctly', async () => {
-    renderWithProviders();
-
-    await waitFor(() => {
-      expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    });
-
   it('renders essentials purchase summary with compare plans content for essentials flow', () => {
     (isEssentialsFlow as jest.Mock).mockReturnValue(true);
 
@@ -101,6 +87,5 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('$149 USD')).toBeInTheDocument();
     expect(screen.getByText('Not sure which plan is right for you?')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Compare plans.' })).toBeInTheDocument();
- main
   });
 });
