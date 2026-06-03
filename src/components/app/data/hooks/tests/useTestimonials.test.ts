@@ -1,11 +1,9 @@
-import { getAuthenticatedHttpClient, getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
 import axios from 'axios';
 
 import {
   fetchTestimonials,
   pickNextTestimonial,
-  SEEDED_ACTIVE_TESTIMONIALS,
 } from '../useTestimonials';
 
 jest.mock('@edx/frontend-platform/auth', () => ({
@@ -20,7 +18,6 @@ jest.mock('@edx/frontend-platform/config', () => ({
 jest.mock('axios');
 
 describe('fetchTestimonials', () => {
-  const mockHttpGet = jest.fn();
   const baseUrl = 'https://enterprise-access.example.com';
   const endpoint = `${baseUrl}/api/v1/testimonials/`;
 
@@ -28,15 +25,14 @@ describe('fetchTestimonials', () => {
     jest.clearAllMocks();
     (getConfig as jest.Mock).mockReturnValue({
       ENTERPRISE_ACCESS_BASE_URL: baseUrl,
-    });
-    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
-      get: mockHttpGet,
+      TESTIMONIALS_API_BASE_URL: baseUrl,
+      TESTIMONIALS_API_USE_RELATIVE_PATH: null,
+      TESTIMONIALS_API_PROXY_TARGET: null,
     });
   });
 
-  it('uses authenticated client for logged-in users and returns only active testimonials', async () => {
-    (getAuthenticatedUser as jest.Mock).mockReturnValue({ username: 'test-user' });
-    mockHttpGet.mockResolvedValue({
+  it('returns only active API testimonials', async () => {
+    (axios.get as jest.Mock).mockResolvedValue({
       data: {
         results: [
           {
@@ -59,8 +55,7 @@ describe('fetchTestimonials', () => {
 
     const result = await fetchTestimonials();
 
-    expect(mockHttpGet).toHaveBeenCalledWith(endpoint);
-    expect((axios.get as jest.Mock)).not.toHaveBeenCalled();
+    expect(axios.get).toHaveBeenCalledWith(endpoint);
     expect(result).toEqual([
       {
         uuid: '1',
@@ -72,8 +67,7 @@ describe('fetchTestimonials', () => {
     ]);
   });
 
-  it('uses axios for logged-out users', async () => {
-    (getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+  it('uses axios for public-read requests', async () => {
     (axios.get as jest.Mock).mockResolvedValue({
       data: {
         results: [
@@ -90,26 +84,63 @@ describe('fetchTestimonials', () => {
     const result = await fetchTestimonials();
 
     expect(axios.get).toHaveBeenCalledWith(endpoint);
-    expect(mockHttpGet).not.toHaveBeenCalled();
     expect(result).toHaveLength(1);
   });
 
-  it('returns seeded active testimonials when API results are missing or malformed', async () => {
-    (getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+  it('returns an empty array when API results are missing or malformed', async () => {
     (axios.get as jest.Mock).mockResolvedValue({ data: { results: null } });
 
     const result = await fetchTestimonials();
 
-    expect(result).toEqual(SEEDED_ACTIVE_TESTIMONIALS);
+    expect(result).toEqual([]);
   });
 
-  it('returns seeded active testimonials when request fails', async () => {
-    (getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+  it('returns an empty array when request fails', async () => {
     (axios.get as jest.Mock).mockRejectedValue(new Error('network'));
 
     const result = await fetchTestimonials();
 
-    expect(result).toEqual(SEEDED_ACTIVE_TESTIMONIALS);
+    expect(result).toEqual([]);
+  });
+
+  it('supports non-paginated array payload shape', async () => {
+    (axios.get as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          uuid: '4',
+          quote_text: 'Array payload quote',
+          attribution_name: 'Robin',
+          attribution_title: 'Engineer',
+          is_active: true,
+        },
+      ],
+    });
+
+    const result = await fetchTestimonials();
+
+    expect(result).toEqual([
+      {
+        uuid: '4',
+        quote_text: 'Array payload quote',
+        attribution_name: 'Robin',
+        attribution_title: 'Engineer',
+        is_active: true,
+      },
+    ]);
+  });
+
+  it('uses relative testimonials API path when enabled', async () => {
+    (getConfig as jest.Mock).mockReturnValue({
+      ENTERPRISE_ACCESS_BASE_URL: baseUrl,
+      TESTIMONIALS_API_BASE_URL: null,
+      TESTIMONIALS_API_USE_RELATIVE_PATH: 'true',
+      TESTIMONIALS_API_PROXY_TARGET: 'http://127.0.0.1:8000',
+    });
+    (axios.get as jest.Mock).mockResolvedValue({ data: { results: [] } });
+
+    await fetchTestimonials();
+
+    expect(axios.get).toHaveBeenCalledWith('/api/v1/testimonials/');
   });
 });
 
