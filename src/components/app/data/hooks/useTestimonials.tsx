@@ -62,7 +62,7 @@ export const pickNextTestimonial = (
 
 export const fetchTestimonials = async (): Promise<Testimonial[]> => {
   const config = getConfig() as Record<string, string | undefined>;
-  const shouldUseRelativePath = config.TESTIMONIALS_API_USE_RELATIVE_PATH === 'true';
+  const shouldUseRelativePath = !!config.TESTIMONIALS_API_USE_RELATIVE_PATH;
   const testimonialsBaseUrl = config.TESTIMONIALS_API_BASE_URL || config.ENTERPRISE_ACCESS_BASE_URL;
   const url = shouldUseRelativePath
     ? '/api/v1/testimonials/'
