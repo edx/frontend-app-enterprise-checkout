@@ -1,5 +1,5 @@
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
-import axios from 'axios';
 
 import {
   fetchTestimonials,
@@ -15,24 +15,27 @@ jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(),
 }));
 
-jest.mock('axios');
+jest.mock('@edx/frontend-platform/utils', () => ({
+  camelCaseObject: jest.fn((obj) => obj),
+}));
 
 describe('fetchTestimonials', () => {
   const baseUrl = 'https://enterprise-access.example.com';
   const endpoint = `${baseUrl}/api/v1/testimonials/`;
+  const mockGet = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (getConfig as jest.Mock).mockReturnValue({
       ENTERPRISE_ACCESS_BASE_URL: baseUrl,
-      TESTIMONIALS_API_BASE_URL: baseUrl,
-      TESTIMONIALS_API_USE_RELATIVE_PATH: null,
-      TESTIMONIALS_API_PROXY_TARGET: null,
+    });
+    (getAuthenticatedHttpClient as jest.Mock).mockReturnValue({
+      get: mockGet,
     });
   });
 
   it('returns only active API testimonials', async () => {
-    (axios.get as jest.Mock).mockResolvedValue({
+    mockGet.mockResolvedValue({
       data: {
         results: [
           {
@@ -40,14 +43,14 @@ describe('fetchTestimonials', () => {
             quote_text: 'Active quote',
             attribution_name: 'Alex',
             attribution_title: 'Director',
-            is_active: true,
+            isActive: true,
           },
           {
             uuid: '2',
             quote_text: 'Inactive quote',
             attribution_name: 'Pat',
             attribution_title: 'Manager',
-            is_active: false,
+            isActive: false,
           },
         ],
       },
@@ -55,7 +58,7 @@ describe('fetchTestimonials', () => {
 
     const result = await fetchTestimonials();
 
-    expect(axios.get).toHaveBeenCalledWith(endpoint);
+    expect(mockGet).toHaveBeenCalledWith(endpoint);
     expect(result).toEqual([
       {
         uuid: '1',
@@ -67,8 +70,8 @@ describe('fetchTestimonials', () => {
     ]);
   });
 
-  it('uses axios for public-read requests', async () => {
-    (axios.get as jest.Mock).mockResolvedValue({
+  it('uses getAuthenticatedHttpClient for API requests', async () => {
+    mockGet.mockResolvedValue({
       data: {
         results: [
           {
@@ -83,20 +86,21 @@ describe('fetchTestimonials', () => {
 
     const result = await fetchTestimonials();
 
-    expect(axios.get).toHaveBeenCalledWith(endpoint);
+    expect(getAuthenticatedHttpClient).toHaveBeenCalled();
+    expect(mockGet).toHaveBeenCalledWith(endpoint);
     expect(result).toHaveLength(1);
   });
 
   it('returns an empty array when API results are missing or malformed', async () => {
-    (axios.get as jest.Mock).mockResolvedValue({ data: { results: null } });
+    mockGet.mockResolvedValue({ data: { results: null } });
 
     const result = await fetchTestimonials();
 
     expect(result).toEqual([]);
   });
 
-  it('returns an empty array when request fails', async () => {
-    (axios.get as jest.Mock).mockRejectedValue(new Error('network'));
+  it('throws when request fails', async () => {
+    mockGet.mockRejectedValue(new Error('network'));
 
     const result = await fetchTestimonials();
 
@@ -104,14 +108,14 @@ describe('fetchTestimonials', () => {
   });
 
   it('supports non-paginated array payload shape', async () => {
-    (axios.get as jest.Mock).mockResolvedValue({
+    mockGet.mockResolvedValue({
       data: [
         {
           uuid: '4',
           quote_text: 'Array payload quote',
           attribution_name: 'Robin',
           attribution_title: 'Engineer',
-          is_active: true,
+          isActive: true,
         },
       ],
     });
@@ -129,18 +133,51 @@ describe('fetchTestimonials', () => {
     ]);
   });
 
-  it('uses relative testimonials API path when enabled', async () => {
+  it('returns empty and avoids request when base URL is not set', async () => {
     (getConfig as jest.Mock).mockReturnValue({
-      ENTERPRISE_ACCESS_BASE_URL: baseUrl,
-      TESTIMONIALS_API_BASE_URL: null,
-      TESTIMONIALS_API_USE_RELATIVE_PATH: 'true',
-      TESTIMONIALS_API_PROXY_TARGET: 'http://127.0.0.1:8000',
+      ENTERPRISE_ACCESS_BASE_URL: undefined,
     });
-    (axios.get as jest.Mock).mockResolvedValue({ data: { results: [] } });
 
-    await fetchTestimonials();
+    const result = await fetchTestimonials();
 
-    expect(axios.get).toHaveBeenCalledWith('/api/v1/testimonials/');
+    expect(result).toEqual([]);
+    expect(mockGet).not.toHaveBeenCalled();
+  });
+
+  it('filters malformed testimonial entries to prevent empty cards', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        results: [
+          null,
+          {
+            uuid: 'good-1',
+            quoteText: 'Good quote',
+            attributionName: 'Casey',
+            attributionTitle: 'Manager',
+            isActive: true,
+          },
+          {
+            uuid: 'bad-1',
+            quoteText: '',
+            attributionName: 'No quote',
+            attributionTitle: 'Title',
+            isActive: true,
+          },
+        ],
+      },
+    });
+
+    const result = await fetchTestimonials();
+
+    expect(result).toEqual([
+      {
+        uuid: 'good-1',
+        quote_text: 'Good quote',
+        attribution_name: 'Casey',
+        attribution_title: 'Manager',
+        is_active: true,
+      },
+    ]);
   });
 });
 

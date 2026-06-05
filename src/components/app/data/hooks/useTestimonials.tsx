@@ -1,6 +1,7 @@
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
+import { camelCaseObject } from '@edx/frontend-platform/utils';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 import { Testimonial } from '@/components/PurchaseSummary/TestimonialCard';
@@ -61,27 +62,42 @@ export const pickNextTestimonial = (
 };
 
 export const fetchTestimonials = async (): Promise<Testimonial[]> => {
-  const config = getConfig() as Record<string, string | undefined>;
-  const shouldUseRelativePath = !!config.TESTIMONIALS_API_USE_RELATIVE_PATH;
-  const testimonialsBaseUrl = config.TESTIMONIALS_API_BASE_URL || config.ENTERPRISE_ACCESS_BASE_URL;
-  const url = shouldUseRelativePath
-    ? '/api/v1/testimonials/'
-    : `${testimonialsBaseUrl}/api/v1/testimonials/`;
-
-  if (!shouldUseRelativePath && !testimonialsBaseUrl) {
+  const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
+  if (!ENTERPRISE_ACCESS_BASE_URL) {
     return [];
   }
 
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/testimonials/`;
   try {
-    const res = await axios.get(url);
+    const response = await getAuthenticatedHttpClient().get(url);
+    const data = camelCaseObject(response.data);
 
-    const payload = res.data;
-    const results = Array.isArray(payload) ? payload : payload?.results;
+    const results = Array.isArray(data) ? data : data?.results;
     if (!Array.isArray(results)) {
       return [];
     }
 
-    return results.filter((testimonial) => testimonial?.is_active !== false);
+    return results
+      .filter((testimonial) => testimonial && typeof testimonial === 'object')
+      .filter((testimonial) => testimonial?.isActive !== false)
+      .map((testimonial) => {
+        const quoteText = testimonial.quoteText || testimonial.quote_text;
+        const attributionName = testimonial.attributionName || testimonial.attribution_name;
+        const attributionTitle = testimonial.attributionTitle || testimonial.attribution_title;
+
+        return {
+          uuid: testimonial.uuid,
+          quote_text: quoteText,
+          attribution_name: attributionName,
+          attribution_title: attributionTitle,
+          is_active: testimonial.isActive ?? testimonial.is_active,
+        };
+      })
+      .filter((testimonial) => (
+        !!testimonial.quote_text
+        && !!testimonial.attribution_name
+        && !!testimonial.attribution_title
+      ));
   } catch {
     return [];
   }
