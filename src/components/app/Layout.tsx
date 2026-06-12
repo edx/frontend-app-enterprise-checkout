@@ -10,7 +10,6 @@ import { Footer } from '../Footer';
 
 const Layout: React.FC = () => {
   const config = getConfig();
-  console.log(isSystemMaintenanceAlertOpen(config));
   return (
     <div id="layout">
       <Helmet titleTemplate="Checkout - %s" />

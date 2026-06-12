@@ -1,8 +1,7 @@
 import dayjs from 'dayjs';
-
-const advancedFormat = require('dayjs/plugin/advancedFormat');
-const isBetween = require('dayjs/plugin/isBetween');
-const relativeTime = require('dayjs/plugin/relativeTime');
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import isBetween from 'dayjs/plugin/isBetween';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(advancedFormat);
 dayjs.extend(isBetween);
