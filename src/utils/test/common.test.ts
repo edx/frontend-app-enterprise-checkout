@@ -1,7 +1,12 @@
 import dayjs from 'dayjs';
 
 import { CheckoutErrorMessagesByField } from '@/constants/checkout';
-import { defaultQueryClientRetryHandler, isExpired, serverValidationError } from '@/utils/common';
+import {
+  defaultQueryClientRetryHandler,
+  isExpired,
+  isTodayBetweenDates,
+  serverValidationError,
+} from '@/utils/common';
 
 describe('defaultQueryClientRetryHandler', () => {
   it.each([
@@ -105,5 +110,57 @@ describe('isExpired', () => {
   it('returns false for a date equal to now (boundary condition)', () => {
     const equalToNow = dayjs(fixedNow).toISOString();
     expect(isExpired(equalToNow)).toBe(false);
+  });
+});
+
+describe('isTodayBetweenDates', () => {
+  const fixedNow = new Date('2026-06-12T17:00:00.000Z');
+
+  beforeEach(() => {
+    jest.useFakeTimers({ legacyFakeTimers: false });
+    jest.setSystemTime(fixedNow);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each([
+    {
+      scenario: 'current time is strictly between start and end',
+      startDate: dayjs(fixedNow).subtract(30, 'minute').toISOString(),
+      endDate: dayjs(fixedNow).add(30, 'minute').toISOString(),
+      expected: true,
+    },
+    {
+      scenario: 'current time is before start',
+      startDate: dayjs(fixedNow).add(30, 'minute').toISOString(),
+      endDate: dayjs(fixedNow).add(1, 'hour').toISOString(),
+      expected: false,
+    },
+    {
+      scenario: 'current time is after end',
+      startDate: dayjs(fixedNow).subtract(1, 'hour').toISOString(),
+      endDate: dayjs(fixedNow).subtract(30, 'minute').toISOString(),
+      expected: false,
+    },
+    {
+      scenario: 'current time equals start boundary',
+      startDate: dayjs(fixedNow).toISOString(),
+      endDate: dayjs(fixedNow).add(30, 'minute').toISOString(),
+      expected: false,
+    },
+    {
+      scenario: 'current time equals end boundary',
+      startDate: dayjs(fixedNow).subtract(30, 'minute').toISOString(),
+      endDate: dayjs(fixedNow).toISOString(),
+      expected: false,
+    },
+  ])('returns $expected when $scenario', ({
+    startDate,
+    endDate,
+    expected,
+  }) => {
+    expect(isTodayBetweenDates({ startDate, endDate })).toBe(expected);
   });
 });
