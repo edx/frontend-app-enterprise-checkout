@@ -161,13 +161,6 @@ const isFeatureEnabled = (enabled: boolean, featureKey?: string | null): boolean
   return isUnlockedBySiteKey || isUnlockedByFeatureKey;
 };
 
-function isTodayBetweenDates({ startDate, endDate }) {
-  const today = dayjs();
-  const formattedStartDate = dayjs(startDate);
-  const formattedEndDate = dayjs(endDate);
-  return today.isBetween(formattedStartDate, formattedEndDate);
-}
-
 export {
   defaultQueryClientRetryHandler,
   getComputedStylePropertyCSSVariable,
@@ -179,5 +172,4 @@ export {
   sendEnterpriseCheckoutPageEvent,
   isFeatureEnabled,
   isEssentialsFlow,
-  isTodayBetweenDates,
 };
