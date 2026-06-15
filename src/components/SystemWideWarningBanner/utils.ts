@@ -1,6 +1,4 @@
-import dayjs from 'dayjs';
-
-import { isTodayBetweenDates } from '@/utils/common';
+import dayjs from '@/utils/dayjs';
 
 /**
  * Check if system maintenance alert is open, based on configuration.
@@ -20,7 +18,7 @@ export function isSystemMaintenanceAlertOpen(config): boolean {
   const startTimestamp = config.MAINTENANCE_ALERT_START_TIMESTAMP;
   const endTimestamp = config.MAINTENANCE_ALERT_END_TIMESTAMP;
   if (startTimestamp && endTimestamp) {
-    return isTodayBetweenDates({ startDate: startTimestamp, endDate: endTimestamp });
+    return dayjs().isBetween(dayjs(startTimestamp), dayjs(endTimestamp));
   }
   if (startTimestamp) {
     return dayjs().isAfter(dayjs(startTimestamp));

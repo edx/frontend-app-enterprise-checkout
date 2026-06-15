@@ -3,8 +3,7 @@ import { Helmet } from 'react-helmet';
 import { Outlet, ScrollRestoration } from 'react-router-dom';
 
 import Header from '@/components/Header/Header';
-import SystemWideWarningBanner from '@/components/SystemWideWarningBanner/SystemWideWarningBanner';
-import { isSystemMaintenanceAlertOpen } from '@/components/SystemWideWarningBanner/utils';
+import { isSystemMaintenanceAlertOpen, SystemWideWarningBanner } from '@/components/SystemWideWarningBanner';
 
 import { Footer } from '../Footer';
 
