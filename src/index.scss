@@ -60,21 +60,14 @@ main {
    ============================= */
 
 .testimonial-card {
-  background: #ffffff;
   border: 2px solid #bfc9ca;
   border-radius: 16px;
-  width: 100%;
-}
-
-.testimonial-card__body {
-  padding: 32px;
 }
 
 .testimonial-card__quote-icon {
   display: flex;
   line-height: 1;
   color: #A45542;
-  margin-bottom: 16px;
 }
 
 .testimonial-card__quote-glyph {
@@ -87,7 +80,6 @@ main {
   color: #163b3f;
   font-size: 17px;
   line-height: 1.55;
-  margin-bottom: 0;
 }
 
 .testimonial-card__attribution {
@@ -127,5 +119,4 @@ main {
   color: #7a7a7a;
   font-size: 13px;
   line-height: 1.45;
-  margin-top: 2px;
 }

@@ -24,14 +24,22 @@ const TestimonialCard = ({ testimonial }: Props) => {
   } = testimonial;
 
   return (
-    <div className="testimonial-card mt-4" data-testid="testimonial-card">
-      <div className="testimonial-card__body">
-        <div className="testimonial-card__quote-icon" aria-hidden="true">
-          <span className="testimonial-card__quote-glyph">❝</span>
+    <div
+      className="testimonial-card bg-white w-100 mt-4"
+      data-testid="testimonial-card"
+    >
+      <div className="p-4">
+        <div
+          className="testimonial-card__quote-icon mb-3"
+          aria-hidden="true"
+        >
+          <span className="testimonial-card__quote-glyph">
+            ❝
+          </span>
         </div>
 
         <p
-          className="testimonial-card__quote mt-4"
+          className="testimonial-card__quote mb-0"
           data-testid="testimonial-quote"
         >
           {quoteText}
@@ -47,7 +55,7 @@ const TestimonialCard = ({ testimonial }: Props) => {
             </span>
 
             <span
-              className="testimonial-card__title d-block"
+              className="testimonial-card__title"
               data-testid="testimonial-title"
             >
               {attributionTitle}
