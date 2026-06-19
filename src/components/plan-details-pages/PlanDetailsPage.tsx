@@ -21,6 +21,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
 import { useFormValidationConstraints, useRecaptchaToken } from '@/components/app/data';
+import { ENTERPRISE_SPONSOR_CHECKOUT_REGISTRATION_SOURCE } from '@/components/app/data/constants';
 import {
   useCreateCheckoutIntentMutation,
   useLoginMutation,
@@ -310,6 +311,7 @@ const PlanDetailsPage = () => {
         username: data.username,
         password: data.password,
         country: data.country,
+        registrationSource: ENTERPRISE_SPONSOR_CHECKOUT_REGISTRATION_SOURCE,
       };
 
       if (recaptchaToken) {
