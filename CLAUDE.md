@@ -20,12 +20,10 @@ frontend-app-enterprise-checkout is a React-based micro-frontend within the Open
 ## Key Principles
 
 - Search the codebase before assuming something isn't implemented
-- Write comprehensive tests with clear documentation
-- Follow Test-Driven Development when refactoring or modifying existing functionality
-- Always write tests for new functionality you implement
-- Keep changes focused and minimal
+- Write comprehensive tests for new components
 - Follow existing code patterns and component structure
-- Use Paragon components from `@openedx/paragon` - invoke the `/paragon` skill for guidance
+- Use Paragon components from `@openedx/paragon` - invoke `/paragon` for guidance
+- Keep changes focused and minimal
 
 ## Documentation & Institutional Memory
 
@@ -34,7 +32,6 @@ frontend-app-enterprise-checkout is a React-based micro-frontend within the Open
   patterns, integration quirks), capture it in the appropriate docs
 - These docs are institutional memory - future sessions (yours or others) will benefit
   from what you record here
-- Architecture decisions are documented in `docs/decisions/` using ADR format
 
 ## Architecture Overview
 
@@ -137,10 +134,7 @@ All forms use react-hook-form with zod validation schemas:
 ## Testing Notes
 
 - Uses Jest and React Testing Library
-- Test files co-located with components (`Component.test.tsx`)
-- Factory functions for test data using rosie (in `__factories__/` directories)
-- Coverage reporting enabled by default
-- Snapshot testing available with `npm run snapshot`
+- Test files co-located with components (`Component.test.jsx`)
 
 ## Important Patterns
 
@@ -160,3 +154,11 @@ All forms use react-hook-form with zod validation schemas:
 - Always import from a feature's public interface (index.ts), never reach into subdirectories
 - Keep circular dependencies in check by following ADR-002 import rules
 - Configure modules from their parent (dependency injection pattern)
+
+## Before opening a PR or pushing a branch
+
+Run a self-check on the diff before creating a PR or pushing:
+1. Compute effective LoC — exclude lockfiles, generated files, snapshots, and vendor code.
+2. Count effective touched files — exclude the above plus one-to-one test pairs.
+3. If effective LoC > 400 or effective files > 10, stop and propose a split before proceeding.
+4. Report the result inline before continuing.

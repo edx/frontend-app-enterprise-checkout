@@ -1,7 +1,8 @@
 import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
-import dayjs from 'dayjs';
+
+import dayjs from './dayjs';
 
 /**
  * Given an error, returns the status code from the custom attributes (Axios error)
