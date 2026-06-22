@@ -56,71 +56,52 @@ main {
 }
 
 /* =============================
-   ✅ TESTIMONIAL CARD STYLES
+   TESTIMONIAL CARD
    ============================= */
 
 .testimonial-card {
-  background: #ffffff;
   border: 2px solid #bfc9ca;
   border-radius: 16px;
 }
 
-.testimonial-card__body {
-  padding: 24px 24px 32px;
-}
-
-/* ✅ Quote icon */
 .testimonial-card__quote-icon {
   display: flex;
-  gap: 6px;
   line-height: 1;
   color: #A45542;
 }
 
 .testimonial-card__quote-glyph {
-  font-size: 3.5rem;
+  font-size: 72px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 0.75;
 }
 
-/* ✅ Quote text */
 .testimonial-card__quote {
   color: #163b3f;
-  font-size: 1.0625rem;
+  font-size: 17px;
   line-height: 1.55;
-  margin-bottom: 0;
 }
 
-/* ✅ Attribution container */
 .testimonial-card__attribution {
   display: flex;
   align-items: flex-start;
 }
 
-/* ❌ REMOVE BLACK DASH (IMPORTANT) */
-.testimonial-card__attribution-dash {
-  display: none !important;   // 🔥 hides old black dash completely
-}
-
-/* ✅ Name + Title block */
 .testimonial-card__attribution-copy {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-/* ✅ NAME */
 .testimonial-card__name {
   position: relative;
   color: #A45542;
-  font-size: 0.95rem;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.2;
-
-  padding-left: 20px;  // space for dash
+  padding-left: 20px;
 }
 
-/* ✅ ONLY DASH (CORRECT ONE) */
 .testimonial-card__name::before {
   content: "";
   position: absolute;
@@ -128,16 +109,14 @@ main {
   top: 50%;
   transform: translateY(-50%);
 
-  width: 14px;            // ✅ line style dash (matches design)
+  width: 14px;
   height: 2px;
   background-color: #A45542;
   border-radius: 2px;
 }
 
-/* ✅ Title */
 .testimonial-card__title {
   color: #7a7a7a;
-  font-size: 0.8125rem;
+  font-size: 13px;
   line-height: 1.45;
-  margin-top: 2px;
 }

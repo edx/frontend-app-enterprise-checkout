@@ -24,23 +24,40 @@ const TestimonialCard = ({ testimonial }: Props) => {
   } = testimonial;
 
   return (
-    <div className="testimonial-card mt-4" data-testid="testimonial-card">
-      <div className="testimonial-card__body">
-        <div className="testimonial-card__quote-icon" aria-hidden="true">
-          <span className="testimonial-card__quote-glyph">&#10077;</span>
+    <div
+      className="testimonial-card bg-white w-100 mt-4"
+      data-testid="testimonial-card"
+    >
+      <div className="p-4">
+        <div
+          className="testimonial-card__quote-icon mb-3"
+          aria-hidden="true"
+        >
+          <span className="testimonial-card__quote-glyph">
+            ❝
+          </span>
         </div>
 
-        <p className="testimonial-card__quote mt-4" data-testid="testimonial-quote">
+        <p
+          className="testimonial-card__quote mb-0"
+          data-testid="testimonial-quote"
+        >
           {quoteText}
         </p>
 
         <div className="testimonial-card__attribution mt-5">
-          <span className="testimonial-card__attribution-dash" aria-hidden="true">&#8212;</span>
           <div className="testimonial-card__attribution-copy">
-            <span className="testimonial-card__name" data-testid="testimonial-name">
+            <span
+              className="testimonial-card__name"
+              data-testid="testimonial-name"
+            >
               {attributionName}
             </span>
-            <span className="testimonial-card__title d-block" data-testid="testimonial-title">
+
+            <span
+              className="testimonial-card__title"
+              data-testid="testimonial-title"
+            >
               {attributionTitle}
             </span>
           </div>
