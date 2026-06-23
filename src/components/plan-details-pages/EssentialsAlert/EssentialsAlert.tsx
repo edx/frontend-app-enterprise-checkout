@@ -30,24 +30,24 @@ const EssentialsAlert = () => {
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
   );
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-
-  const { data: sspProducts = [], isLoading } = useSspProducts();
-
-  const selectedAcademyName = academySelectionData?.academyName?.toString().trim() || '';
-
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
 
   const productKeyParam = searchParams.get('product_key') || DEFAULT_PRODUCT_KEY;
 
-  let matchedProduct = sspProducts.find((p) => (p.lookup_key || '') === productKeyParam || (p.slug || '') === productKeyParam);
+  const { data: sspProducts = [], isLoading } = useSspProducts(productKeyParam);
+
+  const selectedAcademyName = academySelectionData?.academyName?.toString().trim() || '';
+
+  let matchedProduct = sspProducts.find((p) => (p.lookupKey || '') === productKeyParam || (p.slug || '') === productKeyParam);
 
   if (!matchedProduct && sspProducts.length > 0) {
     matchedProduct = sspProducts.find((p) => {
-      const lk = (p.lookup_key || '').toLowerCase();
+      const lk = (p.lookupKey || '').toLowerCase();
       const slug = (p.slug || '').toLowerCase();
-      const name = (p.name || p.long_name || '').toLowerCase();
+      const name = (p.name || p.longName || '').toLowerCase(); // longName instead of long_name
       const selected = selectedAcademyName.toLowerCase();
+
       return lk.startsWith('essentials_') || slug.includes('essentials') || (selected && name.includes(selected));
     }) || sspProducts[0];
   }
@@ -55,14 +55,14 @@ const EssentialsAlert = () => {
   const productPrice = matchedProduct?.price ? Number.parseFloat(matchedProduct.price) : undefined;
   const displayPrice = productPrice ?? ESSENTIALS_PRICE_FALLBACK;
 
-  const academyName = matchedProduct?.long_name || matchedProduct?.name || selectedAcademyName || 'Academy';
+  const academyName = matchedProduct?.longName || matchedProduct?.name || selectedAcademyName || 'Academy';
   const academyDescription = matchedProduct?.description || '';
-  const academyMarketingUrl = matchedProduct?.marketing_url ?? '';
-  const courseCount = (matchedProduct as any)?.course_count ?? 0;
+  const academyMarketingUrl = matchedProduct?.marketingUrl ?? ''; // marketingUrl instead of marketing_url
+  const courseCount = matchedProduct?.courseCount ?? 0;
 
   useEffect(() => {
     if (!matchedProduct) { return; }
-    const nameToStore = (matchedProduct.long_name || matchedProduct.name || '').toString();
+    const nameToStore = (matchedProduct.longName || matchedProduct.name || '').toString();
     const productPriceStr = matchedProduct?.price;
     const priceToStore = productPriceStr
       ? Number.parseFloat(productPriceStr)
@@ -73,7 +73,7 @@ const EssentialsAlert = () => {
       const selectionPayload = { academyName: nameToStore, academyPrice: priceToStore };
       setFormData(DataStoreKey.AcademySelection, selectionPayload);
     }
-  }, [matchedProduct, setFormData, academySelectionData]);
+  }, [matchedProduct, setFormData, academySelectionData?.academyName, academySelectionData?.academyPrice]);
 
   if (isLoading) {
     return (

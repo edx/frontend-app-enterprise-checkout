@@ -1,43 +1,18 @@
-import { getConfig } from '@edx/frontend-platform/config';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
-export type SspProduct = {
-  name?: string;
-  long_name?: string;
-  description?: string;
-  marketing_url?: string | null;
-  thumbnail_url?: string | null;
-  price?: string | null;
-  lookup_key?: string | null;
-  slug?: string | null;
-  course_count?: number | null;
+import { querySspProducts } from '@/components/app/data/queries/queries';
+
+import type { SspProduct } from '@/components/app/data/services/ssp-products';
+
+const useSspProducts = (productKey: string): UseQueryResult<SspProduct[], Error> => {
+  const queryInfo = querySspProducts(productKey);
+
+  return useQuery({
+    ...queryInfo,
+    select: (response) => response.data || [],
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
 };
-
-export const fetchSspProducts = async (): Promise<SspProduct[]> => {
-  const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  if (!ENTERPRISE_ACCESS_BASE_URL) {
-    return [];
-  }
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/ssp-products/`;
-
-  try {
-    const { data } = await axios.get(url);
-
-    if (!Array.isArray(data)) {
-      return [];
-    }
-
-    return data as SspProduct[];
-  } catch {
-    return [];
-  }
-};
-
-const useSspProducts = () => useQuery({
-  queryKey: ['ssp-products'],
-  queryFn: fetchSspProducts,
-  staleTime: 5 * 60 * 1000,
-});
 
 export default useSspProducts;
