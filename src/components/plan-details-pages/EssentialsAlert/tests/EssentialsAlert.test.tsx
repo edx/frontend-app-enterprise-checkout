@@ -348,4 +348,78 @@ describe('EssentialsAlert Component', () => {
       expect(screen.queryByText('Essentials Plan')).not.toBeInTheDocument();
     });
   });
+  describe('Heuristic Fallback Matching', () => {
+    it('should fall back to a product whose lookup_key starts with essentials_', () => {
+      const fallbackProducts = [
+        {
+          name: 'Unrelated Product',
+          lookup_key: 'teams_unrelated_plan',
+          slug: 'unrelated-slug',
+          description: 'No match here.',
+        },
+        {
+          name: 'Fallback Essentials Plan',
+          lookup_key: 'essentials_matched_by_lookup',
+          slug: 'some-slug',
+          description: 'This should be matched by lookup key prefix.',
+        },
+      ];
+      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
+
+      renderComponent('/?product_key=non_existent_key');
+
+      expect(screen.getByRole('heading', { level: 4, name: 'Fallback Essentials Plan' })).toBeInTheDocument();
+      expect(screen.getByText('This should be matched by lookup key prefix.')).toBeInTheDocument();
+    });
+
+    it('should fall back to a product whose slug contains essentials', () => {
+      const fallbackProducts = [
+        {
+          name: 'Unrelated Product',
+          lookup_key: 'teams_unrelated_plan',
+          slug: 'unrelated-slug',
+          description: 'No match here.',
+        },
+        {
+          name: 'Fallback Slug Plan',
+          lookup_key: 'random_key',
+          slug: 'matched-essentials-academy',
+          description: 'This should be matched by slug substring.',
+        },
+      ];
+      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
+
+      renderComponent('/?product_key=non_existent_key');
+
+      expect(screen.getByRole('heading', { level: 4, name: 'Fallback Slug Plan' })).toBeInTheDocument();
+      expect(screen.getByText('This should be matched by slug substring.')).toBeInTheDocument();
+    });
+
+    it('should fall back to a product whose name matches the selected academy name', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            academyName: 'Sustainability',
+          },
+        },
+      }));
+
+      const fallbackProducts = [
+        {
+          name: 'Sustainability Focus',
+          lookup_key: 'random_key',
+          slug: 'random-slug',
+          description: 'This should be matched by name alignment.',
+        },
+      ];
+      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
+
+      renderComponent('/?product_key=non_existent_key');
+
+      expect(screen.getByRole('heading', { level: 4, name: 'Sustainability Focus' })).toBeInTheDocument();
+      expect(screen.getByText('This should be matched by name alignment.')).toBeInTheDocument();
+    });
+  });
 });
