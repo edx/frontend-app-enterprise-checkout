@@ -11,11 +11,15 @@ export type SspProduct = {
   price?: string | null;
   lookup_key?: string | null;
   slug?: string | null;
+  course_count?: number | null;
 };
 
 export const fetchSspProducts = async (): Promise<SspProduct[]> => {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/ssp-products`;
+   if (!ENTERPRISE_ACCESS_BASE_URL) {
+     return [];
+   }
+  const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/ssp-products/`;
 
   try {
     const { data } = await axios.get(url);

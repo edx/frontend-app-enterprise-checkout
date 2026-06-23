@@ -43,8 +43,7 @@ const EssentialsAlert = () => {
 
   const { data: sspProducts = [], isLoading } = useSspProducts();
 
-  const bffPrice = pricePerYear ?? ESSENTIALS_PRICE_FALLBACK;
-  const selectedAcademyName = academySelectionData?.academyName?.trim() || '';
+  const selectedAcademyName = academySelectionData?.academyName?.toString().trim() || '';
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -64,7 +63,7 @@ const EssentialsAlert = () => {
   }
 
   const productPrice = matchedProduct?.price ? Number.parseFloat(matchedProduct.price) : undefined;
-  const displayPrice = productPrice ?? bffPrice ?? ESSENTIALS_PRICE_FALLBACK;
+  const displayPrice = productPrice ?? ESSENTIALS_PRICE_FALLBACK;
 
   const academyName = matchedProduct?.long_name || matchedProduct?.name || selectedAcademyName || 'Academy';
   const academyDescription = matchedProduct?.description || '';
@@ -77,14 +76,14 @@ const EssentialsAlert = () => {
     const productPriceStr = matchedProduct?.price;
     const priceToStore = productPriceStr
       ? Number.parseFloat(productPriceStr)
-      : (bffPrice ?? ESSENTIALS_PRICE_FALLBACK);
+      : ESSENTIALS_PRICE_FALLBACK;
     const current = academySelectionData?.academyName ?? '';
-    const currentPrice = (academySelectionData as any)?.academyPrice ?? null;
+    const currentPrice = academySelectionData?.academyPrice ?? null;
     if (nameToStore && (current !== nameToStore || currentPrice !== priceToStore)) {
       const selectionPayload = { academyName: nameToStore, academyPrice: priceToStore };
       setFormData(DataStoreKey.AcademySelection, selectionPayload);
     }
-  }, [matchedProduct, setFormData, academySelectionData, bffPrice]);
+  }, [matchedProduct, setFormData, academySelectionData]);
 
   if (isLoading) {
     return (

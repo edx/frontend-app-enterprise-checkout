@@ -36,7 +36,7 @@ const EssentialsPurchaseSummary = () => {
   const academyName = rawAcademyName?.toString().trim() || null;
 
   // Prefer academy-specific price when available (stored by EssentialsAlert), otherwise use fallback
-  const academyPriceStored = (academySelectionData as any)?.academyPrice;
+  const academyPriceStored = academySelectionData?.academyPrice;
   const pricePerUser = typeof academyPriceStored === 'number' && !Number.isNaN(academyPriceStored)
     ? academyPriceStored
     : ESSENTIALS_PRICE_PER_USER;
