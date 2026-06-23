@@ -12,6 +12,7 @@ const ESSENTIALS_PRICE_PER_USER = 149;
 
 type AcademySelectionData = {
   academyName?: string;
+  academyPrice?: number;
 };
 
 type PlanDetailsWithAcademy = {
@@ -31,12 +32,19 @@ const EssentialsPurchaseSummary = () => {
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
   );
 
-  const academyName = academySelectionData?.academyName ?? null;
+  const rawAcademyName = academySelectionData?.academyName ?? null;
+  const academyName = rawAcademyName?.toString().trim() || null;
+
+  // Prefer academy-specific price when available (stored by EssentialsAlert), otherwise use fallback
+  const academyPriceStored = (academySelectionData as any)?.academyPrice;
+  const pricePerUser = typeof academyPriceStored === 'number' && !Number.isNaN(academyPriceStored)
+    ? academyPriceStored
+    : ESSENTIALS_PRICE_PER_USER;
 
   const normalizedQuantity = quantity && Number(quantity) > 0 ? Number(quantity) : null;
 
   const totalPerYear = normalizedQuantity && normalizedQuantity > 0
-    ? normalizedQuantity * ESSENTIALS_PRICE_PER_USER
+    ? normalizedQuantity * pricePerUser
     : null;
 
   const isSuccessPage = currentSubstepKey === CheckoutSubstepKey.Success;
@@ -46,7 +54,7 @@ const EssentialsPurchaseSummary = () => {
       <PurchaseSummaryBase
         headerName={academyName}
         isEssentials
-        pricePerUser={ESSENTIALS_PRICE_PER_USER}
+        pricePerUser={pricePerUser}
         priceLabel="Essentials subscription, price per user, paid yearly."
         quantity={normalizedQuantity}
         totalPerYear={totalPerYear}

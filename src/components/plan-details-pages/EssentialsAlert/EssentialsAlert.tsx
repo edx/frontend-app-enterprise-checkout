@@ -2,53 +2,25 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext, type AppContextValue } from '@edx/frontend-platform/react';
 import {
-  Alert, Button, Card,
+  Alert, Button, Card, Spinner,
 } from '@openedx/paragon';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import useSspProducts from '@/components/app/data/hooks/useSspProducts';
 import { DisplayPrice } from '@/components/DisplayPrice';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import './essentials-alert.scss';
 
-// Constants for URLs and default values
-const ESSENTIALS_PRICE_FALLBACK = 149; // Default price in dollars when API is unavailable
-
-interface AcademyData {
-  id?: string;
-  name: string;
-  description: string;
-  tags: string[];
-  courseCount: number;
-  marketingUrl: string;
-}
-
-/**
-* Default academy data for Essentials plan.
-* TODO: Replace with dynamic data from API endpoint when available:
-* GET {ENTERPRISE_ACCESS_BASE_URL}/api/v1/bffs/academies/{academyId}/
-*
-* API response fields needed:
-* - id: Academy identifier
-* - name: Academy name
-* - description: Marketing summary
-* - tags: Skill tags array
-* - courseCount: Number of courses in catalog
-* - marketingUrl: Dynamic URL for "Learn more" link
-*/
-const DEFAULT_ACADEMY_DATA: AcademyData = {
-  id: 'artificial-intelligence',
-  name: 'Artificial Intelligence',
-  description: 'This pathway helps your team build a strong foundation in AI, and equips them to skillfully incorporate AI into existing organizational strategies.',
-  tags: ['AI foundations', 'Intermediate AI', 'Advanced AI', 'AI for business'],
-  courseCount: 16,
-  marketingUrl: 'https://www.edx.org/learn/artificial-intelligence',
-};
+const ESSENTIALS_PRICE_FALLBACK = 149;
+const DEFAULT_PRODUCT_KEY = 'essentials_artificial_intelligence_subscription_license_yearly';
 
 type AcademySelectionData = {
   academyName?: string;
+  academyPrice?: number;
 };
 
 const EssentialsAlert = () => {
@@ -60,9 +32,8 @@ const EssentialsAlert = () => {
   const academySelectionData = useCheckoutFormStore(
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
   );
+  const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
-  // Fetch pricing from BFF context
-  // For Essentials flow, always use $149 per user
   const { data: pricePerYear } = useBFFContext(
     authenticatedUser?.userId ?? null,
     {
@@ -70,13 +41,66 @@ const EssentialsAlert = () => {
     },
   );
 
-  // Ensure fallback price displays when API is unavailable (data is undefined during loading/error)
-  const displayPrice = pricePerYear ?? ESSENTIALS_PRICE_FALLBACK;
-  const academyName = academySelectionData?.academyName?.trim() || DEFAULT_ACADEMY_DATA.name;
+  const { data: sspProducts = [], isLoading } = useSspProducts();
+
+  const bffPrice = pricePerYear ?? ESSENTIALS_PRICE_FALLBACK;
+  const selectedAcademyName = academySelectionData?.academyName?.trim() || '';
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  const productKeyParam = searchParams.get('product_key') || DEFAULT_PRODUCT_KEY;
+
+  let matchedProduct = sspProducts.find((p) => (p.lookup_key || '') === productKeyParam || (p.slug || '') === productKeyParam);
+
+  if (!matchedProduct && sspProducts.length > 0) {
+    matchedProduct = sspProducts.find((p) => {
+      const lk = (p.lookup_key || '').toLowerCase();
+      const slug = (p.slug || '').toLowerCase();
+      const name = (p.name || p.long_name || '').toLowerCase();
+      const selected = selectedAcademyName.toLowerCase();
+      return lk.startsWith('essentials_') || slug.includes('essentials') || (selected && name.includes(selected));
+    }) || sspProducts[0];
+  }
+
+  const productPrice = matchedProduct?.price ? Number.parseFloat(matchedProduct.price) : undefined;
+  const displayPrice = productPrice ?? bffPrice ?? ESSENTIALS_PRICE_FALLBACK;
+
+  const academyName = matchedProduct?.long_name || matchedProduct?.name || selectedAcademyName || 'Academy';
+  const academyDescription = matchedProduct?.description || '';
+  const academyMarketingUrl = matchedProduct?.marketing_url ?? '';
+  const courseCount = (matchedProduct as any)?.course_count ?? 0;
+
+  useEffect(() => {
+    if (!matchedProduct) { return; }
+    const nameToStore = (matchedProduct.long_name || matchedProduct.name || '').toString();
+    const productPriceStr = matchedProduct?.price;
+    const priceToStore = productPriceStr
+      ? Number.parseFloat(productPriceStr)
+      : (bffPrice ?? ESSENTIALS_PRICE_FALLBACK);
+    const current = academySelectionData?.academyName ?? '';
+    const currentPrice = (academySelectionData as any)?.academyPrice ?? null;
+    if (nameToStore && (current !== nameToStore || currentPrice !== priceToStore)) {
+      const selectionPayload = { academyName: nameToStore, academyPrice: priceToStore };
+      setFormData(DataStoreKey.AcademySelection, selectionPayload);
+    }
+  }, [matchedProduct, setFormData, academySelectionData, bffPrice]);
+
+  if (isLoading) {
+    return (
+      <Alert variant="info" className="d-flex align-items-center justify-content-center p-4 m-0 bg-transparent text-white border-0">
+        <Spinner animation="border" variant="light" className="mr-3" screenReaderText="Loading plan details..." />
+        <FormattedMessage
+          id="checkout.essentialsAlert.loading"
+          defaultMessage="Loading plan details..."
+          description="Loading text shown while fetching public API plan configurations"
+        />
+      </Alert>
+    );
+  }
 
   return (
     <Alert data-testid="essentials-alert" className="essentials-alert m-0 text-white p-0">
-      {/* Top row: Title and Price */}
       <div className="essentials-alert__header d-flex justify-content-between align-items-center pt-4 px-4">
         <h3 className="essentials-alert__title font-weight-bold m-0 text-white">
           <FormattedMessage
@@ -108,7 +132,6 @@ const EssentialsAlert = () => {
         )}
       </div>
 
-      {/* Middle section: Description, link, and card */}
       <div className="essentials-alert__body pt-0 px-4 pb-4">
         <p className="h4 essentials-alert__subtitle font-weight-normal m-0 text-white my-3">
           <FormattedMessage
@@ -134,52 +157,44 @@ const EssentialsAlert = () => {
           />
         </p>
 
-        {/* Academy Details Card - Full width */}
         <Card className="essentials-alert__card bg-white border-0 m-0 w-100">
           <Card.Body>
-            {/* Academy Name and Course Count */}
             <div className="essentials-alert__academy-header d-flex align-items-center flex-wrap">
               <h4 className="essentials-alert__academy-name m-0 font-weight-bold">{academyName}</h4>
-              <span className="essentials-alert__course-badge">
-                <FormattedMessage
-                  id="checkout.essentialsAlert.courseCount"
-                  defaultMessage="{count} courses"
-                  description="Number of courses in academy"
-                  values={{ count: DEFAULT_ACADEMY_DATA.courseCount }}
-                />
-              </span>
-              <Button
-                variant="link"
-                href={DEFAULT_ACADEMY_DATA.marketingUrl}
-                className="essentials-alert__learn-more ml-auto font-weight-bold"
-              >
-                <FormattedMessage
-                  id="checkout.essentialsAlert.learnMore"
-                  defaultMessage="Learn more"
-                  description="Link to learn more about the academy"
-                />
-              </Button>
-            </div>
-
-            {/* Tags */}
-            <div className="essentials-alert__tags mb-3">
-              {DEFAULT_ACADEMY_DATA.tags.map((tag, index) => (
-                <span key={tag} className="essentials-alert__tag d-inline">
-                  {tag}
-                  {index < DEFAULT_ACADEMY_DATA.tags.length - 1 && ' • '}
+              {courseCount > 0 && (
+                <span className="essentials-alert__course-badge">
+                  <FormattedMessage
+                    id="checkout.essentialsAlert.courseCount"
+                    defaultMessage="{count} courses"
+                    description="Number of courses in academy"
+                    values={{ count: courseCount }}
+                  />
                 </span>
-              ))}
+              )}
+              {academyMarketingUrl && (
+                <Button
+                  variant="link"
+                  href={academyMarketingUrl}
+                  className="essentials-alert__learn-more ml-auto font-weight-bold"
+                >
+                  <FormattedMessage
+                    id="checkout.essentialsAlert.learnMore"
+                    defaultMessage="Learn more"
+                    description="Link to learn more about the academy"
+                  />
+                </Button>
+              )}
             </div>
 
-            {/* Description */}
-            <p className="essentials-alert__description m-0 font-weight-normal">
-              {DEFAULT_ACADEMY_DATA.description}
-            </p>
+            {academyDescription && (
+              <p className="essentials-alert__description m-0 font-weight-normal pt-3">
+                {academyDescription}
+              </p>
+            )}
           </Card.Body>
         </Card>
       </div>
 
-      {/* Footer Upsell - Darker red section */}
       <div className="essentials-alert__footer-section m-0 p-4">
         <p className="essentials-alert__footer m-0 p-0 bg-transparent border-0 text-white font-weight-normal">
           <FormattedMessage

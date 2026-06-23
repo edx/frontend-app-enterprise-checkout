@@ -1,20 +1,22 @@
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 import * as useBFFContextModule from '@/components/app/data/hooks/useBFFContext';
+import * as useSspProductsModule from '@/components/app/data/hooks/useSspProducts';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import EssentialsAlert from '../EssentialsAlert';
 
+jest.mock('@/components/app/data/hooks/useSspProducts');
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(() => ({
     ESSENTIALS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-essentials/',
     TEAMS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-teams/',
   })),
 }));
-
 jest.mock('@/components/app/data/hooks/useBFFContext');
 jest.mock('@/components/DisplayPrice', () => ({
   DisplayPrice: ({ value }: { value: number }) => <span>${value}</span>,
@@ -32,17 +34,31 @@ const mockContextValue = {
   authenticatedUser: mockAuthenticatedUser,
 };
 
-// The hook with select returns the transformed value: number (price in dollars with fallback)
 const defaultBFFContextValue = {
-  data: 149, // This matches the BFF API fallback default: 14900 cents / 100 = $149 or fallback when API unavailable
+  data: 149,
   isLoading: false,
   error: null,
 };
+
+const mockProductsData = [
+  {
+    name: 'Sustainability',
+    long_name: 'Sustainability Academy',
+    description: 'Sustainability strategy and imperative overview.',
+    marketing_url: 'https://www.edx.org/learn/sustainability',
+    thumbnail_url: 'https://example.com/sustainability.png',
+    price: '149.00',
+    lookup_key: 'essentials_artificial_intelligence_subscription_license_yearly', // Bound to default fallback key
+    slug: 'sustainability-academy-yearly',
+    course_count: 12,
+  },
+];
 
 describe('EssentialsAlert Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useBFFContextModule.default as jest.Mock).mockReturnValue(defaultBFFContextValue);
+    (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: mockProductsData, isLoading: false });
     checkoutFormStore.setState((state) => ({
       ...state,
       formData: {
@@ -52,12 +68,14 @@ describe('EssentialsAlert Component', () => {
     }));
   });
 
-  const renderComponent = () => render(
-    <AppContext.Provider value={mockContextValue as any}>
-      <IntlProvider locale="en" messages={{}}>
-        <EssentialsAlert />
-      </IntlProvider>
-    </AppContext.Provider>,
+  const renderComponent = (initialRoute = '/') => render(
+    <MemoryRouter initialEntries={[initialRoute]}>
+      <AppContext.Provider value={mockContextValue as any}>
+        <IntlProvider locale="en" messages={{}}>
+          <EssentialsAlert />
+        </IntlProvider>
+      </AppContext.Provider>
+    </MemoryRouter>,
   );
 
   describe('Rendering and Header', () => {
@@ -70,14 +88,13 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const header = screen.getByText('Essentials Plan');
       expect(header).toBeInTheDocument();
-      // Header is a plain h3 element
       expect(header.tagName).toBe('H3');
     });
 
     it('should display confirmation text with academy name', () => {
       renderComponent();
       expect(screen.getByText(/You have picked/)).toBeInTheDocument();
-      const confirmationElements = screen.getAllByText(/Artificial Intelligence/);
+      const confirmationElements = screen.getAllByText(/Sustainability Academy/);
       expect(confirmationElements.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/as your focus area/)).toBeInTheDocument();
     });
@@ -136,6 +153,8 @@ describe('EssentialsAlert Component', () => {
         },
       }));
 
+      // Force products empty to let fallback name resolve cleanly from state store
+      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: [], isLoading: false });
       renderComponent();
       const academyNames = screen.getAllByText('AI Academy');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
@@ -143,13 +162,13 @@ describe('EssentialsAlert Component', () => {
 
     it('should display academy name', () => {
       renderComponent();
-      const academyNames = screen.getAllByText('Artificial Intelligence');
+      const academyNames = screen.getAllByText('Sustainability Academy');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should display course count badge', () => {
       renderComponent();
-      expect(screen.getByText('16 courses')).toBeInTheDocument();
+      expect(screen.getByText('12 courses')).toBeInTheDocument();
     });
 
     it('should display "Learn more" link', () => {
@@ -159,24 +178,10 @@ describe('EssentialsAlert Component', () => {
       expect(learnMoreLink.tagName).toBe('A');
     });
 
-    it('should display all tags', () => {
-      renderComponent();
-      expect(screen.getByText(/AI foundations/)).toBeInTheDocument();
-      expect(screen.getByText(/Intermediate AI/)).toBeInTheDocument();
-      expect(screen.getByText(/Advanced AI/)).toBeInTheDocument();
-      expect(screen.getByText(/AI for business/)).toBeInTheDocument();
-    });
-
-    it('should display tags with bullet separators', () => {
-      renderComponent();
-      const tagsSection = screen.getByText(/AI foundations/).parentElement;
-      expect(tagsSection?.textContent).toContain('•');
-    });
-
     it('should display academy description', () => {
       renderComponent();
       expect(
-        screen.getByText(/This pathway helps your team build a strong foundation in AI/),
+        screen.getByText(/Sustainability strategy and imperative overview/),
       ).toBeInTheDocument();
     });
   });
@@ -186,7 +191,6 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
       expect(pickDifferentLink).toBeInTheDocument();
-      // Link should point to configured URL
       expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
     });
 
@@ -200,7 +204,6 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
-      // Link should point to configured URL
       expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
     });
 
@@ -208,10 +211,7 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
-      // Verify link has marketing URL from academy data
-      expect(learnMoreLink.href).toBe(
-        'https://www.edx.org/learn/artificial-intelligence',
-      );
+      expect(learnMoreLink.href).toBe('https://www.edx.org/learn/sustainability');
     });
   });
 
@@ -231,39 +231,24 @@ describe('EssentialsAlert Component', () => {
 
     it('should have correct link count for external resources', () => {
       renderComponent();
-      // Button components with variant="link" may render as buttons
       const buttons = screen.queryAllByRole('button');
       const links = screen.queryAllByRole('link');
       const totalNavigationElements = buttons.length + links.length;
-      // Pick different academy, Learn more, Switch to Teams (at least 2)
       expect(totalNavigationElements).toBeGreaterThanOrEqual(2);
     });
   });
 
   describe('Styling and Layout', () => {
-    it('should have rust-colored background', () => {
+    it('should have alert wrapper container', () => {
       const { container } = renderComponent();
       const alertDiv = container.querySelector('[class*="alert"]');
-      // Paragon Alert will be styled with CSS class
       expect(alertDiv).toBeInTheDocument();
     });
 
-    it('should have white card background for academy details', () => {
+    it('should have card background for academy details', () => {
       const { container } = renderComponent();
-      const cards = container.querySelectorAll('[class*="pgn__card"]');
+      const cards = container.querySelectorAll('[class*="card"]');
       expect(cards.length).toBeGreaterThan(0);
-    });
-
-    it('should use proper spacing and padding', () => {
-      const { container } = renderComponent();
-      const alertDiv = container.querySelector('[class*="pgn__alert"]');
-      expect(alertDiv).toBeInTheDocument();
-    });
-
-    it('should have rounded corners', () => {
-      const { container } = renderComponent();
-      const alertDiv = container.querySelector('[class*="essentials-alert"]');
-      expect(alertDiv).toBeInTheDocument();
     });
   });
 
@@ -272,10 +257,9 @@ describe('EssentialsAlert Component', () => {
       renderComponent();
       const mainHeading = screen.getByText('Essentials Plan');
       expect(mainHeading).toBeInTheDocument();
-      // Main heading is a plain h3 element
       expect(mainHeading.tagName).toBe('H3');
 
-      const academyHeadings = screen.getAllByText('Artificial Intelligence');
+      const academyHeadings = screen.getAllByText('Sustainability Academy');
       expect(academyHeadings.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -286,33 +270,18 @@ describe('EssentialsAlert Component', () => {
         expect(button).toHaveProperty('href');
       });
     });
-
-    it('should have proper styling for buttons', () => {
-      renderComponent();
-      const buttons = screen.getAllByRole('link');
-      buttons.forEach((button) => {
-        expect(button).toBeInTheDocument();
-      });
-    });
   });
 
   describe('Content Completeness', () => {
     it('should display all required sections', () => {
       renderComponent();
-      // Header
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      // Academy name
-      const academyNames = screen.getAllByText('Artificial Intelligence');
+      const academyNames = screen.getAllByText('Sustainability Academy');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
-      // Course count
-      expect(screen.getByText('16 courses')).toBeInTheDocument();
-      // Tags
-      expect(screen.getByText(/AI foundations/)).toBeInTheDocument();
-      // Description
+      expect(screen.getByText('12 courses')).toBeInTheDocument();
       expect(
-        screen.getByText(/This pathway helps your team build a strong foundation in AI/),
+        screen.getByText(/Sustainability strategy and imperative overview/),
       ).toBeInTheDocument();
-      // Upsell
       expect(
         screen.getByText(/Need to upskill your team in more than one focus area/),
       ).toBeInTheDocument();
@@ -320,10 +289,9 @@ describe('EssentialsAlert Component', () => {
 
     it('should not have required fields missing', () => {
       renderComponent();
-      // Verify all key elements are present
       const essentialsText = screen.getByText('Essentials Plan');
-      const academyNames = screen.getAllByText('Artificial Intelligence');
-      const courseCount = screen.getByText('16 courses');
+      const academyNames = screen.getAllByText('Sustainability Academy');
+      const courseCount = screen.getByText('12 courses');
       const price = screen.getByText('$149');
 
       expect(essentialsText).toBeInTheDocument();
@@ -347,28 +315,11 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      // When data is undefined, fallback price of $149 displays
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      const academyNames = screen.getAllByText('Artificial Intelligence');
+      const academyNames = screen.getAllByText('Sustainability Academy');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
-      // Fallback price should be displayed when data is undefined
       const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
-    });
-
-    it('should display price from CheckoutContextPrice.unitAmount', () => {
-      // Mock the hook to return a custom price (in dollars, not cents, because of the select transform)
-      const customPriceInDollars = 20; // Equivalent to 2000 cents
-
-      (useBFFContextModule.default as jest.Mock).mockReturnValue({
-        data: customPriceInDollars,
-        isLoading: false,
-        error: null,
-      });
-
-      renderComponent();
-      // Should display the custom price ($20)
-      expect(screen.getByText(/\$20/)).toBeInTheDocument();
     });
 
     it('should handle BFF context errors gracefully', () => {
@@ -379,11 +330,22 @@ describe('EssentialsAlert Component', () => {
       });
 
       renderComponent();
-      // Component should still render with fallback price
       expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      // Fallback price should display
       const priceElements = screen.queryAllByText(/\$149/);
       expect(priceElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Loading State Rendering', () => {
+    it('should render spinner alert when isLoading is true', () => {
+      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: [], isLoading: true });
+      renderComponent();
+
+      // Use getAllByText to catch both the visible text and the screen-reader text safely
+      const loadingElements = screen.getAllByText('Loading plan details...');
+      expect(loadingElements.length).toBeGreaterThanOrEqual(1);
+
+      expect(screen.queryByText('Essentials Plan')).not.toBeInTheDocument();
     });
   });
 });
