@@ -1,13 +1,11 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { AppContext, type AppContextValue } from '@edx/frontend-platform/react';
 import {
   Alert, Button, Card, Spinner,
 } from '@openedx/paragon';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import useSspProducts from '@/components/app/data/hooks/useSspProducts';
 import { DisplayPrice } from '@/components/DisplayPrice';
 import { DataStoreKey } from '@/constants/checkout';
@@ -24,7 +22,6 @@ type AcademySelectionData = {
 };
 
 const EssentialsAlert = () => {
-  const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const {
     ESSENTIALS_PRODUCT_URL,
     TEAMS_PRODUCT_URL,
@@ -33,13 +30,6 @@ const EssentialsAlert = () => {
     (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
   );
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
-
-  const { data: pricePerYear } = useBFFContext(
-    authenticatedUser?.userId ?? null,
-    {
-      select: (): number => ESSENTIALS_PRICE_FALLBACK,
-    },
-  );
 
   const { data: sspProducts = [], isLoading } = useSspProducts();
 

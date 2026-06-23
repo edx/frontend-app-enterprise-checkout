@@ -3,7 +3,6 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import * as useBFFContextModule from '@/components/app/data/hooks/useBFFContext';
 import * as useSspProductsModule from '@/components/app/data/hooks/useSspProducts';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -17,7 +16,6 @@ jest.mock('@edx/frontend-platform/config', () => ({
     TEAMS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-teams/',
   })),
 }));
-jest.mock('@/components/app/data/hooks/useBFFContext');
 jest.mock('@/components/DisplayPrice', () => ({
   DisplayPrice: ({ value }: { value: number }) => <span>${value}</span>,
 }));
@@ -34,12 +32,6 @@ const mockContextValue = {
   authenticatedUser: mockAuthenticatedUser,
 };
 
-const defaultBFFContextValue = {
-  data: 149,
-  isLoading: false,
-  error: null,
-};
-
 const mockProductsData = [
   {
     name: 'Sustainability',
@@ -48,7 +40,7 @@ const mockProductsData = [
     marketing_url: 'https://www.edx.org/learn/sustainability',
     thumbnail_url: 'https://example.com/sustainability.png',
     price: '149.00',
-    lookup_key: 'essentials_artificial_intelligence_subscription_license_yearly', // Bound to default fallback key
+    lookup_key: 'essentials_artificial_intelligence_subscription_license_yearly',
     slug: 'sustainability-academy-yearly',
     course_count: 12,
   },
@@ -57,7 +49,6 @@ const mockProductsData = [
 describe('EssentialsAlert Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useBFFContextModule.default as jest.Mock).mockReturnValue(defaultBFFContextValue);
     (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: mockProductsData, isLoading: false });
     checkoutFormStore.setState((state) => ({
       ...state,
@@ -115,30 +106,6 @@ describe('EssentialsAlert Component', () => {
       expect(priceSection?.textContent).toContain('$149');
       expect(priceSection?.textContent).toContain('/yr');
     });
-
-    it('should display fallback price when loading and no price data is available', () => {
-      (useBFFContextModule.default as jest.Mock).mockReturnValue({
-        data: undefined,
-        isLoading: true,
-        error: null,
-      });
-
-      renderComponent();
-      const priceElements = screen.queryAllByText(/\$149/);
-      expect(priceElements.length).toBeGreaterThan(0);
-    });
-
-    it('should display fallback price when the API fails and no price data is available', () => {
-      (useBFFContextModule.default as jest.Mock).mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        error: new Error('Unable to load price'),
-      });
-
-      renderComponent();
-      const priceElements = screen.queryAllByText(/\$149/);
-      expect(priceElements.length).toBeGreaterThan(0);
-    });
   });
 
   describe('Academy Details Card', () => {
@@ -153,7 +120,6 @@ describe('EssentialsAlert Component', () => {
         },
       }));
 
-      // Force products empty to let fallback name resolve cleanly from state store
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: [], isLoading: false });
       renderComponent();
       const academyNames = screen.getAllByText('AI Academy');
@@ -301,53 +267,18 @@ describe('EssentialsAlert Component', () => {
     });
   });
 
-  describe('BFF Context Integration', () => {
-    it('should fetch pricing from BFF context', () => {
-      renderComponent();
-      expect(useBFFContextModule.default).toHaveBeenCalled();
-    });
-
-    it('should use fallback price when BFF data is null', () => {
-      (useBFFContextModule.default as jest.Mock).mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        error: null,
-      });
-
-      renderComponent();
-      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      const academyNames = screen.getAllByText('Sustainability Academy');
-      expect(academyNames.length).toBeGreaterThanOrEqual(1);
-      const priceElements = screen.queryAllByText(/\$149/);
-      expect(priceElements.length).toBeGreaterThan(0);
-    });
-
-    it('should handle BFF context errors gracefully', () => {
-      (useBFFContextModule.default as jest.Mock).mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        error: new Error('BFF Error'),
-      });
-
-      renderComponent();
-      expect(screen.getByText('Essentials Plan')).toBeInTheDocument();
-      const priceElements = screen.queryAllByText(/\$149/);
-      expect(priceElements.length).toBeGreaterThan(0);
-    });
-  });
-
   describe('Loading State Rendering', () => {
     it('should render spinner alert when isLoading is true', () => {
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: [], isLoading: true });
       renderComponent();
 
-      // Use getAllByText to catch both the visible text and the screen-reader text safely
       const loadingElements = screen.getAllByText('Loading plan details...');
       expect(loadingElements.length).toBeGreaterThanOrEqual(1);
 
       expect(screen.queryByText('Essentials Plan')).not.toBeInTheDocument();
     });
   });
+
   describe('Heuristic Fallback Matching', () => {
     it('should fall back to a product whose lookup_key starts with essentials_', () => {
       const fallbackProducts = [
@@ -364,6 +295,7 @@ describe('EssentialsAlert Component', () => {
           description: 'This should be matched by lookup key prefix.',
         },
       ];
+      // FIX: Cast the default export as a jest.Mock
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
 
       renderComponent('/?product_key=non_existent_key');
@@ -387,6 +319,7 @@ describe('EssentialsAlert Component', () => {
           description: 'This should be matched by slug substring.',
         },
       ];
+      // FIX: Cast the default export as a jest.Mock
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
 
       renderComponent('/?product_key=non_existent_key');
@@ -414,6 +347,7 @@ describe('EssentialsAlert Component', () => {
           description: 'This should be matched by name alignment.',
         },
       ];
+      // FIX: Cast the default export as a jest.Mock
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
 
       renderComponent('/?product_key=non_existent_key');

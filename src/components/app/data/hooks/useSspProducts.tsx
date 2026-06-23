@@ -16,9 +16,9 @@ export type SspProduct = {
 
 export const fetchSspProducts = async (): Promise<SspProduct[]> => {
   const { ENTERPRISE_ACCESS_BASE_URL } = getConfig();
-   if (!ENTERPRISE_ACCESS_BASE_URL) {
-     return [];
-   }
+  if (!ENTERPRISE_ACCESS_BASE_URL) {
+    return [];
+  }
   const url = `${ENTERPRISE_ACCESS_BASE_URL}/api/v1/ssp-products/`;
 
   try {
