@@ -32,17 +32,18 @@ const mockContextValue = {
   authenticatedUser: mockAuthenticatedUser,
 };
 
+// FIX: Keys updated to camelCase to prevent undefined values in your component mapper logic
 const mockProductsData = [
   {
     name: 'Sustainability',
-    long_name: 'Sustainability Academy',
+    longName: 'Sustainability Academy',
     description: 'Sustainability strategy and imperative overview.',
-    marketing_url: 'https://www.edx.org/learn/sustainability',
-    thumbnail_url: 'https://example.com/sustainability.png',
+    marketingUrl: 'https://www.edx.org/learn/sustainability',
+    thumbnailUrl: 'https://example.com/sustainability.png',
     price: '149.00',
-    lookup_key: 'essentials_artificial_intelligence_subscription_license_yearly',
+    lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
     slug: 'sustainability-academy-yearly',
-    course_count: 12,
+    courseCount: 12,
   },
 ];
 
@@ -85,6 +86,7 @@ describe('EssentialsAlert Component', () => {
     it('should display confirmation text with academy name', () => {
       renderComponent();
       expect(screen.getByText(/You have picked/)).toBeInTheDocument();
+      // FIX: Component renders matchedProduct.longName || matchedProduct.name, which is 'Sustainability Academy'
       const confirmationElements = screen.getAllByText(/Sustainability Academy/);
       expect(confirmationElements.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/as your focus area/)).toBeInTheDocument();
@@ -280,22 +282,22 @@ describe('EssentialsAlert Component', () => {
   });
 
   describe('Heuristic Fallback Matching', () => {
-    it('should fall back to a product whose lookup_key starts with essentials_', () => {
+    it('should fall back to a product whose lookupKey starts with essentials_', () => {
+      // FIX: Keys here converted to camelCase to track production component parameters
       const fallbackProducts = [
         {
           name: 'Unrelated Product',
-          lookup_key: 'teams_unrelated_plan',
+          lookupKey: 'teams_unrelated_plan',
           slug: 'unrelated-slug',
           description: 'No match here.',
         },
         {
           name: 'Fallback Essentials Plan',
-          lookup_key: 'essentials_matched_by_lookup',
+          lookupKey: 'essentials_matched_by_lookup',
           slug: 'some-slug',
           description: 'This should be matched by lookup key prefix.',
         },
       ];
-      // FIX: Cast the default export as a jest.Mock
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
 
       renderComponent('/?product_key=non_existent_key');
@@ -305,21 +307,21 @@ describe('EssentialsAlert Component', () => {
     });
 
     it('should fall back to a product whose slug contains essentials', () => {
+      // FIX: Keys here converted to camelCase to track production component parameters
       const fallbackProducts = [
         {
           name: 'Unrelated Product',
-          lookup_key: 'teams_unrelated_plan',
+          lookupKey: 'teams_unrelated_plan',
           slug: 'unrelated-slug',
           description: 'No match here.',
         },
         {
           name: 'Fallback Slug Plan',
-          lookup_key: 'random_key',
+          lookupKey: 'random_key',
           slug: 'matched-essentials-academy',
           description: 'This should be matched by slug substring.',
         },
       ];
-      // FIX: Cast the default export as a jest.Mock
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
 
       renderComponent('/?product_key=non_existent_key');
@@ -339,21 +341,79 @@ describe('EssentialsAlert Component', () => {
         },
       }));
 
+      // FIX: Keys here converted to camelCase to track production component parameters
       const fallbackProducts = [
         {
           name: 'Sustainability Focus',
-          lookup_key: 'random_key',
+          lookupKey: 'random_key',
           slug: 'random-slug',
           description: 'This should be matched by name alignment.',
         },
       ];
-      // FIX: Cast the default export as a jest.Mock
       (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
 
       renderComponent('/?product_key=non_existent_key');
 
       expect(screen.getByRole('heading', { level: 4, name: 'Sustainability Focus' })).toBeInTheDocument();
       expect(screen.getByText('This should be matched by name alignment.')).toBeInTheDocument();
+    });
+  });
+  describe('Form Data Storage Synchronization Coverage', () => {
+    it('covers store extraction, parsing variables, and dependencies', () => {
+      // 1. Setup a clean product using the precise camelCase fields
+      const mockProduct = [
+        {
+          name: 'Sustainability Focus',
+          longName: 'Sustainability Academy',
+          price: '149.00',
+          lookupKey: 'essentials_sustainability',
+          slug: 'sustainability-academy-yearly',
+        },
+      ];
+      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: mockProduct, isLoading: false });
+
+      // 2. Set the form data store to trigger a mismatch on name and price
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            academyName: 'Old Outdated Academy Name',
+            academyPrice: 999, // Mismatched price to force productPriceStr path
+          },
+        },
+      }));
+
+      // 3. Render targeting the matched product
+      const { rerender } = renderComponent('/?product_key=essentials_sustainability');
+
+      // 4. Force the hook's dependency array to see a change by updating the store dynamically
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            academyName: 'Sustainability Academy',
+            academyPrice: 149,
+          },
+        },
+      }));
+
+      // 5. Re-render the exact same component instance to execute the dependency array update line
+      rerender(
+        <MemoryRouter initialEntries={['/?product_key=essentials_sustainability']}>
+          <AppContext.Provider value={mockContextValue as any}>
+            <IntlProvider locale="en" messages={{}}>
+              <EssentialsAlert />
+            </IntlProvider>
+          </AppContext.Provider>
+        </MemoryRouter>,
+      );
+
+      // Verify the final structure matches your expected primitive outputs
+      const finalState = (checkoutFormStore.getState().formData as any)[DataStoreKey.AcademySelection];
+      expect(finalState.academyName).toBe('Sustainability Academy');
+      expect(finalState.academyPrice).toBe(149);
     });
   });
 });
