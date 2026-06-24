@@ -11,13 +11,12 @@ import { StripeProvider } from '@/components/StripeProvider';
 import { BillingDetailsSchema, CheckoutStepKey, DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
-const BillingDetails = () => {
-  const checkoutSessionClientSecret = useCheckoutSessionClientSecret();
+const BillingDetailsFallback = () => {
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const StepperContent = useStepperContent();
   const billingDetailsSchema = useMemo(() => (
-    BillingDetailsSchema(formValidationConstraints as CheckoutContextFieldConstraints)
+    BillingDetailsSchema((formValidationConstraints ?? {}) as CheckoutContextFieldConstraints)
   ), [formValidationConstraints]);
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
@@ -25,19 +24,25 @@ const BillingDetails = () => {
     defaultValues: billingDetailsData,
   });
 
-  if (!checkoutSessionClientSecret) {
-    return (
-      <>
-        <Helmet title="Billing Details" />
-        <Stepper.Step eventKey={CheckoutStepKey.BillingDetails} title="Billing Details">
-          <Stack gap={4}>
-            <StepperContent form={form} />
-          </Stack>
-        </Stepper.Step>
-      </>
+  return (
+    <>
+      <Helmet title="Billing Details" />
+      <Stepper.Step eventKey={CheckoutStepKey.BillingDetails} title="Billing Details">
+        <Stack gap={4}>
+          <StepperContent form={form} />
+        </Stack>
+      </Stepper.Step>
+    </>
+  );
+};
 
-    );
+const BillingDetails = () => {
+  const checkoutSessionClientSecret = useCheckoutSessionClientSecret();
+
+  if (!checkoutSessionClientSecret) {
+    return <BillingDetailsFallback />;
   }
+
   return (
     <StripeProvider>
       <BillingDetailsPage />
