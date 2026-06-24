@@ -43,8 +43,8 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
     queryKey: [checkoutIntentId],
     queryFn: () => createBillingPortalSession(checkoutIntentId),
   }),
-  sspProducts: (productKey: string) => ({
-    queryKey: [productKey],
+  sspProducts: () => ({
+    queryKey: ['ssp-products'],
     queryFn: () => fetchSspProducts(),
   }),
 });

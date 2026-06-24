@@ -11,6 +11,11 @@ import {
   PlanDetailsSchema,
 } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import {
+  resolveEssentialsProduct,
+} from '@/utils/resolveEssentialsProduct';
+
+import type { SspProduct } from '@/components/app/data/services/ssp-products';
 
 /**
  * Parameters for populateInitialApplicationState.
@@ -297,9 +302,27 @@ const validateFormState = async ({
   return { valid: true };
 };
 
+const hydrateEssentialsProduct = (
+  allSspProducts: SspProduct[],
+  productKey: string | null,
+): void => {
+  const resolvedProductKey = productKey || '';
+  const selectedProduct = resolveEssentialsProduct(
+    allSspProducts,
+    resolvedProductKey,
+  );
+  if (selectedProduct) {
+    checkoutFormStore.getState().setFormData(
+      DataStoreKey.AcademySelection,
+      { selectedProduct },
+    );
+  }
+};
+
 export {
   determineExistingCheckoutIntentState,
   mapCheckoutIntentStateToSessionStatus,
   populateInitialApplicationState,
   validateFormState,
+  hydrateEssentialsProduct,
 };

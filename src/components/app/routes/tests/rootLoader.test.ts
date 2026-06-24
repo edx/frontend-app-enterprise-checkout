@@ -5,10 +5,22 @@ import { QueryClient } from '@tanstack/react-query';
 
 import { makeRootLoader } from '@/components/app/routes/loaders';
 import * as utilsMod from '@/components/app/routes/loaders/utils';
+import { hydrateEssentialsProduct } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 
 import { getRoutes } from '../../../../routes';
 import { getFeatureForPath } from '../loaders/rootLoader';
+
+jest.mock('@/components/app/data/queries/queries', () => ({
+  querySspProducts: jest.fn(() => ({
+    queryKey: ['ssp-products'],
+    queryFn: jest.fn(),
+  })),
+  queryBffContext: jest.fn((userId: string | null) => ({
+    queryKey: ['bff-context', userId],
+    queryFn: jest.fn(),
+  })),
+}));
 
 // Mock redirect to avoid depending on global Response being present in Jest env
 jest.mock('react-router-dom', () => ({
@@ -41,6 +53,7 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 jest.mock('@/components/app/routes/loaders/utils', () => ({
   determineExistingCheckoutIntentState: jest.fn(),
   populateInitialApplicationState: jest.fn(),
+  hydrateEssentialsProduct: jest.fn(),
 }));
 
 jest.mock('@/utils/checkout', () => ({
@@ -378,6 +391,153 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(sessionStorage.getItem('edx.checkout.self-service-purchasing'))
       .toBe('SSP_SITE_CHECKOUT');
     expect(result).toBeNull();
+  });
+  describe('Essentials product hydration', () => {
+    beforeEach(() => {
+      (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+
+      (getConfig as jest.Mock).mockReturnValue({
+        FEATURE_SELF_SERVICE_PURCHASING: true,
+        FEATURE_SELF_SERVICE_PURCHASING_KEY: null,
+        FEATURE_SELF_SERVICE_ESSENTIALS: true,
+        FEATURE_SELF_SERVICE_ESSENTIALS_KEY: null,
+        FEATURE_SELF_SERVICE_SITE_KEY: null,
+      });
+    });
+
+    it('sets sessionStorage isEssentials to true on essentials path', async () => {
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(EssentialsPageRoute.PlanDetails),
+      } as any);
+
+      expect(sessionStorage.getItem('isEssentials')).toBe('true');
+    });
+
+    it('removes sessionStorage isEssentials on non-essentials path', async () => {
+      sessionStorage.setItem('isEssentials', 'true');
+
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(CheckoutPageRoute.PlanDetails),
+      } as any);
+
+      expect(sessionStorage.getItem('isEssentials')).toBeNull();
+    });
+
+    it('fetches SSP products and hydrates when product_key is present', async () => {
+      const mockProducts = [
+        { slug: 'ai-academy-yearly', name: 'AI', lookupKey: 'essentials_ai_yearly' },
+        { slug: 'data-academy-yearly', name: 'Data', lookupKey: 'essentials_data_yearly' },
+      ];
+
+      ensureSpy.mockResolvedValue({ data: mockProducts });
+
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(
+          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+        ),
+      } as any);
+
+      expect(ensureSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ queryKey: ['ssp-products'] }),
+      );
+      expect(hydrateEssentialsProduct).toHaveBeenCalledWith(
+        mockProducts,
+        'essentials_ai_yearly',
+      );
+      expect(sessionStorage.getItem('isEssentials')).toBe('true');
+    });
+
+    it('does not fetch SSP products when product_key is absent', async () => {
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(EssentialsPageRoute.PlanDetails),
+      } as any);
+
+      const sspCalls = ensureSpy.mock.calls.filter(
+        (call: any[]) => call[0]?.queryKey?.[0] === 'ssp-products',
+      );
+      expect(sspCalls).toHaveLength(0);
+      expect(hydrateEssentialsProduct).not.toHaveBeenCalled();
+    });
+
+    it('handles empty SSP products response gracefully', async () => {
+      ensureSpy.mockResolvedValue({ data: [] });
+
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(
+          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+        ),
+      } as any);
+
+      expect(hydrateEssentialsProduct).toHaveBeenCalledWith([], 'essentials_ai_yearly');
+    });
+
+    it('handles null data in SSP products response', async () => {
+      ensureSpy.mockResolvedValue({ data: null });
+
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(
+          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+        ),
+      } as any);
+
+      expect(hydrateEssentialsProduct).toHaveBeenCalledWith([], 'essentials_ai_yearly');
+    });
+
+    it('catches and logs error when SSP products fetch fails', async () => {
+      const fetchError = new Error('Network error');
+
+      ensureSpy.mockImplementation((queryOptions: any) => {
+        if (queryOptions?.queryKey?.[0] === 'ssp-products') {
+          return Promise.reject(fetchError);
+        }
+        return Promise.resolve({ data: {} });
+      });
+
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(
+          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+        ),
+      } as any);
+
+      expect(logError).toHaveBeenCalledWith(
+        'Failed to fetch SSP products in root loader',
+        fetchError,
+      );
+      expect(hydrateEssentialsProduct).not.toHaveBeenCalled();
+    });
+
+    it('still sets isEssentials in sessionStorage even when fetch fails', async () => {
+      ensureSpy.mockImplementation((queryOptions: any) => {
+        if (queryOptions?.queryKey?.[0] === 'ssp-products') {
+          return Promise.reject(new Error('API down'));
+        }
+        return Promise.resolve({ data: {} });
+      });
+
+      const loader = makeRootLoader(queryClient);
+
+      await loader({
+        request: makeRequest(
+          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+        ),
+      } as any);
+
+      expect(sessionStorage.getItem('isEssentials')).toBe('true');
+    });
   });
 });
 

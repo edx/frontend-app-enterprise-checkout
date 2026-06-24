@@ -13,7 +13,8 @@ const OrderDetailsBillingInfo = () => {
   const { adminEmail } = planDetailsData;
   const isEssentials = isEssentialsFlow();
   const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
-  const academyName = academySelectionData?.academyName?.toString().trim() || '';
+  const product = academySelectionData?.selectedProduct;
+  const academyName = (product?.name || '').trim();
 
   if (!firstBillableInvoice) {
     return null;

@@ -3,13 +3,13 @@ import { AppContext } from '@edx/frontend-platform/react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import * as useSspProductsModule from '@/components/app/data/hooks/useSspProducts';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 import EssentialsAlert from '../EssentialsAlert';
 
-jest.mock('@/components/app/data/hooks/useSspProducts');
+jest.mock('@/components/app/data/hooks/useBFFContext');
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn(() => ({
     ESSENTIALS_PRODUCT_URL: 'https://business.edx.org/course-library-plans-essentials/',
@@ -32,30 +32,32 @@ const mockContextValue = {
   authenticatedUser: mockAuthenticatedUser,
 };
 
-// FIX: Keys updated to camelCase to prevent undefined values in your component mapper logic
-const mockProductsData = [
-  {
-    name: 'Sustainability',
-    longName: 'Sustainability Academy',
-    description: 'Sustainability strategy and imperative overview.',
-    marketingUrl: 'https://www.edx.org/learn/sustainability',
-    thumbnailUrl: 'https://example.com/sustainability.png',
-    price: '149.00',
-    lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
-    slug: 'sustainability-academy-yearly',
-    courseCount: 12,
-  },
-];
+const mockProduct = {
+  name: 'Sustainability',
+  longName: 'Sustainability Academy',
+  description: 'Sustainability strategy and imperative overview.',
+  marketingUrl: 'https://www.edx.org/learn/sustainability',
+  thumbnailUrl: 'https://example.com/sustainability.png',
+  price: '149.00',
+  lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+  slug: 'sustainability-academy-yearly',
+  courseCount: 12,
+};
 
 describe('EssentialsAlert Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: mockProductsData, isLoading: false });
+
+    (useBFFContext as jest.Mock).mockReturnValue({ data: null });
+
+    // Store has selectedProduct (populated by root loader)
     checkoutFormStore.setState((state) => ({
       ...state,
       formData: {
         ...state.formData,
-        [DataStoreKey.AcademySelection]: {},
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: mockProduct,
+        },
       },
     }));
   });
@@ -69,6 +71,34 @@ describe('EssentialsAlert Component', () => {
       </AppContext.Provider>
     </MemoryRouter>,
   );
+
+  describe('No Product Selected', () => {
+    it('should render nothing when no product is in the store', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {},
+        },
+      }));
+
+      const { container } = renderComponent();
+      expect(container.innerHTML).toBe('');
+    });
+
+    it('should render nothing when selectedProduct is undefined', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: { selectedProduct: undefined },
+        },
+      }));
+
+      const { container } = renderComponent();
+      expect(container.innerHTML).toBe('');
+    });
+  });
 
   describe('Rendering and Header', () => {
     it('should render the component', () => {
@@ -86,7 +116,6 @@ describe('EssentialsAlert Component', () => {
     it('should display confirmation text with academy name', () => {
       renderComponent();
       expect(screen.getByText(/You have picked/)).toBeInTheDocument();
-      // FIX: Component renders matchedProduct.longName || matchedProduct.name, which is 'Sustainability Academy'
       const confirmationElements = screen.getAllByText(/Sustainability Academy/);
       expect(confirmationElements.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/as your focus area/)).toBeInTheDocument();
@@ -94,11 +123,69 @@ describe('EssentialsAlert Component', () => {
   });
 
   describe('Pricing Display', () => {
-    it('should display pricing information', () => {
+    it('should display price from product.price (primary source)', () => {
       renderComponent();
       expect(screen.getByText(/From/)).toBeInTheDocument();
       expect(screen.getByText(/\/yr/)).toBeInTheDocument();
       expect(screen.getByText('$149')).toBeInTheDocument();
+    });
+
+    it('should fall back to BFF price when product.price is missing', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, price: null },
+          },
+        },
+      }));
+      (useBFFContext as jest.Mock).mockReturnValue({ data: 199 });
+
+      renderComponent();
+      expect(screen.getByText('$199')).toBeInTheDocument();
+    });
+
+    it('should fall back to BFF price when product.price is empty string', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, price: '' },
+          },
+        },
+      }));
+      (useBFFContext as jest.Mock).mockReturnValue({ data: 199 });
+
+      renderComponent();
+      expect(screen.getByText('$199')).toBeInTheDocument();
+    });
+
+    it('should not display price section when neither source has price', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, price: null },
+          },
+        },
+      }));
+      (useBFFContext as jest.Mock).mockReturnValue({ data: null });
+
+      renderComponent();
+      expect(screen.queryByText(/From/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/\/yr/)).not.toBeInTheDocument();
+    });
+
+    it('should prefer product.price over BFF price when both are available', () => {
+      (useBFFContext as jest.Mock).mockReturnValue({ data: 199 });
+
+      renderComponent();
+      // product.price is 149.00, BFF returns 199 — should show 149
+      expect(screen.getByText('$149')).toBeInTheDocument();
+      expect(screen.queryByText('$199')).not.toBeInTheDocument();
     });
 
     it('should display "From $149 /yr" format', () => {
@@ -108,29 +195,119 @@ describe('EssentialsAlert Component', () => {
       expect(priceSection?.textContent).toContain('$149');
       expect(priceSection?.textContent).toContain('/yr');
     });
-  });
-
-  describe('Academy Details Card', () => {
-    it('should display selected academy name from user selection when available', () => {
+    it('should extract price from BFF context using product lookupKey', () => {
       checkoutFormStore.setState((state) => ({
         ...state,
         formData: {
           ...state.formData,
           [DataStoreKey.AcademySelection]: {
-            academyName: 'AI Academy',
+            selectedProduct: { ...mockProduct, price: null },
           },
         },
       }));
 
-      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+      // Mock useBFFContext to actually invoke the select function
+      (useBFFContext as jest.Mock).mockImplementation((_userId: string | null, options: any) => {
+        const contextData = {
+          pricing: {
+            defaultByLookupKey: 'teams_subscription_license_yearly',
+            prices: [
+              {
+                lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+                unitAmount: 14900,
+              },
+              {
+                lookupKey: 'essentials_data_subscription_license_yearly',
+                unitAmount: 19900,
+              },
+            ],
+          },
+        };
+        const selected = options?.select?.(contextData);
+        return { data: selected };
+      });
+
       renderComponent();
-      const academyNames = screen.getAllByText('AI Academy');
+      expect(screen.getByText('$149')).toBeInTheDocument();
+    });
+
+    it('should return null from BFF context when lookupKey does not match', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: {
+              ...mockProduct,
+              price: null,
+              lookupKey: 'nonexistent_key',
+            },
+          },
+        },
+      }));
+
+      (useBFFContext as jest.Mock).mockImplementation((_userId: string | null, options: any) => {
+        const contextData = {
+          pricing: {
+            defaultByLookupKey: 'teams_subscription_license_yearly',
+            prices: [
+              {
+                lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+                unitAmount: 14900,
+              },
+            ],
+          },
+        };
+        const selected = options?.select?.(contextData);
+        return { data: selected };
+      });
+
+      renderComponent();
+      // No price from product, no match in BFF → price section hidden
+      expect(screen.queryByText(/From/)).not.toBeInTheDocument();
+    });
+
+    it('should handle null pricing in BFF context', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, price: null },
+          },
+        },
+      }));
+
+      (useBFFContext as jest.Mock).mockImplementation((_userId: string | null, options: any) => {
+        const selected = options?.select?.({ pricing: undefined });
+        return { data: selected };
+      });
+
+      renderComponent();
+      expect(screen.queryByText(/From/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Academy Details Card', () => {
+    it('should display academy longName when available', () => {
+      renderComponent();
+      const academyNames = screen.getAllByText('Sustainability Academy');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should display academy name', () => {
+    it('should fall back to product name when longName is missing', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, longName: undefined },
+          },
+        },
+      }));
+
       renderComponent();
-      const academyNames = screen.getAllByText('Sustainability Academy');
+      const academyNames = screen.getAllByText('Sustainability');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -151,6 +328,54 @@ describe('EssentialsAlert Component', () => {
       expect(
         screen.getByText(/Sustainability strategy and imperative overview/),
       ).toBeInTheDocument();
+    });
+    it('should handle missing description gracefully', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, description: undefined },
+          },
+        },
+      }));
+
+      renderComponent();
+      const academyNames = screen.getAllByText('Sustainability Academy');
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText('Sustainability strategy and imperative overview.')).not.toBeInTheDocument();
+    });
+
+    it('should handle missing marketingUrl gracefully', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, marketingUrl: undefined },
+          },
+        },
+      }));
+
+      renderComponent();
+      // "Learn more" link is not rendered when marketingUrl is missing
+      expect(screen.queryByText('Learn more')).not.toBeInTheDocument();
+    });
+
+    it('should not display course badge when courseCount is missing', () => {
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: { ...mockProduct, courseCount: undefined },
+          },
+        },
+      }));
+
+      renderComponent();
+      // Course badge is not rendered when courseCount is missing
+      expect(screen.queryByText(/courses/)).not.toBeInTheDocument();
     });
   });
 
@@ -269,151 +494,36 @@ describe('EssentialsAlert Component', () => {
     });
   });
 
-  describe('Loading State Rendering', () => {
-    it('should render spinner alert when isLoading is true', () => {
-      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: [], isLoading: true });
+  describe('Different Academy Products', () => {
+    it('should render correctly with a different selected product', () => {
+      const aiProduct = {
+        name: 'AI',
+        longName: 'AI Academy',
+        description: 'Master artificial intelligence fundamentals.',
+        marketingUrl: 'https://www.edx.org/learn/ai',
+        thumbnailUrl: 'https://example.com/ai.png',
+        price: '199.00',
+        lookupKey: 'essentials_ai_subscription_license_yearly',
+        slug: 'ai-academy-yearly',
+        courseCount: 8,
+      };
+
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: aiProduct,
+          },
+        },
+      }));
+
       renderComponent();
-
-      const loadingElements = screen.getAllByText('Loading plan details...');
-      expect(loadingElements.length).toBeGreaterThanOrEqual(1);
-
-      expect(screen.queryByText('Essentials Plan')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Heuristic Fallback Matching', () => {
-    it('should fall back to a product whose lookupKey starts with essentials_', () => {
-      // FIX: Keys here converted to camelCase to track production component parameters
-      const fallbackProducts = [
-        {
-          name: 'Unrelated Product',
-          lookupKey: 'teams_unrelated_plan',
-          slug: 'unrelated-slug',
-          description: 'No match here.',
-        },
-        {
-          name: 'Fallback Essentials Plan',
-          lookupKey: 'essentials_matched_by_lookup',
-          slug: 'some-slug',
-          description: 'This should be matched by lookup key prefix.',
-        },
-      ];
-      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
-
-      renderComponent('/?product_key=non_existent_key');
-
-      expect(screen.getByRole('heading', { level: 4, name: 'Fallback Essentials Plan' })).toBeInTheDocument();
-      expect(screen.getByText('This should be matched by lookup key prefix.')).toBeInTheDocument();
-    });
-
-    it('should fall back to a product whose slug contains essentials', () => {
-      // FIX: Keys here converted to camelCase to track production component parameters
-      const fallbackProducts = [
-        {
-          name: 'Unrelated Product',
-          lookupKey: 'teams_unrelated_plan',
-          slug: 'unrelated-slug',
-          description: 'No match here.',
-        },
-        {
-          name: 'Fallback Slug Plan',
-          lookupKey: 'random_key',
-          slug: 'matched-essentials-academy',
-          description: 'This should be matched by slug substring.',
-        },
-      ];
-      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
-
-      renderComponent('/?product_key=non_existent_key');
-
-      expect(screen.getByRole('heading', { level: 4, name: 'Fallback Slug Plan' })).toBeInTheDocument();
-      expect(screen.getByText('This should be matched by slug substring.')).toBeInTheDocument();
-    });
-
-    it('should fall back to a product whose name matches the selected academy name', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            academyName: 'Sustainability',
-          },
-        },
-      }));
-
-      // FIX: Keys here converted to camelCase to track production component parameters
-      const fallbackProducts = [
-        {
-          name: 'Sustainability Focus',
-          lookupKey: 'random_key',
-          slug: 'random-slug',
-          description: 'This should be matched by name alignment.',
-        },
-      ];
-      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: fallbackProducts, isLoading: false });
-
-      renderComponent('/?product_key=non_existent_key');
-
-      expect(screen.getByRole('heading', { level: 4, name: 'Sustainability Focus' })).toBeInTheDocument();
-      expect(screen.getByText('This should be matched by name alignment.')).toBeInTheDocument();
-    });
-  });
-  describe('Form Data Storage Synchronization Coverage', () => {
-    it('covers store extraction, parsing variables, and dependencies', () => {
-      // 1. Setup a clean product using the precise camelCase fields
-      const mockProduct = [
-        {
-          name: 'Sustainability Focus',
-          longName: 'Sustainability Academy',
-          price: '149.00',
-          lookupKey: 'essentials_sustainability',
-          slug: 'sustainability-academy-yearly',
-        },
-      ];
-      (useSspProductsModule.default as jest.Mock).mockReturnValue({ data: mockProduct, isLoading: false });
-
-      // 2. Set the form data store to trigger a mismatch on name and price
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            academyName: 'Old Outdated Academy Name',
-            academyPrice: 999, // Mismatched price to force productPriceStr path
-          },
-        },
-      }));
-
-      // 3. Render targeting the matched product
-      const { rerender } = renderComponent('/?product_key=essentials_sustainability');
-
-      // 4. Force the hook's dependency array to see a change by updating the store dynamically
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            academyName: 'Sustainability Academy',
-            academyPrice: 149,
-          },
-        },
-      }));
-
-      // 5. Re-render the exact same component instance to execute the dependency array update line
-      rerender(
-        <MemoryRouter initialEntries={['/?product_key=essentials_sustainability']}>
-          <AppContext.Provider value={mockContextValue as any}>
-            <IntlProvider locale="en" messages={{}}>
-              <EssentialsAlert />
-            </IntlProvider>
-          </AppContext.Provider>
-        </MemoryRouter>,
-      );
-
-      // Verify the final structure matches your expected primitive outputs
-      const finalState = (checkoutFormStore.getState().formData as any)[DataStoreKey.AcademySelection];
-      expect(finalState.academyName).toBe('Sustainability Academy');
-      expect(finalState.academyPrice).toBe(149);
+      const academyNames = screen.getAllByText('AI Academy');
+      expect(academyNames.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('8 courses')).toBeInTheDocument();
+      expect(screen.getByText('$199')).toBeInTheDocument();
+      expect(screen.getByText(/Master artificial intelligence fundamentals/)).toBeInTheDocument();
     });
   });
 });

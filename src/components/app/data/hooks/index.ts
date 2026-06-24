@@ -15,4 +15,3 @@ export { default as useCheckoutSessionClientSecret } from './useCheckoutSessionC
 export { default as useRegisterMutation } from './useRegisterMutation';
 export { default as useCountryOptions } from './useCountryOptions';
 export { default as useRecaptchaToken } from './useRecaptchaToken';
-export { default as useSspProducts } from './useSspProducts';

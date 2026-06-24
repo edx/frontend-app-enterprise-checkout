@@ -46,8 +46,8 @@ export const queryCreateBillingPortalSession = (checkoutIntentId?: number) => (
     .createBillingPortalSession(checkoutIntentId)
 );
 
-export const querySspProducts = (productKey: string) => (
+export const querySspProducts = () => (
   queries
     .enterpriseCheckout
-    .sspProducts(productKey)
+    .sspProducts()
 );

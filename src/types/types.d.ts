@@ -98,7 +98,7 @@ declare global {
    * Maps step names to their corresponding data types
    */
   interface StepDataMap {
-    'AcademySelection': { academyName?: string };
+    'AcademySelection': { academyName?: string, academyPrice?: number, selectedProduct?: SspProduct };
     'PlanDetails': Partial<PlanDetailsData>;
     'AccountDetails': Partial<AccountDetailsData>;
     'BillingDetails': Partial<BillingDetailsData>;
