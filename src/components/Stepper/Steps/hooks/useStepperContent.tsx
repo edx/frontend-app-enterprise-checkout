@@ -11,6 +11,8 @@ import useCurrentPage from '@/hooks/useCurrentPage';
 // Define a generic type for components that can accept a form prop
 type StepperContentComponent = React.FC<{ form?: any }>;
 
+const EmptyContent: StepperContentComponent = () => null;
+
 const StepperContentByPage = {
   PlanDetails: PlanDetailsContent,
   PlanDetailsLogin: PlanDetailsLoginContent,
@@ -22,8 +24,9 @@ const StepperContentByPage = {
 
 const useStepperContent = (): StepperContentComponent => {
   const currentPage = useCurrentPage();
-  // Return a default empty component if currentPage is null
-  return currentPage ? StepperContentByPage[currentPage] : () => null;
+  const resolved = currentPage ? StepperContentByPage[currentPage] : undefined;
+
+  return resolved ?? EmptyContent;
 };
 
 export default useStepperContent;
