@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import { useCheckoutSessionClientSecret, useFormValidationConstraints } from '@/components/app/data';
 import BillingDetails from '@/components/Stepper/Steps/BillingDetails';
@@ -29,7 +29,7 @@ describe('BillingDetails', () => {
     mockedUseFormValidationConstraints.mockReturnValue({ data: null });
   });
 
-  it('passes a configured billing form to stepper content when the checkout session client secret is missing', () => {
+  it('passes a configured billing form to stepper content when the checkout session client secret is missing', async () => {
     let capturedForm: UseFormReturn<BillingDetailsData> | undefined;
 
     mockedUseCheckoutSessionClientSecret.mockReturnValue(undefined);
@@ -52,5 +52,9 @@ describe('BillingDetails', () => {
       getValues: expect.any(Function),
     }));
     expect(capturedForm!.getValues()).toEqual({});
+
+    await act(async () => {
+      await expect(capturedForm!.trigger()).resolves.toBe(false);
+    });
   });
 });

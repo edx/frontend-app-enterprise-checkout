@@ -11,14 +11,14 @@ import { StripeProvider } from '@/components/StripeProvider';
 import { BillingDetailsSchema, CheckoutStepKey, DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/index';
 
-const DEFAULT_BILLING_DETAILS_CONSTRAINTS = {} as CheckoutContextFieldConstraints;
+const EMPTY_BILLING_DETAILS_CONSTRAINTS = {} as CheckoutContextFieldConstraints;
 
 const BillingDetailsFallback = () => {
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const StepperContent = useStepperContent();
   const billingDetailsSchema = useMemo(() => (
-    BillingDetailsSchema(formValidationConstraints ?? DEFAULT_BILLING_DETAILS_CONSTRAINTS)
+    BillingDetailsSchema(formValidationConstraints ?? EMPTY_BILLING_DETAILS_CONSTRAINTS)
   ), [formValidationConstraints]);
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
