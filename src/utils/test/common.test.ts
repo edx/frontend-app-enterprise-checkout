@@ -155,51 +155,7 @@ describe('resolveEssentialsProduct', () => {
       expect(result?.name).toBe('AI');
     });
   });
-  describe('fuzzy fallback', () => {
-    it('falls back to product with essentials_ lookupKey when no exact match', () => {
-      const result = resolveEssentialsProduct(mockProducts, 'nonexistent-key');
-      // First product with lookupKey starting with 'essentials_' → AI
-      expect(result?.name).toBe('AI');
-    });
-    it('falls back to product with essentials in slug when lookupKey does not match', () => {
-      const products = [
-        {
-          name: 'Generic',
-          slug: 'generic-yearly',
-          lookupKey: 'generic_yearly',
-          price: '99.00',
-        },
-        {
-          name: 'Essentials Bundle',
-          slug: 'essentials-bundle-yearly',
-          lookupKey: 'bundle_yearly',
-          price: '129.00',
-        },
-      ] as any[];
-      const result = resolveEssentialsProduct(products, 'nonexistent-key');
-      expect(result?.name).toBe('Essentials Bundle');
-    });
-  });
-  describe('last resort fallback', () => {
-    it('returns first product when no exact or fuzzy match', () => {
-      const products = [
-        {
-          name: 'Leadership',
-          slug: 'leadership-yearly',
-          lookupKey: 'leadership_yearly',
-          price: '179.00',
-        },
-        {
-          name: 'Management',
-          slug: 'management-yearly',
-          lookupKey: 'management_yearly',
-          price: '159.00',
-        },
-      ] as any[];
-      const result = resolveEssentialsProduct(products, 'nonexistent-key');
-      expect(result?.name).toBe('Leadership');
-    });
-  });
+
   describe('empty products', () => {
     it('returns undefined when products array is empty', () => {
       const result = resolveEssentialsProduct([], 'any-key');
@@ -225,9 +181,9 @@ describe('resolveEssentialsProduct', () => {
       const products = [
         { name: 'Empty', slug: undefined, lookupKey: undefined, price: '99.00' },
       ] as any[];
-      // No exact match, no fuzzy match → falls back to first product
+
       const result = resolveEssentialsProduct(products, 'any-key');
-      expect(result?.name).toBe('Empty');
+      expect(result).toBeUndefined();
     });
   });
 });

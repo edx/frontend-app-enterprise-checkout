@@ -86,66 +86,6 @@ describe('fetchSspProducts Service Layer API Coverage', () => {
   });
 });
 
-// describe('querySspProducts Query Definition', () => {
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
-
-//   it('should return the correct query key', () => {
-//     const result = querySspProducts();
-//     expect(result.queryKey).toEqual(['ssp-products']);
-//   });
-
-//   it('should return a queryFn that is a function', () => {
-//     const result = querySspProducts();
-//     expect(typeof result.queryFn).toBe('function');
-//   });
-
-//   it('should have queryFn that delegates to fetchSspProducts', async () => {
-//     const mockProducts: SspProduct[] = [
-//       {
-//         name: 'AI',
-//         longName: 'AI Academy',
-//         description: 'Master artificial intelligence fundamentals.',
-//         marketingUrl: 'https://www.edx.org/learn/ai',
-//         thumbnailUrl: 'https://example.com/ai.png',
-//         price: '149.00',
-//         lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
-//         slug: 'ai-academy-yearly',
-//         courseCount: 8,
-//       },
-//     ];
-
-//     const mockAxiosResponse = {
-//       data: mockProducts,
-//       status: 200,
-//       statusText: 'OK',
-//       headers: {},
-//       config: {},
-//     };
-//     mockedAxios.get.mockResolvedValueOnce(mockAxiosResponse);
-
-//     const result = querySspProducts();
-//     const data = await result.queryFn();
-
-//     expect(mockedAxios.get).toHaveBeenCalledWith(
-//       'https://api.mocked-url.com/api/v1/ssp-products/',
-//       expect.objectContaining({
-//         transformResponse: expect.any(Array),
-//       }),
-//     );
-//     expect(data.data).toEqual(mockProducts);
-//   });
-
-//   it('should propagate errors from fetchSspProducts through queryFn', async () => {
-//     const mockError = new Error('Network failure');
-//     mockedAxios.get.mockRejectedValueOnce(mockError);
-
-//     const result = querySspProducts();
-
-//     await expect(result.queryFn()).rejects.toThrow('Network failure');
-//   });
-// });
 describe('querySspProducts Query Definition', () => {
   it('should return the correct query key', () => {
     const result = querySspProducts();

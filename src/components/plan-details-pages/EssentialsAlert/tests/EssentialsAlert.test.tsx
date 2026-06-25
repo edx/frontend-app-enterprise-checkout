@@ -123,166 +123,20 @@ describe('EssentialsAlert Component', () => {
   });
 
   describe('Pricing Display', () => {
-    it('should display price from product.price (primary source)', () => {
+    it('should display price from BFF context', () => {
+      (useBFFContext as jest.Mock).mockReturnValue({
+        data: 149,
+      });
       renderComponent();
       expect(screen.getByText(/From/)).toBeInTheDocument();
+      expect(screen.getByText(/149/)).toBeInTheDocument();
       expect(screen.getByText(/\/yr/)).toBeInTheDocument();
-      expect(screen.getByText('$149')).toBeInTheDocument();
     });
 
-    it('should fall back to BFF price when product.price is missing', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: { ...mockProduct, price: null },
-          },
-        },
-      }));
-      (useBFFContext as jest.Mock).mockReturnValue({ data: 199 });
-
-      renderComponent();
-      expect(screen.getByText('$199')).toBeInTheDocument();
-    });
-
-    it('should fall back to BFF price when product.price is empty string', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: { ...mockProduct, price: '' },
-          },
-        },
-      }));
-      (useBFFContext as jest.Mock).mockReturnValue({ data: 199 });
-
-      renderComponent();
-      expect(screen.getByText('$199')).toBeInTheDocument();
-    });
-
-    it('should not display price section when neither source has price', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: { ...mockProduct, price: null },
-          },
-        },
-      }));
-      (useBFFContext as jest.Mock).mockReturnValue({ data: null });
-
-      renderComponent();
-      expect(screen.queryByText(/From/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/\/yr/)).not.toBeInTheDocument();
-    });
-
-    it('should prefer product.price over BFF price when both are available', () => {
-      (useBFFContext as jest.Mock).mockReturnValue({ data: 199 });
-
-      renderComponent();
-      // product.price is 149.00, BFF returns 199 — should show 149
-      expect(screen.getByText('$149')).toBeInTheDocument();
-      expect(screen.queryByText('$199')).not.toBeInTheDocument();
-    });
-
-    it('should display "From $149 /yr" format', () => {
-      renderComponent();
-      const priceSection = screen.getByText(/From/).parentElement;
-      expect(priceSection?.textContent).toContain('From');
-      expect(priceSection?.textContent).toContain('$149');
-      expect(priceSection?.textContent).toContain('/yr');
-    });
-    it('should extract price from BFF context using product lookupKey', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: { ...mockProduct, price: null },
-          },
-        },
-      }));
-
-      // Mock useBFFContext to actually invoke the select function
-      (useBFFContext as jest.Mock).mockImplementation((_userId: string | null, options: any) => {
-        const contextData = {
-          pricing: {
-            defaultByLookupKey: 'teams_subscription_license_yearly',
-            prices: [
-              {
-                lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
-                unitAmount: 14900,
-              },
-              {
-                lookupKey: 'essentials_data_subscription_license_yearly',
-                unitAmount: 19900,
-              },
-            ],
-          },
-        };
-        const selected = options?.select?.(contextData);
-        return { data: selected };
+    it('should hide price section when BFF price is null', () => {
+      (useBFFContext as jest.Mock).mockReturnValue({
+        data: null,
       });
-
-      renderComponent();
-      expect(screen.getByText('$149')).toBeInTheDocument();
-    });
-
-    it('should return null from BFF context when lookupKey does not match', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: {
-              ...mockProduct,
-              price: null,
-              lookupKey: 'nonexistent_key',
-            },
-          },
-        },
-      }));
-
-      (useBFFContext as jest.Mock).mockImplementation((_userId: string | null, options: any) => {
-        const contextData = {
-          pricing: {
-            defaultByLookupKey: 'teams_subscription_license_yearly',
-            prices: [
-              {
-                lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
-                unitAmount: 14900,
-              },
-            ],
-          },
-        };
-        const selected = options?.select?.(contextData);
-        return { data: selected };
-      });
-
-      renderComponent();
-      // No price from product, no match in BFF → price section hidden
-      expect(screen.queryByText(/From/)).not.toBeInTheDocument();
-    });
-
-    it('should handle null pricing in BFF context', () => {
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: { ...mockProduct, price: null },
-          },
-        },
-      }));
-
-      (useBFFContext as jest.Mock).mockImplementation((_userId: string | null, options: any) => {
-        const selected = options?.select?.({ pricing: undefined });
-        return { data: selected };
-      });
-
       renderComponent();
       expect(screen.queryByText(/From/)).not.toBeInTheDocument();
     });
@@ -485,12 +339,10 @@ describe('EssentialsAlert Component', () => {
       const essentialsText = screen.getByText('Essentials Plan');
       const academyNames = screen.getAllByText('Sustainability Academy');
       const courseCount = screen.getByText('12 courses');
-      const price = screen.getByText('$149');
 
       expect(essentialsText).toBeInTheDocument();
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
       expect(courseCount).toBeInTheDocument();
-      expect(price).toBeInTheDocument();
     });
   });
 
@@ -522,7 +374,6 @@ describe('EssentialsAlert Component', () => {
       const academyNames = screen.getAllByText('AI Academy');
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText('8 courses')).toBeInTheDocument();
-      expect(screen.getByText('$199')).toBeInTheDocument();
       expect(screen.getByText(/Master artificial intelligence fundamentals/)).toBeInTheDocument();
     });
   });

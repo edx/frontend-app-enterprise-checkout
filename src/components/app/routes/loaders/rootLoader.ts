@@ -173,6 +173,18 @@ const makeRootLoader = (
 
   const productKey = searchParams.get('product_key');
 
+  if (productKey) {
+    try {
+      const response = await queryClient.ensureQueryData(
+        querySspProducts(),
+      );
+      const allSspProducts = response?.data || [];
+      hydrateEssentialsProduct(allSspProducts, productKey);
+    } catch (err) {
+      logError('Failed to fetch SSP products in root loader', err);
+    }
+  }
+
   // Determine if current path is Essentials by route or by query product_key
   const isEssentialsRoute = isPathMatch(currentPath, '/essentials');
   const isEssentialsProduct = !!productKey && essentialsLookupKeys.has(productKey);
@@ -186,17 +198,6 @@ const makeRootLoader = (
 
   if (isEssentialsPath) {
     sessionStorage.setItem('isEssentials', 'true');
-    if (productKey) {
-      try {
-        const response = await queryClient.ensureQueryData(
-          querySspProducts(),
-        );
-        const allSspProducts = response?.data || [];
-        hydrateEssentialsProduct(allSspProducts, productKey);
-      } catch (err) {
-        logError('Failed to fetch SSP products in root loader', err);
-      }
-    }
   } else {
     sessionStorage.removeItem('isEssentials');
   }

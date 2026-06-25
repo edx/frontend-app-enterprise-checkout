@@ -34,10 +34,7 @@ const EssentialsPurchaseSummary = () => {
   }
   const academyName = (product?.name || '').trim();
 
-  const academyPriceStored = product.price
-    ? Number.parseFloat(product.price)
-    : null;
-  const pricePerUser = academyPriceStored ?? bffPrice ?? null;
+  const pricePerUser = bffPrice ?? null;
 
   const normalizedQuantity = quantity && Number(quantity) > 0 ? Number(quantity) : null;
 

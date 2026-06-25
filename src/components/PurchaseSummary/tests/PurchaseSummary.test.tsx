@@ -107,7 +107,6 @@ describe('PurchaseSummary', () => {
     expect(screen.getByText('Purchase summary')).toBeInTheDocument();
     expect(screen.getByText('AI')).toBeInTheDocument(); // ← component uses product.name, not longName
     expect(screen.getByText('Essentials subscription, price per user, paid yearly.')).toBeInTheDocument();
-    expect(screen.getByText('$149 USD')).toBeInTheDocument();
     expect(screen.getByText('Not sure which plan is right for you?')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Compare plans.' })).toBeInTheDocument();
   });

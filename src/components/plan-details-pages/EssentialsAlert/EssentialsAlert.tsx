@@ -34,10 +34,7 @@ const EssentialsAlert = () => {
   if (!product) {
     return null;
   }
-  const productPrice = product.price
-    ? Number.parseFloat(product.price)
-    : null;
-  const displayPrice = productPrice ?? bffPrice ?? null;
+  const displayPrice = bffPrice ?? null;
 
   const academyName = product.longName || product.name || '';
   const academyDescription = product.description || '';
