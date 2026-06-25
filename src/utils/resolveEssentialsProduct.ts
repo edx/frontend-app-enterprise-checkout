@@ -23,13 +23,5 @@ export function resolveEssentialsProduct(
       || (p.slug || '') === productKey,
   );
   if (exactMatch) { return exactMatch; }
-
-  // 2. Fuzzy fallback
-  return (
-    allProducts.find((p) => {
-      const lk = (p.lookupKey || '').toLowerCase();
-      const slug = (p.slug || '').toLowerCase();
-      return lk.startsWith('essentials_') || slug.includes('essentials');
-    }) || allProducts[0]
-  );
+  return undefined;
 }
