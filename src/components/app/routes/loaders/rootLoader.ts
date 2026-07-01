@@ -8,11 +8,10 @@ import { logError, logInfo } from '@edx/frontend-platform/logging';
 import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunction, redirect } from 'react-router-dom';
 
-import { queryBffContext } from '@/components/app/data/queries/queries';
-import {
-  determineExistingCheckoutIntentState,
-  populateInitialApplicationState,
-} from '@/components/app/routes/loaders/utils';
+import { queryBffContext, querySspProducts } from '@/components/app/data/queries/queries';
+import { determineExistingCheckoutIntentState,
+  hydrateEssentialsProduct,
+  populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { extractPriceId } from '@/utils/checkout';
 
@@ -173,6 +172,18 @@ const makeRootLoader = (
   ]);
 
   const productKey = searchParams.get('product_key');
+
+  if (productKey) {
+    try {
+      const response = await queryClient.ensureQueryData(
+        querySspProducts(),
+      );
+      const allSspProducts = response?.data || [];
+      hydrateEssentialsProduct(allSspProducts, productKey);
+    } catch (err) {
+      logError('Failed to fetch SSP products in root loader', err);
+    }
+  }
 
   // Determine if current path is Essentials by route or by query product_key
   const isEssentialsRoute = isPathMatch(currentPath, '/essentials');

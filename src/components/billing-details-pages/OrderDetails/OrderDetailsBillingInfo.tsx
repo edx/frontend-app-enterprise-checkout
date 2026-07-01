@@ -12,6 +12,9 @@ const OrderDetailsBillingInfo = () => {
   const planDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const { adminEmail } = planDetailsData;
   const isEssentials = isEssentialsFlow();
+  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
+  const product = academySelectionData?.selectedProduct;
+  const academyName = (product?.name || '').trim();
 
   if (!firstBillableInvoice) {
     return null;
@@ -39,7 +42,7 @@ const OrderDetailsBillingInfo = () => {
                 description="Label for academy name section"
               />
             </h3>
-            <p className="text-muted mb-0">—</p>
+            <p className="text-muted mb-0">{academyName || '—'}</p>
           </Col>
         </Row>
       )}

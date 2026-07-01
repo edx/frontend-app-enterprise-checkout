@@ -45,3 +45,9 @@ export const queryCreateBillingPortalSession = (checkoutIntentId?: number) => (
     .enterpriseCheckout
     .createBillingPortalSession(checkoutIntentId)
 );
+
+export const querySspProducts = () => (
+  queries
+    .enterpriseCheckout
+    .sspProducts()
+);

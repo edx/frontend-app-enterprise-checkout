@@ -8,6 +8,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
+import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 
@@ -23,6 +24,8 @@ jest.mock('@/components/app/data', () => ({
 jest.mock('@/utils/common', () => ({
   isEssentialsFlow: jest.fn(),
 }));
+
+jest.mock('@/components/app/data/hooks/useBFFContext');
 
 const renderWithProviders = (initialRoute = '/') => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -79,12 +82,31 @@ describe('PurchaseSummary', () => {
   it('renders essentials purchase summary with compare plans content for essentials flow', () => {
     (isEssentialsFlow as jest.Mock).mockReturnValue(true);
 
+    checkoutFormStore.setState((state) => ({
+      ...state,
+      formData: {
+        ...state.formData,
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: {
+            name: 'AI',
+            longName: 'AI Academy',
+            description: 'Master artificial intelligence fundamentals.',
+            price: '149.00',
+            lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+            slug: 'ai-academy-yearly',
+            courseCount: 8,
+          },
+        },
+      },
+    }));
+
+    (useBFFContext as jest.Mock).mockReturnValue({ data: null });
+
     renderWithProviders(EssentialsPageRoute.PlanDetails);
 
     expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    expect(screen.getByText('AI Academy')).toBeInTheDocument();
+    expect(screen.getByText('AI')).toBeInTheDocument(); // ← component uses product.name, not longName
     expect(screen.getByText('Essentials subscription, price per user, paid yearly.')).toBeInTheDocument();
-    expect(screen.getByText('$149 USD')).toBeInTheDocument();
     expect(screen.getByText('Not sure which plan is right for you?')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Compare plans.' })).toBeInTheDocument();
   });

@@ -4,6 +4,7 @@ import { fetchCheckoutIntent } from '@/components/app/data/services/checkout-int
 import createCheckoutSession from '@/components/app/data/services/checkout-session';
 import { fetchCheckoutContext, fetchCheckoutSuccess } from '@/components/app/data/services/context';
 import createBillingPortalSession from '@/components/app/data/services/create-billing-portal';
+import { fetchSspProducts } from '@/components/app/data/services/ssp-products';
 import fetchCheckoutValidation from '@/components/app/data/services/validation';
 
 const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
@@ -41,6 +42,10 @@ const enterpriseCheckout = createQueryKeys('enterpriseCheckout', {
   createBillingPortalSession: (checkoutIntentId) => ({
     queryKey: [checkoutIntentId],
     queryFn: () => createBillingPortalSession(checkoutIntentId),
+  }),
+  sspProducts: () => ({
+    queryKey: ['ssp-products'],
+    queryFn: () => fetchSspProducts(),
   }),
 });
 

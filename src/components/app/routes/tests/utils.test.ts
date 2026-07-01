@@ -1,9 +1,10 @@
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
-import { determineExistingCheckoutIntentState, mapCheckoutIntentStateToSessionStatus, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
+import { determineExistingCheckoutIntentState, hydrateEssentialsProduct, mapCheckoutIntentStateToSessionStatus, populateInitialApplicationState, validateFormState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { resolveEssentialsProduct } from '@/utils/resolveEssentialsProduct';
 
 jest.mock('@hookform/resolvers/zod', () => ({
   zodResolver: jest.fn(() => async (values: any) => {
@@ -39,6 +40,10 @@ jest.mock('@edx/frontend-platform/config', () => ({
     FEATURE_SELF_SERVICE_ESSENTIALS_KEY: 'test_essentials_key',
     FEATURE_SELF_SERVICE_SITE_KEY: 'test_site_key',
   })),
+}));
+
+jest.mock('@/utils/resolveEssentialsProduct', () => ({
+  resolveEssentialsProduct: jest.fn(),
 }));
 
 describe('utils.ts', () => {
@@ -406,5 +411,94 @@ describe('validateFormState – Essentials flow', () => {
       valid: false,
       invalidRoute: EssentialsPageRoute.PlanDetails,
     });
+  });
+});
+
+describe('hydrateEssentialsProduct', () => {
+  const mockSetFormData = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+      setFormData: mockSetFormData,
+    });
+  });
+
+  it('resolves product by lookupKey and stores it in checkoutFormStore', () => {
+    const mockProduct = {
+      name: 'AI',
+      longName: 'AI Academy',
+      slug: 'ai-academy-yearly',
+      lookupKey: 'essentials_ai_yearly',
+      price: '149.00',
+      courseCount: 8,
+    };
+
+    (resolveEssentialsProduct as jest.Mock).mockReturnValue(mockProduct);
+
+    hydrateEssentialsProduct([mockProduct] as any[], 'essentials_ai_yearly');
+
+    expect(resolveEssentialsProduct).toHaveBeenCalledWith(
+      [mockProduct],
+      'essentials_ai_yearly',
+    );
+    expect(mockSetFormData).toHaveBeenCalledWith(
+      DataStoreKey.AcademySelection,
+      { selectedProduct: mockProduct },
+    );
+  });
+
+  it('does not update store when no product is resolved', () => {
+    (resolveEssentialsProduct as jest.Mock).mockReturnValue(undefined);
+
+    hydrateEssentialsProduct([], 'nonexistent-key');
+
+    expect(resolveEssentialsProduct).toHaveBeenCalledWith([], 'nonexistent-key');
+    expect(mockSetFormData).not.toHaveBeenCalled();
+  });
+
+  it('uses empty string when productKey is null', () => {
+    const mockProduct = {
+      name: 'Data',
+      longName: 'Data Academy',
+      slug: 'data-academy-yearly',
+      lookupKey: 'essentials_data_yearly',
+      price: '199.00',
+      courseCount: 10,
+    };
+
+    (resolveEssentialsProduct as jest.Mock).mockReturnValue(mockProduct);
+
+    hydrateEssentialsProduct([mockProduct] as any[], null);
+
+    expect(resolveEssentialsProduct).toHaveBeenCalledWith(
+      [mockProduct],
+      '',
+    );
+    expect(mockSetFormData).toHaveBeenCalledWith(
+      DataStoreKey.AcademySelection,
+      { selectedProduct: mockProduct },
+    );
+  });
+
+  it('passes full products array to resolveEssentialsProduct', () => {
+    const mockProducts = [
+      { name: 'AI', lookupKey: 'essentials_ai_yearly' },
+      { name: 'Data', lookupKey: 'essentials_data_yearly' },
+    ];
+    const selectedProduct = mockProducts[1];
+
+    (resolveEssentialsProduct as jest.Mock).mockReturnValue(selectedProduct);
+
+    hydrateEssentialsProduct(mockProducts as any[], 'essentials_data_yearly');
+
+    expect(resolveEssentialsProduct).toHaveBeenCalledWith(
+      mockProducts,
+      'essentials_data_yearly',
+    );
+    expect(mockSetFormData).toHaveBeenCalledWith(
+      DataStoreKey.AcademySelection,
+      { selectedProduct },
+    );
   });
 });

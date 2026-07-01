@@ -1,18 +1,15 @@
-import React from 'react';
+import { AppContext } from '@edx/frontend-platform/react';
+import React, { useContext } from 'react';
 
 import { CheckoutSubstepKey, DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore, useCurrentStep } from '@/hooks/index';
+import { extractPriceByProductLookupKey } from '@/utils/checkout';
+
+import useBFFContext from '../app/data/hooks/useBFFContext';
 
 import ComparePlansBox from './ComparePlansBox';
 import PurchaseSummaryBase from './PurchaseSummaryBase';
 import PurchaseSummaryCardButton from './PurchaseSummaryCardButton';
-
-// TODO: Remove this hardcoded price once it correctly propagates from the Stripe API
-const ESSENTIALS_PRICE_PER_USER = 149;
-
-type AcademySelectionData = {
-  academyName?: string;
-};
 
 type PlanDetailsWithAcademy = {
   quantity?: number;
@@ -24,19 +21,25 @@ const EssentialsPurchaseSummary = () => {
   const planDetailsData = useCheckoutFormStore(
     (state) => state.formData[DataStoreKey.PlanDetails] as PlanDetailsWithAcademy,
   );
-
+  const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const quantity = planDetailsData?.quantity;
+  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
+  const product = academySelectionData?.selectedProduct;
+  const { data: bffPrice } = useBFFContext(authenticatedUser?.userId ?? null, {
+    select: (contextData): number | null => extractPriceByProductLookupKey(contextData?.pricing, product?.lookupKey),
+  });
 
-  const academySelectionData = useCheckoutFormStore(
-    (state) => (state.formData as Record<string, AcademySelectionData>)[DataStoreKey.AcademySelection],
-  );
+  if (!product) {
+    return null;
+  }
+  const academyName = (product?.name || '').trim();
 
-  const academyName = academySelectionData?.academyName ?? null;
+  const pricePerUser = bffPrice ?? null;
 
   const normalizedQuantity = quantity && Number(quantity) > 0 ? Number(quantity) : null;
 
-  const totalPerYear = normalizedQuantity && normalizedQuantity > 0
-    ? normalizedQuantity * ESSENTIALS_PRICE_PER_USER
+  const totalPerYear = normalizedQuantity && pricePerUser
+    ? normalizedQuantity * pricePerUser
     : null;
 
   const isSuccessPage = currentSubstepKey === CheckoutSubstepKey.Success;
@@ -46,7 +49,7 @@ const EssentialsPurchaseSummary = () => {
       <PurchaseSummaryBase
         headerName={academyName}
         isEssentials
-        pricePerUser={ESSENTIALS_PRICE_PER_USER}
+        pricePerUser={pricePerUser}
         priceLabel="Essentials subscription, price per user, paid yearly."
         quantity={normalizedQuantity}
         totalPerYear={totalPerYear}

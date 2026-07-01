@@ -68,6 +68,20 @@ export const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContext
   return matched?.id ?? null;
 };
 
+// find price amount by a specific product's lookup key
+export const extractPriceByProductLookupKey = (
+  pricing: CheckoutContextPricing | undefined,
+  lookupKey: string | undefined,
+): number | null => {
+  if (!pricing?.prices?.length || !lookupKey) {
+    return null;
+  }
+  const matched = pricing.prices.find(
+    (price) => price.lookupKey === lookupKey,
+  );
+  return matched ? matched.unitAmount / 100 : null;
+};
+
 /**
  * Generates a URL slug from a company name following specific rules:
  * - Converts to lowercase
