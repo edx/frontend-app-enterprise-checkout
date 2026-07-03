@@ -19,13 +19,7 @@ jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
-// Mock checkout intent hook via app data barrel
-jest.mock('@/components/app/data', () => ({
-  ...jest.requireActual('@/components/app/data'),
-  useCheckoutIntent: jest.fn(),
-}));
-
-// Also mock the pricing hook so tests can simulate essentials vs default prices
+// Mock checkout intent and pricing hooks via app data barrel
 jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useCheckoutIntent: jest.fn(),

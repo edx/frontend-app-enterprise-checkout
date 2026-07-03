@@ -116,7 +116,7 @@ const EssentialsAlert = () => {
               </span>
               )}
               <a
-                href={academyMarketingUrl || ESSENTIALS_PRODUCT_URL || '#'}
+                href={learnMoreHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="essentials-alert__learn-more ml-auto font-weight-bold"

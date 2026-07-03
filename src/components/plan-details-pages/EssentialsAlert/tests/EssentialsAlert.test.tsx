@@ -212,8 +212,10 @@ describe('EssentialsAlert Component', () => {
       }));
 
       renderComponent();
-      // "Learn more" link is not rendered when marketingUrl is missing
-      expect(screen.queryByText('Learn more')).not.toBeInTheDocument();
+      // "Learn more" link should fall back to configured ESSENTIALS_PRODUCT_URL when marketingUrl is missing
+      const fallbackLearnMore = screen.getByText('Learn more') as HTMLAnchorElement;
+      expect(fallbackLearnMore).toBeInTheDocument();
+      expect(fallbackLearnMore.href).toContain('business.edx.org/course-library-plans-essentials/');
     });
 
     it('should not display course badge when courseCount is missing', () => {

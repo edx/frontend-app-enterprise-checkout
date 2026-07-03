@@ -141,6 +141,9 @@ describe('SubscriptionStartMessage', () => {
       },
     }));
 
+    // Mark the session as Essentials flow so component uses product lookupKey pricing
+    sessionStorage.setItem('isEssentials', 'true');
+
     renderComponent();
 
     // Price should be the essentials price (150) in the rendered description

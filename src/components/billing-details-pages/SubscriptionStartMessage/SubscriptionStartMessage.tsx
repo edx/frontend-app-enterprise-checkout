@@ -38,7 +38,10 @@ const SubscriptionStartMessage = () => {
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
   // If essentials flow and an academy product is selected, prefer its price
   const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
-  const selectedProductLookupKey = academySelectionData?.selectedProduct?.lookupKey ?? null;
+  // Only use the selected product lookup key when this is the Essentials flow
+  const selectedProductLookupKey = isEssentials
+    ? academySelectionData?.selectedProduct?.lookupKey ?? null
+    : null;
 
   const {
     yearlySubscriptionCostForQuantity: essentialsYearlySubscriptionCostForQuantity,

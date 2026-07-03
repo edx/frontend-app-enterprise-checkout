@@ -38,7 +38,10 @@ const usePurchaseSummaryPricing = (productLookupKey?: string | null) => {
       // default price object extraction.
       if (productLookupKey) {
         const matched = data.pricing.prices.find((p) => p.lookupKey === productLookupKey);
-        return matched ? matched.unitAmount : null;
+        if (matched) {
+          return matched.unitAmount;
+        }
+        // Fall through to default extraction if no matching price found
       }
       const priceObject = extractPriceObject(data.pricing);
       if (!priceObject) {
