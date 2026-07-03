@@ -2,7 +2,7 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import {
-  Alert, Card,
+  Alert, Button, Card,
 } from '@openedx/paragon';
 import { useContext } from 'react';
 
@@ -40,7 +40,6 @@ const EssentialsAlert = () => {
   const academyDescription = product.description || '';
   const academyMarketingUrl = product.marketingUrl ?? '';
   const courseCount = product.courseCount ?? 0;
-  const learnMoreHref = academyMarketingUrl || ESSENTIALS_PRODUCT_URL || '#';
 
   return (
     <Alert data-testid="essentials-alert" className="essentials-alert m-0 text-white p-0">
@@ -115,10 +114,10 @@ const EssentialsAlert = () => {
                 />
               </span>
               )}
-              <a
-                href={learnMoreHref}
-                target="_blank"
-                rel="noopener noreferrer"
+              {academyMarketingUrl && (
+              <Button
+                variant="link"
+                href={academyMarketingUrl}
                 className="essentials-alert__learn-more ml-auto font-weight-bold"
               >
                 <FormattedMessage
@@ -126,7 +125,8 @@ const EssentialsAlert = () => {
                   defaultMessage="Learn more"
                   description="Link to learn more about the academy"
                 />
-              </a>
+              </Button>
+              )}
             </div>
 
             {academyDescription && (
