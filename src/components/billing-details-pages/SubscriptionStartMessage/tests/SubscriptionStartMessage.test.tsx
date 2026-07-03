@@ -10,6 +10,9 @@ import {
   usePurchaseSummaryPricing,
 } from '@/components/app/data';
 import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
+import BillingDetailsDisclaimer from '@/components/Disclaimer/BillingDetailsDisclaimer';
+import { DataStoreKey } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 // Mock the useFirstBillableInvoice hook
@@ -117,5 +120,63 @@ describe('SubscriptionStartMessage', () => {
     expect(titleElement).not.toBeInTheDocument();
     const link = screen.queryByRole('link', { name: 'Subscription Management' });
     expect(link).toBeNull();
+  });
+
+  it('displays essentials price when academy product selected', () => {
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation((productLookupKey?: string | null) => {
+      if (productLookupKey === 'essentials-lookup') {
+        return { yearlySubscriptionCostForQuantity: 150 };
+      }
+      return { yearlySubscriptionCostForQuantity: 300 };
+    });
+
+    // Set academy selection in store
+    checkoutFormStore.setState((s: any) => ({
+      ...s,
+      formData: {
+        ...s.formData,
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: { lookupKey: 'essentials-lookup' },
+        },
+      },
+    }));
+
+    renderComponent();
+
+    // Price should be the essentials price (150) in the rendered description
+    validateText(/150/);
+    expect(screen.queryByText(/300/)).toBeNull();
+  });
+
+  it('BillingDetailsDisclaimer shows essentials price when academy selection set', () => {
+    // Override pricing hook to return essentials vs default
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation((productLookupKey?: string | null) => {
+      if (productLookupKey === 'essentials-lookup') {
+        return { yearlySubscriptionCostForQuantity: 150 };
+      }
+      return { yearlySubscriptionCostForQuantity: 300 };
+    });
+
+    // Set academy selection in the shared store
+    checkoutFormStore.setState((s: any) => ({
+      ...s,
+      formData: {
+        ...s.formData,
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: { lookupKey: 'essentials-lookup' },
+        },
+      },
+    }));
+
+    // Render the disclaimer component and assert price
+    render(
+      <IntlProvider locale="en">
+        <BillingDetailsDisclaimer />
+      </IntlProvider>,
+    );
+
+    const matches = screen.getAllByText(/150/);
+    expect(matches.length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText(/300/)).toBeNull();
   });
 });

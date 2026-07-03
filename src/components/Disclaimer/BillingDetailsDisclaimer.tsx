@@ -4,9 +4,21 @@ import dayjs from 'dayjs';
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SHORT_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
 import { DisplayPrice } from '@/components/DisplayPrice';
+import { DataStoreKey } from '@/constants/checkout';
+import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 const BillingDetailsDisclaimer = () => {
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
+  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
+  const selectedProductLookupKey = academySelectionData?.selectedProduct?.lookupKey ?? null;
+
+  const {
+    yearlySubscriptionCostForQuantity: essentialsYearlySubscriptionCostForQuantity,
+  } = usePurchaseSummaryPricing(selectedProductLookupKey);
+
+  const effectiveYearlySubscriptionCostForQuantity = essentialsYearlySubscriptionCostForQuantity
+  ?? yearlySubscriptionCostForQuantity;
+
   const trialEndDate = dayjs().add(SUBSCRIPTION_TRIAL_LENGTH_DAYS, 'days').format(SHORT_MONTH_DATE_FORMAT);
   return (
     <p className="small font-weight-light">
@@ -22,7 +34,7 @@ const BillingDetailsDisclaimer = () => {
         description="Billing details disclaimer text before the line break in the billing details page"
         values={{
           trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
-          price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
+          price: (<DisplayPrice value={effectiveYearlySubscriptionCostForQuantity ?? 0} />),
         }}
       />
       <br /><br />
@@ -34,7 +46,7 @@ const BillingDetailsDisclaimer = () => {
           description="Billing details disclaimer text after the line break in the billing details page"
           values={{
             trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
-            price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
+            price: (<DisplayPrice value={effectiveYearlySubscriptionCostForQuantity ?? 0} />),
             trialEndDate,
           }}
         />

@@ -2,7 +2,7 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import {
-  Alert, Button, Card,
+  Alert, Card,
 } from '@openedx/paragon';
 import { useContext } from 'react';
 
@@ -40,6 +40,7 @@ const EssentialsAlert = () => {
   const academyDescription = product.description || '';
   const academyMarketingUrl = product.marketingUrl ?? '';
   const courseCount = product.courseCount ?? 0;
+  const learnMoreHref = academyMarketingUrl || ESSENTIALS_PRODUCT_URL || '#';
 
   return (
     <Alert data-testid="essentials-alert" className="essentials-alert m-0 text-white p-0">
@@ -83,9 +84,10 @@ const EssentialsAlert = () => {
             values={{
               academyName: <span className="font-weight-bold">{academyName}</span>,
               pickDifferentLink: (
-                <Button
-                  variant="link"
+                <a
                   href={ESSENTIALS_PRODUCT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="essentials-alert__link text-white d-inline-block p-0 mb-0"
                 >
                   <FormattedMessage
@@ -93,7 +95,7 @@ const EssentialsAlert = () => {
                     defaultMessage="Pick a different academy"
                     description="Link to pick a different academy"
                   />
-                </Button>
+                </a>
               ),
             }}
           />
@@ -113,10 +115,10 @@ const EssentialsAlert = () => {
                 />
               </span>
               )}
-              {academyMarketingUrl && (
-              <Button
-                variant="link"
-                href={academyMarketingUrl}
+              <a
+                href={academyMarketingUrl || ESSENTIALS_PRODUCT_URL || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="essentials-alert__learn-more ml-auto font-weight-bold"
               >
                 <FormattedMessage
@@ -124,8 +126,7 @@ const EssentialsAlert = () => {
                   defaultMessage="Learn more"
                   description="Link to learn more about the academy"
                 />
-              </Button>
-              )}
+              </a>
             </div>
 
             {academyDescription && (
@@ -145,9 +146,10 @@ const EssentialsAlert = () => {
             description="Upsell message for switching to Teams plan"
             values={{
               switchToTeamsLink: (
-                <Button
-                  variant="link"
+                <a
                   href={TEAMS_PRODUCT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="essentials-alert__footer-link p-0 m-0"
                 >
                   <FormattedMessage
@@ -155,7 +157,7 @@ const EssentialsAlert = () => {
                     defaultMessage="Switch to Teams"
                     description="Link to switch to Teams plan"
                   />
-                </Button>
+                </a>
               ),
             }}
           />

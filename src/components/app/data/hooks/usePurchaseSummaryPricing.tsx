@@ -25,13 +25,20 @@ export function calculateSubscriptionCost(quantity: number, unitAmount?: number 
   };
 }
 
-const usePurchaseSummaryPricing = () => {
+const usePurchaseSummaryPricing = (productLookupKey?: string | null) => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
   const { quantity } = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const { data: unitAmount } = useBFFContext(authenticatedUser?.userId ?? null, {
     select: (data): CheckoutContextPrice['unitAmount'] | null => {
       if (!data.pricing) {
         return null;
+      }
+      // If a specific product lookup key is provided (e.g., Essentials flow), try to
+      // find the matching price object by lookupKey. Otherwise fall back to the
+      // default price object extraction.
+      if (productLookupKey) {
+        const matched = data.pricing.prices.find((p) => p.lookupKey === productLookupKey);
+        return matched ? matched.unitAmount : null;
       }
       const priceObject = extractPriceObject(data.pricing);
       if (!priceObject) {

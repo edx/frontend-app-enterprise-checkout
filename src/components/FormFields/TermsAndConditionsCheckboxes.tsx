@@ -37,6 +37,19 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
     yearlySubscriptionCostForQuantity,
   } = usePurchaseSummaryPricing();
 
+  // If user selected an Essentials academy product, prefer its price (lookupKey)
+  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
+  const selectedProductLookupKey = academySelectionData?.selectedProduct?.lookupKey ?? null;
+
+  // Re-read pricing using the academy product lookup key when present
+
+  const {
+    yearlySubscriptionCostForQuantity: essentialsYearlySubscriptionCostForQuantity,
+  } = usePurchaseSummaryPricing(selectedProductLookupKey);
+
+  const effectiveYearlySubscriptionCostForQuantity = essentialsYearlySubscriptionCostForQuantity
+  ?? yearlySubscriptionCostForQuantity;
+
   const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     const checkoutIntentId = checkoutIntent?.id ?? null;
     const checkoutIntentUuid = checkoutIntent?.uuid ?? null;
@@ -182,7 +195,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
               defaultMessage="I agree to enroll in a recurring annual subscription for {price}/year USD."
               description="Checkbox label to confirm the recurring subscription with price"
               values={{
-                price: (<span className="font-weight-bold ml-1"><DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} /></span>),
+                price: (<span className="font-weight-bold ml-1"><DisplayPrice value={effectiveYearlySubscriptionCostForQuantity ?? 0} /></span>),
               }}
             />
           </Form.Checkbox>

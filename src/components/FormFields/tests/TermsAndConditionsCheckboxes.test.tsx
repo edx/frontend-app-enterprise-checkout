@@ -25,6 +25,13 @@ jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(),
 }));
 
+// Also mock the pricing hook so tests can simulate essentials vs default prices
+jest.mock('@/components/app/data', () => ({
+  ...jest.requireActual('@/components/app/data'),
+  useCheckoutIntent: jest.fn(),
+  usePurchaseSummaryPricing: jest.fn(),
+}));
+
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
 const { useCheckoutIntent } = jest.requireMock('@/components/app/data');
 
@@ -65,8 +72,46 @@ describe('TermsAndConditionsCheckboxes', () => {
           confirmSubscription: false,
           confirmRecurringSubscription: false,
         },
+        // default academy selection empty
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: null,
+        },
       },
     }));
+    // Default pricing hook behavior: return nulls
+    const { usePurchaseSummaryPricing } = jest.requireMock('@/components/app/data');
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => ({
+      yearlySubscriptionCostForQuantity: null,
+    }));
+  });
+
+  it('shows essentials price when academy product lookupKey is selected', () => {
+    const { usePurchaseSummaryPricing } = jest.requireMock('@/components/app/data');
+    // Default (no lookupKey) returns Teams/default price of 300
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation((productLookupKey?: string | null) => {
+      if (productLookupKey === 'essentials-lookup') {
+        return { yearlySubscriptionCostForQuantity: 150 };
+      }
+      return { yearlySubscriptionCostForQuantity: 300 };
+    });
+
+    // Set selected academy product in the shared store
+    checkoutFormStore.setState((s) => ({
+      ...s,
+      formData: {
+        ...s.formData,
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: { lookupKey: 'essentials-lookup' },
+        },
+      },
+    }));
+
+    render(<TestWrapper />);
+
+    // The recurring subscription checkbox label should contain the essentials price (150)
+    const matches = screen.getAllByText(/150/);
+    expect(matches.length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText(/300/)).toBeNull();
   });
 
   it('renders the expected checkbox labels', () => {
