@@ -8,8 +8,7 @@
 
 @import "/src/styles/nprogress.scss";
 
-/* Apply card/alert radius to root so Paragon card and alert components pick it up.
-   Also set button radius variables explicitly so buttons keep Paragon defaults. */
+/* Apply card/alert radius to root so Paragon card and alert components pick it up.*/
 :root {
   --pgn-size-card-border-radius-base: 16px;
   --pgn-size-alert-border-radius: 16px;
