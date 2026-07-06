@@ -8,6 +8,21 @@
 
 @import "/src/styles/nprogress.scss";
 
+/* Apply card/alert radius to root so Paragon card and alert components pick it up.
+   Also set button radius variables explicitly so buttons keep Paragon defaults. */
+:root {
+  --pgn-size-card-border-radius-base: 16px;
+  --pgn-size-alert-border-radius: 16px;
+  --pgn-size-btn-border-radius-base: 0.375rem;
+  --pgn-size-btn-border-radius-sm: 0.25rem;
+  --pgn-size-btn-border-radius-lg: 0.425rem;
+}
+
+/* Boxes that should follow card radius (FieldContainer and similar) */
+.ssp-box {
+  border-radius: var(--pgn-size-card-border-radius-base, 16px);
+}
+
 #layout {
   display: flex;
   flex-direction: column;

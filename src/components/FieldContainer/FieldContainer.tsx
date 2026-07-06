@@ -6,7 +6,7 @@ interface FieldContainerProps {
 }
 
 const FieldContainer = ({ children }: FieldContainerProps) => (
-  <Stack spacing={2} className="bg-light-300 p-4.5 rounded">
+  <Stack spacing={2} className="bg-light-300 p-4.5 ssp-box">
     {children}
   </Stack>
 );

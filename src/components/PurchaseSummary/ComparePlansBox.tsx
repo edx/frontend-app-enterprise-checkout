@@ -23,7 +23,7 @@ const ComparePlansBox = () => {
   );
 
   return (
-    <Card className="bg-light-300 rounded border border-light-400 p-4.5" style={{ width: 'min(100%, 401px)', minHeight: '120px' }}>
+    <Card className="bg-light-300 ssp-box border border-light-400 p-4.5" style={{ width: 'min(100%, 401px)', minHeight: '120px' }}>
       <Card.Body className="p-0">
         <p className="mb-0">
           <FormattedMessage
