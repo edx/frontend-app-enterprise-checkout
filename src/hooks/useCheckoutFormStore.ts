@@ -36,6 +36,13 @@ export const useCheckoutFormStore = create<FormStore>(
         },
       }),
     ),
+    productLookupKey: '',
+    setProductLookupKey: (productLookupKey: string) => set(
+      (store) => ({
+        ...store,
+        productLookupKey,
+      }),
+    ),
     /* Place to memorize the checkout session client secret. */
     checkoutSessionClientSecret: undefined,
     checkoutSessionStatus: {

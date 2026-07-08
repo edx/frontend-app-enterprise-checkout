@@ -316,6 +316,12 @@ const hydrateEssentialsProduct = (
       DataStoreKey.AcademySelection,
       { selectedProduct },
     );
+    if ((selectedProduct as any).lookupKey) {
+      checkoutFormStore.setState((s) => ({
+        ...s,
+        productLookupKey: (selectedProduct as any).lookupKey,
+      }));
+    }
   }
 };
 

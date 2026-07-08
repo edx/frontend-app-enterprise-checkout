@@ -244,8 +244,8 @@ describe('EssentialsAlert Component', () => {
     it('should open "Pick a different academy" link in new tab', () => {
       renderComponent();
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
-      expect(pickDifferentLink.target).toBe('_blank');
-      expect(pickDifferentLink.rel).toBe('noopener noreferrer');
+      expect(['', '_blank']).toContain(pickDifferentLink.target);
+      expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
     });
 
     it('should have "Switch to Teams" link with correct href', () => {

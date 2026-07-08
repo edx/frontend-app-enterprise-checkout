@@ -36,19 +36,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const {
     yearlySubscriptionCostForQuantity,
   } = usePurchaseSummaryPricing();
-
-  // If user selected an Essentials academy product, prefer its price (lookupKey)
-  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
-  const selectedProductLookupKey = academySelectionData?.selectedProduct?.lookupKey ?? null;
-
-  // Re-read pricing using the academy product lookup key when present
-
-  const {
-    yearlySubscriptionCostForQuantity: essentialsYearlySubscriptionCostForQuantity,
-  } = usePurchaseSummaryPricing(selectedProductLookupKey);
-
-  const effectiveYearlySubscriptionCostForQuantity = essentialsYearlySubscriptionCostForQuantity
-  ?? yearlySubscriptionCostForQuantity;
+  const effectiveYearlySubscriptionCostForQuantity = yearlySubscriptionCostForQuantity;
 
   const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     const checkoutIntentId = checkoutIntent?.id ?? null;

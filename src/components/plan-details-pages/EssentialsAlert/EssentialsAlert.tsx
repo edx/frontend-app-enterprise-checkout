@@ -83,10 +83,9 @@ const EssentialsAlert = () => {
             values={{
               academyName: <span className="font-weight-bold">{academyName}</span>,
               pickDifferentLink: (
-                <a
+                <Button
+                  variant="link"
                   href={ESSENTIALS_PRODUCT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="essentials-alert__link text-white d-inline-block p-0 mb-0"
                 >
                   <FormattedMessage
@@ -94,7 +93,7 @@ const EssentialsAlert = () => {
                     defaultMessage="Pick a different academy"
                     description="Link to pick a different academy"
                   />
-                </a>
+                </Button>
               ),
             }}
           />
@@ -146,7 +145,8 @@ const EssentialsAlert = () => {
             description="Upsell message for switching to Teams plan"
             values={{
               switchToTeamsLink: (
-                <a
+                <Button
+                  variant="link"
                   href={TEAMS_PRODUCT_URL}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -157,7 +157,7 @@ const EssentialsAlert = () => {
                     defaultMessage="Switch to Teams"
                     description="Link to switch to Teams plan"
                   />
-                </a>
+                </Button>
               ),
             }}
           />

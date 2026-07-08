@@ -120,6 +120,8 @@ declare global {
       step: K,
       data: Partial<FormData[K]>,
     ): void;
+    productLookupKey: string;
+    setProductLookupKey(productLookupKey: string): void;
     checkoutSessionClientSecret: string | undefined;
     checkoutSessionStatus: {
       type: StripeCheckoutStatus['type'] | null,

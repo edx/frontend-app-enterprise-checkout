@@ -123,8 +123,9 @@ describe('SubscriptionStartMessage', () => {
   });
 
   it('displays essentials price when academy product selected', () => {
-    (usePurchaseSummaryPricing as jest.Mock).mockImplementation((productLookupKey?: string | null) => {
-      if (productLookupKey === 'essentials-lookup') {
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => {
+      const key = checkoutFormStore.getState().productLookupKey;
+      if (key === 'essentials-lookup') {
         return { yearlySubscriptionCostForQuantity: 150 };
       }
       return { yearlySubscriptionCostForQuantity: 300 };
@@ -141,6 +142,12 @@ describe('SubscriptionStartMessage', () => {
       },
     }));
 
+    // Also set the product lookup key as the root loader would.
+    checkoutFormStore.setState((s: any) => ({
+      ...s,
+      productLookupKey: 'essentials-lookup',
+    }));
+
     // Mark the session as Essentials flow so component uses product lookupKey pricing
     sessionStorage.setItem('isEssentials', 'true');
 
@@ -153,8 +160,9 @@ describe('SubscriptionStartMessage', () => {
 
   it('BillingDetailsDisclaimer shows essentials price when academy selection set', () => {
     // Override pricing hook to return essentials vs default
-    (usePurchaseSummaryPricing as jest.Mock).mockImplementation((productLookupKey?: string | null) => {
-      if (productLookupKey === 'essentials-lookup') {
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => {
+      const key = checkoutFormStore.getState().productLookupKey;
+      if (key === 'essentials-lookup') {
         return { yearlySubscriptionCostForQuantity: 150 };
       }
       return { yearlySubscriptionCostForQuantity: 300 };
@@ -169,6 +177,12 @@ describe('SubscriptionStartMessage', () => {
           selectedProduct: { lookupKey: 'essentials-lookup' },
         },
       },
+    }));
+
+    // Mirror the loader hydration: set active product lookup key
+    checkoutFormStore.setState((s: any) => ({
+      ...s,
+      productLookupKey: 'essentials-lookup',
     }));
 
     // Render the disclaimer component and assert price

@@ -4,7 +4,7 @@ import { useContext, useMemo } from 'react';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { extractPriceObject } from '@/utils/checkout';
+import { extractPriceByProductLookupKey } from '@/utils/checkout';
 
 export function calculateSubscriptionCost(quantity: number, unitAmount?: number | null) {
   if (unitAmount == null) {
@@ -14,7 +14,7 @@ export function calculateSubscriptionCost(quantity: number, unitAmount?: number 
     };
   }
 
-  const yearlyCostPerSubscriptionPerUser = unitAmount / 100;
+  const yearlyCostPerSubscriptionPerUser = unitAmount;
   const yearlySubscriptionCostForQuantity = quantity && quantity > 0
     ? yearlyCostPerSubscriptionPerUser * quantity
     : null;
@@ -25,32 +25,13 @@ export function calculateSubscriptionCost(quantity: number, unitAmount?: number 
   };
 }
 
-const usePurchaseSummaryPricing = (productLookupKey?: string | null) => {
+const usePurchaseSummaryPricing = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
   const { quantity } = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
+  const productLookupKey = useCheckoutFormStore((state) => state.productLookupKey);
   const { data: unitAmount } = useBFFContext(authenticatedUser?.userId ?? null, {
-    select: (data): CheckoutContextPrice['unitAmount'] | null => {
-      if (!data.pricing) {
-        return null;
-      }
-      // If a specific product lookup key is provided (e.g., Essentials flow), try to
-      // find the matching price object by lookupKey. Otherwise fall back to the
-      // default price object extraction.
-      if (productLookupKey) {
-        const matched = data.pricing.prices.find((p) => p.lookupKey === productLookupKey);
-        if (matched) {
-          return matched.unitAmount;
-        }
-        // Fall through to default extraction if no matching price found
-      }
-      const priceObject = extractPriceObject(data.pricing);
-      if (!priceObject) {
-        return null;
-      }
-      return priceObject.unitAmount;
-    },
+    select: (data): number | null => extractPriceByProductLookupKey(data?.pricing, productLookupKey),
   });
-
   // This useMemo can be extended to return different purchase options in the future
   return useMemo(() => calculateSubscriptionCost(quantity, unitAmount), [quantity, unitAmount]);
 };

@@ -82,8 +82,9 @@ describe('TermsAndConditionsCheckboxes', () => {
   it('shows essentials price when academy product lookupKey is selected', () => {
     const { usePurchaseSummaryPricing } = jest.requireMock('@/components/app/data');
     // Default (no lookupKey) returns Teams/default price of 300
-    (usePurchaseSummaryPricing as jest.Mock).mockImplementation((productLookupKey?: string | null) => {
-      if (productLookupKey === 'essentials-lookup') {
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => {
+      const key = checkoutFormStore.getState().productLookupKey;
+      if (key === 'essentials-lookup') {
         return { yearlySubscriptionCostForQuantity: 150 };
       }
       return { yearlySubscriptionCostForQuantity: 300 };
@@ -98,6 +99,12 @@ describe('TermsAndConditionsCheckboxes', () => {
           selectedProduct: { lookupKey: 'essentials-lookup' },
         },
       },
+    }));
+
+    // Mirror loader hydration: set active product lookup key
+    checkoutFormStore.setState((s) => ({
+      ...s,
+      productLookupKey: 'essentials-lookup',
     }));
 
     render(<TestWrapper />);

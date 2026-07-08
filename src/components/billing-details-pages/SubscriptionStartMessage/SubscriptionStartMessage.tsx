@@ -11,9 +11,7 @@ import { LONG_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/compon
 import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { DisplayPrice } from '@/components/DisplayPrice';
 import { FieldContainer } from '@/components/FieldContainer';
-import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
-import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const freeTrialDateRangeText = (
@@ -28,7 +26,7 @@ const messages = defineMessages({
   },
 });
 
-const SubscriptionStartMessage = () => {
+export const SubscriptionStartMessage = () => {
   const intl = useIntl();
   const isEssentials = isEssentialsFlow();
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
@@ -36,19 +34,6 @@ const SubscriptionStartMessage = () => {
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
-  // If essentials flow and an academy product is selected, prefer its price
-  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
-  // Only use the selected product lookup key when this is the Essentials flow
-  const selectedProductLookupKey = isEssentials
-    ? academySelectionData?.selectedProduct?.lookupKey ?? null
-    : null;
-
-  const {
-    yearlySubscriptionCostForQuantity: essentialsYearlySubscriptionCostForQuantity,
-  } = usePurchaseSummaryPricing(selectedProductLookupKey);
-
-  const effectiveYearlySubscriptionCostForQuantity = essentialsYearlySubscriptionCostForQuantity
-  ?? yearlySubscriptionCostForQuantity;
 
   if (isLoading || !firstBillableInvoice) {
     return null;
@@ -105,7 +90,7 @@ const SubscriptionStartMessage = () => {
                   {intl.formatMessage(messages.subscriptionManagement)}
                 </a>
               ),
-              price: (<DisplayPrice value={effectiveYearlySubscriptionCostForQuantity ?? 0} />),
+              price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
             }}
           />
         </p>

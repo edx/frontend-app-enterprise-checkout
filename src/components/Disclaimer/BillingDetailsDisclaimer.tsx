@@ -4,20 +4,10 @@ import dayjs from 'dayjs';
 import { usePurchaseSummaryPricing } from '@/components/app/data';
 import { SHORT_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
 import { DisplayPrice } from '@/components/DisplayPrice';
-import { DataStoreKey } from '@/constants/checkout';
-import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 
 const BillingDetailsDisclaimer = () => {
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
-  const academySelectionData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AcademySelection]);
-  const selectedProductLookupKey = academySelectionData?.selectedProduct?.lookupKey ?? null;
-
-  const {
-    yearlySubscriptionCostForQuantity: essentialsYearlySubscriptionCostForQuantity,
-  } = usePurchaseSummaryPricing(selectedProductLookupKey);
-
-  const effectiveYearlySubscriptionCostForQuantity = essentialsYearlySubscriptionCostForQuantity
-  ?? yearlySubscriptionCostForQuantity;
+  const effectiveYearlySubscriptionCostForQuantity = yearlySubscriptionCostForQuantity;
 
   const trialEndDate = dayjs().add(SUBSCRIPTION_TRIAL_LENGTH_DAYS, 'days').format(SHORT_MONTH_DATE_FORMAT);
   return (
