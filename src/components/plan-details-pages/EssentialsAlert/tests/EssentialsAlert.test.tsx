@@ -241,10 +241,11 @@ describe('EssentialsAlert Component', () => {
       expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
     });
 
-    it('should open "Pick a different academy" link in new tab', () => {
+    it('should open "Pick a different academy" link in same tab', () => {
       renderComponent();
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
-      expect(['', '_blank']).toContain(pickDifferentLink.target);
+      // The Essentials link intentionally opens in the current tab (no target="_blank")
+      expect(pickDifferentLink.target).toBe('');
       expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
     });
 

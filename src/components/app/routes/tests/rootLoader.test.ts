@@ -51,19 +51,24 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 }));
 
 // Mock the checkout form store used by the loader to persist lookup keys
-jest.mock('@/hooks/useCheckoutFormStore', () => ({
-  checkoutFormStore: {
-    // getState returns a minimal shape used by rootLoader
-    getState: jest.fn(() => ({ productLookupKey: null, setProductLookupKey: jest.fn() })),
-    // setState/setProductLookupKey may be invoked; provide no-op mocks
+jest.mock('@/hooks/useCheckoutFormStore', () => {
+  const checkoutFormStore = {
+    getState: jest.fn(() => ({ productLookupKey: null, formData: {}, setProductLookupKey: jest.fn() })),
     setState: jest.fn(),
     setProductLookupKey: jest.fn(),
-  },
-  useCheckoutFormStore: {
-    getState: jest.fn(() => ({ productLookupKey: null, setProductLookupKey: jest.fn() })),
-    setState: jest.fn(),
-  },
-}));
+    setFormData: jest.fn(),
+  };
+
+  const useCheckoutFormStore = jest.fn((selector: any) => {
+    const state = { productLookupKey: null, formData: {} };
+    return typeof selector === 'function' ? selector(state) : state;
+  });
+
+  return {
+    checkoutFormStore,
+    useCheckoutFormStore,
+  };
+});
 
 jest.mock('@/components/app/routes/loaders/utils', () => ({
   determineExistingCheckoutIntentState: jest.fn(),

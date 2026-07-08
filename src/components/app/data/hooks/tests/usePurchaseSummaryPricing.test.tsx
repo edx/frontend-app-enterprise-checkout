@@ -128,4 +128,12 @@ describe('usePurchaseSummaryPricing (hook)', () => {
     expect(screen.getByTestId('per-user')).toHaveTextContent('null');
     expect(screen.getByTestId('total')).toHaveTextContent('null');
   });
+
+  it('checkoutFormStore.setProductLookupKey updates the productLookupKey in the store', () => {
+    checkoutFormStore.getState().setProductLookupKey('');
+
+    checkoutFormStore.getState().setProductLookupKey('essentials-lookup');
+
+    expect(checkoutFormStore.getState().productLookupKey).toBe('essentials-lookup');
+  });
 });

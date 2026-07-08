@@ -34,6 +34,15 @@ describe('SubscriptionStartMessage', () => {
   beforeEach(() => {
     // Reset sessionStorage between tests
     sessionStorage.clear();
+    // Reset shared checkout store fields to avoid cross-test pollution
+    checkoutFormStore.setState((s: any) => ({
+      ...s,
+      productLookupKey: '',
+      formData: {
+        ...s.formData,
+        [DataStoreKey.AcademySelection]: { selectedProduct: null },
+      },
+    }));
     // Mock the hook to return data that will render "June 9th, 2025"
     (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
       data: {
