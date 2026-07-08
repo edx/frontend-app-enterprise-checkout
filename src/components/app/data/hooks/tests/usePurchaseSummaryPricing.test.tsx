@@ -87,7 +87,7 @@ describe('usePurchaseSummaryPricing (hook)', () => {
     checkoutFormStore.setState((s) => ({ ...s, productLookupKey: 'essentials_test_key' }));
 
     // Mock useBFFContext to invoke the provided selector with a fake pricing payload
-    mockedUseBFFContext.mockImplementation((userId: any, options: any) => {
+    mockedUseBFFContext.mockImplementation((_userId: any, options: any) => {
       const fakePricing = {
         prices: [
           { lookupKey: 'essentials_test_key', unitAmount: 7500 },
