@@ -254,6 +254,9 @@ describe('EssentialsAlert Component', () => {
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
       expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
+      expect(switchToTeamsLink.target).toBe('_blank');
+      expect(switchToTeamsLink.rel).toContain('noopener');
+      expect(switchToTeamsLink.rel).toContain('noreferrer');
     });
 
     it('should have "Learn more" link with dynamic marketing URL', () => {

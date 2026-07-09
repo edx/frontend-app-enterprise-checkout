@@ -72,6 +72,8 @@ describe('TermsAndConditionsCheckboxes', () => {
         },
       },
     }));
+    // Reset any persisted product lookup key to avoid cross-test pollution
+    checkoutFormStore.setState((s) => ({ ...s, productLookupKey: '' }));
     // Default pricing hook behavior: return nulls
     const { usePurchaseSummaryPricing } = jest.requireMock('@/components/app/data');
     (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => ({

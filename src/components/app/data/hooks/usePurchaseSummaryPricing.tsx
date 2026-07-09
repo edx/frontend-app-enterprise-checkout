@@ -31,7 +31,8 @@ const usePurchaseSummaryPricing = () => {
   const productLookupKey = useCheckoutFormStore((state) => state.productLookupKey);
   const { data: unitAmount } = useBFFContext(authenticatedUser?.userId ?? null, {
     select: (data): number | null => {
-      const matched = extractPriceObject(data?.pricing as any, productLookupKey);
+      if (!data?.pricing) { return null; }
+      const matched = extractPriceObject(data.pricing, productLookupKey);
       return matched ? matched.unitAmount / 100 : null;
     },
   });
