@@ -107,6 +107,7 @@ describe('utils.ts', () => {
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
+        sspProductSlug: '',
       });
 
       // Ensure setState called with updater fn and "false" (replace action behavior flag)
@@ -154,6 +155,7 @@ describe('utils.ts', () => {
         checkoutIntent: null as any,
         authenticatedUser: emptyUser,
         stripePriceId: null,
+        sspProductSlug: '',
       });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
@@ -208,6 +210,7 @@ describe('utils.ts', () => {
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
+        sspProductSlug: '',
       });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
@@ -257,6 +260,7 @@ describe('utils.ts', () => {
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
+        sspProductSlug: '',
       });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
