@@ -75,7 +75,6 @@ const makeRootLoader = (
   queryClient: QueryClient,
 ): LoaderFunction => async function rootLoader({ request }) {
   const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
-  const SSP_PRODUCT_KEY_SESSION_KEY = 'edx.checkout.ssp-product-key';
 
   const {
     FEATURE_SELF_SERVICE_SITE_KEY,
@@ -174,11 +173,9 @@ const makeRootLoader = (
     'essentials_communication_subscription_license_yearly',
   ]);
 
+  // Read product_key from query params only; do not persist to sessionStorage.
   const queryProductKey = searchParams.get('product_key');
-  if (queryProductKey) {
-    sessionStorage.setItem(SSP_PRODUCT_KEY_SESSION_KEY, queryProductKey);
-  }
-  const productKey = queryProductKey ?? sessionStorage.getItem(SSP_PRODUCT_KEY_SESSION_KEY);
+  const productKey = queryProductKey;
 
   if (productKey) {
     try {
@@ -223,10 +220,16 @@ const makeRootLoader = (
     expiredCheckoutIntent,
   } = determineExistingCheckoutIntentState(checkoutIntent);
   const { productLookupKey: storedLookupKey } = checkoutFormStore.getState();
-  const productKeyIsLookupKey = !!productKey && !!pricing?.prices?.some(
-    (price) => price.lookupKey === productKey,
-  );
-  const lookupKey = storedLookupKey || (productKeyIsLookupKey ? productKey : null) || pricing?.defaultByLookupKey;
+
+  // Validate whether the provided productKey corresponds to a pricing.lookupKey.
+  // Returns the key when valid, otherwise `null` to allow concise fallback logic.
+  const validateProductKey = (pricingObj: any, key?: string | null): string | null => {
+    if (!key || !pricingObj?.prices) { return null; }
+    return pricingObj.prices.some((p: any) => p.lookupKey === key) ? key : null;
+  };
+
+  const validatedLookupKey = validateProductKey(pricing, productKey);
+  const lookupKey = storedLookupKey || validatedLookupKey || pricing?.defaultByLookupKey;
 
   if (lookupKey) {
     checkoutFormStore.getState().setProductLookupKey(lookupKey);

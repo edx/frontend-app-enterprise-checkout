@@ -292,7 +292,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(result).toBeNull();
   });
 
-  it('prefers stored productLookupKey over non-lookup session product_key for essentials pricing resolution', async () => {
+  it('prefers stored productLookupKey over non-lookup product_key for essentials pricing resolution', async () => {
     const authenticatedUser = { email: 'a@b.com', name: 'Alice', username: 'alice', country: 'US' };
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
     (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
@@ -313,7 +313,6 @@ describe('makeRootLoader (rootLoader) tests', () => {
         ],
       },
     } as any);
-    sessionStorage.setItem('edx.checkout.ssp-product-key', 'ai-academy-yearly');
     (checkoutFormStore.getState as jest.Mock).mockReturnValue({
       productLookupKey: ESSENTIALS_LOOKUP_KEY,
       setProductLookupKey: jest.fn(),
@@ -321,7 +320,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     });
 
     const loader = makeRootLoader(queryClient);
-    await loader({ request: makeRequest(EssentialsPageRoute.AccountDetails) } as any);
+    await loader({ request: makeRequest(`${EssentialsPageRoute.AccountDetails}?product_key=${encodeURIComponent('ai-academy-yearly')}`) } as any);
 
     expect(extractPriceId).toHaveBeenCalledWith(expect.anything(), ESSENTIALS_LOOKUP_KEY);
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith(expect.objectContaining({
@@ -478,12 +477,11 @@ describe('makeRootLoader (rootLoader) tests', () => {
       });
     });
 
-    it('sets sessionStorage isEssentials on essentials path without product_key when prior essentials key exists in session', async () => {
-      sessionStorage.setItem('edx.checkout.ssp-product-key', ESSENTIALS_LOOKUP_KEY);
+    it('sets sessionStorage isEssentials when product_key is present', async () => {
       const loader = makeRootLoader(queryClient);
 
       await loader({
-        request: makeRequest(EssentialsPageRoute.PlanDetails),
+        request: makeRequest(`${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`),
       } as any);
 
       expect(sessionStorage.getItem('isEssentials')).toBe('true');
