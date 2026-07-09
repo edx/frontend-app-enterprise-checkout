@@ -64,7 +64,7 @@ export const extractPriceObject = (
   // If an explicit lookupKey is provided, prefer an exact match
   if (lookupKey) {
     const exact = pricing.prices.find((price) => price.lookupKey === lookupKey);
-    if (exact) return exact;
+    if (exact) { return exact; }
   }
 
   // Fallback to existing behavior: find by defaultByLookupKey substring
