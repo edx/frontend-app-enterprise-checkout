@@ -14,7 +14,7 @@ import { determineExistingCheckoutIntentState,
   populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { extractPriceId } from '@/utils/checkout';
+import { extractPriceId, extractPriceObject } from '@/utils/checkout';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -75,6 +75,7 @@ const makeRootLoader = (
   queryClient: QueryClient,
 ): LoaderFunction => async function rootLoader({ request }) {
   const SSP_SESSION_KEY = 'edx.checkout.self-service-purchasing';
+  const SSP_PRODUCT_KEY_SESSION_KEY = 'edx.checkout.ssp-product-key';
 
   const {
     FEATURE_SELF_SERVICE_SITE_KEY,
@@ -158,6 +159,7 @@ const makeRootLoader = (
   // Parse query params & check essentials keys
   const url = new URL(request.url);
   const { searchParams } = url;
+  const isEssentialsRoute = isPathMatch(currentPath, EssentialsPageRoute.Base);
 
   // list of accepted essentials product_keys
   const essentialsLookupKeys = new Set<string>([
@@ -172,7 +174,11 @@ const makeRootLoader = (
     'essentials_communication_subscription_license_yearly',
   ]);
 
-  const productKey = searchParams.get('product_key');
+  const queryProductKey = searchParams.get('product_key');
+  if (queryProductKey) {
+    sessionStorage.setItem(SSP_PRODUCT_KEY_SESSION_KEY, queryProductKey);
+  }
+  const productKey = queryProductKey ?? sessionStorage.getItem(SSP_PRODUCT_KEY_SESSION_KEY);
 
   if (productKey) {
     try {
@@ -186,8 +192,7 @@ const makeRootLoader = (
     }
   }
 
-  // Determine if current path is Essentials by route or by query product_key
-  const isEssentialsRoute = isPathMatch(currentPath, '/essentials');
+  // Keep essentials flow true across all /essentials/* steps, even when product_key is not present.
   const isEssentialsProduct = !!productKey && essentialsLookupKeys.has(productKey);
   const isEssentialsPath = isEssentialsRoute || isEssentialsProduct;
 
@@ -218,16 +223,22 @@ const makeRootLoader = (
     expiredCheckoutIntent,
   } = determineExistingCheckoutIntentState(checkoutIntent);
   const { productLookupKey: storedLookupKey } = checkoutFormStore.getState();
-  const lookupKey = productKey || storedLookupKey || pricing?.defaultByLookupKey;
+  const productKeyIsLookupKey = !!productKey && !!pricing?.prices?.some(
+    (price) => price.lookupKey === productKey,
+  );
+  const lookupKey = storedLookupKey || (productKeyIsLookupKey ? productKey : null) || pricing?.defaultByLookupKey;
 
   if (lookupKey) {
     checkoutFormStore.getState().setProductLookupKey(lookupKey);
   }
+  const priceObject = extractPriceObject(pricing, lookupKey);
   const stripePriceId = extractPriceId(pricing, lookupKey);
+  const sspProductSlug = priceObject?.sspProductSlug ?? '';
 
   populateInitialApplicationState({
     checkoutIntent,
     stripePriceId,
+    sspProductSlug,
     authenticatedUser,
   });
 

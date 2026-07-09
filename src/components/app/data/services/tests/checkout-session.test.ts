@@ -24,7 +24,9 @@ describe('createCheckoutSession', () => {
   const mockConfig = {
     ENTERPRISE_ACCESS_BASE_URL: 'https://example.com',
   };
-  const mockRequest = createCheckoutSessionRequestFactory();
+  const mockRequest = createCheckoutSessionRequestFactory({
+    sspProductSlug: 'teams_yearly',
+  });
   const baseUrl = 'https://example.com/api/v1/customer-billing/create-checkout-session/';
 
   beforeEach(() => {
@@ -53,6 +55,19 @@ describe('createCheckoutSession', () => {
       snakeCaseObject(mockRequest),
       expect.anything(), // axios config.
     );
+  });
+
+  it('should snake_case sspProductSlug into ssp_product_slug when provided', async () => {
+    const mockSuccessResponse = {
+      data: createCheckoutSessionSuccessResponseFactory(),
+    } as AxiosResponse<CreateCheckoutSessionSuccessResponseSchema>;
+    mockPost.mockResolvedValue(mockSuccessResponse);
+
+    await createCheckoutSession(mockRequest);
+
+    const postedPayload = mockPost.mock.calls[0][1];
+    expect(postedPayload).toHaveProperty('ssp_product_slug', 'teams_yearly');
+    expect(postedPayload).not.toHaveProperty('sspProductSlug');
   });
 
   it('should return the successful response from the API', async () => {

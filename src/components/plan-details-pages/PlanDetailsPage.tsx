@@ -59,6 +59,7 @@ const PlanDetailsPage = () => {
 
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
+  const sspProductSlug = useCheckoutFormStore((state) => state.sspProductSlug);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
   const navigate = useNavigate();
@@ -198,6 +199,7 @@ const PlanDetailsPage = () => {
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
+        sspProductSlug,
       });
       await invalidateCheckoutQueries(queryClient);
     },
@@ -219,6 +221,7 @@ const PlanDetailsPage = () => {
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
+        sspProductSlug,
       });
       // Now refresh context cache used by rootLoader/loaders
       await invalidateCheckoutQueries(queryClient);
@@ -292,6 +295,7 @@ const PlanDetailsPage = () => {
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
+        sspProductSlug,
         // TODO: Record terms metadata too.
       });
     },

@@ -21,7 +21,22 @@ jest.mock('@hookform/resolvers/zod', () => ({
 }));
 
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
-  checkoutFormStore: { setState: jest.fn(), getState: jest.fn() },
+  checkoutFormStore: {
+    setState: jest.fn(),
+    getState: jest.fn(() => ({
+      setSspProductSlug: jest.fn(),
+      setProductLookupKey: jest.fn(),
+      formData: {
+        [DataStoreKey.PlanDetails]: {},
+        [DataStoreKey.AccountDetails]: {},
+        [DataStoreKey.BillingDetails]: {},
+      },
+      checkoutSessionStatus: {
+        type: null,
+        paymentStatus: null,
+      },
+    })),
+  },
 }));
 // Helper types for test inputs (loosely typed to avoid coupling to app types)
 type TestCheckoutIntent = {

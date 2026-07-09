@@ -622,6 +622,7 @@ describe('PlanDetailsRegistrationPage - reCAPTCHA null token behavior', () => {
     // Pre-populate the plan details form data so read-only fields are satisfied
     checkoutFormStore.setState((state: any) => ({
       ...state,
+      sspProductSlug: 'teams_yearly',
       formData: {
         ...state.formData,
         [DataStoreKey.PlanDetails]: {
@@ -822,6 +823,10 @@ describe('PlanDetailsPage - Button Pending State', () => {
     await waitFor(() => {
       expect(createCheckoutIntentMutateSpy).toHaveBeenCalled();
     });
+
+    expect(createCheckoutIntentMutateSpy).toHaveBeenCalledWith(expect.objectContaining({
+      sspProductSlug: 'teams_yearly',
+    }));
 
     // Try clicking again while pending - should not trigger another mutation call
     await user.click(submitButton);

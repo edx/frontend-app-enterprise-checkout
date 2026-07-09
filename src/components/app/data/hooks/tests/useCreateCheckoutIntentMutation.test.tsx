@@ -30,6 +30,7 @@ const createWrapper = () => {
 const createMockRequest = (overrides = {}) => ({
   quantity: 10,
   country: 'US',
+  sspProductSlug: 'teams_yearly',
   ...overrides,
 });
 
