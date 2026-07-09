@@ -92,6 +92,8 @@ function setup(overrides = {}) {
         },
       },
       setFormData: jest.fn(),
+      productLookupKey: '',
+      setProductLookupKey: jest.fn(),
       checkoutSessionClientSecret: undefined,
       checkoutSessionStatus: {
         type: null,
@@ -169,6 +171,8 @@ describe('StatefulSubscribeButton', () => {
             },
           },
           setFormData: jest.fn(),
+          productLookupKey: '',
+          setProductLookupKey: jest.fn(),
           checkoutSessionClientSecret: undefined,
           checkoutSessionStatus: {
             type: null,
@@ -210,6 +214,8 @@ describe('StatefulSubscribeButton', () => {
             },
           },
           setFormData: jest.fn(),
+          productLookupKey: '',
+          setProductLookupKey: jest.fn(),
           checkoutSessionClientSecret: undefined,
           checkoutSessionStatus: {
             type: null,
@@ -251,6 +257,8 @@ describe('StatefulSubscribeButton', () => {
             },
           },
           setFormData: jest.fn(),
+          productLookupKey: '',
+          setProductLookupKey: jest.fn(),
           checkoutSessionClientSecret: undefined,
           checkoutSessionStatus: {
             type: null,

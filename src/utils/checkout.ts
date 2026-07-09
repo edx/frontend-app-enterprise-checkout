@@ -53,18 +53,32 @@ export function getCheckoutPageDetails(
   return null;
 }
 
-export const extractPriceObject = (pricing: CheckoutContextPricing): CheckoutContextPrice | null => {
-  if (!pricing.prices.length) {
+export const extractPriceObject = (
+  pricing: CheckoutContextPricing,
+  lookupKey?: string | null,
+): CheckoutContextPrice | null => {
+  if (!pricing?.prices?.length) {
     return null;
   }
+
+  // If an explicit lookupKey is provided, prefer an exact match
+  if (lookupKey) {
+    const exact = pricing.prices.find((price) => price.lookupKey === lookupKey);
+    if (exact) { return exact; }
+  }
+
+  // Fallback to existing behavior: find by defaultByLookupKey substring
   return pricing.prices.find((price) => price.lookupKey.includes(pricing.defaultByLookupKey)) ?? null;
 };
 
-export const extractPriceId = (pricing: CheckoutContextPricing): CheckoutContextPrice['id'] | null => {
-  if (!pricing.prices.length) {
+export const extractPriceId = (
+  pricing: CheckoutContextPricing,
+  lookupKey?: string | null,
+): CheckoutContextPrice['id'] | null => {
+  if (!pricing?.prices?.length) {
     return null;
   }
-  const matched = extractPriceObject(pricing);
+  const matched = extractPriceObject(pricing, lookupKey);
   return matched?.id ?? null;
 };
 
@@ -76,9 +90,7 @@ export const extractPriceByProductLookupKey = (
   if (!pricing?.prices?.length || !lookupKey) {
     return null;
   }
-  const matched = pricing.prices.find(
-    (price) => price.lookupKey === lookupKey,
-  );
+  const matched = extractPriceObject(pricing as CheckoutContextPricing, lookupKey);
   return matched ? matched.unitAmount / 100 : null;
 };
 

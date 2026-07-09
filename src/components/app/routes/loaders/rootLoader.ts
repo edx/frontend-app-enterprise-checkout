@@ -13,6 +13,7 @@ import { determineExistingCheckoutIntentState,
   hydrateEssentialsProduct,
   populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId } from '@/utils/checkout';
 
 /**
@@ -216,8 +217,13 @@ const makeRootLoader = (
     existingSuccessfulCheckoutIntent,
     expiredCheckoutIntent,
   } = determineExistingCheckoutIntentState(checkoutIntent);
+  const { productLookupKey: storedLookupKey } = checkoutFormStore.getState();
+  const lookupKey = productKey || storedLookupKey || pricing?.defaultByLookupKey;
 
-  const stripePriceId = extractPriceId(pricing);
+  if (lookupKey) {
+    checkoutFormStore.getState().setProductLookupKey(lookupKey);
+  }
+  const stripePriceId = extractPriceId(pricing, lookupKey);
 
   populateInitialApplicationState({
     checkoutIntent,

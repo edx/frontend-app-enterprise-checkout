@@ -33,9 +33,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore(state => state.setFormData);
   const { data: checkoutIntent } = useCheckoutIntent();
-  const {
-    yearlySubscriptionCostForQuantity,
-  } = usePurchaseSummaryPricing();
+  const { yearlySubscriptionCostForQuantity: effectiveYearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
 
   const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     const checkoutIntentId = checkoutIntent?.id ?? null;
@@ -182,7 +180,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
               defaultMessage="I agree to enroll in a recurring annual subscription for {price}/year USD."
               description="Checkbox label to confirm the recurring subscription with price"
               values={{
-                price: (<span className="font-weight-bold ml-1"><DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} /></span>),
+                price: (<span className="font-weight-bold ml-1"><DisplayPrice value={effectiveYearlySubscriptionCostForQuantity ?? 0} /></span>),
               }}
             />
           </Form.Checkbox>

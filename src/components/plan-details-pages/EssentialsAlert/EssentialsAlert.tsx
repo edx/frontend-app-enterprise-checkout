@@ -148,6 +148,8 @@ const EssentialsAlert = () => {
                 <Button
                   variant="link"
                   href={TEAMS_PRODUCT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="essentials-alert__footer-link p-0 m-0"
                 >
                   <FormattedMessage

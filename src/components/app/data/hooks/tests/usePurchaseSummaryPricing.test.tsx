@@ -52,18 +52,18 @@ describe('calculateSubscriptionCost (helper)', () => {
   });
 
   it('computes per-user and total correctly for positive quantity', () => {
-    // unitAmount is in cents; 5000 => $50
-    const result = calculateSubscriptionCost(3, 5000);
+    // unitPrice is in dollars
+    const result = calculateSubscriptionCost(3, 50);
     expect(result.yearlyCostPerSubscriptionPerUser).toBe(50);
     expect(result.yearlySubscriptionCostForQuantity).toBe(150);
   });
 
   it('returns total as null when quantity is falsy but still exposes per-user price', () => {
-    const result0 = calculateSubscriptionCost(0, 5000);
+    const result0 = calculateSubscriptionCost(0, 50);
     expect(result0.yearlyCostPerSubscriptionPerUser).toBe(50);
     expect(result0.yearlySubscriptionCostForQuantity).toBeNull();
 
-    const resultNullQty = calculateSubscriptionCost((undefined as unknown) as number, 5000);
+    const resultNullQty = calculateSubscriptionCost((undefined as unknown) as number, 50);
     expect(resultNullQty.yearlyCostPerSubscriptionPerUser).toBe(50);
     expect(resultNullQty.yearlySubscriptionCostForQuantity).toBeNull();
   });
@@ -82,9 +82,34 @@ describe('usePurchaseSummaryPricing (hook)', () => {
     }));
   });
 
-  it('derives prices from useBFFContext unitAmount and store quantity', () => {
-    // Simulate BFF returning a unitAmount (cents)
-    mockedUseBFFContext.mockReturnValue({ data: 5000 });
+  it('uses the stored productLookupKey when selecting price from BFF context', () => {
+    // Arrange: set a productLookupKey in the store and provide a fake pricing payload
+    checkoutFormStore.setState((s) => ({ ...s, productLookupKey: 'essentials_test_key' }));
+
+    // Mock useBFFContext to invoke the provided selector with a fake pricing payload
+    mockedUseBFFContext.mockImplementation((_userId: any, options: any) => {
+      const fakePricing = {
+        prices: [
+          { lookupKey: 'essentials_test_key', unitAmount: 7500 },
+          { lookupKey: 'teams_subscription_license_yearly', unitAmount: 20000 },
+        ],
+        defaultByLookupKey: 'teams_subscription_license_yearly',
+      } as any;
+      const selected = options && typeof options.select === 'function'
+        ? options.select({ pricing: fakePricing })
+        : null;
+      return { data: selected };
+    });
+
+    renderWithAppContext(<HookConsumer />);
+
+    expect(screen.getByTestId('per-user')).toHaveTextContent('75');
+    expect(screen.getByTestId('total')).toHaveTextContent('300');
+  });
+
+  it('derives prices from useBFFContext unitPrice and store quantity', () => {
+    // Simulate BFF returning a unitPrice (dollars) after extractor select
+    mockedUseBFFContext.mockReturnValue({ data: 50 });
 
     renderWithAppContext(<HookConsumer />);
 
@@ -102,5 +127,13 @@ describe('usePurchaseSummaryPricing (hook)', () => {
 
     expect(screen.getByTestId('per-user')).toHaveTextContent('null');
     expect(screen.getByTestId('total')).toHaveTextContent('null');
+  });
+
+  it('checkoutFormStore.setProductLookupKey updates the productLookupKey in the store', () => {
+    checkoutFormStore.getState().setProductLookupKey('');
+
+    checkoutFormStore.getState().setProductLookupKey('essentials-lookup');
+
+    expect(checkoutFormStore.getState().productLookupKey).toBe('essentials-lookup');
   });
 });

@@ -416,11 +416,13 @@ describe('validateFormState – Essentials flow', () => {
 
 describe('hydrateEssentialsProduct', () => {
   const mockSetFormData = jest.fn();
+  const mockSetProductLookupKey = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (checkoutFormStore.getState as jest.Mock).mockReturnValue({
       setFormData: mockSetFormData,
+      setProductLookupKey: mockSetProductLookupKey,
     });
   });
 

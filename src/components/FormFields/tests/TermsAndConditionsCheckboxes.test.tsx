@@ -19,10 +19,11 @@ jest.mock('@/utils/common', () => ({
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
 }));
 
-// Mock checkout intent hook via app data barrel
+// Mock checkout intent and pricing hooks via app data barrel
 jest.mock('@/components/app/data', () => ({
   ...jest.requireActual('@/components/app/data'),
   useCheckoutIntent: jest.fn(),
+  usePurchaseSummaryPricing: jest.fn(),
 }));
 
 const { sendEnterpriseCheckoutTrackingEvent } = jest.requireMock('@/utils/common');
@@ -65,8 +66,55 @@ describe('TermsAndConditionsCheckboxes', () => {
           confirmSubscription: false,
           confirmRecurringSubscription: false,
         },
+        // default academy selection empty
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: null,
+        },
       },
     }));
+    // Reset any persisted product lookup key to avoid cross-test pollution
+    checkoutFormStore.setState((s) => ({ ...s, productLookupKey: '' }));
+    // Default pricing hook behavior: return nulls
+    const { usePurchaseSummaryPricing } = jest.requireMock('@/components/app/data');
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => ({
+      yearlySubscriptionCostForQuantity: null,
+    }));
+  });
+
+  it('shows essentials price when academy product lookupKey is selected', () => {
+    const { usePurchaseSummaryPricing } = jest.requireMock('@/components/app/data');
+    // Default (no lookupKey) returns Teams/default price of 300
+    (usePurchaseSummaryPricing as jest.Mock).mockImplementation(() => {
+      const key = checkoutFormStore.getState().productLookupKey;
+      if (key === 'essentials-lookup') {
+        return { yearlySubscriptionCostForQuantity: 150 };
+      }
+      return { yearlySubscriptionCostForQuantity: 300 };
+    });
+
+    // Set selected academy product in the shared store
+    checkoutFormStore.setState((s) => ({
+      ...s,
+      formData: {
+        ...s.formData,
+        [DataStoreKey.AcademySelection]: {
+          selectedProduct: { lookupKey: 'essentials-lookup' },
+        },
+      },
+    }));
+
+    // Mirror loader hydration: set active product lookup key
+    checkoutFormStore.setState((s) => ({
+      ...s,
+      productLookupKey: 'essentials-lookup',
+    }));
+
+    render(<TestWrapper />);
+
+    // The recurring subscription checkbox label should contain the essentials price (150)
+    const matches = screen.getAllByText(/150/);
+    expect(matches.length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText(/300/)).toBeNull();
   });
 
   it('renders the expected checkbox labels', () => {

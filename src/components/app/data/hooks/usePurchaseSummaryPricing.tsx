@@ -14,7 +14,7 @@ export function calculateSubscriptionCost(quantity: number, unitAmount?: number 
     };
   }
 
-  const yearlyCostPerSubscriptionPerUser = unitAmount / 100;
+  const yearlyCostPerSubscriptionPerUser = unitAmount;
   const yearlySubscriptionCostForQuantity = quantity && quantity > 0
     ? yearlyCostPerSubscriptionPerUser * quantity
     : null;
@@ -28,19 +28,14 @@ export function calculateSubscriptionCost(quantity: number, unitAmount?: number 
 const usePurchaseSummaryPricing = () => {
   const { authenticatedUser }:AppContextValue = useContext(AppContext);
   const { quantity } = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
+  const productLookupKey = useCheckoutFormStore((state) => state.productLookupKey);
   const { data: unitAmount } = useBFFContext(authenticatedUser?.userId ?? null, {
-    select: (data): CheckoutContextPrice['unitAmount'] | null => {
-      if (!data.pricing) {
-        return null;
-      }
-      const priceObject = extractPriceObject(data.pricing);
-      if (!priceObject) {
-        return null;
-      }
-      return priceObject.unitAmount;
+    select: (data): number | null => {
+      if (!data?.pricing) { return null; }
+      const matched = extractPriceObject(data.pricing, productLookupKey);
+      return matched ? matched.unitAmount / 100 : null;
     },
   });
-
   // This useMemo can be extended to return different purchase options in the future
   return useMemo(() => calculateSubscriptionCost(quantity, unitAmount), [quantity, unitAmount]);
 };

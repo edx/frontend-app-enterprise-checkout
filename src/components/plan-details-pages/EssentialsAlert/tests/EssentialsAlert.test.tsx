@@ -244,7 +244,9 @@ describe('EssentialsAlert Component', () => {
     it('should open "Pick a different academy" link in same tab', () => {
       renderComponent();
       const pickDifferentLink = screen.getByText('Pick a different academy') as HTMLAnchorElement;
-      expect(pickDifferentLink.target).not.toBe('_blank');
+      // The Essentials link intentionally opens in the current tab (no target="_blank")
+      expect(pickDifferentLink.target).toBe('');
+      expect(pickDifferentLink.href).toContain('business.edx.org/course-library-plans-essentials/');
     });
 
     it('should have "Switch to Teams" link with correct href', () => {
@@ -252,6 +254,9 @@ describe('EssentialsAlert Component', () => {
       const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
       expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
+      expect(switchToTeamsLink.target).toBe('_blank');
+      expect(switchToTeamsLink.rel).toContain('noopener');
+      expect(switchToTeamsLink.rel).toContain('noreferrer');
     });
 
     it('should have "Learn more" link with dynamic marketing URL', () => {

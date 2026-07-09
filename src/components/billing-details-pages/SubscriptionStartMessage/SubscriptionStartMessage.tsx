@@ -26,7 +26,7 @@ const messages = defineMessages({
   },
 });
 
-const SubscriptionStartMessage = () => {
+export const SubscriptionStartMessage = () => {
   const intl = useIntl();
   const isEssentials = isEssentialsFlow();
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
