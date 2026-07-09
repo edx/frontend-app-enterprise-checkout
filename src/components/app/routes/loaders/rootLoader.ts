@@ -223,8 +223,7 @@ const makeRootLoader = (
   if (lookupKey) {
     checkoutFormStore.getState().setProductLookupKey(lookupKey);
   }
-  const stripePriceId = pricing?.prices?.find((p) => p.lookupKey === lookupKey)?.id
-    ?? extractPriceId(pricing);
+  const stripePriceId = extractPriceId(pricing, lookupKey);
 
   populateInitialApplicationState({
     checkoutIntent,

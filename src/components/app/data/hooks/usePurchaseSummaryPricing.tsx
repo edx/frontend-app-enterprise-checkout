@@ -4,7 +4,7 @@ import { useContext, useMemo } from 'react';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { extractPriceByProductLookupKey } from '@/utils/checkout';
+import { extractPriceObject } from '@/utils/checkout';
 
 export function calculateSubscriptionCost(quantity: number, unitAmount?: number | null) {
   if (unitAmount == null) {
@@ -30,7 +30,10 @@ const usePurchaseSummaryPricing = () => {
   const { quantity } = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
   const productLookupKey = useCheckoutFormStore((state) => state.productLookupKey);
   const { data: unitAmount } = useBFFContext(authenticatedUser?.userId ?? null, {
-    select: (data): number | null => extractPriceByProductLookupKey(data?.pricing, productLookupKey),
+    select: (data): number | null => {
+      const matched = extractPriceObject(data?.pricing as any, productLookupKey);
+      return matched ? matched.unitAmount / 100 : null;
+    },
   });
   // This useMemo can be extended to return different purchase options in the future
   return useMemo(() => calculateSubscriptionCost(quantity, unitAmount), [quantity, unitAmount]);

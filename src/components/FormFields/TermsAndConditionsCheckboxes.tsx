@@ -33,10 +33,7 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
   const billingDetailsData = useCheckoutFormStore(state => state.formData[DataStoreKey.BillingDetails]);
   const setFormData = useCheckoutFormStore(state => state.setFormData);
   const { data: checkoutIntent } = useCheckoutIntent();
-  const {
-    yearlySubscriptionCostForQuantity,
-  } = usePurchaseSummaryPricing();
-  const effectiveYearlySubscriptionCostForQuantity = yearlySubscriptionCostForQuantity;
+  const { yearlySubscriptionCostForQuantity: effectiveYearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
 
   const sendCheckBoxEvent = (eventName: string, value: boolean) => {
     const checkoutIntentId = checkoutIntent?.id ?? null;

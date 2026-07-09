@@ -6,8 +6,7 @@ import { SHORT_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/compo
 import { DisplayPrice } from '@/components/DisplayPrice';
 
 const BillingDetailsDisclaimer = () => {
-  const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
-  const effectiveYearlySubscriptionCostForQuantity = yearlySubscriptionCostForQuantity;
+  const { yearlySubscriptionCostForQuantity: effectiveYearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
 
   const trialEndDate = dayjs().add(SUBSCRIPTION_TRIAL_LENGTH_DAYS, 'days').format(SHORT_MONTH_DATE_FORMAT);
   return (
