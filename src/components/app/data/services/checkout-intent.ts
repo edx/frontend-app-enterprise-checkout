@@ -26,7 +26,7 @@ declare global {
     enterpriseName?: string;
     enterpriseSlug?: string;
     country?: string;
-    sspProductSlug: string;
+    sspProduct: string;
     termsMetadata?: TermsMetadata;
   }
   type CheckoutIntentCreateErrorResponseSchema = Record<string, unknown>;

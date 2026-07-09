@@ -199,7 +199,7 @@ const PlanDetailsPage = () => {
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
-        sspProductSlug,
+        sspProduct: sspProductSlug,
       });
       await invalidateCheckoutQueries(queryClient);
     },
@@ -221,7 +221,7 @@ const PlanDetailsPage = () => {
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
-        sspProductSlug,
+        sspProduct: sspProductSlug,
       });
       // Now refresh context cache used by rootLoader/loaders
       await invalidateCheckoutQueries(queryClient);
@@ -295,7 +295,7 @@ const PlanDetailsPage = () => {
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
         country: planDetailsFormData.country,
-        sspProductSlug,
+        sspProduct: sspProductSlug,
         // TODO: Record terms metadata too.
       });
     },

@@ -825,7 +825,7 @@ describe('PlanDetailsPage - Button Pending State', () => {
     });
 
     expect(createCheckoutIntentMutateSpy).toHaveBeenCalledWith(expect.objectContaining({
-      sspProductSlug: 'teams_yearly',
+      sspProduct: 'teams_yearly',
     }));
 
     // Try clicking again while pending - should not trigger another mutation call
