@@ -61,6 +61,8 @@ export const useCheckoutFormStore = create<FormStore>(
         checkoutSessionStatus: status,
       }),
     ),
+    sspProductSlug: '',
+    setSspProductSlug: (slug: string) => set((store) => ({ ...store, sspProductSlug: slug })),
   }),
 );
 

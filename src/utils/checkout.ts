@@ -82,6 +82,18 @@ export const extractPriceId = (
   return matched?.id ?? null;
 };
 
+/**
+ * Validate whether a provided product key corresponds to a pricing lookupKey.
+ * Returns the key when valid, otherwise `null`.
+ */
+export const validateProductKey = (
+  pricing: CheckoutContextPricing | undefined | null,
+  key?: string | null,
+): string | null => {
+  if (!key || !pricing?.prices?.length) { return null; }
+  return pricing.prices.some((p) => p.lookupKey === key) ? key : null;
+};
+
 // find price amount by a specific product's lookup key
 export const extractPriceByProductLookupKey = (
   pricing: CheckoutContextPricing | undefined,

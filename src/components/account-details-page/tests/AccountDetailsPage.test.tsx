@@ -95,6 +95,7 @@ describe('AccountDetailsPage', () => {
 
     checkoutFormStore.setState((state) => ({
       ...state,
+      sspProductSlug: 'teams_yearly',
       formData: {
         ...state.formData,
         [DataStoreKey.PlanDetails]: {
@@ -450,6 +451,7 @@ describe('AccountDetailsPage', () => {
         companyName: 'Acme Inc',
         enterpriseSlug: 'acme-inc',
         quantity: 10,
+        sspProduct: 'teams_yearly',
       }));
     });
   });

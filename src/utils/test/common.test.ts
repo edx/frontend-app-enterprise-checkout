@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import { CheckoutErrorMessagesByField } from '@/constants/checkout';
+import { validateProductKey } from '@/utils/checkout';
 import {
   defaultQueryClientRetryHandler,
   isExpired,
@@ -41,6 +42,32 @@ describe('defaultQueryClientRetryHandler', () => {
   }) => {
     const shouldRetry = defaultQueryClientRetryHandler(retryCount, error);
     expect(shouldRetry).toBe(expectedShouldRetry);
+  });
+});
+
+describe('validateProductKey', () => {
+  const pricing = {
+    defaultByLookupKey: 'teams_yearly',
+    prices: [
+      { lookupKey: 'teams_yearly', id: 'price_teams' },
+      { lookupKey: 'essentials_ai_yearly', id: 'price_ai' },
+    ],
+  } as any;
+
+  it('returns the key when it matches a pricing.lookupKey', () => {
+    expect(validateProductKey(pricing, 'essentials_ai_yearly')).toBe('essentials_ai_yearly');
+  });
+
+  it('returns null when key is absent', () => {
+    expect(validateProductKey(pricing, null)).toBeNull();
+  });
+
+  it('returns null when pricing is undefined', () => {
+    expect(validateProductKey(undefined, 'teams_yearly')).toBeNull();
+  });
+
+  it('returns null when key does not match any pricing.lookupKey', () => {
+    expect(validateProductKey(pricing, 'nonexistent')).toBeNull();
   });
 });
 

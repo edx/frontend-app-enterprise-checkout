@@ -7,6 +7,8 @@ import { makeRootLoader } from '@/components/app/routes/loaders';
 import * as utilsMod from '@/components/app/routes/loaders/utils';
 import { hydrateEssentialsProduct } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
+import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { extractPriceId } from '@/utils/checkout';
 
 import { getRoutes } from '../../../../routes';
 import { getFeatureForPath } from '../loaders/rootLoader';
@@ -52,7 +54,7 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 // Mock the checkout form store used by the loader to persist lookup keys
 jest.mock('@/hooks/useCheckoutFormStore', () => {
-  const checkoutFormStore = {
+  const mockedCheckoutFormStore = {
     getState: jest.fn(() => ({ productLookupKey: null, formData: {}, setProductLookupKey: jest.fn() })),
     setState: jest.fn(),
     setProductLookupKey: jest.fn(),
@@ -65,7 +67,7 @@ jest.mock('@/hooks/useCheckoutFormStore', () => {
   });
 
   return {
-    checkoutFormStore,
+    checkoutFormStore: mockedCheckoutFormStore,
     useCheckoutFormStore,
   };
 });
@@ -78,9 +80,19 @@ jest.mock('@/components/app/routes/loaders/utils', () => ({
 
 jest.mock('@/utils/checkout', () => ({
   extractPriceId: jest.fn().mockReturnValue(null),
+  extractPriceObject: jest.fn().mockReturnValue({
+    id: 'price_test_123',
+    lookupKey: 'teams_yearly',
+    sspProductSlug: 'teams_yearly',
+  }),
+  validateProductKey: jest.fn((pricing: any, key: string | null) => {
+    if (!key || !pricing?.prices?.length) { return null; }
+    return pricing.prices.some((p: any) => p.lookupKey === key) ? key : null;
+  }),
 }));
 
 describe('makeRootLoader (rootLoader) tests', () => {
+  const ESSENTIALS_LOOKUP_KEY = 'essentials_artificial_intelligence_subscription_license_yearly';
   const makeRequest = (path: string) => ({ url: `http://localhost${path}` } as any);
 
   let queryClient: QueryClient;
@@ -119,7 +131,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(res.headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
   });
 
-  it('redirects unauthenticated user on protected Essentials path to Essentials PlanDetails', async () => {
+  it('redirects unauthenticated user on protected Essentials path to Essentials PlanDetails when essentials product_key is present', async () => {
     // Arrange: unauthenticated user
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
 
@@ -136,7 +148,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
     // Act: hit a PROTECTED Essentials route (not PlanDetails itself)
     const result = await loader({
-      request: makeRequest(EssentialsPageRoute.AccountDetails),
+      request: makeRequest(`${EssentialsPageRoute.AccountDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`),
     } as any);
 
     // Assert: redirect to Essentials PlanDetails
@@ -173,6 +185,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'paid' },
       stripePriceId: null,
+      sspProductSlug: 'teams_yearly',
       authenticatedUser,
     });
 
@@ -182,7 +195,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(res.headers.get('Location')).toBe(CheckoutPageRoute.BillingDetailsSuccess);
   });
 
-  it('redirects to Essentials Billing Details Success for successful intent on essentials path', async () => {
+  it('redirects to Essentials Billing Details Success for successful intent when essentials product_key is present', async () => {
     const authenticatedUser = { email: 'a@b.com', name: 'Alice', username: 'alice', country: 'US' };
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
     (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
@@ -192,7 +205,9 @@ describe('makeRootLoader (rootLoader) tests', () => {
     ensureSpy.mockResolvedValue({ checkoutIntent: { state: 'paid' } } as any);
 
     const loader = makeRootLoader(queryClient);
-    const result = await loader({ request: makeRequest(EssentialsPageRoute.PlanDetails) } as any);
+    const result = await loader({
+      request: makeRequest(`${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`),
+    } as any);
 
     expect(result).not.toBeNull();
     const res = result as any;
@@ -230,6 +245,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'created' },
       stripePriceId: null,
+      sspProductSlug: 'teams_yearly',
       authenticatedUser,
     });
 
@@ -239,7 +255,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(res.headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
   });
 
-  it('redirects to Essentials Plan Details when the checkout intent is expired on essentials path', async () => {
+  it('redirects to Essentials Plan Details when checkout intent is expired and essentials product_key is present', async () => {
     const authenticatedUser = { email: 'a@b.com', name: 'Alice', username: 'alice', country: 'US' };
     (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
     (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
@@ -249,7 +265,9 @@ describe('makeRootLoader (rootLoader) tests', () => {
     ensureSpy.mockResolvedValue({ checkoutIntent: { state: 'created' } } as any);
 
     const loader = makeRootLoader(queryClient);
-    const result = await loader({ request: makeRequest(EssentialsPageRoute.BillingDetails) } as any);
+    const result = await loader({
+      request: makeRequest(`${EssentialsPageRoute.BillingDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`),
+    } as any);
 
     expect(result).not.toBeNull();
     const res = result as any;
@@ -272,9 +290,47 @@ describe('makeRootLoader (rootLoader) tests', () => {
     expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith({
       checkoutIntent: { state: 'requires_payment' },
       stripePriceId: null,
+      sspProductSlug: 'teams_yearly',
       authenticatedUser,
     });
     expect(result).toBeNull();
+  });
+
+  it('prefers stored productLookupKey over non-lookup product_key for essentials pricing resolution', async () => {
+    const authenticatedUser = { email: 'a@b.com', name: 'Alice', username: 'alice', country: 'US' };
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(authenticatedUser);
+    (utilsMod.determineExistingCheckoutIntentState as jest.Mock).mockReturnValue({
+      existingSuccessfulCheckoutIntent: false,
+      expiredCheckoutIntent: false,
+    });
+    ensureSpy.mockResolvedValue({
+      checkoutIntent: { state: 'requires_payment' },
+      pricing: {
+        defaultByLookupKey: 'teams_yearly',
+        prices: [
+          { lookupKey: 'teams_yearly', id: 'price_teams', sspProductSlug: 'teams_yearly' },
+          {
+            lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
+            id: 'price_essentials_ai',
+            sspProductSlug: 'ai-academy-yearly',
+          },
+        ],
+      },
+    } as any);
+    (checkoutFormStore.getState as jest.Mock).mockReturnValue({
+      productLookupKey: ESSENTIALS_LOOKUP_KEY,
+      setProductLookupKey: jest.fn(),
+      formData: {},
+    });
+
+    const loader = makeRootLoader(queryClient);
+    await loader({ request: makeRequest(`${EssentialsPageRoute.AccountDetails}?product_key=${encodeURIComponent('ai-academy-yearly')}`) } as any);
+
+    expect(extractPriceId).toHaveBeenCalledWith(expect.anything(), ESSENTIALS_LOOKUP_KEY);
+    expect(utilsMod.populateInitialApplicationState).toHaveBeenCalledWith(expect.objectContaining({
+      stripePriceId: null,
+      authenticatedUser,
+    }));
   });
 
   it('feature flag: should return checkout feature key when feature is disabled and path matches', () => {
@@ -425,11 +481,11 @@ describe('makeRootLoader (rootLoader) tests', () => {
       });
     });
 
-    it('sets sessionStorage isEssentials to true on essentials path', async () => {
+    it('sets sessionStorage isEssentials when product_key is present', async () => {
       const loader = makeRootLoader(queryClient);
 
       await loader({
-        request: makeRequest(EssentialsPageRoute.PlanDetails),
+        request: makeRequest(`${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`),
       } as any);
 
       expect(sessionStorage.getItem('isEssentials')).toBe('true');
@@ -459,7 +515,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
       await loader({
         request: makeRequest(
-          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+          `${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`,
         ),
       } as any);
 
@@ -468,7 +524,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
       );
       expect(hydrateEssentialsProduct).toHaveBeenCalledWith(
         mockProducts,
-        'essentials_ai_yearly',
+        ESSENTIALS_LOOKUP_KEY,
       );
       expect(sessionStorage.getItem('isEssentials')).toBe('true');
     });
@@ -494,11 +550,11 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
       await loader({
         request: makeRequest(
-          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+          `${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`,
         ),
       } as any);
 
-      expect(hydrateEssentialsProduct).toHaveBeenCalledWith([], 'essentials_ai_yearly');
+      expect(hydrateEssentialsProduct).toHaveBeenCalledWith([], ESSENTIALS_LOOKUP_KEY);
     });
 
     it('handles null data in SSP products response', async () => {
@@ -508,11 +564,11 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
       await loader({
         request: makeRequest(
-          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+          `${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`,
         ),
       } as any);
 
-      expect(hydrateEssentialsProduct).toHaveBeenCalledWith([], 'essentials_ai_yearly');
+      expect(hydrateEssentialsProduct).toHaveBeenCalledWith([], ESSENTIALS_LOOKUP_KEY);
     });
 
     it('catches and logs error when SSP products fetch fails', async () => {
@@ -529,7 +585,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
       await loader({
         request: makeRequest(
-          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+          `${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`,
         ),
       } as any);
 
@@ -552,7 +608,7 @@ describe('makeRootLoader (rootLoader) tests', () => {
 
       await loader({
         request: makeRequest(
-          `${EssentialsPageRoute.PlanDetails}?product_key=essentials_ai_yearly`,
+          `${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`,
         ),
       } as any);
 

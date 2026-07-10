@@ -52,6 +52,7 @@ const AccountDetailsPage: React.FC = () => {
 
   const accountDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.AccountDetails]);
   const planDetailsFormData = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]);
+  const sspProductSlug = useCheckoutFormStore((state) => state.sspProductSlug);
   const setFormData = useCheckoutFormStore((state) => state.setFormData);
 
   const { data: checkoutIntent } = useCheckoutIntent();
@@ -268,6 +269,7 @@ const AccountDetailsPage: React.FC = () => {
         enterpriseSlug,
         companyName,
         quantity,
+        sspProduct: sspProductSlug,
       });
     } else {
       const isEssentials = isEssentialsFlow();

@@ -21,7 +21,22 @@ jest.mock('@hookform/resolvers/zod', () => ({
 }));
 
 jest.mock('@/hooks/useCheckoutFormStore', () => ({
-  checkoutFormStore: { setState: jest.fn(), getState: jest.fn() },
+  checkoutFormStore: {
+    setState: jest.fn(),
+    getState: jest.fn(() => ({
+      setSspProductSlug: jest.fn(),
+      setProductLookupKey: jest.fn(),
+      formData: {
+        [DataStoreKey.PlanDetails]: {},
+        [DataStoreKey.AccountDetails]: {},
+        [DataStoreKey.BillingDetails]: {},
+      },
+      checkoutSessionStatus: {
+        type: null,
+        paymentStatus: null,
+      },
+    })),
+  },
 }));
 // Helper types for test inputs (loosely typed to avoid coupling to app types)
 type TestCheckoutIntent = {
@@ -92,6 +107,7 @@ describe('utils.ts', () => {
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
+        sspProductSlug: '',
       });
 
       // Ensure setState called with updater fn and "false" (replace action behavior flag)
@@ -139,6 +155,7 @@ describe('utils.ts', () => {
         checkoutIntent: null as any,
         authenticatedUser: emptyUser,
         stripePriceId: null,
+        sspProductSlug: '',
       });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
@@ -193,6 +210,7 @@ describe('utils.ts', () => {
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
+        sspProductSlug: '',
       });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();
@@ -242,6 +260,7 @@ describe('utils.ts', () => {
         checkoutIntent: checkoutIntent as CheckoutContextCheckoutIntent,
         authenticatedUser,
         stripePriceId,
+        sspProductSlug: '',
       });
 
       expect((checkoutFormStore.setState as jest.Mock)).toHaveBeenCalled();

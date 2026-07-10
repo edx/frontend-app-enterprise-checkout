@@ -122,6 +122,8 @@ declare global {
     ): void;
     productLookupKey: string;
     setProductLookupKey(productLookupKey: string): void;
+    sspProductSlug: string;
+    setSspProductSlug(slug: string): void;
     checkoutSessionClientSecret: string | undefined;
     checkoutSessionStatus: {
       type: StripeCheckoutStatus['type'] | null,
@@ -170,6 +172,7 @@ declare global {
     quantity: number;
     companyName: string;
     stripePriceId: string;
+    sspProduct?: string;
   }
 
   /**
@@ -242,6 +245,8 @@ declare global {
       internal: string;
       intervalCount: number;
     };
+    /** Optional slug from BFF pricing (camelCased from ssp_product_slug). */
+    sspProductSlug?: string | null;
     currency: string;
     unitAmount: number;
     unitAmountDecimal: string;

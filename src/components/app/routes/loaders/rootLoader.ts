@@ -14,7 +14,7 @@ import { determineExistingCheckoutIntentState,
   populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { extractPriceId } from '@/utils/checkout';
+import { extractPriceId, extractPriceObject, validateProductKey } from '@/utils/checkout';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -158,6 +158,7 @@ const makeRootLoader = (
   // Parse query params & check essentials keys
   const url = new URL(request.url);
   const { searchParams } = url;
+  const isEssentialsRoute = isPathMatch(currentPath, EssentialsPageRoute.Base);
 
   // list of accepted essentials product_keys
   const essentialsLookupKeys = new Set<string>([
@@ -172,7 +173,9 @@ const makeRootLoader = (
     'essentials_communication_subscription_license_yearly',
   ]);
 
-  const productKey = searchParams.get('product_key');
+  // Read product_key from query params only; do not persist to sessionStorage.
+  const queryProductKey = searchParams.get('product_key');
+  const productKey = queryProductKey;
 
   if (productKey) {
     try {
@@ -186,8 +189,7 @@ const makeRootLoader = (
     }
   }
 
-  // Determine if current path is Essentials by route or by query product_key
-  const isEssentialsRoute = isPathMatch(currentPath, '/essentials');
+  // Keep essentials flow true across all /essentials/* steps, even when product_key is not present.
   const isEssentialsProduct = !!productKey && essentialsLookupKeys.has(productKey);
   const isEssentialsPath = isEssentialsRoute || isEssentialsProduct;
 
@@ -218,16 +220,23 @@ const makeRootLoader = (
     expiredCheckoutIntent,
   } = determineExistingCheckoutIntentState(checkoutIntent);
   const { productLookupKey: storedLookupKey } = checkoutFormStore.getState();
-  const lookupKey = productKey || storedLookupKey || pricing?.defaultByLookupKey;
+
+  // Validate whether the provided productKey corresponds to a pricing.lookupKey.
+
+  const validatedLookupKey = validateProductKey(pricing, productKey);
+  const lookupKey = storedLookupKey || validatedLookupKey || pricing?.defaultByLookupKey;
 
   if (lookupKey) {
     checkoutFormStore.getState().setProductLookupKey(lookupKey);
   }
+  const priceObject = extractPriceObject(pricing, lookupKey);
   const stripePriceId = extractPriceId(pricing, lookupKey);
+  const sspProductSlug = priceObject?.sspProductSlug ?? '';
 
   populateInitialApplicationState({
     checkoutIntent,
     stripePriceId,
+    sspProductSlug,
     authenticatedUser,
   });
 

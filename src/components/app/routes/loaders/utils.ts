@@ -25,6 +25,8 @@ type PopulateCompletedFormFieldsProps = {
   checkoutIntent: CheckoutContextCheckoutIntent | null,
   /** Stripe price id from the backend context */
   stripePriceId: CheckoutContextPrice['id'] | null,
+  /** Resolved ssp_product_slug (always present; e.g. 'teams_yearly' or 'ai-academy-yearly') */
+  sspProductSlug: string,
   /** The currently authenticated user as exposed by the platform auth util. */
   authenticatedUser: AuthenticatedUser,
 };
@@ -108,6 +110,7 @@ const mapCheckoutIntentStateToSessionStatus = (checkoutIntentState?: CheckoutInt
 const populateInitialApplicationState = ({
   checkoutIntent,
   stripePriceId,
+  sspProductSlug,
   authenticatedUser,
 }: PopulateCompletedFormFieldsProps): void => {
   checkoutFormStore.setState(
@@ -158,6 +161,9 @@ const populateInitialApplicationState = ({
     }),
     false,
   );
+
+  // Ensure the ssp product slug is stored in the store (always present).
+  checkoutFormStore.getState().setSspProductSlug(sspProductSlug);
 };
 
 /**
