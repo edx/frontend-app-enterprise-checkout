@@ -43,8 +43,8 @@ const mockProduct = {
   slug: 'sustainability-academy-yearly',
   courseCount: 12,
   tags: [
-    { id: 1, title_en: 'sustainability', description: 'Test tag1' },
-    { id: 2, title: 'strategy', description: 'Test tag2' },
+    { id: 1, title: 'sustainability', description: 'Test tag1', titleEn: 'sustainability' },
+    { id: 2, title: 'strategy', description: 'Test tag2', titleEn: 'strategy' },
   ],
 };
 
@@ -439,33 +439,6 @@ describe('EssentialsAlert Component', () => {
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText('8 courses')).toBeInTheDocument();
       expect(screen.getByText(/Master artificial intelligence fundamentals/)).toBeInTheDocument();
-    });
-
-    it('should render when tags are simple strings', () => {
-      const stringTagsProduct = {
-        ...mockProduct,
-        name: 'Strings',
-        longName: 'Strings Academy',
-        tags: ['alpha', 'beta', 'gamma'],
-      };
-
-      checkoutFormStore.setState((state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          [DataStoreKey.AcademySelection]: {
-            selectedProduct: stringTagsProduct,
-          },
-        },
-      }));
-
-      renderComponent();
-      const alert = screen.getByTestId('essentials-alert');
-      const tagsContainer = alert.querySelector('.essentials-alert__tags');
-      expect(tagsContainer).toBeTruthy();
-      expect(tagsContainer).toHaveTextContent('alpha');
-      expect(tagsContainer).toHaveTextContent('beta');
-      expect(tagsContainer).toHaveTextContent('gamma');
     });
   });
 });

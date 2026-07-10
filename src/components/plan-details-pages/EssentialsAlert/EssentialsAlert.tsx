@@ -13,6 +13,8 @@ import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import './essentials-alert.scss';
 import { extractPriceByProductLookupKey } from '@/utils/checkout';
 
+import AcademyTags from './AcademyTags';
+
 const EssentialsAlert = () => {
   const {
     ESSENTIALS_PRODUCT_URL,
@@ -40,24 +42,6 @@ const EssentialsAlert = () => {
   const academyDescription = product.description || '';
   const academyMarketingUrl = product.marketingUrl ?? '';
   const courseCount = product.courseCount ?? 0;
-
-  const tags = product.tags ?? [];
-  let tagsElement: JSX.Element | null = null;
-  if (tags.length > 0) {
-    tagsElement = (
-      <div className="essentials-alert__tags">
-        {tags.map((tag: any, index: number, arr: any[]) => {
-          const label = typeof tag === 'string' ? tag : (tag.title || tag.title_en || tag.titleEn || '');
-          const key = tag && tag.id != null ? String(tag.id) : String(index);
-          return (
-            <span key={key} className="essentials-alert__tag">
-              {label}{index < arr.length - 1 && ' • '}
-            </span>
-          );
-        })}
-      </div>
-    );
-  }
 
   return (
     <Alert data-testid="essentials-alert" className="essentials-alert m-0 text-white p-0">
@@ -146,7 +130,7 @@ const EssentialsAlert = () => {
               )}
             </div>
 
-            {tagsElement}
+            <AcademyTags tags={product.tags ?? []} />
 
             {academyDescription && (
             <p className="essentials-alert__description m-0 font-weight-normal pt-3">

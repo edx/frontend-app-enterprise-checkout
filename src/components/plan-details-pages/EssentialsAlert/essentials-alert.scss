@@ -145,13 +145,24 @@
   }
 
   &__tags {
-    color: #666 !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: #333 !important;
   }
 
   &__tag {
-    color: #666;
+    color: #333;
     font-size: 13px;
     line-height: 1.6;
+
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: 4px;
+    }
   }
 
   &__description {
