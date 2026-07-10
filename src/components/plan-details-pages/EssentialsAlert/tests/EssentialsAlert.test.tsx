@@ -153,6 +153,49 @@ describe('EssentialsAlert Component', () => {
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
     });
 
+    it('should not render tags section when tags are missing or empty', () => {
+      // Case: tags undefined
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: { selectedProduct: { ...mockProduct, tags: undefined } },
+        },
+      }));
+
+      const { rerender } = render(
+        <MemoryRouter>
+          <AppContext.Provider value={mockContextValue as any}>
+            <IntlProvider locale="en" messages={{}}>
+              <EssentialsAlert />
+            </IntlProvider>
+          </AppContext.Provider>
+        </MemoryRouter>,
+      );
+      expect(screen.queryByText('sustainability')).not.toBeInTheDocument();
+      expect(screen.queryByText('strategy')).not.toBeInTheDocument();
+
+      // Case: tags empty array
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: { selectedProduct: { ...mockProduct, tags: [] } },
+        },
+      }));
+      rerender(
+        <MemoryRouter>
+          <AppContext.Provider value={mockContextValue as any}>
+            <IntlProvider locale="en" messages={{}}>
+              <EssentialsAlert />
+            </IntlProvider>
+          </AppContext.Provider>
+        </MemoryRouter>,
+      );
+      expect(screen.queryByText('sustainability')).not.toBeInTheDocument();
+      expect(screen.queryByText('strategy')).not.toBeInTheDocument();
+    });
+
     it('should fall back to product name when longName is missing', () => {
       checkoutFormStore.setState((state) => ({
         ...state,
@@ -179,10 +222,8 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more');
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.tagName).toBe('A');
-      // Learn more should open in a new tab
-      expect((learnMoreLink as HTMLAnchorElement).target).toBe('_blank');
-      expect((learnMoreLink as HTMLAnchorElement).rel).toContain('noopener');
-      expect((learnMoreLink as HTMLAnchorElement).rel).toContain('noreferrer');
+      // Learn more should open in the same tab (no target)
+      expect((learnMoreLink as HTMLAnchorElement).target).toBe('');
     });
 
     it('should display academy description', () => {
@@ -272,9 +313,7 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.href).toBe('https://www.edx.org/learn/sustainability');
-      expect(learnMoreLink.target).toBe('_blank');
-      expect(learnMoreLink.rel).toContain('noopener');
-      expect(learnMoreLink.rel).toContain('noreferrer');
+      expect(learnMoreLink.target).toBe('');
     });
 
     it('should render product tags when available', () => {
@@ -400,6 +439,33 @@ describe('EssentialsAlert Component', () => {
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText('8 courses')).toBeInTheDocument();
       expect(screen.getByText(/Master artificial intelligence fundamentals/)).toBeInTheDocument();
+    });
+
+    it('should render when tags are simple strings', () => {
+      const stringTagsProduct = {
+        ...mockProduct,
+        name: 'Strings',
+        longName: 'Strings Academy',
+        tags: ['alpha', 'beta', 'gamma'],
+      };
+
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: {
+            selectedProduct: stringTagsProduct,
+          },
+        },
+      }));
+
+      renderComponent();
+      const alert = screen.getByTestId('essentials-alert');
+      const tagsContainer = alert.querySelector('.essentials-alert__tags');
+      expect(tagsContainer).toBeTruthy();
+      expect(tagsContainer).toHaveTextContent('alpha');
+      expect(tagsContainer).toHaveTextContent('beta');
+      expect(tagsContainer).toHaveTextContent('gamma');
     });
   });
 });

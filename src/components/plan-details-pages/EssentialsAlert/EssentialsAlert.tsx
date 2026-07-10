@@ -41,6 +41,24 @@ const EssentialsAlert = () => {
   const academyMarketingUrl = product.marketingUrl ?? '';
   const courseCount = product.courseCount ?? 0;
 
+  const tags = product.tags ?? [];
+  let tagsElement: JSX.Element | null = null;
+  if (tags.length > 0) {
+    tagsElement = (
+      <div className="essentials-alert__tags">
+        {tags.map((tag: any, index: number, arr: any[]) => {
+          const label = typeof tag === 'string' ? tag : (tag.title || tag.title_en || tag.titleEn || '');
+          const key = tag && tag.id != null ? String(tag.id) : String(index);
+          return (
+            <span key={key} className="essentials-alert__tag">
+              {label}{index < arr.length - 1 && ' • '}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <Alert data-testid="essentials-alert" className="essentials-alert m-0 text-white p-0">
       <div className="essentials-alert__header d-flex justify-content-between align-items-center pt-4 px-4">
@@ -117,8 +135,6 @@ const EssentialsAlert = () => {
               <Button
                 variant="link"
                 href={academyMarketingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="essentials-alert__learn-more ml-auto font-weight-bold"
               >
                 <FormattedMessage
@@ -130,20 +146,7 @@ const EssentialsAlert = () => {
               )}
             </div>
 
-            <div className="essentials-alert__tags">
-              {(product.tags || []).map((tag: any, index: number) => {
-                const label = typeof tag === 'string'
-                  ? tag
-                  : (tag.title || tag.title_en || tag.titleEn || tag.id || String(tag));
-                const key = typeof tag === 'string' ? tag : (tag.id ?? index);
-                return (
-                  <span key={key} className="essentials-alert__tag">
-                    {label}
-                    {index < (product.tags || []).length - 1 && ' • '}
-                  </span>
-                );
-              })}
-            </div>
+            {tagsElement}
 
             {academyDescription && (
             <p className="essentials-alert__description m-0 font-weight-normal pt-3">
