@@ -117,6 +117,8 @@ const EssentialsAlert = () => {
               <Button
                 variant="link"
                 href={academyMarketingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="essentials-alert__learn-more ml-auto font-weight-bold"
               >
                 <FormattedMessage
@@ -126,6 +128,15 @@ const EssentialsAlert = () => {
                 />
               </Button>
               )}
+            </div>
+
+            <div className="essentials-alert__tags">
+              {(product.tags || []).map((tag: string, index: number) => (
+                <span key={tag} className="essentials-alert__tag">
+                  {tag}
+                  {index < (product.tags || []).length - 1 && ' • '}
+                </span>
+              ))}
             </div>
 
             {academyDescription && (

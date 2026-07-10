@@ -42,6 +42,7 @@ const mockProduct = {
   lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
   slug: 'sustainability-academy-yearly',
   courseCount: 12,
+  tags: ['sustainability', 'strategy'],
 };
 
 describe('EssentialsAlert Component', () => {
@@ -175,6 +176,10 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more');
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.tagName).toBe('A');
+      // Learn more should open in a new tab
+      expect((learnMoreLink as HTMLAnchorElement).target).toBe('_blank');
+      expect((learnMoreLink as HTMLAnchorElement).rel).toContain('noopener');
+      expect((learnMoreLink as HTMLAnchorElement).rel).toContain('noreferrer');
     });
 
     it('should display academy description', () => {
@@ -264,6 +269,18 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.href).toBe('https://www.edx.org/learn/sustainability');
+      expect(learnMoreLink.target).toBe('_blank');
+      expect(learnMoreLink.rel).toContain('noopener');
+      expect(learnMoreLink.rel).toContain('noreferrer');
+    });
+
+    it('should render product tags when available', () => {
+      renderComponent();
+      const alert = screen.getByTestId('essentials-alert');
+      const tagsContainer = alert.querySelector('.essentials-alert__tags');
+      expect(tagsContainer).toBeTruthy();
+      expect(tagsContainer).toHaveTextContent('sustainability');
+      expect(tagsContainer).toHaveTextContent('strategy');
     });
   });
 
