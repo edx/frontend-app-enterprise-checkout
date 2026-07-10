@@ -42,7 +42,10 @@ const mockProduct = {
   lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
   slug: 'sustainability-academy-yearly',
   courseCount: 12,
-  tags: ['sustainability', 'strategy'],
+  tags: [
+    { id: 1, title_en: 'sustainability', description: 'Test tag1' },
+    { id: 2, title: 'strategy', description: 'Test tag2' },
+  ],
 };
 
 describe('EssentialsAlert Component', () => {

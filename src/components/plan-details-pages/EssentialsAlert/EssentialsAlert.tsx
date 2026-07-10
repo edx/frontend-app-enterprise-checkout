@@ -131,12 +131,18 @@ const EssentialsAlert = () => {
             </div>
 
             <div className="essentials-alert__tags">
-              {(product.tags || []).map((tag: string, index: number) => (
-                <span key={tag} className="essentials-alert__tag">
-                  {tag}
-                  {index < (product.tags || []).length - 1 && ' • '}
-                </span>
-              ))}
+              {(product.tags || []).map((tag: any, index: number) => {
+                const label = typeof tag === 'string'
+                  ? tag
+                  : (tag.title || tag.title_en || tag.titleEn || tag.id || String(tag));
+                const key = typeof tag === 'string' ? tag : (tag.id ?? index);
+                return (
+                  <span key={key} className="essentials-alert__tag">
+                    {label}
+                    {index < (product.tags || []).length - 1 && ' • '}
+                  </span>
+                );
+              })}
             </div>
 
             {academyDescription && (
