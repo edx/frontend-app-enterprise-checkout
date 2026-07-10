@@ -13,6 +13,8 @@ import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import './essentials-alert.scss';
 import { extractPriceByProductLookupKey } from '@/utils/checkout';
 
+import AcademyTags from './AcademyTags';
+
 const EssentialsAlert = () => {
   const {
     ESSENTIALS_PRODUCT_URL,
@@ -127,6 +129,8 @@ const EssentialsAlert = () => {
               </Button>
               )}
             </div>
+
+            <AcademyTags tags={product.tags ?? []} />
 
             {academyDescription && (
             <p className="essentials-alert__description m-0 font-weight-normal pt-3">

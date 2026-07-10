@@ -42,6 +42,10 @@ const mockProduct = {
   lookupKey: 'essentials_artificial_intelligence_subscription_license_yearly',
   slug: 'sustainability-academy-yearly',
   courseCount: 12,
+  tags: [
+    { id: 1, title: 'sustainability', description: 'Test tag1', titleEn: 'sustainability' },
+    { id: 2, title: 'strategy', description: 'Test tag2', titleEn: 'strategy' },
+  ],
 };
 
 describe('EssentialsAlert Component', () => {
@@ -149,6 +153,49 @@ describe('EssentialsAlert Component', () => {
       expect(academyNames.length).toBeGreaterThanOrEqual(1);
     });
 
+    it('should not render tags section when tags are missing or empty', () => {
+      // Case: tags undefined
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: { selectedProduct: { ...mockProduct, tags: undefined } },
+        },
+      }));
+
+      const { rerender } = render(
+        <MemoryRouter>
+          <AppContext.Provider value={mockContextValue as any}>
+            <IntlProvider locale="en" messages={{}}>
+              <EssentialsAlert />
+            </IntlProvider>
+          </AppContext.Provider>
+        </MemoryRouter>,
+      );
+      expect(screen.queryByText('sustainability')).not.toBeInTheDocument();
+      expect(screen.queryByText('strategy')).not.toBeInTheDocument();
+
+      // Case: tags empty array
+      checkoutFormStore.setState((state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          [DataStoreKey.AcademySelection]: { selectedProduct: { ...mockProduct, tags: [] } },
+        },
+      }));
+      rerender(
+        <MemoryRouter>
+          <AppContext.Provider value={mockContextValue as any}>
+            <IntlProvider locale="en" messages={{}}>
+              <EssentialsAlert />
+            </IntlProvider>
+          </AppContext.Provider>
+        </MemoryRouter>,
+      );
+      expect(screen.queryByText('sustainability')).not.toBeInTheDocument();
+      expect(screen.queryByText('strategy')).not.toBeInTheDocument();
+    });
+
     it('should fall back to product name when longName is missing', () => {
       checkoutFormStore.setState((state) => ({
         ...state,
@@ -175,6 +222,8 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more');
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.tagName).toBe('A');
+      // Learn more should open in the same tab (no target)
+      expect((learnMoreLink as HTMLAnchorElement).target).toBe('');
     });
 
     it('should display academy description', () => {
@@ -264,6 +313,16 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.href).toBe('https://www.edx.org/learn/sustainability');
+      expect(learnMoreLink.target).toBe('');
+    });
+
+    it('should render product tags when available', () => {
+      renderComponent();
+      const alert = screen.getByTestId('essentials-alert');
+      const tagsContainer = alert.querySelector('.essentials-alert__tags');
+      expect(tagsContainer).toBeTruthy();
+      expect(tagsContainer).toHaveTextContent('sustainability');
+      expect(tagsContainer).toHaveTextContent('strategy');
     });
   });
 
