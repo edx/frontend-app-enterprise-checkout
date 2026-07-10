@@ -85,6 +85,10 @@ jest.mock('@/utils/checkout', () => ({
     lookupKey: 'teams_yearly',
     sspProductSlug: 'teams_yearly',
   }),
+  validateProductKey: jest.fn((pricing: any, key: string | null) => {
+    if (!key || !pricing?.prices?.length) { return null; }
+    return pricing.prices.some((p: any) => p.lookupKey === key) ? key : null;
+  }),
 }));
 
 describe('makeRootLoader (rootLoader) tests', () => {

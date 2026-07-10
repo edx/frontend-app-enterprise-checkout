@@ -14,7 +14,7 @@ import { determineExistingCheckoutIntentState,
   populateInitialApplicationState } from '@/components/app/routes/loaders/utils';
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
-import { extractPriceId, extractPriceObject } from '@/utils/checkout';
+import { extractPriceId, extractPriceObject, validateProductKey } from '@/utils/checkout';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -222,11 +222,6 @@ const makeRootLoader = (
   const { productLookupKey: storedLookupKey } = checkoutFormStore.getState();
 
   // Validate whether the provided productKey corresponds to a pricing.lookupKey.
-  // Returns the key when valid, otherwise `null` to allow concise fallback logic.
-  const validateProductKey = (pricingObj: any, key?: string | null): string | null => {
-    if (!key || !pricingObj?.prices) { return null; }
-    return pricingObj.prices.some((p: any) => p.lookupKey === key) ? key : null;
-  };
 
   const validatedLookupKey = validateProductKey(pricing, productKey);
   const lookupKey = storedLookupKey || validatedLookupKey || pricing?.defaultByLookupKey;
