@@ -77,7 +77,7 @@ const EssentialsAlert = () => {
       </div>
 
       <div className="essentials-alert__body pt-0 px-4 pb-4">
-        <p className="h4 essentials-alert__subtitle font-weight-normal m-0 text-white my-3">
+        <p className="h4 essentials-alert__subtitle font-weight-normal mt-0 mb-3 text-white">
           <FormattedMessage
             id="checkout.essentialsAlert.descriptionWithLink"
             defaultMessage="You have picked {academyName} as your focus area. Changed your mind? {pickDifferentLink}"
@@ -88,7 +88,7 @@ const EssentialsAlert = () => {
                 <Button
                   variant="link"
                   href={ESSENTIALS_PRODUCT_URL}
-                  className="essentials-alert__link text-white d-inline-block p-0 mb-0"
+                  className="essentials-alert__link text-white d-block p-0 mt-0 mb-0 text-left"
                 >
                   <FormattedMessage
                     id="checkout.essentialsAlert.pickDifferentAcademy"
