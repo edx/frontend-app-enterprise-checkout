@@ -88,7 +88,7 @@ const EssentialsAlert = () => {
                 <Button
                   variant="link"
                   href={ESSENTIALS_PRODUCT_URL}
-                  className="essentials-alert__link text-white d-block p-0 mb-0"
+                  className="essentials-alert__link text-white d-block p-0 mt-0 mb-0 text-left"
                 >
                   <FormattedMessage
                     id="checkout.essentialsAlert.pickDifferentAcademy"
