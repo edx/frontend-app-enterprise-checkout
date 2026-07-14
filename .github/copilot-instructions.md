@@ -71,5 +71,6 @@ MERGE_READINESS: READY | CHANGES_REQUIRED | REJECT_SCOPE
 
 - **READY**: no confirmed critical or moderate findings.
 - **CHANGES_REQUIRED**: confirmed findings need addressing before merge.
-- **REJECT_SCOPE**: PR exceeds 400 effective LoC or 10 effective files (excluding tests,
-  lockfiles, generated files, migrations). Propose a split instead of a full review.
+- **REJECT_SCOPE**: PR exceeds the effective LoC/file threshold defined in this repo's
+  `CLAUDE.md` under "## Before opening a PR or pushing a branch". Propose a split instead
+  of a full review.
