@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { usePolledAuthenticatedUser, usePolledCheckoutIntent } from '@/components/app/data';
+import useCheckoutIntent from '@/components/app/data/hooks/useCheckoutIntent';
 
 import BillingDetailsHeadingMessage from '../BillingDetailsHeadingMessage';
 
@@ -12,10 +13,16 @@ jest.mock('@/components/app/data', () => ({
   usePolledAuthenticatedUser: jest.fn(),
 }));
 
+jest.mock('@/components/app/data/hooks/useCheckoutIntent', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 const mockUsePolledCheckoutIntent = usePolledCheckoutIntent as jest.MockedFunction<typeof usePolledCheckoutIntent>;
 const mockUsePolledAuthenticatedUser = (
   usePolledAuthenticatedUser as jest.MockedFunction<typeof usePolledAuthenticatedUser>
 );
+const mockUseCheckoutIntent = useCheckoutIntent as jest.MockedFunction<typeof useCheckoutIntent>;
 
 describe('BillingDetailsHeadingMessage', () => {
   const renderComponent = () => render(
@@ -26,6 +33,10 @@ describe('BillingDetailsHeadingMessage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionStorage.clear();
+    mockUseCheckoutIntent.mockReturnValue({
+      data: { productType: null },
+    } as any);
   });
 
   it('renders the celebration image', () => {
@@ -55,6 +66,54 @@ describe('BillingDetailsHeadingMessage', () => {
     renderComponent();
     expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
     expect(screen.getByText(/Go to your administrator dashboard/)).toBeInTheDocument();
+  });
+
+  it('renders Teams when checkoutIntent.productType is Teams', () => {
+    mockUseCheckoutIntent.mockReturnValue({
+      data: { productType: 'Teams' },
+    } as any);
+    mockUsePolledCheckoutIntent.mockReturnValue({
+      polledCheckoutIntent: { state: 'fulfilled' },
+    } as any);
+    mockUsePolledAuthenticatedUser.mockReturnValue({
+      polledAuthenticatedUser: { isActive: true },
+    } as any);
+
+    renderComponent();
+
+    expect(screen.getByText(/Welcome to edX for Teams!/)).toBeInTheDocument();
+  });
+
+  it('renders Essentials when checkoutIntent.productType is Essentials', () => {
+    mockUseCheckoutIntent.mockReturnValue({
+      data: { productType: 'Essentials' },
+    } as any);
+    mockUsePolledCheckoutIntent.mockReturnValue({
+      polledCheckoutIntent: { state: 'fulfilled' },
+    } as any);
+    mockUsePolledAuthenticatedUser.mockReturnValue({
+      polledAuthenticatedUser: { isActive: true },
+    } as any);
+
+    renderComponent();
+
+    expect(screen.getByText(/Welcome to edX for Essentials!/)).toBeInTheDocument();
+  });
+
+  it('falls back to the existing Team copy when checkoutIntent.productType is null', () => {
+    mockUseCheckoutIntent.mockReturnValue({
+      data: { productType: null },
+    } as any);
+    mockUsePolledCheckoutIntent.mockReturnValue({
+      polledCheckoutIntent: { state: 'fulfilled' },
+    } as any);
+    mockUsePolledAuthenticatedUser.mockReturnValue({
+      polledAuthenticatedUser: { isActive: true },
+    } as any);
+
+    renderComponent();
+
+    expect(screen.getByText(/Welcome to edX for Team/)).toBeInTheDocument();
   });
 
   it('renders PendingHeading when checkout is paid and user is active', () => {

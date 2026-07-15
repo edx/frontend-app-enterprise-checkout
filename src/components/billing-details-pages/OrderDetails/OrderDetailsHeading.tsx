@@ -1,9 +1,12 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
+import { useCheckoutIntent } from '@/components/app/data';
 import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 
 const OrderDetailsHeading: React.FC = () => {
-  const isEssentials = isEssentialsFlow();
+  const { data: checkoutIntent } = useCheckoutIntent();
+  // Use productType from backend (ENT-12069), fallback to sessionStorage heuristic for backward compatibility
+  const productType = checkoutIntent?.productType || (isEssentialsFlow() ? 'Essentials' : 'Team');
   return (
     <>
       <h3 className="mb-2">
@@ -19,7 +22,7 @@ const OrderDetailsHeading: React.FC = () => {
           defaultMessage="You have purchased an edX {productName} subscription."
           description="Description text explaining the order details"
           values={{
-            productName: isEssentials ? 'Essentials' : 'Team',
+            productName: productType,
           }}
         />
       </p>

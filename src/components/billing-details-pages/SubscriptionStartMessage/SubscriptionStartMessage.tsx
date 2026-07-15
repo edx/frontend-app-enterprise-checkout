@@ -28,11 +28,12 @@ const messages = defineMessages({
 
 export const SubscriptionStartMessage = () => {
   const intl = useIntl();
-  const isEssentials = isEssentialsFlow();
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
   // TODO: Add this endpoint to the success page loader
   const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
+  // Use productType from backend (ENT-12069), fallback to sessionStorage heuristic for backward compatibility
+  const productType = checkoutIntent?.productType || (isEssentialsFlow() ? 'Essentials' : 'Team');
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
 
   if (isLoading || !firstBillableInvoice) {
@@ -59,7 +60,7 @@ export const SubscriptionStartMessage = () => {
             description="Title for the free trial success field section"
             values={{
               trialDays: SUBSCRIPTION_TRIAL_LENGTH_DAYS,
-              productName: isEssentials ? 'edX Essentials' : 'edX Team',
+              productName: `edX ${productType}`,
             }}
           />
         </h3>

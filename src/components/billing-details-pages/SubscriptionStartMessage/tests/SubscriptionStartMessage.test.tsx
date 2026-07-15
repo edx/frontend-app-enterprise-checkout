@@ -83,10 +83,49 @@ describe('SubscriptionStartMessage', () => {
     validateText('Your free 14-day trial for edX Team subscription has started.');
   });
 
+  it('renders the title from checkoutIntent.productType when it is Teams', () => {
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 7,
+        productType: 'Teams',
+      },
+    });
+
+    renderComponent();
+
+    validateText('Your free 14-day trial for edX Teams subscription has started.');
+  });
+
   it('renders the title correctly for Essentials flow', () => {
     sessionStorage.setItem('isEssentials', 'true');
     renderComponent();
     validateText('Your free 14-day trial for edX Essentials subscription has started.');
+  });
+
+  it('renders the title from checkoutIntent.productType when it is Essentials', () => {
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 7,
+        productType: 'Essentials',
+      },
+    });
+
+    renderComponent();
+
+    validateText('Your free 14-day trial for edX Essentials subscription has started.');
+  });
+
+  it('falls back to the existing Team copy when checkoutIntent.productType is null', () => {
+    (useCheckoutIntent as jest.Mock).mockReturnValue({
+      data: {
+        id: 7,
+        productType: null,
+      },
+    });
+
+    renderComponent();
+
+    validateText('Your free 14-day trial for edX Team subscription has started.');
   });
 
   it('renders the description message correctly', () => {

@@ -130,6 +130,39 @@ describe('OrderDetails', () => {
       validateText(expectedText);
     });
 
+    it('renders Teams from checkoutIntent.productType when provided', () => {
+      (useCheckoutIntent as jest.Mock).mockReturnValue({
+        data: { id: 'test-checkout-intent-id', productType: 'Teams' },
+        isLoading: false,
+      });
+
+      renderComponent();
+
+      validateText('You have purchased an edX Teams subscription.');
+    });
+
+    it('renders Essentials from checkoutIntent.productType when provided', () => {
+      (useCheckoutIntent as jest.Mock).mockReturnValue({
+        data: { id: 'test-checkout-intent-id', productType: 'Essentials' },
+        isLoading: false,
+      });
+
+      renderComponent();
+
+      validateText('You have purchased an edX Essentials subscription.');
+    });
+
+    it('falls back to the existing Team copy when checkoutIntent.productType is null', () => {
+      (useCheckoutIntent as jest.Mock).mockReturnValue({
+        data: { id: 'test-checkout-intent-id', productType: null },
+        isLoading: false,
+      });
+
+      renderComponent();
+
+      validateText('You have purchased an edX Team subscription.');
+    });
+
     it('renders all section headings', () => {
       (useFirstBillableInvoice as jest.Mock).mockReturnValue({
         data: {
