@@ -177,18 +177,6 @@ const makeRootLoader = (
   const queryProductKey = searchParams.get('product_key');
   const productKey = queryProductKey;
 
-  if (productKey) {
-    try {
-      const response = await queryClient.ensureQueryData(
-        querySspProducts(),
-      );
-      const allSspProducts = response?.data || [];
-      hydrateEssentialsProduct(allSspProducts, productKey);
-    } catch (err) {
-      logError('Failed to fetch SSP products in root loader', err);
-    }
-  }
-
   // Keep essentials flow true across all /essentials/* steps, even when product_key is not present.
   const isEssentialsProduct = !!productKey && essentialsLookupKeys.has(productKey);
   const isEssentialsPath = isEssentialsRoute || isEssentialsProduct;
@@ -214,6 +202,19 @@ const makeRootLoader = (
   }
 
   const { checkoutIntent, pricing } = contextMetadata;
+  // Only fetch SSP products and hydrate for academy data.
+  const academyProductKey = productKey ?? checkoutIntent?.sspProduct ?? null;
+  if (academyProductKey) {
+    try {
+      const response = await queryClient.ensureQueryData(
+        querySspProducts(),
+      );
+      const allSspProducts = response?.data || [];
+      hydrateEssentialsProduct(allSspProducts, academyProductKey);
+    } catch (err) {
+      logError('Failed to fetch SSP products in root loader', err);
+    }
+  }
 
   const {
     existingSuccessfulCheckoutIntent,

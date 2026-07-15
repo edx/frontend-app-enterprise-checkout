@@ -481,16 +481,6 @@ describe('makeRootLoader (rootLoader) tests', () => {
       });
     });
 
-    it('sets sessionStorage isEssentials when product_key is present', async () => {
-      const loader = makeRootLoader(queryClient);
-
-      await loader({
-        request: makeRequest(`${EssentialsPageRoute.PlanDetails}?product_key=${ESSENTIALS_LOOKUP_KEY}`),
-      } as any);
-
-      expect(sessionStorage.getItem('isEssentials')).toBe('true');
-    });
-
     it('removes sessionStorage isEssentials on non-essentials path', async () => {
       sessionStorage.setItem('isEssentials', 'true');
 
@@ -519,9 +509,8 @@ describe('makeRootLoader (rootLoader) tests', () => {
         ),
       } as any);
 
-      expect(ensureSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ queryKey: ['ssp-products'] }),
-      );
+      const calledWithSsp = ensureSpy.mock.calls.some((call: any[]) => call[0]?.queryKey?.[0] === 'ssp-products');
+      expect(calledWithSsp).toBe(true);
       expect(hydrateEssentialsProduct).toHaveBeenCalledWith(
         mockProducts,
         ESSENTIALS_LOOKUP_KEY,

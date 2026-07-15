@@ -7,6 +7,7 @@ import { isEssentialsFlow, validateFormState } from '@/components/app/routes/loa
 import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
+
 /**
  * Route loader for Plan Details page.
  *
@@ -170,10 +171,13 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
 
   const { checkoutIntent } = contextMetadata;
 
-  const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+  const resolvedRouteBase = checkoutIntent?.sspProduct?.includes('academy')
+    ? EssentialsPageRoute
+    : CheckoutPageRoute;
 
-  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent) {
-    return redirect(CheckoutPageRoute.PlanDetails);
+  const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent && !checkoutIntent?.stripeCheckoutSessionId) {
+    return redirect(resolvedRouteBase.PlanDetails);
   }
 
   return null;
