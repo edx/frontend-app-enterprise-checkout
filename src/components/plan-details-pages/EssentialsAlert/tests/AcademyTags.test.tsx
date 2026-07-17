@@ -42,4 +42,26 @@ describe('AcademyTags Component', () => {
     const items = container.querySelectorAll('li.essentials-alert__tag');
     expect(items).toHaveLength(2);
   });
+
+  it('renders only the first 3 tags when more than 3 are provided', () => {
+    const tags = [
+      { id: 1, title: 'sustainability' },
+      { id: 2, title: 'strategy' },
+      { id: 3, title: 'leadership' },
+      { id: 4, title: 'engineering' },
+      { id: 5, title: 'marketing' },
+    ];
+
+    const { container } = render(<AcademyTags tags={tags} />);
+
+    const items = container.querySelectorAll('li.essentials-alert__tag');
+    expect(items).toHaveLength(3);
+
+    expect(screen.getByText('sustainability')).toBeInTheDocument();
+    expect(screen.getByText('strategy')).toBeInTheDocument();
+    expect(screen.getByText('leadership')).toBeInTheDocument();
+
+    expect(screen.queryByText('engineering')).not.toBeInTheDocument();
+    expect(screen.queryByText('marketing')).not.toBeInTheDocument();
+  });
 });
