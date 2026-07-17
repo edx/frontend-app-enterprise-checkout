@@ -14,7 +14,7 @@ const AcademyTags = ({ tags }: AcademyTagsProps) => {
 
   return (
     <ul className="essentials-alert__tags">
-      {tags.map(({ id, title }) => (
+      {tags.slice(0, 3).map(({ id, title }) => (
         <li key={id} className="essentials-alert__tag">{title}</li>
       ))}
     </ul>
