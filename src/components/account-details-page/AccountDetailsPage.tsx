@@ -269,7 +269,7 @@ const AccountDetailsPage: React.FC = () => {
         enterpriseSlug,
         companyName,
         quantity,
-        sspProduct: sspProductSlug,
+        sspProductSlug,
       });
     } else {
       const isEssentials = isEssentialsFlow();

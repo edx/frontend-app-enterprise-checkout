@@ -451,7 +451,7 @@ describe('AccountDetailsPage', () => {
         companyName: 'Acme Inc',
         enterpriseSlug: 'acme-inc',
         quantity: 10,
-        sspProduct: 'teams_yearly',
+        sspProductSlug: 'teams_yearly',
       }));
     });
   });
