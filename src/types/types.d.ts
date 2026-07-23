@@ -172,7 +172,7 @@ declare global {
     quantity: number;
     companyName: string;
     stripePriceId: string;
-    sspProduct?: string;
+    sspProductSlug?: string;
   }
 
   /**
