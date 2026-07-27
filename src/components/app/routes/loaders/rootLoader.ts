@@ -203,14 +203,14 @@ const makeRootLoader = (
 
   const { checkoutIntent, pricing } = contextMetadata;
   // Only fetch SSP products and hydrate for academy data.
-  const academyProductKey = productKey ?? checkoutIntent?.sspProduct ?? null;
-  if (academyProductKey) {
+  const selectedProduct = productKey ?? checkoutIntent?.sspProduct ?? null;
+  if (selectedProduct) {
     try {
       const response = await queryClient.ensureQueryData(
         querySspProducts(),
       );
       const allSspProducts = response?.data || [];
-      hydrateEssentialsProduct(allSspProducts, academyProductKey);
+      hydrateEssentialsProduct(allSspProducts, selectedProduct);
     } catch (err) {
       logError('Failed to fetch SSP products in root loader', err);
     }

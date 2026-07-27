@@ -171,13 +171,10 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
 
   const { checkoutIntent } = contextMetadata;
 
-  const resolvedRouteBase = checkoutIntent?.sspProduct?.includes('academy')
-    ? EssentialsPageRoute
-    : CheckoutPageRoute;
-
   const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
+
   if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent && !checkoutIntent?.stripeCheckoutSessionId) {
-    return redirect(resolvedRouteBase.PlanDetails);
+    return redirect(CheckoutPageRoute.PlanDetails);
   }
 
   return null;
