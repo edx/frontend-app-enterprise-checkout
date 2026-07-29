@@ -125,7 +125,6 @@ describe('makeCheckoutStepperLoader (stepper loaders)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetFormStore();
-    sessionStorage.clear();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     ensureSpy = jest.spyOn(queryClient, 'ensureQueryData');
   });
@@ -463,7 +462,6 @@ describe('billingDetailsLoader – formStoreSecret fallback', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetFormStore();
-    sessionStorage.clear();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   });
 
@@ -539,32 +537,6 @@ describe('billingDetailsSuccessLoader – null return paths', () => {
         CheckoutPageRoute.BillingDetailsSuccess,
       ),
     );
-    expect(result).toBeNull();
-  });
-
-  it('returns null when checkout intent is created but has a Stripe checkout session id', async () => {
-    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue({ userId: 1 });
-    const ctx = {
-      ...buildContext({ withPrice: true, includeCheckoutIntent: true }),
-      pricing: {
-        defaultByLookupKey: 'teams_yearly',
-      },
-      checkoutIntent: {
-        ...buildContext({ withPrice: true, includeCheckoutIntent: true }).checkoutIntent,
-        existingSuccessfulCheckoutIntent: false,
-        state: 'created',
-      },
-    };
-    jest.spyOn(queryClient, 'ensureQueryData').mockResolvedValue(ctx);
-    const loader = makeCheckoutStepperLoader(queryClient);
-    const result = await loader(
-      makeLoaderArgs(
-        CheckoutStepKey.BillingDetails,
-        CheckoutSubstepKey.Success,
-        CheckoutPageRoute.BillingDetailsSuccess,
-      ),
-    );
-
     expect(result).toBeNull();
   });
 });

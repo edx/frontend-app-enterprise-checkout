@@ -173,7 +173,7 @@ async function billingDetailsSuccessLoader(queryClient: QueryClient): Promise<Re
 
   const checkoutIntentType = checkoutFormStore.getState().checkoutSessionStatus?.type;
 
-  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent && !checkoutIntent?.stripeCheckoutSessionId) {
+  if (checkoutIntentType !== 'complete' && !checkoutIntent?.existingSuccessfulCheckoutIntent) {
     return redirect(CheckoutPageRoute.PlanDetails);
   }
 
