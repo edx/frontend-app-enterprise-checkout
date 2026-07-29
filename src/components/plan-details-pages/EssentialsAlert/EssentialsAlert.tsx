@@ -1,13 +1,12 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
-import {
-  Alert, Button, Card,
-} from '@openedx/paragon';
+import { Alert, Button, Card } from '@openedx/paragon';
 import { useContext } from 'react';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
 import { DisplayPrice } from '@/components/DisplayPrice';
+import { ExternalLink } from '@/components/ExternalLink';
 import { DataStoreKey } from '@/constants/checkout';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import './essentials-alert.scss';
@@ -116,9 +115,10 @@ const EssentialsAlert = () => {
               </span>
               )}
               {academyMarketingUrl && (
-              <Button
-                variant="link"
+              <ExternalLink
                 href={academyMarketingUrl}
+                variant="button"
+                buttonVariant="link"
                 className="essentials-alert__learn-more ml-auto font-weight-bold"
               >
                 <FormattedMessage
@@ -126,7 +126,7 @@ const EssentialsAlert = () => {
                   defaultMessage="Learn more"
                   description="Link to learn more about the academy"
                 />
-              </Button>
+              </ExternalLink>
               )}
             </div>
 
@@ -149,19 +149,12 @@ const EssentialsAlert = () => {
             description="Upsell message for switching to Teams plan"
             values={{
               switchToTeamsLink: (
-                <Button
-                  variant="link"
+                <ExternalLink
+                  variant="button"
                   href={TEAMS_PRODUCT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="essentials-alert__footer-link p-0 m-0"
-                >
-                  <FormattedMessage
-                    id="checkout.essentialsAlert.switchToTeams"
-                    defaultMessage="Switch to Teams"
-                    description="Link to switch to Teams plan"
-                  />
-                </Button>
+                  className="essentials-alert__footer-link p-0 m-0 font-weight-bold text-white"
+                > Switch to Teams
+                </ExternalLink>
               ),
             }}
           />

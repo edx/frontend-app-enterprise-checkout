@@ -1,6 +1,8 @@
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { Card, Hyperlink } from '@openedx/paragon';
+import { Card } from '@openedx/paragon';
 import React from 'react';
+
+import { ExternalLink } from '../ExternalLink';
 
 const renderStrong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
@@ -8,18 +10,13 @@ const ComparePlansBox = () => {
   // This URL can be removed once it is configured in environment files.
   const COMPARE_ENTERPRISE_PLANS_URL = 'https://business.edx.org/course-library-compare-plans/';
   const comparePlansLink = (
-    <Hyperlink
-      destination={COMPARE_ENTERPRISE_PLANS_URL}
-      target="_blank"
-      showLaunchIcon={false}
-      role="link"
-    >
+    <ExternalLink href={COMPARE_ENTERPRISE_PLANS_URL}>
       <FormattedMessage
         id="checkout.purchaseSummary.comparePlans.link"
-        defaultMessage="Compare plans."
+        defaultMessage="Compare plans"
         description="Link text for compare plans"
       />
-    </Hyperlink>
+    </ExternalLink>
   );
 
   return (

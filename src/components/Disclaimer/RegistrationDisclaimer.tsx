@@ -1,6 +1,7 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { Hyperlink } from '@openedx/paragon';
+
+import { ExternalLink } from '../ExternalLink';
 
 const RegistrationDisclaimer = () => {
   const { TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL } = getConfig();
@@ -12,32 +13,27 @@ const RegistrationDisclaimer = () => {
         description="Registration disclaimer text with links to terms of service, honor code, and privacy policy"
         values={{
           termsAndHonorLink: (
-            <Hyperlink
-              destination={TERMS_OF_SERVICE_URL}
-              target="_blank"
-              showLaunchIcon={false}
-              role="link"
+            <ExternalLink
+              href={TERMS_OF_SERVICE_URL}
+
             >
               <FormattedMessage
                 id="checkout.registration.disclaimer.termsOfServiceAndHonorCode"
                 defaultMessage="Terms of Service and Honor Code"
                 description="Link text for Terms of Service and HonorCode in registration disclaimer"
               />
-            </Hyperlink>
+            </ExternalLink>
           ),
           privacyPolicyLink: (
-            <Hyperlink
-              destination={PRIVACY_POLICY_URL}
-              target="_blank"
-              showLaunchIcon={false}
-              role="link"
+            <ExternalLink
+              href={PRIVACY_POLICY_URL}
             >
               <FormattedMessage
                 id="checkout.registration.disclaimer.privacyPolicy"
                 defaultMessage="Privacy Policy"
                 description="Link text for Privacy Policy in registration disclaimer"
               />
-            </Hyperlink>
+            </ExternalLink>
           ),
         }}
       />
