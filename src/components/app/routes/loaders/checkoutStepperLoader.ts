@@ -7,7 +7,6 @@ import { isEssentialsFlow, validateFormState } from '@/components/app/routes/loa
 import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, getCheckoutPageDetails, getStepFromParams } from '@/utils/checkout';
-
 /**
  * Route loader for Plan Details page.
  *
