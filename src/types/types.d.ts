@@ -308,6 +308,7 @@ declare global {
     expiresAt: string;
     adminPortalUrl: string;
     country: string | null;
+    sspProduct?: string | null;
   }
 
   type BillingAddress = {
