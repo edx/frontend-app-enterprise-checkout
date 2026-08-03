@@ -2,6 +2,7 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Form } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
+import React from 'react';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
