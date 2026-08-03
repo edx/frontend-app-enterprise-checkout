@@ -105,9 +105,9 @@ describe('PurchaseSummary', () => {
     renderWithProviders(EssentialsPageRoute.PlanDetails);
 
     expect(screen.getByText('Purchase summary')).toBeInTheDocument();
-    expect(screen.getByText('AI')).toBeInTheDocument(); // ← component uses product.name, not longName
+    expect(screen.getByText('AI')).toBeInTheDocument();
     expect(screen.getByText('Essentials subscription, price per user, paid yearly.')).toBeInTheDocument();
     expect(screen.getByText('Not sure which plan is right for you?')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Compare plans' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Compare plans/i })).toBeInTheDocument();
   });
 });

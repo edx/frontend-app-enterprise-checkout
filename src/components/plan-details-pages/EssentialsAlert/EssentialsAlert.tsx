@@ -151,9 +151,15 @@ const EssentialsAlert = () => {
               switchToTeamsLink: (
                 <ExternalLink
                   variant="button"
+                  buttonVariant="link"
                   href={TEAMS_PRODUCT_URL}
                   className="essentials-alert__footer-link p-0 m-0 font-weight-bold text-white"
-                > Switch to Teams
+                >
+                  <FormattedMessage
+                    id="checkout.essentialsAlert.switchToTeams"
+                    defaultMessage="Switch to Teams"
+                    description="Link to switch to Teams plan"
+                  />
                 </ExternalLink>
               ),
             }}

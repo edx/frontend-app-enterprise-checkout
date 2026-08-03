@@ -1,5 +1,4 @@
-// components/ExternalLink/ExternalLink.tsx
-import { Button, Icon } from '@openedx/paragon';
+import { Button, Hyperlink, Icon } from '@openedx/paragon';
 import { Launch } from '@openedx/paragon/icons';
 import React from 'react';
 
@@ -30,10 +29,6 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
     <Icon src={Launch} className="ml-1" />
   );
 
-  const hyperlinkLaunchIcon = (
-    <Icon src={Launch} className="ml-0 small align-middle" />
-  );
-
   if (variant === 'button') {
     return (
       <Button
@@ -53,16 +48,14 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
   }
 
   return (
-    <a
-      href={href}
+    <Hyperlink
+      destination={href}
       target="_blank"
-      rel="noopener noreferrer"
       className={`d-inline-flex align-items-center ${className || ''}`}
       data-testid={dataTestId}
     >
       {children}
-      {hyperlinkLaunchIcon}
-    </a>
+    </Hyperlink>
   );
 };
 
