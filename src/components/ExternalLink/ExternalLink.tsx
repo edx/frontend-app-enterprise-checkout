@@ -51,6 +51,8 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
     <Hyperlink
       destination={href}
       target="_blank"
+      rel="noopener noreferrer"
+      showLaunchIcon
       className={`d-inline-flex align-items-center ${className || ''}`}
       data-testid={dataTestId}
     >
