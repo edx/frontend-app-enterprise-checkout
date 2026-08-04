@@ -219,11 +219,11 @@ describe('EssentialsAlert Component', () => {
 
     it('should display "Learn more" link', () => {
       renderComponent();
-      const learnMoreLink = screen.getByText('Learn more');
+      const learnMoreLink = screen.getByText('Learn more').closest('a') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.tagName).toBe('A');
-      // Learn more should open in the same tab (no target)
-      expect((learnMoreLink as HTMLAnchorElement).target).toBe('');
+      // Learn more should open in the new tab
+      expect((learnMoreLink as HTMLAnchorElement).target).toBe('_blank');
     });
 
     it('should display academy description', () => {
@@ -300,7 +300,7 @@ describe('EssentialsAlert Component', () => {
 
     it('should have "Switch to Teams" link with correct href', () => {
       renderComponent();
-      const switchToTeamsLink = screen.getByText('Switch to Teams') as HTMLAnchorElement;
+      const switchToTeamsLink = screen.getByText('Switch to Teams').closest('a') as HTMLAnchorElement;
       expect(switchToTeamsLink).toBeInTheDocument();
       expect(switchToTeamsLink.href).toContain('business.edx.org/course-library-plans-teams/');
       expect(switchToTeamsLink.target).toBe('_blank');
@@ -310,10 +310,12 @@ describe('EssentialsAlert Component', () => {
 
     it('should have "Learn more" link with dynamic marketing URL', () => {
       renderComponent();
-      const learnMoreLink = screen.getByText('Learn more') as HTMLAnchorElement;
+      const learnMoreLink = screen.getByText('Learn more').closest('a') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.href).toBe('https://www.edx.org/learn/sustainability');
-      expect(learnMoreLink.target).toBe('');
+      expect(learnMoreLink.target).toBe('_blank');
+      expect(learnMoreLink.rel).toContain('noopener');
+      expect(learnMoreLink.rel).toContain('noreferrer');
     });
 
     it('should render product tags when available', () => {
@@ -336,8 +338,8 @@ describe('EssentialsAlert Component', () => {
 
     it('should display "Switch to Teams" link in footer', () => {
       renderComponent();
-      const switchLink = screen.getByText('Switch to Teams');
-      expect(switchLink).toBeInTheDocument();
+      const switchToTeamsLink = screen.getByText('Switch to Teams').closest('a') as HTMLAnchorElement;
+      expect(switchToTeamsLink).toBeInTheDocument();
     });
 
     it('should have correct link count for external resources', () => {

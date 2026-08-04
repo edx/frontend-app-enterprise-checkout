@@ -1,4 +1,5 @@
-import { Button } from '@openedx/paragon';
+import { Button, Icon } from '@openedx/paragon';
+import { Launch } from '@openedx/paragon/icons';
 import { FormattedMessage } from 'react-intl';
 
 import { useCheckoutIntent, useCreateBillingPortalSession } from '@/components/app/data';
@@ -31,6 +32,7 @@ const ReceiptButton: React.FC = () => {
         defaultMessage="View Receipt"
         description="Button text to view the receipt for the purchase"
       />
+      <Icon src={Launch} className="ml-1 small align-middle" />
     </Button>
   );
 };

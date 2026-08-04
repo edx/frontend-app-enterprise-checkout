@@ -1,12 +1,13 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
-import { Form, Hyperlink } from '@openedx/paragon';
+import { Form } from '@openedx/paragon';
 import { isEmpty } from 'lodash-es';
-import { useCallback } from 'react';
+import React from 'react';
 import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
 import { DisplayPrice } from '@/components/DisplayPrice';
+import { ExternalLink } from '@/components/ExternalLink';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -22,6 +23,7 @@ interface TermsAndConditionsCheckboxesProps {
  *  - confirmSubscription: boolean
  *  - confirmRecurringSubscription: boolean
  */
+
 const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProps) => {
   const {
     control,
@@ -48,28 +50,16 @@ const TermsAndConditionsCheckboxes = ({ form }: TermsAndConditionsCheckboxesProp
     });
   };
 
-  const getProductDescriptionsTermsHyperlink = useCallback((chunks: string) => (
-    <Hyperlink
-      destination={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      showLaunchIcon={false}
-    >
+  const getProductDescriptionsTermsHyperlink = (chunks: React.ReactNode) => (
+    <ExternalLink href={ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL}>
       {chunks}
-    </Hyperlink>
-  ), [ENTERPRISE_PRODUCT_DESCRIPTIONS_AND_TERMS_URL]);
-
-  const getSalesTermsHyperlink = useCallback((chunks: string) => (
-    <Hyperlink
-      destination={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      showLaunchIcon={false}
-    >
+    </ExternalLink>
+  );
+  const getSalesTermsHyperlink = (chunks: React.ReactNode) => (
+    <ExternalLink href={ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL}>
       {chunks}
-    </Hyperlink>
-  ), [ENTERPRISE_SALES_TERMS_AND_CONDITIONS_URL]);
-
+    </ExternalLink>
+  );
   return (
     <Form.CheckboxSet
       name="userDisclosureAndConsent"

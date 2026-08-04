@@ -1,6 +1,8 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
+import { ExternalLink } from '@/components/ExternalLink';
+
 const TermsAndConditionsText = () => {
   const { TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL } = getConfig();
 
@@ -13,22 +15,14 @@ const TermsAndConditionsText = () => {
           description="Terms and conditions text for plan details form"
           values={{
             termsOfUseLink: (
-              <a
-                href={TERMS_OF_SERVICE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <ExternalLink href={TERMS_OF_SERVICE_URL}>
                 Terms of Use
-              </a>
+              </ExternalLink>
             ),
             privacyNoticeLink: (
-              <a
-                href={PRIVACY_POLICY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <ExternalLink href={PRIVACY_POLICY_URL}>
                 Privacy Notice
-              </a>
+              </ExternalLink>
             ),
           }}
         />
