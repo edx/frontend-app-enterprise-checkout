@@ -64,6 +64,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
       destination={href}
       target="_blank"
       className={classNames('external-link', className)}
+      rel="noopener noreferrer"
       data-testid={dataTestId}
     >
       {children}
