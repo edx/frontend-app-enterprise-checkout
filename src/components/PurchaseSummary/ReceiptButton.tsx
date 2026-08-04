@@ -32,7 +32,7 @@ const ReceiptButton: React.FC = () => {
         defaultMessage="View Receipt"
         description="Button text to view the receipt for the purchase"
       />
-      <Icon src={Launch as React.ComponentType<{}>} className="ml-1 small align-middle" />
+      <Icon src={Launch} className="ml-1 small align-middle" />
     </Button>
   );
 };

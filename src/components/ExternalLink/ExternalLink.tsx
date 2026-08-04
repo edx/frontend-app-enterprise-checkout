@@ -25,7 +25,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
   iconBeforeStyle,
   dataTestId,
 }) => {
-  const buttonLaunchIcon = (
+  const launchIcon = (
     <Icon src={Launch} className="ml-1" />
   );
 
@@ -42,7 +42,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
       >
         {iconBefore && <Icon src={iconBefore} style={iconBeforeStyle} />}
         <span>{children}</span>
-        {buttonLaunchIcon}
+        {launchIcon}
       </Button>
     );
   }
@@ -52,11 +52,12 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
       destination={href}
       target="_blank"
       rel="noopener noreferrer"
-      showLaunchIcon
-      className={`d-inline-flex align-items-center ${className || ''}`}
+      showLaunchIcon={false}
+      className={`${className || ''}`}
       data-testid={dataTestId}
     >
       {children}
+      {launchIcon}
     </Hyperlink>
   );
 };

@@ -150,8 +150,6 @@ const EssentialsAlert = () => {
             values={{
               switchToTeamsLink: (
                 <ExternalLink
-                  variant="button"
-                  buttonVariant="link"
                   href={TEAMS_PRODUCT_URL}
                   className="essentials-alert__footer-link p-0 m-0 font-weight-bold text-white"
                 >

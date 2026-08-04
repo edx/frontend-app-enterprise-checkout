@@ -222,7 +222,7 @@ describe('EssentialsAlert Component', () => {
       const learnMoreLink = screen.getByText('Learn more').closest('a') as HTMLAnchorElement;
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.tagName).toBe('A');
-      // Learn more should open in the same tab (no target)
+      // Learn more should open in the new tab
       expect((learnMoreLink as HTMLAnchorElement).target).toBe('_blank');
     });
 

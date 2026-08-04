@@ -15,7 +15,6 @@ const RegistrationDisclaimer = () => {
           termsAndHonorLink: (
             <ExternalLink
               href={TERMS_OF_SERVICE_URL}
-
             >
               <FormattedMessage
                 id="checkout.registration.disclaimer.termsOfServiceAndHonorCode"

@@ -42,8 +42,7 @@ describe('ExternalLink', () => {
       );
       const link = screen.getByText('Click here').closest('a');
       expect(link).toHaveClass('my-custom-class');
-      expect(link).toHaveClass('d-inline-flex');
-      expect(link).toHaveClass('align-items-center');
+      expect(link).toHaveClass('pgn__hyperlink');
     });
 
     it('renders launch icon', () => {
@@ -74,8 +73,7 @@ describe('ExternalLink', () => {
     it('renders without className when not provided', () => {
       renderWithIntl(<ExternalLink href="https://example.com">Click here</ExternalLink>);
       const link = screen.getByText('Click here').closest('a');
-      expect(link).toHaveClass('d-inline-flex');
-      expect(link).toHaveClass('align-items-center');
+      expect(link).toHaveClass('pgn__hyperlink');
     });
   });
 
@@ -218,7 +216,7 @@ describe('ExternalLink', () => {
       renderWithIntl(<ExternalLink href="https://example.com">Click here</ExternalLink>);
       const link = screen.getByText('Click here').closest('a');
       expect(link).not.toHaveClass('btn');
-      expect(link).toHaveClass('d-inline-flex');
+      expect(link).toHaveClass('pgn__hyperlink');
     });
 
     it('renders plain text children', () => {
