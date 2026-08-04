@@ -7,12 +7,11 @@ import { Controller, type UseFormReturn } from 'react-hook-form';
 
 import { useCheckoutIntent, usePurchaseSummaryPricing } from '@/components/app/data';
 import { DisplayPrice } from '@/components/DisplayPrice';
+import { ExternalLink } from '@/components/ExternalLink';
 import { DataStoreKey } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
-
-import { ExternalLink } from '../ExternalLink';
 
 interface TermsAndConditionsCheckboxesProps {
   form: UseFormReturn<BillingDetailsData>;

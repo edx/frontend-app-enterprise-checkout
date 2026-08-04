@@ -1,6 +1,8 @@
 import { Button, Hyperlink, Icon } from '@openedx/paragon';
 import { Launch } from '@openedx/paragon/icons';
+import classNames from 'classnames';
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 interface ExternalLinkProps {
   href: string;
@@ -25,11 +27,21 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
   iconBeforeStyle,
   dataTestId,
 }) => {
-  const launchIcon = (
-    <Icon src={Launch} className="ml-1" />
-  );
-
   if (variant === 'button') {
+    const launchIcon = (
+      <Icon
+        src={Launch}
+        className="ml-1"
+        screenReaderText={(
+          <FormattedMessage
+            id="checkout.externalLink.screenReaderText"
+            defaultMessage="Opens in a new tab"
+            description="Screen reader text announcing that a link opens in a new browser tab"
+          />
+        )}
+      />
+    );
+
     return (
       <Button
         variant={buttonVariant}
@@ -51,13 +63,10 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
     <Hyperlink
       destination={href}
       target="_blank"
-      rel="noopener noreferrer"
-      showLaunchIcon={false}
-      className={`${className || ''}`}
+      className={classNames('external-link', className)}
       data-testid={dataTestId}
     >
       {children}
-      {launchIcon}
     </Hyperlink>
   );
 };

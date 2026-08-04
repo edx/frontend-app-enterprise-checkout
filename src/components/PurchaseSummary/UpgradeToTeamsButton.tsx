@@ -2,7 +2,7 @@ import { Lock } from '@openedx/paragon/icons';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
-import { ExternalLink } from '../ExternalLink';
+import { ExternalLink } from '@/components/ExternalLink';
 
 const UPGRADE_TO_TEAMS_URL = 'https://business.edx.org/course-library-plans-teams/';
 

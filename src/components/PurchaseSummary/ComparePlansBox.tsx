@@ -2,7 +2,7 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Card } from '@openedx/paragon';
 import React from 'react';
 
-import { ExternalLink } from '../ExternalLink';
+import { ExternalLink } from '@/components/ExternalLink';
 
 const renderStrong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 

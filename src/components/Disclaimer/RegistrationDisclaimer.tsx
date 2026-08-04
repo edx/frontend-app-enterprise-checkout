@@ -1,7 +1,7 @@
 import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
-import { ExternalLink } from '../ExternalLink';
+import { ExternalLink } from '@/components/ExternalLink';
 
 const RegistrationDisclaimer = () => {
   const { TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL } = getConfig();
