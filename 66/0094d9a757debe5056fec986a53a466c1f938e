@@ -1,0 +1,35 @@
+.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-97
+.claude/skills/gitnexus/gitnexus-debugging/SKILL.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-101
+CLAUDE.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 164-209
+.claude/skills/gitnexus/gitnexus-guide/SKILL.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-138
+.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-121
+.claude/skills/gitnexus/gitnexus-cli/SKILL.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-86
+.claude/skills/gitnexus/gitnexus-exploring/SKILL.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-78
+AGENTS.md
+  s_ceec66738c4f65::t_d1ba59076c0cec 1-44
+package-lock.json
+  s_ceec66738c4f65::t_3bafe0d730b3e3 3124,3147,3160,3173,21072
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "660094d9a757debe5056fec986a53a466c1f938e",
+  "prompts": {},
+  "sessions": {
+    "s_ceec66738c4f65": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e1bd6944-0f86-4de2-9698-26c73f472672",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Hamzah Ullah <hamzahullah@yahoo.com>"
+    }
+  }
+}
