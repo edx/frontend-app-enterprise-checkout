@@ -94,6 +94,8 @@ describe('PurchaseSummaryCardButton', () => {
       expect(screen.queryByTestId('edit-plan-button')).not.toBeInTheDocument();
       expect(screen.queryByText('Edit Plan')).not.toBeInTheDocument();
       expect(screen.queryByText('View Receipt')).not.toBeInTheDocument();
+      // Ensure PlanDetailsRegister does NOT render the Essentials upgrade button
+      expect(screen.queryByTestId('upgrade-to-teams-button')).not.toBeInTheDocument();
     });
 
     it('renders nothing for unknown/unmapped routes', () => {

@@ -22,7 +22,7 @@ const ROUTE_BUTTON_MAP: Record<string, ButtonType> = {
   [CheckoutPageRoute.BillingDetailsSuccess]: BUTTON_TYPES.RECEIPT,
   [CheckoutPageRoute.PlanDetails]: BUTTON_TYPES.NONE,
   [CheckoutPageRoute.PlanDetailsLogin]: BUTTON_TYPES.NONE,
-  [CheckoutPageRoute.PlanDetailsRegister]: BUTTON_TYPES.NONE,
+  [CheckoutPageRoute.PlanDetailsRegister]: BUTTON_TYPES.NONE, // Already in the Teams checkout flow — no upgrade needed.
   [EssentialsPageRoute.AcademicSelection]: BUTTON_TYPES.UPGRADE,
   [EssentialsPageRoute.PlanDetails]: BUTTON_TYPES.UPGRADE,
   [`${EssentialsPageRoute.PlanDetails}/${CheckoutSubstepKey.Register}`]: BUTTON_TYPES.UPGRADE,
