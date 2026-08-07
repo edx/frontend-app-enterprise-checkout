@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutSubstepKey, EssentialsPageRoute } from '@/constants/checkout';
 
 import EditPlanButton from './EditPlanButton';
 import ReceiptButton from './ReceiptButton';
@@ -25,6 +25,7 @@ const ROUTE_BUTTON_MAP: Record<string, ButtonType> = {
   [CheckoutPageRoute.PlanDetailsRegister]: BUTTON_TYPES.NONE,
   [EssentialsPageRoute.AcademicSelection]: BUTTON_TYPES.UPGRADE,
   [EssentialsPageRoute.PlanDetails]: BUTTON_TYPES.UPGRADE,
+  [`${EssentialsPageRoute.PlanDetails}/${CheckoutSubstepKey.Register}`]: BUTTON_TYPES.UPGRADE,
   [EssentialsPageRoute.AccountDetails]: BUTTON_TYPES.UPGRADE,
   [EssentialsPageRoute.BillingDetails]: BUTTON_TYPES.UPGRADE,
   [EssentialsPageRoute.BillingDetailsSuccess]: BUTTON_TYPES.RECEIPT,

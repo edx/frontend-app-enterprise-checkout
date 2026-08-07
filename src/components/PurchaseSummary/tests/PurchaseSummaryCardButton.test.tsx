@@ -5,7 +5,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 
-import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
+import { CheckoutPageRoute, CheckoutSubstepKey, EssentialsPageRoute } from '@/constants/checkout';
 
 import PurchaseSummaryCardButton from '../PurchaseSummaryCardButton';
 
@@ -106,8 +106,14 @@ describe('PurchaseSummaryCardButton', () => {
   });
 
   describe('Essentials Routes', () => {
-    it('renders upgrade button for essentials plan details route', () => {
-      renderWithRouter(EssentialsPageRoute.PlanDetails);
+    it.each([
+      EssentialsPageRoute.AcademicSelection,
+      EssentialsPageRoute.PlanDetails,
+      `${EssentialsPageRoute.PlanDetails}/${CheckoutSubstepKey.Register}`,
+      EssentialsPageRoute.AccountDetails,
+      EssentialsPageRoute.BillingDetails,
+    ])('renders upgrade button for essentials route: %s', (route) => {
+      renderWithRouter(route);
 
       expect(screen.getByTestId('upgrade-to-teams-button')).toBeInTheDocument();
       expect(screen.getByText('Upgrade to Teams')).toBeInTheDocument();
