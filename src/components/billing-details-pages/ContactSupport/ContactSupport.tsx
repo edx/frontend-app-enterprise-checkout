@@ -17,7 +17,7 @@ const ContactSupport = () => {
           defaultMessage="For questions about your subscription or our{lineBreak}cancellation procedures, please {contactSupport}"
           description="Help text with link to contact support"
           values={{
-            lineBreak: <span style={{ display: 'block' }} />,
+            lineBreak: <br />,
             contactSupport: (
               <ExternalLink
                 href={CONTACT_SUPPORT_URL}
