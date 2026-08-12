@@ -118,6 +118,18 @@ describe('SubscriptionStartMessage', () => {
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
   });
 
+  it('renders plain text when billing portal URL is missing', () => {
+    // Simulate billing portal session still loading / unavailable
+    (useCreateBillingPortalSession as jest.Mock).mockReturnValue({ data: undefined });
+    renderComponent();
+
+    // There should be no clickable link for subscription management
+    expect(screen.queryByRole('link', { name: /Subscription Management/ })).toBeNull();
+
+    // The text should still be present as plain text
+    expect(screen.getByText(/Subscription Management/)).toBeInTheDocument();
+  });
+
   it('does not render when data is missing', () => {
     (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
       startTime: null,

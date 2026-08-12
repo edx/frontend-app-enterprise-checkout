@@ -14,7 +14,7 @@ interface ExternalLinkProps {
   iconBefore?: React.ComponentType<{}>;
   iconBeforeStyle?: React.CSSProperties;
   dataTestId?: string;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLElement> | (() => void);
 }
 
 const ExternalLink: React.FC<ExternalLinkProps> = ({

@@ -75,19 +75,25 @@ export const SubscriptionStartMessage = () => {
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
-                <ExternalLink
-                  href={billingPortalSession?.url ?? ''}
-                  onClick={() => sendEnterpriseCheckoutTrackingEvent({
-                    checkoutIntentId: checkoutIntent?.id ?? null,
-                    checkoutIntentUuid: checkoutIntent?.uuid ?? null,
-                    eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
-                    properties: {
-                      billingPortalSessionUrl: billingPortalSession?.url,
-                    },
-                  })}
-                >
-                  {intl.formatMessage(messages.subscriptionManagement)}
-                </ExternalLink>
+                billingPortalSession?.url
+                  ? (
+                    <ExternalLink
+                      href={billingPortalSession.url}
+                      onClick={() => sendEnterpriseCheckoutTrackingEvent({
+                        checkoutIntentId: checkoutIntent?.id ?? null,
+                        checkoutIntentUuid: checkoutIntent?.uuid ?? null,
+                        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
+                        properties: {
+                          billingPortalSessionUrl: billingPortalSession?.url,
+                        },
+                      })}
+                    >
+                      {intl.formatMessage(messages.subscriptionManagement)}
+                    </ExternalLink>
+                  )
+                  : (
+                    <span>{intl.formatMessage(messages.subscriptionManagement)}</span>
+                  )
               ),
               price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
             }}
