@@ -1,0 +1,23 @@
+src/components/StatefulButton/StatefulSubscribeButton.tsx
+  s_9e9e168f067a48::t_88024d24e3b8c2 153
+  s_9e9e168f067a48::t_9c284fac7aa422 57
+  s_9e9e168f067a48::t_5faf7b8938770f 38-46
+  s_9e9e168f067a48::t_9fc01a8507cef7 170
+  s_9e9e168f067a48::t_347d9a218049fa 109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "16b0d9e6d1af134e08cae63a8a4c558013bb9ea3",
+  "prompts": {},
+  "sessions": {
+    "s_9e9e168f067a48": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4dabccec-6d3d-4706-85a9-886575a54c27",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Srija Indukuri <ssrijaindukuri-sonata@2u.com>"
+    }
+  }
+}
