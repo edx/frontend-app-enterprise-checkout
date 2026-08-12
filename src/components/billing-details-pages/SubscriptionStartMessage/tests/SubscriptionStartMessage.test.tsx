@@ -107,7 +107,7 @@ describe('SubscriptionStartMessage', () => {
   it('renders the link correctly', async () => {
     const user = userEvent.setup();
     renderComponent();
-    const link = screen.getByRole('link', { name: 'Subscription Management' });
+    const link = screen.getByRole('link', { name: /Subscription Management/ });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://stripe-billing.example.com/session');
     expect(link).toHaveAttribute('target', '_blank');
@@ -116,6 +116,18 @@ describe('SubscriptionStartMessage', () => {
     await user.click(link);
 
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
+  });
+
+  it('renders plain text when billing portal URL is missing', () => {
+    // Simulate billing portal session still loading / unavailable
+    (useCreateBillingPortalSession as jest.Mock).mockReturnValue({ data: undefined });
+    renderComponent();
+
+    // There should be no clickable link for subscription management
+    expect(screen.queryByRole('link', { name: /Subscription Management/ })).toBeNull();
+
+    // The text should still be present as plain text
+    expect(screen.getByText(/Subscription Management/)).toBeInTheDocument();
   });
 
   it('does not render when data is missing', () => {
@@ -127,7 +139,7 @@ describe('SubscriptionStartMessage', () => {
     renderComponent();
     const titleElement = screen.queryByText('Your free trial for edX team\'s subscription has started.');
     expect(titleElement).not.toBeInTheDocument();
-    const link = screen.queryByRole('link', { name: 'Subscription Management' });
+    const link = screen.queryByRole('link', { name: /Subscription Management/ });
     expect(link).toBeNull();
   });
 

@@ -10,6 +10,7 @@ import {
 import { LONG_MONTH_DATE_FORMAT, SUBSCRIPTION_TRIAL_LENGTH_DAYS } from '@/components/app/data/constants';
 import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 import { DisplayPrice } from '@/components/DisplayPrice';
+import { ExternalLink } from '@/components/ExternalLink';
 import { FieldContainer } from '@/components/FieldContainer';
 import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
@@ -74,21 +75,25 @@ export const SubscriptionStartMessage = () => {
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
-                <a
-                  onClick={() => sendEnterpriseCheckoutTrackingEvent({
-                    checkoutIntentId: checkoutIntent?.id ?? null,
-                    checkoutIntentUuid: checkoutIntent?.uuid ?? null,
-                    eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
-                    properties: {
-                      billingPortalSessionUrl: billingPortalSession?.url,
-                    },
-                  })}
-                  href={billingPortalSession?.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {intl.formatMessage(messages.subscriptionManagement)}
-                </a>
+                billingPortalSession?.url
+                  ? (
+                    <ExternalLink
+                      href={billingPortalSession.url}
+                      onClick={() => sendEnterpriseCheckoutTrackingEvent({
+                        checkoutIntentId: checkoutIntent?.id ?? null,
+                        checkoutIntentUuid: checkoutIntent?.uuid ?? null,
+                        eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
+                        properties: {
+                          billingPortalSessionUrl: billingPortalSession?.url,
+                        },
+                      })}
+                    >
+                      {intl.formatMessage(messages.subscriptionManagement)}
+                    </ExternalLink>
+                  )
+                  : (
+                    <span>{intl.formatMessage(messages.subscriptionManagement)}</span>
+                  )
               ),
               price: (<DisplayPrice value={yearlySubscriptionCostForQuantity ?? 0} />),
             }}
