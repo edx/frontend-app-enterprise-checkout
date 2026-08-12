@@ -1,0 +1,19 @@
+src/components/billing-details-pages/ContactSupport/ContactSupport.tsx
+  s_84bc43ed9b83dd::t_74ac6a5ae7f9d3 17,20,22-23,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "206c55fc4d5778b9a16aaedffb6ad8938a8b3916",
+  "prompts": {},
+  "sessions": {
+    "s_84bc43ed9b83dd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6313ccf5-7e50-49a0-8c11-0b20b8d68988",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "tsunkara-sonata <tsunkara-sonata@2u.com>"
+    }
+  }
+}
