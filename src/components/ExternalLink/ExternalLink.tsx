@@ -14,6 +14,7 @@ interface ExternalLinkProps {
   iconBefore?: React.ComponentType<{}>;
   iconBeforeStyle?: React.CSSProperties;
   dataTestId?: string;
+  onClick?: () => void;
 }
 
 const ExternalLink: React.FC<ExternalLinkProps> = ({
@@ -26,6 +27,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
   iconBefore,
   iconBeforeStyle,
   dataTestId,
+  onClick,
 }) => {
   if (variant === 'button') {
     const launchIcon = (
@@ -51,6 +53,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
         target="_blank"
         rel="noopener noreferrer"
         data-testid={dataTestId}
+        onClick={onClick}
       >
         {iconBefore && <Icon src={iconBefore} style={iconBeforeStyle} />}
         <span>{children}</span>
@@ -66,6 +69,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({
       className={classNames('external-link', className)}
       rel="noopener noreferrer"
       data-testid={dataTestId}
+      onClick={onClick}
     >
       {children}
     </Hyperlink>

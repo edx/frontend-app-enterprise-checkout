@@ -107,7 +107,7 @@ describe('SubscriptionStartMessage', () => {
   it('renders the link correctly', async () => {
     const user = userEvent.setup();
     renderComponent();
-    const link = screen.getByRole('link', { name: 'Subscription Management' });
+    const link = screen.getByRole('link', { name: /Subscription Management/ });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://stripe-billing.example.com/session');
     expect(link).toHaveAttribute('target', '_blank');
@@ -127,7 +127,7 @@ describe('SubscriptionStartMessage', () => {
     renderComponent();
     const titleElement = screen.queryByText('Your free trial for edX team\'s subscription has started.');
     expect(titleElement).not.toBeInTheDocument();
-    const link = screen.queryByRole('link', { name: 'Subscription Management' });
+    const link = screen.queryByRole('link', { name: /Subscription Management/ });
     expect(link).toBeNull();
   });
 
