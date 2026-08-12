@@ -1,0 +1,21 @@
+src/components/ExternalLink/ExternalLink.tsx
+  s_6d62b24129c229::t_7e705e1b957fee 17
+src/components/billing-details-pages/SubscriptionStartMessage/SubscriptionStartMessage.tsx
+  s_6d62b24129c229::t_e6547f56c337d2 78-96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "10ec95796ea37d9c7adce4ee635be2be029240a2",
+  "prompts": {},
+  "sessions": {
+    "s_6d62b24129c229": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "db2daa4d-ed10-4c57-a685-85aa0de5e6d5",
+        "model": "unknown"
+      },
+      "human_author": "tsunkara-sonata <tsunkara-sonata@2u.com>"
+    }
+  }
+}
