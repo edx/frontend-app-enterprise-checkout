@@ -1,0 +1,24 @@
+src/components/billing-details-pages/SubscriptionStartMessage/SubscriptionStartMessage.tsx
+  s_2e1e40727466a9::t_1082f3758a2d55 13
+  s_2e1e40727466a9::t_66d61f415eb0c9 78-79,90
+src/components/ExternalLink/ExternalLink.tsx
+  s_2e1e40727466a9::t_bbd7e03084cc97 72
+  s_2e1e40727466a9::t_cadfd23ba01ecd 17,30
+  s_2e1e40727466a9::t_55d95578b00eeb 56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "c747897d9d424bd280442a236e3326655e6b4ae1",
+  "prompts": {},
+  "sessions": {
+    "s_2e1e40727466a9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3787c4cf-d5c3-45c8-8dd4-d573d0bd90b2",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": null
+    }
+  }
+}
