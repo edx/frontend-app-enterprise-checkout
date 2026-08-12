@@ -1,0 +1,42 @@
+Makefile
+  s_b6da43c927e3ff::t_f4b30b9f1b4723 46-47,49
+  s_b6da43c927e3ff::t_52d82cfc3ce00b 9-13
+src/components/PurchaseSummary/ReceiptButton.tsx
+  s_9e9e168f067a48::t_5e8a1f4c2f2a56 1
+src/components/PurchaseSummary/UpgradeToTeamsButton.tsx
+  s_dcd9a7604974c4::t_a958d2ea63a127 1
+src/components/PurchaseSummary/EditPlanButton.tsx
+  s_dcd9a7604974c4::t_678459d8da417a 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "322ed9f6cf2f19959b763bb4de29a84889822476",
+  "prompts": {},
+  "sessions": {
+    "s_9e9e168f067a48": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4dabccec-6d3d-4706-85a9-886575a54c27",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Srija Indukuri <ssrijaindukuri-sonata@2u.com>"
+    },
+    "s_b6da43c927e3ff": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a2abd9bf-2c98-4e35-a8e8-969401987b0c",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": null
+    },
+    "s_dcd9a7604974c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "236499ce-bf73-4d49-9a69-b6236a8807ec",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": null
+    }
+  }
+}
