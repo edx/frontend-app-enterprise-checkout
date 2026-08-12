@@ -1,6 +1,6 @@
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Lock } from '@openedx/paragon/icons';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 
 import { ExternalLink } from '@/components/ExternalLink';
 

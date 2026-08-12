@@ -6,6 +6,11 @@ transifex_input = $(i18n)/transifex_input.json
 # This directory must match .babelrc .
 transifex_temp = ./temp/babel-plugin-formatjs
 
+# Variables for additional translation sources and imports (define in edx-internal if needed)
+ATLAS_EXTRA_SOURCES ?=
+ATLAS_EXTRA_INTL_IMPORTS ?=
+ATLAS_OPTIONS ?=
+
 precommit:
 	npm run lint
 	npm audit
@@ -38,7 +43,8 @@ pull_translations:
 	            translations/paragon/src/i18n/messages:paragon \
 	            translations/frontend-component-footer/src/i18n/messages:frontend-component-footer \
 	            translations/frontend-component-header/src/i18n/messages:frontend-component-header \
-	            translations/frontend-app-enterprise-checkout/src/i18n/messages:frontend-app-enterprise-checkout
+	            translations/frontend-app-enterprise-checkout/src/i18n/messages:frontend-app-enterprise-checkout \
+	            $(ATLAS_EXTRA_SOURCES)
 
-	$(intl_imports) frontend-platform paragon frontend-component-header frontend-component-footer frontend-app-enterprise-checkout
+	$(intl_imports) frontend-platform paragon frontend-component-header frontend-component-footer frontend-app-enterprise-checkout $(ATLAS_EXTRA_INTL_IMPORTS)
 

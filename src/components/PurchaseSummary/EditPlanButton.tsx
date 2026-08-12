@@ -1,6 +1,6 @@
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button } from '@openedx/paragon';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 import { useNavigate } from 'react-router';
 
 import { CheckoutPageRoute } from '@/constants/checkout';
