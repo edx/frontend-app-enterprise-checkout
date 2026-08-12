@@ -35,17 +35,15 @@ const buttonMessages = defineMessages({
     defaultMessage: 'Processing...',
     description: 'Button label when processing subscription',
   },
-  error: {
-    paymentFailed: {
-      id: 'checkout.billingDetails.statefulSubscribeButton.declined_card.error',
-      defaultMessage: 'Error, card declined.',
-      description: 'Button label when subscription error on declined card',
-    },
-    fallback: {
-      id: 'checkout.billingDetails.statefulSubscribeButton.generic.error',
-      defaultMessage: 'Error, try again later.',
-      description: 'Button label when subscription error occurs',
-    },
+  errorPaymentFailed: {
+    id: 'checkout.billingDetails.statefulSubscribeButton.declined_card.error',
+    defaultMessage: 'Error, card declined.',
+    description: 'Button label when subscription error on declined card',
+  },
+  errorFallback: {
+    id: 'checkout.billingDetails.statefulSubscribeButton.generic.error',
+    defaultMessage: 'Error, try again later.',
+    description: 'Button label when subscription error occurs',
   },
   success: {
     id: 'checkout.billingDetails.statefulSubscribeButton.success',
@@ -56,7 +54,7 @@ const buttonMessages = defineMessages({
 
 const StatefulSubscribeButton = () => {
   const [statefulButtonState, setStatefulButtonState] = useState('default');
-  const [errorMessageKey, setErrorMessageKey] = useState('fallback');
+  const [errorMessageKey, setErrorMessageKey] = useState('errorFallback');
   const { data: checkoutIntent } = useCheckoutIntent();
   const intl = useIntl();
   const hasNavigatedRef = useRef(false);
@@ -108,7 +106,7 @@ const StatefulSubscribeButton = () => {
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
     setStatefulButtonState(response.type || 'default');
     if (response.type === 'error') {
-      setErrorMessageKey(buttonMessages.error[response.error?.code] ? response.error?.code : 'fallback');
+      setErrorMessageKey(response.error?.code === 'paymentFailed' ? 'errorPaymentFailed' : 'errorFallback');
       logError(
         `[BillingDetails] Error during self service purchasing Stripe checkout for checkoutIntent: ${JSON.stringify(checkoutIntent)}, ${JSON.stringify(response.error)}`,
       );
@@ -152,7 +150,7 @@ const StatefulSubscribeButton = () => {
     } else {
       // Stripe fallback
       setStatefulButtonState('error');
-      setErrorMessageKey('fallback');
+      setErrorMessageKey('errorFallback');
     }
   }, [
     statefulButtonState,
@@ -169,7 +167,7 @@ const StatefulSubscribeButton = () => {
     labels: {
       default: intl.formatMessage(buttonMessages.default),
       pending: intl.formatMessage(buttonMessages.pending),
-      error: intl.formatMessage(buttonMessages.error[errorMessageKey]),
+      error: intl.formatMessage(buttonMessages[errorMessageKey]),
       success: intl.formatMessage(buttonMessages.success),
     },
     type: 'submit',
