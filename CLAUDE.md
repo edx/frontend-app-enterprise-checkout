@@ -116,6 +116,11 @@ Configured path aliases for cleaner imports:
 - Requires devstack and enterprise-access service running
 - See README.rst for complete setup instructions including required enterprise-access settings
 
+### Local Stage Development
+
+- Runs on `localhost.stage.edx.org:1989`
+- Start with: `npm run start:stage`
+
 ### State Management
 
 - **Server State**: TanStack Query with 20-second stale time and retry logic
