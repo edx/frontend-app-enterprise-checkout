@@ -13,7 +13,7 @@ import CheckoutPage from '@/components/checkout-page/CheckoutPage';
 import AcademicSelection from '@/components/essentials-page/AcademicSelection';
 import { authenticatedSteps, CheckoutStepKey, EssentialsStepKey } from '@/constants/checkout';
 
-import { ErrorPage } from './components/ErrorPage';
+import { ErrorPage, RouteErrorPage } from './components/ErrorPage';
 
 /**
  * Returns the route loader function if a queryClient is available; otherwise, returns null.
@@ -104,7 +104,7 @@ export function getRoutes(queryClient: QueryClient) {
 
         return defaultShouldRevalidate;
       },
-      errorElement: <ErrorPage message="Error Boundary" />,
+      errorElement: <RouteErrorPage message="Error Boundary" />,
       children: [
         {
           path: 'essentials',
@@ -164,7 +164,7 @@ export function getRoutes(queryClient: QueryClient) {
             </PageWrap>
           ),
           children: checkoutRoutes,
-          errorElement: (<ErrorPage message="Error Boundary" />),
+          errorElement: (<RouteErrorPage message="Error Boundary" />),
         },
         {
           path: '*',
