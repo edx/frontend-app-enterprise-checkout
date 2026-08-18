@@ -1,4 +1,3 @@
-import { getConfig } from '@edx/frontend-platform/config';
 import { useRouteError } from 'react-router';
 import { isRouteErrorResponse } from 'react-router-dom';
 
@@ -62,11 +61,7 @@ const RouteErrorPage = ({ message }: RouteErrorPageProps) => {
   // Prefer downstream thrown error message; fall back to prop message
   const errorMessage = derivedErrorMessage ?? message;
 
-  // Never expose stack traces in production.
-  const { ENVIRONMENT } = getConfig();
-  const stackTrace = ENVIRONMENT !== 'production' ? routeError?.stack : undefined;
-
-  return <ErrorPage message={errorMessage} stackTrace={stackTrace} />;
+  return <ErrorPage message={errorMessage} stackTrace={routeError?.stack} />;
 };
 
 export default RouteErrorPage;

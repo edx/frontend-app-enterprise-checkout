@@ -1,4 +1,3 @@
-import { getConfig } from '@edx/frontend-platform/config';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
@@ -6,21 +5,11 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import RouteErrorPage, { getErrorMessage } from '../RouteErrorPage';
 
-const defaultConfig = {
-  COMPARE_ENTERPRISE_PLANS_URL: 'https://compare.example.com',
-  ENVIRONMENT: 'development',
-};
-
 jest.mock('@edx/frontend-platform/config', () => ({
   getConfig: jest.fn().mockReturnValue({
     COMPARE_ENTERPRISE_PLANS_URL: 'https://compare.example.com',
-    ENVIRONMENT: 'development',
   }),
 }));
-
-const mockGetConfig = (overrides = {}) => {
-  (getConfig as jest.Mock).mockReturnValue({ ...defaultConfig, ...overrides });
-};
 
 // Renders RouteErrorPage as a real errorElement inside a data router, so useRouteError()
 // has the context it requires. IntlProvider wraps the errorElement itself since
@@ -42,12 +31,7 @@ const renderWithThrowingLoader = (loader: () => never) => {
 };
 
 describe('RouteErrorPage', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockGetConfig();
-  });
-
-  it('displays the message and stack trace from a thrown Error outside production', async () => {
+  it('displays the message and stack trace from a thrown Error', async () => {
     renderWithThrowingLoader(() => {
       const error = new Error('Loader exploded');
       error.stack = 'at loader (foo.ts:1:1)';
@@ -56,18 +40,6 @@ describe('RouteErrorPage', () => {
 
     expect(await screen.findByText('Loader exploded')).toBeInTheDocument();
     expect(screen.getByText('at loader (foo.ts:1:1)')).toBeInTheDocument();
-  });
-
-  it('does not display a stack trace in production', async () => {
-    mockGetConfig({ ENVIRONMENT: 'production' });
-    renderWithThrowingLoader(() => {
-      const error = new Error('Loader exploded');
-      error.stack = 'at loader (foo.ts:1:1)';
-      throw error;
-    });
-
-    expect(await screen.findByText('Loader exploded')).toBeInTheDocument();
-    expect(screen.queryByText('at loader (foo.ts:1:1)')).not.toBeInTheDocument();
   });
 
   it('displays a thrown string as the message', async () => {
