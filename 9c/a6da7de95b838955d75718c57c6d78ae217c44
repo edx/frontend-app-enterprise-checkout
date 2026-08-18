@@ -1,0 +1,27 @@
+src/components/PurchaseSummary/TestimonialCard.tsx
+  s_3f3d56dd628f1f::t_0ab0c9c41b3031 36
+  h_7a93e17fee0064 37
+src/components/PurchaseSummary/TestimonialCard.test.tsx
+  s_3f3d56dd628f1f::t_8a2056fe6bc2dc 39-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9ca6da7de95b838955d75718c57c6d78ae217c44",
+  "prompts": {},
+  "humans": {
+    "h_7a93e17fee0064": {
+      "author": "Hamzah Ullah <hamzahullah@yahoo.com>"
+    }
+  },
+  "sessions": {
+    "s_3f3d56dd628f1f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "332a6dca-f704-4937-9091-a753bdf0758f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Hamzah Ullah <hamzahullah@yahoo.com>"
+    }
+  }
+}
