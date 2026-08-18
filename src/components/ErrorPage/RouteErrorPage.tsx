@@ -41,13 +41,9 @@ export function getErrorMessage(err: unknown): string | undefined {
   return undefined;
 }
 
-const getRouteErrorDerivedMessage = (routeError: UnknownError): string | undefined => {
-  try {
-    return routeError ? getErrorMessage(routeError) : undefined;
-  } catch {
-    return undefined;
-  }
-};
+const getRouteErrorDerivedMessage = (routeError: unknown): string | undefined => (
+  routeError ? getErrorMessage(routeError) : undefined
+);
 
 /**
  * Thin adapter for React Router data-router error boundaries. `useRouteError` requires
