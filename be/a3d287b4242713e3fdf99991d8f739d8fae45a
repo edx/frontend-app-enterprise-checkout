@@ -1,0 +1,36 @@
+src/components/ErrorPage/RouteErrorPage.tsx
+  s_655798132f28e6::t_114cc5f54e7b75 1-72
+src/components/ErrorPage/tests/ErrorPage.test.tsx
+  s_655798132f28e6::t_e1c1d2f7ef95f7 3,18-19,41-48,51,53,56-58
+src/routes.tsx
+  s_655798132f28e6::t_87d1ee9f20c4af 16
+  s_655798132f28e6::t_fe5fb742f2d2c2 107
+  s_655798132f28e6::t_0b6fb37d191c71 167
+src/components/ErrorPage/index.ts
+  s_655798132f28e6::t_fe3c2d2de5be20 2
+src/components/ErrorPage/tests/RouteErrorPage.test.tsx
+  s_655798132f28e6::t_c303d6458d8ccf 82,85,88,90,92-104,106,109-115,117-140
+  s_655798132f28e6::t_e0e0fd0599737c 1-6,8,14,19-21,23-74,76-81,83,86-87,89,91,105,107-108,116,141-142
+  s_655798132f28e6::t_9402f23cde6fb0 84
+  s_655798132f28e6::t_cc98443f2bcbb3 7
+  s_655798132f28e6::t_9d42bb6d6f9794 9-13,15-18,22
+  s_655798132f28e6::t_c23f47281896d6 75
+src/components/ErrorPage/ErrorPage.tsx
+  s_655798132f28e6::t_6366dfe518b107 13,57-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "bea3d287b4242713e3fdf99991d8f739d8fae45a",
+  "prompts": {},
+  "sessions": {
+    "s_655798132f28e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cbbe16ce-34ec-45f4-b80a-9b8e85f69052",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Hamzah Ullah <hamzahullah@yahoo.com>"
+    }
+  }
+}
