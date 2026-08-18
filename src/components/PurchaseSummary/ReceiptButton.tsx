@@ -1,6 +1,6 @@
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button, Icon } from '@openedx/paragon';
 import { Launch } from '@openedx/paragon/icons';
-import { FormattedMessage } from 'react-intl';
 
 import { useCheckoutIntent, useCreateBillingPortalSession } from '@/components/app/data';
 import EVENT_NAMES from '@/constants/events';
