@@ -1,0 +1,76 @@
+src/hooks/useFieldTracking.ts
+  912b611c44641b19 17,39,49
+src/utils/common.ts
+  912b611c44641b19 95-99,102,105,113,119,127,137
+src/components/FormFields/RegisterAccountFields.tsx
+  912b611c44641b19 116-117,142,158-159,197
+src/components/FormFields/CompanyNameField.tsx
+  912b611c44641b19 22-23,56
+src/hooks/tests/useFieldTracking.test.ts
+  912b611c44641b19 30,35,49,57,73,77,92,102,126,140,142,159,163,179,184,199,212,226
+src/components/app/data/hooks/usePolledCheckoutIntent.tsx
+  912b611c44641b19 11-15,18
+src/components/FormFields/CustomUrlField.tsx
+  912b611c44641b19 22-23,64
+src/hooks/tests/useDebounceTracking.test.ts
+  912b611c44641b19 36,56,72,95,105,115,138,145,165,183,190,205,218,231
+src/components/FormFields/tests/TermsAndConditionsCheckboxes.test.tsx
+  912b611c44641b19 54,88,104,123
+src/components/app/data/services/checkout-intent.ts
+  912b611c44641b19 127,129-131,134-136,145-146,148,189-199,209-210,212
+src/components/account-details-page/AccountDetailsPage.tsx
+  912b611c44641b19 74,91,196
+src/components/StatefulButton/StatefulProvisioningButton.tsx
+  912b611c44641b19 50
+src/components/StatefulButton/StatefulSubscribeButton.tsx
+  912b611c44641b19 141
+src/components/billing-details-pages/tests/BillingDetailsPage.test.tsx
+  912b611c44641b19 59,122
+src/hooks/useDebounceTrackFieldBlur.ts
+  912b611c44641b19 12,40,54
+src/components/plan-details-pages/PlanDetailsPage.tsx
+  912b611c44641b19 74-75,90,105,144
+src/components/billing-details-pages/SubscriptionStartMessage/SubscriptionStartMessage.tsx
+  912b611c44641b19 77
+src/components/billing-details-pages/OrderDetails/tests/OrderDetails.test.tsx
+  912b611c44641b19 330,333,349
+src/components/PurchaseSummary/tests/PurchaseSummaryCardButton.test.tsx
+  912b611c44641b19 18,153
+src/components/StatefulButton/tests/StatefulSubscribeButton.test.tsx
+  912b611c44641b19 377
+src/components/FormFields/LicensesField.tsx
+  912b611c44641b19 23-24,66
+src/components/FormFields/TermsAndConditionsCheckboxes.tsx
+  912b611c44641b19 42,45
+src/components/billing-details-pages/BillingDetailsPage.tsx
+  912b611c44641b19 60
+src/components/PurchaseSummary/ReceiptButton.tsx
+  912b611c44641b19 23
+src/components/app/data/queries/queryKeyFactory.ts
+  912b611c44641b19 31-35,37-38
+src/components/FormFields/NameAndEmailFields.tsx
+  912b611c44641b19 26-27,70,97,124
+src/components/billing-details-pages/ContactSupport/ContactSupport.tsx
+  912b611c44641b19 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.6",
+  "base_commit_sha": "605b1d66e6478ca27a909e59500c7cbff21d9330",
+  "prompts": {
+    "912b611c44641b19": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aea20230-87ef-43f5-b6b9-bce62e0f5166",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Alexander Dusenbery",
+      "messages": [],
+      "total_additions": 135,
+      "total_deletions": 27,
+      "accepted_lines": 135,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/78dd2e5ab571a36c4af9da435150c26a5d8cb5a035eb8256da531155114899eb"
+    }
+  }
+}
