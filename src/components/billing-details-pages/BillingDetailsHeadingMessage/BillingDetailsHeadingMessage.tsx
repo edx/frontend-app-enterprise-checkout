@@ -1,10 +1,18 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { defineMessages, FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { Container, Image, Stack } from '@openedx/paragon';
 
 import { usePolledAuthenticatedUser, usePolledCheckoutIntent } from '@/components/app/data';
 import { isEssentialsFlow } from '@/components/app/routes/loaders/utils';
 
 import Celebration from './images/celebration.svg';
+
+const messages = defineMessages({
+  celebrationImageAlt: {
+    id: 'checkout.success.celebrationImage.alt',
+    defaultMessage: 'Celebration of subscription purchase success',
+    description: 'Alt text for the celebration illustration on the billing success page',
+  },
+});
 
 const ErrorHeading = () => {
   const isEssentials = isEssentialsFlow();
@@ -105,6 +113,7 @@ const determineBannerMessageElement = (
 };
 
 const BillingDetailsHeadingMessage = () => {
+  const intl = useIntl();
   const { polledCheckoutIntent } = usePolledCheckoutIntent();
   const { polledAuthenticatedUser } = usePolledAuthenticatedUser();
   const bannerMessageElement = determineBannerMessageElement(
@@ -119,7 +128,7 @@ const BillingDetailsHeadingMessage = () => {
           <Image
             src={Celebration}
             fluid
-            alt="Celebration of subscription purchase success"
+            alt={intl.formatMessage(messages.celebrationImageAlt)}
           />
         </Container>
       </Stack>
