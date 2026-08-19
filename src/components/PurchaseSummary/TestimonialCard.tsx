@@ -33,7 +33,8 @@ const TestimonialCard = ({ testimonial }: Props) => {
           className="testimonial-card__quote-icon mb-3"
           aria-hidden="true"
         >
-          <span className="testimonial-card__quote-glyph">
+          {/* Translation extensions can mutate this node outside React, breaking reconciliation. */}
+          <span className="testimonial-card__quote-glyph notranslate" translate="no">
             ❝
           </span>
         </div>
