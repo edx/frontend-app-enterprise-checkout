@@ -36,4 +36,11 @@ describe('TestimonialCard', () => {
     const { container } = render(<TestimonialCard testimonial={null} />);
     expect(container.firstChild).toBeNull();
   });
+
+  it('marks the quote glyph as protected from browser translation', () => {
+    const { container } = render(<TestimonialCard testimonial={testimonial} />);
+    const glyph = container.querySelector('.testimonial-card__quote-glyph');
+    expect(glyph).toHaveClass('notranslate');
+    expect(glyph).toHaveAttribute('translate', 'no');
+  });
 });
