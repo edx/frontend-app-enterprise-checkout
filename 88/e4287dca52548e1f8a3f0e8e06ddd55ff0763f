@@ -1,0 +1,21 @@
+package.json
+  s_2871f154eaf1f0::t_168677e19cbe9c 43
+package-lock.json
+  s_2871f154eaf1f0::t_1f1624cd3e5e66 16,2589-2597
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "88e4287dca52548e1f8a3f0e8e06ddd55ff0763f",
+  "prompts": {},
+  "sessions": {
+    "s_2871f154eaf1f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "94edcd42-4ae9-4b68-8e44-435985e056e1",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Srija Indukuri <ssrijaindukuri-sonata@2u.com>"
+    }
+  }
+}
