@@ -15,6 +15,8 @@ src/components/Stepper/Steps/BillingDetails.tsx
 src/routes.tsx
   s_24a10f7622127d::t_317fbac2bb24e4 171
   s_24a10f7622127d::t_04a2340b7b25f7 154
+  s_9c4f85592a2c8b::t_312fa67cc97c3d 107
+  s_9c4f85592a2c8b::t_595eefeb7670b4 167
 src/components/essentials-page/AcademicSelection.tsx
   s_24a10f7622127d::t_17a254ac18e4bd 44
   s_24a10f7622127d::t_207c7368edb6a4 1,16-22
@@ -26,6 +28,7 @@ src/components/ErrorPage/ErrorPage.tsx
   s_24a10f7622127d::t_2177428043365f 85-86
   s_24a10f7622127d::t_1716b00a2ebb92 44-61
   s_24a10f7622127d::t_e8dc4caa606d4f 13-16,18-19
+  s_9c4f85592a2c8b::t_a40770b6af3deb 82,84,87-91
 src/components/Header/Header.tsx
   s_24a10f7622127d::t_a28892d116085d 1,10-17,20,29,35
 src/components/Footer/Footer.tsx
@@ -59,6 +62,14 @@ src/components/essentials-page/tests/AcademicSelection.test.tsx
         "model": "claude-sonnet-5"
       },
       "human_author": null
+    },
+    "s_9c4f85592a2c8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5fa6f5a4-c3dc-438d-91d7-64e32b5b1ae3",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Srija Indukuri <ssrijaindukuri-sonata@2u.com>"
     }
   }
 }
