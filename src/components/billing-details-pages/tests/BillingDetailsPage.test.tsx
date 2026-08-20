@@ -1,7 +1,9 @@
+import { IntlProvider, useIntl } from '@edx/frontend-platform/i18n';
 import { useCheckout } from '@stripe/react-stripe-js';
-import { screen, waitFor } from '@testing-library/react';
+import { renderHook, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import {
   useBFFSuccess,
@@ -12,6 +14,7 @@ import {
 import { CheckoutPageRoute, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
 import EVENT_NAMES from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import useCurrentPageDetails from '@/hooks/useCurrentPageDetails';
 import { renderStepperRoute } from '@/utils/tests';
 
 // Mock the tracking utility
@@ -79,6 +82,29 @@ describe('BillingDetailsPage', () => {
       },
     });
     expect(screen.getByTestId('stepper-title')).toHaveTextContent('Billing Details');
+  });
+
+  it('useCurrentPageDetails falls back to a translatable title instead of `{}` for an unrecognized step', () => {
+    // Guards against a regression where the fallback `title` was `{}`, which throws when passed
+    // to `intl.formatMessage` (used unconditionally by this page's Helmet/Stepper.Step and by
+    // StepperTitle) because a MessageDescriptor requires an `id`.
+    const { result } = renderHook(() => {
+      const { title } = useCurrentPageDetails();
+      const intl = useIntl();
+      return intl.formatMessage(title);
+    }, {
+      wrapper: ({ children }) => (
+        <IntlProvider locale="en">
+          <MemoryRouter initialEntries={['/some-unrecognized-step']}>
+            <Routes>
+              <Route path="/:step?" element={children} />
+            </Routes>
+          </MemoryRouter>
+        </IntlProvider>
+      ),
+    });
+
+    expect(result.current).toBe('Checkout');
   });
 
   it('renders the purchase button correctly', async () => {
