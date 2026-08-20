@@ -101,8 +101,8 @@ const AccountDetailsPage: React.FC = () => {
   }, [checkoutIntent?.id, checkoutIntent?.uuid, currentStepKey, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints, planDetailsFormData.adminEmail)
-  ), [formSchema, formValidationConstraints, planDetailsFormData.adminEmail]);
+    formSchema(formValidationConstraints, planDetailsFormData.adminEmail, intl.formatMessage)
+  ), [formSchema, formValidationConstraints, planDetailsFormData.adminEmail, intl.formatMessage]);
 
   const form = useForm<AccountDetailsData>({
     mode: 'onTouched',

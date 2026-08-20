@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-import { CheckoutErrorMessagesByField } from '@/constants/checkout';
+import { getCheckoutErrorMessagesByField } from '@/constants/checkout';
 import { validateProductKey } from '@/utils/checkout';
 import {
   defaultQueryClientRetryHandler,
@@ -72,7 +72,7 @@ describe('validateProductKey', () => {
 });
 
 describe('serverValidationError', () => {
-  const mapping = CheckoutErrorMessagesByField;
+  const mapping = getCheckoutErrorMessagesByField();
 
   const cases = Object.entries(mapping)
     .flatMap(([field, codes]) => Object.entries(codes)

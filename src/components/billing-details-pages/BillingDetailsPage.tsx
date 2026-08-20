@@ -45,8 +45,8 @@ const BillingDetailsPage: React.FC = () => {
   const intl = useIntl();
 
   const billingDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints)
-  ), [formSchema, formValidationConstraints]);
+    formSchema(formValidationConstraints, intl.formatMessage)
+  ), [formSchema, formValidationConstraints, intl.formatMessage]);
 
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',

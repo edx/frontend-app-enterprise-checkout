@@ -128,8 +128,8 @@ const PlanDetailsPage = () => {
   }, [checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname]);
 
   const planDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
-  ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
+    formSchema(formValidationConstraints, planDetailsFormData.stripePriceId, intl.formatMessage)
+  ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId, intl.formatMessage]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onTouched',
