@@ -1,3 +1,4 @@
+import { defineMessages, FormattedMessage } from '@edx/frontend-platform/i18n';
 import {
   Col,
   Container,
@@ -11,6 +12,14 @@ import React from 'react';
 import { useRotatingTestimonial } from '@/components/app/data/hooks/useTestimonials';
 import { PurchaseSummary } from '@/components/PurchaseSummary';
 import TestimonialCard from '@/components/PurchaseSummary/TestimonialCard';
+
+const messages = defineMessages({
+  comingSoon: {
+    id: 'essentials.academicSelection.comingSoon',
+    defaultMessage: 'Coming Soon',
+    description: 'Heading shown on the academic selection page while it is under construction',
+  },
+});
 
 const AcademicSelection: React.FC = () => {
   const currentTestimonial = useRotatingTestimonial('academic-selection');
@@ -32,7 +41,7 @@ const AcademicSelection: React.FC = () => {
             </div>
 
             <h1 className="display-3 fw-bold">
-              Coming Soon
+              <FormattedMessage {...messages.comingSoon} />
             </h1>
           </Stack>
         </Col>

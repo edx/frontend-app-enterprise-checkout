@@ -104,7 +104,7 @@ export function getRoutes(queryClient: QueryClient) {
 
         return defaultShouldRevalidate;
       },
-      errorElement: <RouteErrorPage message="Error Boundary" />,
+      errorElement: <RouteErrorPage message="errorBoundary" />,
       children: [
         {
           path: 'essentials',
@@ -151,7 +151,7 @@ export function getRoutes(queryClient: QueryClient) {
         },
         {
           path: 'essentials/*',
-          element: <ErrorPage message="Page Not Found" />,
+          element: <ErrorPage message="notFound" />,
         },
         {
           path: '/',
@@ -164,11 +164,11 @@ export function getRoutes(queryClient: QueryClient) {
             </PageWrap>
           ),
           children: checkoutRoutes,
-          errorElement: (<RouteErrorPage message="Error Boundary" />),
+          errorElement: (<RouteErrorPage message="errorBoundary" />),
         },
         {
           path: '*',
-          element: (<ErrorPage message="Not Found" />),
+          element: (<ErrorPage message="notFound" />),
         }],
     },
   ];

@@ -1,4 +1,4 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -61,9 +61,11 @@ const AccountDetailsPage: React.FC = () => {
   const lmsUserId: number | undefined = authenticatedUser?.userId;
 
   const {
+    title,
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+  const intl = useIntl();
 
   const lastTrackedPathRef = useRef<string | null>(null);
   const { currentStepKey } = useCurrentStep();
@@ -99,8 +101,8 @@ const AccountDetailsPage: React.FC = () => {
   }, [checkoutIntent?.id, checkoutIntent?.uuid, currentStepKey, location.pathname]);
 
   const accountDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints, planDetailsFormData.adminEmail)
-  ), [formSchema, formValidationConstraints, planDetailsFormData.adminEmail]);
+    formSchema(formValidationConstraints, planDetailsFormData.adminEmail, intl.formatMessage)
+  ), [formSchema, formValidationConstraints, planDetailsFormData.adminEmail, intl.formatMessage]);
 
   const form = useForm<AccountDetailsData>({
     mode: 'onTouched',
@@ -307,9 +309,9 @@ const AccountDetailsPage: React.FC = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title="Account Details" />
+      <Helmet title={intl.formatMessage(title)} />
       <Stack gap={4}>
-        <Stepper.Step eventKey={eventKey} title="Account Details">
+        <Stepper.Step eventKey={eventKey} title={intl.formatMessage(title)}>
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>
