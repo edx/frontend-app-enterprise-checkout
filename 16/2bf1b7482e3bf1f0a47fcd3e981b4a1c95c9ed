@@ -1,0 +1,64 @@
+src/components/TermsAndConditionsText/TermsAndConditionsText.tsx
+  s_24a10f7622127d::t_e3989b0d143299 19-23,28-32
+src/constants/checkout.ts
+  s_24a10f7622127d::t_a4139b16b53789 341-346,359-364,366-371,379-384,386-391,399-404,406-411,419-424,426-431,439-444,446-451,459-464
+src/components/billing-details-pages/BillingDetailsPage.tsx
+  s_24a10f7622127d::t_d6191d6d356ea9 73,75
+  s_24a10f7622127d::t_2b9357c3f98da0 41,45
+  s_24a10f7622127d::t_ba00539c9c7295 1
+src/components/account-details-page/AccountDetailsPage.tsx
+  s_24a10f7622127d::t_a6bba3f71dac88 1
+  s_24a10f7622127d::t_a47eca9ebc9d34 64,68
+  s_24a10f7622127d::t_4f9c3aac81665e 312,314
+src/components/Stepper/Steps/BillingDetails.tsx
+  s_24a10f7622127d::t_cf8a03e56e5897 1,9,14,17,20-21
+src/routes.tsx
+  s_24a10f7622127d::t_317fbac2bb24e4 171
+  s_24a10f7622127d::t_04a2340b7b25f7 154
+src/components/essentials-page/AcademicSelection.tsx
+  s_24a10f7622127d::t_17a254ac18e4bd 44
+  s_24a10f7622127d::t_207c7368edb6a4 1,16-22
+  s_24a10f7622127d::t_e954d80c380758 23
+src/components/ErrorPage/ErrorPage.tsx
+  s_24a10f7622127d::t_ee5385e6129500 11-12
+  s_24a10f7622127d::t_fa5a1cbb07f896 70
+  s_24a10f7622127d::t_052ffc978d3151 83
+  s_24a10f7622127d::t_2177428043365f 85-86
+  s_24a10f7622127d::t_1716b00a2ebb92 44-61
+  s_24a10f7622127d::t_e8dc4caa606d4f 13-16,18-19
+src/components/Header/Header.tsx
+  s_24a10f7622127d::t_a28892d116085d 1,10-17,20,29,35
+src/components/Footer/Footer.tsx
+  s_24a10f7622127d::t_7287287a311291 44
+  s_24a10f7622127d::t_9c7cf9d5778c19 25-29
+src/components/plan-details-pages/PlanDetailsPage.tsx
+  s_24a10f7622127d::t_5b3cd7f4b46a0f 367,369
+  s_24a10f7622127d::t_1f6d5d7e56a125 6
+  s_24a10f7622127d::t_958997f124a3f9 72,76
+src/components/billing-details-pages/BillingDetailsHeadingMessage/BillingDetailsHeadingMessage.tsx
+  s_24a10f7622127d::t_0c30ac27d6fbf0 1,9-15
+  s_24a10f7622127d::t_bd34ac13a225f0 116,131
+  s_24a10f7622127d::t_aef7d6f646bace 16
+src/components/Header/UserMenu/UserMenu.tsx
+  s_24a10f7622127d::t_7cb5a18a1f98b1 2,6-22
+  s_24a10f7622127d::t_e12427976e6542 65-70,72-74
+  s_24a10f7622127d::t_67b0adcb0e4a8b 23
+src/components/essentials-page/tests/AcademicSelection.test.tsx
+  s_24a10f7622127d::t_fe9aa6f0622949 1-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "162bf1b7482e3bf1f0a47fcd3e981b4a1c95c9ed",
+  "prompts": {},
+  "sessions": {
+    "s_24a10f7622127d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7365bbf1-1847-482c-9469-6779521e67c9",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": null
+    }
+  }
+}
