@@ -1,0 +1,34 @@
+src/components/FormFields/tests/LicensesField.test.tsx
+  s_72c90b6251eb17::t_188f6a992ba196 47-51
+src/components/FormFields/LicensesField.tsx
+  s_72c90b6251eb17::t_9bc32b47b7f1bf 1,4,7,9,11,15,32-33
+  s_72c90b6251eb17::t_74e7b583f03eb3 79-108
+src/constants/checkout.ts
+  s_72c90b6251eb17::t_7931e9f8c300bb 6
+  s_72c90b6251eb17::t_8ebfabe763b7e5 132-168,184-187
+src/components/FormFields/tests/LicensesField.maxError.test.tsx
+  s_72c90b6251eb17::t_afc301da5a1cc0 1-3,5-44,46-69,71-92,97-102,104-131,133-154,156-196
+  s_72c90b6251eb17::t_fea4029472f66a 4,70,103
+  s_72c90b6251eb17::t_44fa0e67aad7e5 45
+  s_72c90b6251eb17::t_19ec53b570c6e3 93-96
+  s_72c90b6251eb17::t_816e3d43e184b2 132
+  s_72c90b6251eb17::t_72bb7a19cab9db 155
+src/constants/tests/getQuantityMaxValidationMessage.test.ts
+  s_72c90b6251eb17::t_d09b6a07da1cc6 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "4e002562385f0b4e3c6a30af40eff76a0251e307",
+  "prompts": {},
+  "sessions": {
+    "s_72c90b6251eb17": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f20ae417-5329-494e-af5f-6ce8962ac867",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Hamzah Ullah <hamzahullah@yahoo.com>"
+    }
+  }
+}
