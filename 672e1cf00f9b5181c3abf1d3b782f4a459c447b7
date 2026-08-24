@@ -1,0 +1,45 @@
+src/constants/checkout.ts
+  s_9c4f85592a2c8b::t_dd9a066aeed241 504-507
+  s_9c4f85592a2c8b::t_e53267d4caef0f 549-550
+  s_9c4f85592a2c8b::t_423643752dd3f7 288-340,344,349,353,357,368,375,379,384,388,392,396,412,421
+  s_9c4f85592a2c8b::t_63a3cd1e6a6c6b 578-579
+  s_9c4f85592a2c8b::t_d00b3d39619b8a 434-461,465,470,489,500,511,528,535-548,551-552,555,558,563-575,577,580-581,584-585
+  s_9c4f85592a2c8b::t_c7c6f7d9f454e0 239
+  s_9c4f85592a2c8b::t_2c280f66a51468 64-140,142-144,147-150,153-155,158-160,163
+  s_9c4f85592a2c8b::t_e36db66647055a 9-25
+  s_9c4f85592a2c8b::t_c2f3050aa5d666 165
+  s_9c4f85592a2c8b::t_18c4f6d1f577f7 2
+  s_9c4f85592a2c8b::t_2417d19dd5052c 167-178,180,183-184,190-191,194-238,240-241,246,252,256-257,259-261,264,266
+  s_9c4f85592a2c8b::t_61efc148dc707b 181-182
+  s_9c4f85592a2c8b::t_f7bd09881db189 471-474
+  s_9c4f85592a2c8b::t_32cdce853a0e60 26
+  s_9c4f85592a2c8b::t_e92156c022f39d 166
+src/utils/test/common.test.ts
+  s_9c4f85592a2c8b::t_4a475665d8f1b9 75
+  s_9c4f85592a2c8b::t_54c58f0a8c8c33 3
+src/components/billing-details-pages/BillingDetailsPage.tsx
+  s_9c4f85592a2c8b::t_d93403de337d50 48
+  s_9c4f85592a2c8b::t_6c32f29dd50457 49
+src/components/plan-details-pages/PlanDetailsPage.tsx
+  s_9c4f85592a2c8b::t_23367050ee182b 132
+  s_9c4f85592a2c8b::t_19de28601e6612 131
+src/components/account-details-page/AccountDetailsPage.tsx
+  s_9c4f85592a2c8b::t_9cf194e74893e5 105
+  s_9c4f85592a2c8b::t_b06a68ba1e9047 104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "672e1cf00f9b5181c3abf1d3b782f4a459c447b7",
+  "prompts": {},
+  "sessions": {
+    "s_9c4f85592a2c8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5fa6f5a4-c3dc-438d-91d7-64e32b5b1ae3",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Srija Indukuri <ssrijaindukuri-sonata@2u.com>"
+    }
+  }
+}
