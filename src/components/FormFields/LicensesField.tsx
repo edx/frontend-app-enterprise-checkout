@@ -1,4 +1,3 @@
-import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
 import { Form } from '@openedx/paragon';
@@ -12,7 +11,6 @@ import { getQuantityMaxValidationMessage } from '@/constants/checkout';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
 import useCurrentStep from '@/hooks/useCurrentStep';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
-import { isEssentialsFlow } from '@/utils/common';
 
 import Field from './Field';
 
@@ -83,12 +81,9 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
             return <>{defaultControl}{defaultErrorFeedback}</>;
           }
 
-          const productType = isEssentialsFlow() ? 'essentials' : 'teams';
           const {
-            beforeLink, linkText, afterLink, configKey,
-          } = getQuantityMaxValidationMessage(maxQuantity, productType);
-          const { TEAMS_PRODUCT_URL, ESSENTIALS_PRODUCT_URL } = getConfig();
-          const contactUrl = configKey === 'TEAMS_PRODUCT_URL' ? TEAMS_PRODUCT_URL : ESSENTIALS_PRODUCT_URL;
+            beforeLink, linkText, afterLink, contactUrl,
+          } = getQuantityMaxValidationMessage(maxQuantity);
 
           if (!contactUrl) {
             return <>{defaultControl}{defaultErrorFeedback}</>;

@@ -1,3 +1,4 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
@@ -136,7 +137,7 @@ interface QuantityMaxValidationMessage {
   linkText: string;
   afterLink: string;
   plainText: string;
-  configKey: 'TEAMS_PRODUCT_URL' | 'ESSENTIALS_PRODUCT_URL';
+  contactUrl: string | null;
 }
 
 const PLAN_LABEL_BY_PRODUCT: Record<CheckoutProductType, string> = {
@@ -144,25 +145,30 @@ const PLAN_LABEL_BY_PRODUCT: Record<CheckoutProductType, string> = {
   essentials: 'Essentials',
 };
 
-const PRODUCT_URL_CONFIG_KEY_BY_PRODUCT: Record<CheckoutProductType, QuantityMaxValidationMessage['configKey']> = {
+const PRODUCT_URL_CONFIG_KEY_BY_PRODUCT: Record<CheckoutProductType, 'TEAMS_PRODUCT_URL' | 'ESSENTIALS_PRODUCT_URL'> = {
   teams: 'TEAMS_PRODUCT_URL',
   essentials: 'ESSENTIALS_PRODUCT_URL',
 };
 
-export const getQuantityMaxValidationMessage = (
-  max: number,
-  productType: CheckoutProductType,
-): QuantityMaxValidationMessage => {
+/**
+ * Single source of truth for the quantity max-validation copy and its "contact us" link.
+ * Resolves the product flow and the destination URL itself so callers (both the Zod
+ * schema and the rendering component) never have to duplicate that decision.
+ */
+export const getQuantityMaxValidationMessage = (max: number): QuantityMaxValidationMessage => {
+  const productType: CheckoutProductType = isEssentialsFlow() ? 'essentials' : 'teams';
   const planLabel = PLAN_LABEL_BY_PRODUCT[productType];
+  const configKey = PRODUCT_URL_CONFIG_KEY_BY_PRODUCT[productType];
   const beforeLink = `You can only have up to ${max} licenses on the ${planLabel} plan. Either decrease the number of licenses or `;
   const linkText = 'contact us';
   const afterLink = '.';
+  const config: Record<string, string | null | undefined> = getConfig();
   return {
     beforeLink,
     linkText,
     afterLink,
     plainText: `${beforeLink}${linkText}${afterLink}`,
-    configKey: PRODUCT_URL_CONFIG_KEY_BY_PRODUCT[productType],
+    contactUrl: config[configKey] || null,
   };
 };
 
@@ -181,10 +187,7 @@ export const PlanDetailsSchema = (
     )
     .max(
       constraints?.quantity?.max ?? 50,
-      getQuantityMaxValidationMessage(
-        constraints?.quantity?.max ?? 50,
-        isEssentialsFlow() ? 'essentials' : 'teams',
-      ).plainText,
+      getQuantityMaxValidationMessage(constraints?.quantity?.max ?? 50).plainText,
     )
     .superRefine(async (quantity, ctx) => {
       const { isValid, validationDecisions } = await validateFieldDetailed(
