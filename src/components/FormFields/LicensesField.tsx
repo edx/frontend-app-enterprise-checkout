@@ -1,12 +1,18 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { AppContext } from '@edx/frontend-platform/react';
+import { Form } from '@openedx/paragon';
 import { useContext } from 'react';
 
+import { useFormValidationConstraints } from '@/components/app/data';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import { ExternalLink } from '@/components/ExternalLink';
 import { FieldContainer } from '@/components/FieldContainer';
+import { getQuantityMaxValidationMessage } from '@/constants/checkout';
 import { PLAN_TYPE, TRACKED_FIELDS } from '@/constants/events';
 import useCurrentStep from '@/hooks/useCurrentStep';
 import { trackFieldBlur } from '@/hooks/useFieldTracking';
+import { isEssentialsFlow } from '@/utils/common';
 
 import Field from './Field';
 
@@ -23,6 +29,8 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
   const checkoutIntentId = bffContext?.checkoutIntent?.id ?? null;
   const checkoutIntentUuid = bffContext?.checkoutIntent?.uuid ?? null;
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+  const { data: formValidationConstraints } = useFormValidationConstraints();
+  const maxQuantity = formValidationConstraints?.quantity?.max ?? 50;
 
   return (
     <FieldContainer>
@@ -68,7 +76,36 @@ const LicensesField = ({ form }: LicensesFieldProps) => {
             plan_type: PLAN_TYPE.TEAMS,
           },
         })}
-      />
+      >
+        {({ defaultControl, defaultErrorFeedback }) => {
+          const isMaxError = form.formState.errors.quantity?.type === 'too_big';
+          if (!isMaxError) {
+            return <>{defaultControl}{defaultErrorFeedback}</>;
+          }
+
+          const productType = isEssentialsFlow() ? 'essentials' : 'teams';
+          const {
+            beforeLink, linkText, afterLink, configKey,
+          } = getQuantityMaxValidationMessage(maxQuantity, productType);
+          const { TEAMS_PRODUCT_URL, ESSENTIALS_PRODUCT_URL } = getConfig();
+          const contactUrl = configKey === 'TEAMS_PRODUCT_URL' ? TEAMS_PRODUCT_URL : ESSENTIALS_PRODUCT_URL;
+
+          if (!contactUrl) {
+            return <>{defaultControl}{defaultErrorFeedback}</>;
+          }
+
+          return (
+            <>
+              {defaultControl}
+              <Form.Control.Feedback>
+                {beforeLink}
+                <ExternalLink href={contactUrl}>{linkText}</ExternalLink>
+                {afterLink}
+              </Form.Control.Feedback>
+            </>
+          );
+        }}
+      </Field>
     </FieldContainer>
   );
 };

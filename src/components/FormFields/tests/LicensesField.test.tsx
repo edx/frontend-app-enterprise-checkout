@@ -44,6 +44,11 @@ jest.mock('@/components/app/data/hooks/useBFFContext', () => ({
   default: (...args: any[]) => (mockUseBFFContext as any)(...args),
 }));
 
+// Mock form validation constraints (used to build the max-quantity contact-link message)
+jest.mock('@/components/app/data', () => ({
+  useFormValidationConstraints: jest.fn(() => ({ data: null })),
+}));
+
 jest.mock('@/components/FormFields/Field', () => ({
   __esModule: true,
   default: ({ floatingLabel, placeholder, onBlur }) => (

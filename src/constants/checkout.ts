@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { serverValidationError } from '@/utils/common';
+import { isEssentialsFlow, serverValidationError } from '@/utils/common';
 
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
@@ -129,6 +129,43 @@ export const PlanDetailsRegisterPageSchema = (constraints: CheckoutContextFieldC
   }
 }));
 
+export type CheckoutProductType = 'teams' | 'essentials';
+
+interface QuantityMaxValidationMessage {
+  beforeLink: string;
+  linkText: string;
+  afterLink: string;
+  plainText: string;
+  configKey: 'TEAMS_PRODUCT_URL' | 'ESSENTIALS_PRODUCT_URL';
+}
+
+const PLAN_LABEL_BY_PRODUCT: Record<CheckoutProductType, string> = {
+  teams: 'Teams',
+  essentials: 'Essentials',
+};
+
+const PRODUCT_URL_CONFIG_KEY_BY_PRODUCT: Record<CheckoutProductType, QuantityMaxValidationMessage['configKey']> = {
+  teams: 'TEAMS_PRODUCT_URL',
+  essentials: 'ESSENTIALS_PRODUCT_URL',
+};
+
+export const getQuantityMaxValidationMessage = (
+  max: number,
+  productType: CheckoutProductType,
+): QuantityMaxValidationMessage => {
+  const planLabel = PLAN_LABEL_BY_PRODUCT[productType];
+  const beforeLink = `You can only have up to ${max} licenses on the ${planLabel} plan. Either decrease the number of licenses or `;
+  const linkText = 'contact us';
+  const afterLink = '.';
+  return {
+    beforeLink,
+    linkText,
+    afterLink,
+    plainText: `${beforeLink}${linkText}${afterLink}`,
+    configKey: PRODUCT_URL_CONFIG_KEY_BY_PRODUCT[productType],
+  };
+};
+
 export const PlanDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,
   stripePriceId: CheckoutContextPrice['id'],
@@ -144,7 +181,10 @@ export const PlanDetailsSchema = (
     )
     .max(
       constraints?.quantity?.max ?? 50,
-      `You can only have up to ${constraints?.quantity?.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`,
+      getQuantityMaxValidationMessage(
+        constraints?.quantity?.max ?? 50,
+        isEssentialsFlow() ? 'essentials' : 'teams',
+      ).plainText,
     )
     .superRefine(async (quantity, ctx) => {
       const { isValid, validationDecisions } = await validateFieldDetailed(
