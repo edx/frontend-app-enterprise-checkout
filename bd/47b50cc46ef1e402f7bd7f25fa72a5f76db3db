@@ -1,0 +1,19 @@
+src/components/ErrorPage/ErrorPage.tsx
+  s_2d0fe4c0088000::t_d3e270b92d8bd4 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "bd47b50cc46ef1e402f7bd7f25fa72a5f76db3db",
+  "prompts": {},
+  "sessions": {
+    "s_2d0fe4c0088000": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe0d17cf-0997-4457-b185-68397a600169",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Srija Indukuri <ssrijaindukuri-sonata@2u.com>"
+    }
+  }
+}
