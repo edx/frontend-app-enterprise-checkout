@@ -16,7 +16,7 @@ const isErrorPageMessageKind = (
 
 interface ErrorPageProps {
   // A known ErrorPageMessageKind is translated; any other string is displayed verbatim.
-  message?: ErrorPageMessageKind | string;
+  message?: string;
   stackTrace?: string;
 }
 
