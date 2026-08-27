@@ -22,11 +22,6 @@ const footerMessages: Record<string, MessageDescriptor> = defineMessages({
     defaultMessage: 'Support',
     description: 'Link to edX support page.',
   },
-  logoAlt: {
-    id: 'footer.logo.alt',
-    defaultMessage: 'edX for Business logo',
-    description: 'Alt text for the edX for Business logo in the footer',
-  },
 });
 
 const Footer: React.FC = () => {
@@ -41,7 +36,7 @@ const Footer: React.FC = () => {
           <Link className="float-left" to="/">
             <Image
               src={blackEdxLogo}
-              alt={intl.formatMessage(footerMessages.logoAlt)}
+              alt="edX for Business logo"
               style={{ maxWidth: 200 }}
               fluid
             />

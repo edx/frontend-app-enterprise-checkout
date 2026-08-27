@@ -16,20 +16,12 @@ const TermsAndConditionsText = () => {
           values={{
             termsOfUseLink: (
               <ExternalLink href={TERMS_OF_SERVICE_URL}>
-                <FormattedMessage
-                  id="checkout.planDetails.termsAndConditions.termsOfUse"
-                  defaultMessage="Terms of Use"
-                  description="Link text for Terms of Use in the plan details terms and conditions text"
-                />
+                Terms of Use
               </ExternalLink>
             ),
             privacyNoticeLink: (
               <ExternalLink href={PRIVACY_POLICY_URL}>
-                <FormattedMessage
-                  id="checkout.planDetails.termsAndConditions.privacyNotice"
-                  defaultMessage="Privacy Notice"
-                  description="Link text for Privacy Notice in the plan details terms and conditions text"
-                />
+                Privacy Notice
               </ExternalLink>
             ),
           }}
