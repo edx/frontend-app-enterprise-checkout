@@ -338,12 +338,10 @@ export const EssentialsPageDetails = {
     formSchema: AcademicSelectionSchema,
     route: EssentialsPageRoute.AcademicSelection,
     title: defineMessages({
-      title: {
-        id: 'essentials.academicSelection.title',
-        defaultMessage: 'Academic Selection',
-        description: 'Title for the academic selection page',
-      },
-    }).title,
+      id: 'essentials.academicSelection.title',
+      defaultMessage: 'Academic Selection',
+      description: 'Title for the academic selection page',
+    }),
     buttonMessage: null,
   },
 
@@ -356,19 +354,15 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     formSchema: PlanDetailsSchema,
     route: CheckoutPageRoute.PlanDetails,
     title: defineMessages({
-      title: {
-        id: 'checkout.planDetails.title',
-        defaultMessage: 'Plan Details',
-        description: 'Title for the plan details page',
-      },
-    }).title,
+      id: 'checkout.planDetails.title',
+      defaultMessage: 'Plan Details',
+      description: 'Title for the plan details page',
+    }),
     buttonMessage: defineMessages({
-      buttonMessage: {
-        id: 'checkout.planDetails.continue',
-        defaultMessage: 'Continue',
-        description: 'Button label for the next step in the plan details step',
-      },
-    }).buttonMessage,
+      id: 'checkout.planDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button label for the next step in the plan details step',
+    }),
   },
   PlanDetailsLogin: {
     step: 'PlanDetails',
@@ -376,19 +370,15 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     formSchema: PlanDetailsLoginPageSchema,
     route: CheckoutPageRoute.PlanDetailsLogin,
     title: defineMessages({
-      title: {
-        id: 'checkout.planDetailsLogin.title',
-        defaultMessage: 'Log in to your account',
-        description: 'Title for the login page in the plan details step',
-      },
-    }).title,
+      id: 'checkout.planDetailsLogin.title',
+      defaultMessage: 'Log in to your account',
+      description: 'Title for the login page in the plan details step',
+    }),
     buttonMessage: defineMessages({
-      buttonMessage: {
-        id: 'checkout.registrationPage.login',
-        defaultMessage: 'Sign in',
-        description: 'Button label to login a user in the plan details step',
-      },
-    }).buttonMessage,
+      id: 'checkout.registrationPage.login',
+      defaultMessage: 'Sign in',
+      description: 'Button label to login a user in the plan details step',
+    }),
   },
   PlanDetailsRegister: {
     step: 'PlanDetails',
@@ -396,19 +386,15 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     formSchema: PlanDetailsRegisterPageSchema,
     route: CheckoutPageRoute.PlanDetailsRegister,
     title: defineMessages({
-      title: {
-        id: 'checkout.planDetailsRegistration.title',
-        defaultMessage: 'Create your Account',
-        description: 'Title for the registration page in the plan details step',
-      },
-    }).title,
+      id: 'checkout.planDetailsRegistration.title',
+      defaultMessage: 'Create your Account',
+      description: 'Title for the registration page in the plan details step',
+    }),
     buttonMessage: defineMessages({
-      buttonMessage: {
-        id: 'checkout.registrationPage.register',
-        defaultMessage: 'Register',
-        description: 'Button label to register a new user in the plan details step',
-      },
-    }).buttonMessage,
+      id: 'checkout.registrationPage.register',
+      defaultMessage: 'Register',
+      description: 'Button label to register a new user in the plan details step',
+    }),
   },
   AccountDetails: {
     step: 'AccountDetails',
@@ -416,19 +402,15 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     formSchema: AccountDetailsSchema,
     route: CheckoutPageRoute.AccountDetails,
     title: defineMessages({
-      title: {
-        id: 'checkout.accountDetails.title',
-        defaultMessage: 'Account Details',
-        description: 'Title for the account details step',
-      },
-    }).title,
+      id: 'checkout.accountDetails.title',
+      defaultMessage: 'Account Details',
+      description: 'Title for the account details step',
+    }),
     buttonMessage: defineMessages({
-      buttonMessage: {
-        id: 'checkout.accountDetails.continue',
-        defaultMessage: 'Continue',
-        description: 'Button to go to the next page',
-      },
-    }).buttonMessage,
+      id: 'checkout.accountDetails.continue',
+      defaultMessage: 'Continue',
+      description: 'Button to go to the next page',
+    }),
   },
   BillingDetails: {
     step: 'BillingDetails',
@@ -436,19 +418,15 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     formSchema: BillingDetailsSchema,
     route: CheckoutPageRoute.BillingDetails,
     title: defineMessages({
-      title: {
-        id: 'checkout.billingDetails.title',
-        defaultMessage: 'Billing Details',
-        description: 'Title for the billing details step',
-      },
-    }).title,
+      id: 'checkout.billingDetails.title',
+      defaultMessage: 'Billing Details',
+      description: 'Title for the billing details step',
+    }),
     buttonMessage: defineMessages({
-      buttonMessage: {
-        id: 'checkout.billingDetails.purchaseNow',
-        defaultMessage: 'Subscribe',
-        description: 'Button to purchase the subscription product',
-      },
-    }).buttonMessage,
+      id: 'checkout.billingDetails.purchaseNow',
+      defaultMessage: 'Subscribe',
+      description: 'Button to purchase the subscription product',
+    }),
   },
   BillingDetailsSuccess: {
     step: 'BillingDetails',
@@ -456,12 +434,10 @@ export const CheckoutPageDetails: { [K in CheckoutPage]: CheckoutPageDetails } =
     formSchema: BillingDetailsSchema,
     route: CheckoutPageRoute.BillingDetailsSuccess,
     title: defineMessages({
-      title: {
-        id: 'checkout.billingDetailsSuccess.title',
-        defaultMessage: 'Thank you, {firstName}.',
-        description: 'Title for the success page',
-      },
-    }).title,
+      id: 'checkout.billingDetailsSuccess.title',
+      defaultMessage: 'Thank you, {firstName}.',
+      description: 'Title for the success page',
+    }),
     buttonMessage: null,
   },
 };

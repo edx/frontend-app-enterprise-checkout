@@ -3,7 +3,7 @@ import {
   getAuthenticatedUser,
   hydrateAuthenticatedUser,
 } from '@edx/frontend-platform/auth';
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -69,11 +69,9 @@ const PlanDetailsPage = () => {
     inEssentials ? `/essentials${route}` : route
   );
   const {
-    title,
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
-  const intl = useIntl();
 
   const { getToken } = useRecaptchaToken('signup');
 
@@ -364,9 +362,9 @@ const PlanDetailsPage = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title={intl.formatMessage(title)} />
+      <Helmet title="Plan Details" />
       <Stack gap={4}>
-        <Stepper.Step eventKey={eventKey} title={intl.formatMessage(title)} data-testid="stepper-title">
+        <Stepper.Step eventKey={eventKey} title="Plan Details" data-testid="stepper-title">
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>
