@@ -1,9 +1,10 @@
+import { getConfig } from '@edx/frontend-platform/config';
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { z } from 'zod';
 
 import { validateRegistrationFieldsDebounced } from '@/components/app/data/services/registration';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
-import { serverValidationError } from '@/utils/common';
+import { isEssentialsFlow, serverValidationError } from '@/utils/common';
 
 export enum CheckoutStepKey {
   PlanDetails = 'plan-details',
@@ -129,6 +130,48 @@ export const PlanDetailsRegisterPageSchema = (constraints: CheckoutContextFieldC
   }
 }));
 
+export type CheckoutProductType = 'teams' | 'essentials';
+
+interface QuantityMaxValidationMessage {
+  beforeLink: string;
+  linkText: string;
+  afterLink: string;
+  plainText: string;
+  contactUrl: string | null;
+}
+
+const PLAN_LABEL_BY_PRODUCT: Record<CheckoutProductType, string> = {
+  teams: 'Teams',
+  essentials: 'Essentials',
+};
+
+const PRODUCT_URL_CONFIG_KEY_BY_PRODUCT: Record<CheckoutProductType, 'TEAMS_PRODUCT_URL' | 'ESSENTIALS_PRODUCT_URL'> = {
+  teams: 'TEAMS_PRODUCT_URL',
+  essentials: 'ESSENTIALS_PRODUCT_URL',
+};
+
+/**
+ * Single source of truth for the quantity max-validation copy and its "contact us" link.
+ * Resolves the product flow and the destination URL itself so callers (both the Zod
+ * schema and the rendering component) never have to duplicate that decision.
+ */
+export const getQuantityMaxValidationMessage = (max: number): QuantityMaxValidationMessage => {
+  const productType: CheckoutProductType = isEssentialsFlow() ? 'essentials' : 'teams';
+  const planLabel = PLAN_LABEL_BY_PRODUCT[productType];
+  const configKey = PRODUCT_URL_CONFIG_KEY_BY_PRODUCT[productType];
+  const beforeLink = `You can only have up to ${max} licenses on the ${planLabel} plan. Either decrease the number of licenses or `;
+  const linkText = 'contact us';
+  const afterLink = '.';
+  const config: Record<string, string | null | undefined> = getConfig();
+  return {
+    beforeLink,
+    linkText,
+    afterLink,
+    plainText: `${beforeLink}${linkText}${afterLink}`,
+    contactUrl: config[configKey] || null,
+  };
+};
+
 export const PlanDetailsSchema = (
   constraints: CheckoutContextFieldConstraints,
   stripePriceId: CheckoutContextPrice['id'],
@@ -144,7 +187,7 @@ export const PlanDetailsSchema = (
     )
     .max(
       constraints?.quantity?.max ?? 50,
-      `You can only have up to ${constraints?.quantity?.max ?? 50} licenses on the Teams plan. Either decrease the number of licenses or choose a different plan.`,
+      getQuantityMaxValidationMessage(constraints?.quantity?.max ?? 50).plainText,
     )
     .superRefine(async (quantity, ctx) => {
       const { isValid, validationDecisions } = await validateFieldDetailed(
