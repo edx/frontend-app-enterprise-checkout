@@ -32,6 +32,9 @@ export const SubscriptionStartMessage = () => {
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
   const { data: checkoutIntent } = useCheckoutIntent();
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
+  const subscriptionManagementUrl = checkoutIntent?.adminPortalUrl
+    ? `${checkoutIntent.adminPortalUrl.replace(/\/$/, '')}/admin/subscriptions/manage-learners`
+    : null;
 
   if (isLoading || !firstBillableInvoice) {
     return null;
@@ -72,16 +75,16 @@ export const SubscriptionStartMessage = () => {
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
-                checkoutIntent?.adminPortalUrl
+                subscriptionManagementUrl
                   ? (
                     <ExternalLink
-                      href={`${checkoutIntent.adminPortalUrl}/admin/subscriptions/manage-learners`}
+                      href={subscriptionManagementUrl}
                       onClick={() => sendEnterpriseCheckoutTrackingEvent({
                         checkoutIntentId: checkoutIntent?.id ?? null,
                         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
                         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
                         properties: {
-                          adminPortalUrl: `${checkoutIntent.adminPortalUrl}/admin/subscriptions/manage-learners`,
+                          adminPortalUrl: subscriptionManagementUrl,
                         },
                       })}
                     >

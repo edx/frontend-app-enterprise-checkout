@@ -9,7 +9,7 @@ import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 const ReceiptButton: React.FC = () => {
   const { data: checkoutIntent } = useCheckoutIntent();
   const adminBillingUrl = checkoutIntent?.adminPortalUrl
-    ? `${checkoutIntent.adminPortalUrl}/admin/billing`
+    ? `${checkoutIntent.adminPortalUrl.replace(/\/$/, '')}/admin/billing`
     : null;
 
   return (
