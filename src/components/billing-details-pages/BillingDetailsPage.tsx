@@ -1,4 +1,4 @@
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -15,6 +15,7 @@ import { useCheckoutIntent, useFormValidationConstraints } from '@/components/ap
 import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
+  CheckoutPageDetails,
   CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
@@ -41,10 +42,12 @@ const BillingDetailsPage: React.FC = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+  const intl = useIntl();
+  const { title } = CheckoutPageDetails.BillingDetails;
 
   const billingDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints)
-  ), [formSchema, formValidationConstraints]);
+    formSchema(formValidationConstraints, { intl })
+  ), [formSchema, formValidationConstraints, intl]);
 
   const form = useForm<BillingDetailsData>({
     mode: 'onTouched',
@@ -68,9 +71,9 @@ const BillingDetailsPage: React.FC = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title="Billing Details" />
+      <Helmet title={intl.formatMessage(title)} />
       <Stack gap={4}>
-        <Stepper.Step eventKey={eventKey} title="Billing Details">
+        <Stepper.Step eventKey={eventKey} title={intl.formatMessage(title)}>
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>

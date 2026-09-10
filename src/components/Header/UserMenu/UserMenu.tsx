@@ -1,6 +1,25 @@
 import { getConfig } from '@edx/frontend-platform/config';
+import { defineMessages, FormattedMessage } from '@edx/frontend-platform/i18n';
 import { AvatarButton, Dropdown } from '@openedx/paragon';
 import { useMemo } from 'react';
+
+const messages = defineMessages({
+  profile: {
+    id: 'header.userMenu.profile',
+    defaultMessage: 'Profile',
+    description: 'Link to the user profile page',
+  },
+  account: {
+    id: 'header.userMenu.account',
+    defaultMessage: 'Account',
+    description: 'Link to the user account settings page',
+  },
+  signOut: {
+    id: 'header.userMenu.signOut',
+    defaultMessage: 'Sign Out',
+    description: 'Link to log the user out',
+  },
+});
 
 interface UserMenuProps { user: AuthenticatedUser }
 
@@ -43,10 +62,16 @@ const UserMenu = ({ user }: UserMenuProps) => {
         <Dropdown.Header>
           {metaBlock}
         </Dropdown.Header>
-        <Dropdown.Item href={profileUrl} data-testid="user-profile-link">Profile</Dropdown.Item>
-        <Dropdown.Item href={accountUrl} data-testid="user-account-link">Account</Dropdown.Item>
+        <Dropdown.Item href={profileUrl} data-testid="user-profile-link">
+          <FormattedMessage {...messages.profile} />
+        </Dropdown.Item>
+        <Dropdown.Item href={accountUrl} data-testid="user-account-link">
+          <FormattedMessage {...messages.account} />
+        </Dropdown.Item>
         <Dropdown.Divider />
-        <Dropdown.Item href={logoutUrl} data-testid="user-logout-link">Sign Out</Dropdown.Item>
+        <Dropdown.Item href={logoutUrl} data-testid="user-logout-link">
+          <FormattedMessage {...messages.signOut} />
+        </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );

@@ -1,3 +1,4 @@
+import { createIntl } from '@edx/frontend-platform/i18n';
 import dayjs from 'dayjs';
 
 import { CheckoutErrorMessagesByField } from '@/constants/checkout';
@@ -73,10 +74,11 @@ describe('validateProductKey', () => {
 
 describe('serverValidationError', () => {
   const mapping = CheckoutErrorMessagesByField;
+  const intl = createIntl({ locale: 'en', messages: {} });
 
   const cases = Object.entries(mapping)
     .flatMap(([field, codes]) => Object.entries(codes)
-      .map(([errorCode, expectedMessage]) => ({ field, errorCode, expectedMessage })));
+      .map(([errorCode, descriptor]) => ({ field, errorCode, expectedMessage: descriptor.defaultMessage })));
 
   it.each(cases)(
     'returns mapped message when matching errorCode exists for $field: $errorCode',
@@ -85,13 +87,13 @@ describe('serverValidationError', () => {
         [field]: { errorCode, developerMessage: 'irrelevant' },
       };
 
-      const msg = serverValidationError(field, decisions, mapping as any);
+      const msg = serverValidationError(field, decisions, mapping as any, intl);
       expect(msg).toBe(expectedMessage);
     },
   );
 
   it('returns default message when validationDecisions is null', () => {
-    const msg = serverValidationError('quantity', null as any, mapping as any);
+    const msg = serverValidationError('quantity', null as any, mapping as any, intl);
     expect(msg).toBe('Failed server-side validation');
   });
 
@@ -100,7 +102,7 @@ describe('serverValidationError', () => {
       adminEmail: { errorCode: 'invalid_format', developerMessage: 'Invalid' },
     };
 
-    const msg = serverValidationError('quantity', decisions, mapping as any);
+    const msg = serverValidationError('quantity', decisions, mapping as any, intl);
     expect(msg).toBe('Failed server-side validation');
   });
 
@@ -109,7 +111,7 @@ describe('serverValidationError', () => {
       quantity: { errorCode: 'unknown_code', developerMessage: 'Unknown' },
     };
 
-    const msg = serverValidationError('quantity', decisions, mapping as any);
+    const msg = serverValidationError('quantity', decisions, mapping as any, intl);
     expect(msg).toBe('Failed server-side validation');
   });
 });

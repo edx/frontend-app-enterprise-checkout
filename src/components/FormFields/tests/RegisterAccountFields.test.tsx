@@ -1,4 +1,4 @@
-import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { createIntl, IntlProvider } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -55,7 +55,7 @@ const TestWrapper = (
   };
   const form = useForm({
     mode: 'onTouched', // Use onTouched mode to match real application behavior
-    resolver: zodResolver(PlanDetailsRegisterPageSchema(constraints)),
+    resolver: zodResolver(PlanDetailsRegisterPageSchema(constraints, { intl: createIntl({ locale: 'en', messages: {} }) })),
     defaultValues: {
       adminEmail: 'test@example.com',
       fullName: '',
