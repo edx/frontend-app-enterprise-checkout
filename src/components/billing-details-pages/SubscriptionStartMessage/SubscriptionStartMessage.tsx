@@ -33,7 +33,7 @@ export const SubscriptionStartMessage = () => {
   const { data: checkoutIntent } = useCheckoutIntent();
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
   const subscriptionManagementUrl = checkoutIntent?.adminPortalUrl
-    ? `${checkoutIntent.adminPortalUrl.replace(/\/$/, '')}/admin/subscriptions/manage-learners/`
+    ? new URL('admin/subscriptions/manage-learners/', `${checkoutIntent.adminPortalUrl.replace(/\/$/, '')}/`).toString()
     : null;
 
   if (isLoading || !firstBillableInvoice) {
