@@ -6,7 +6,6 @@ import '@testing-library/jest-dom';
 
 import {
   useBFFSuccess, useCheckoutIntent,
-  useCreateBillingPortalSession,
   useFirstBillableInvoice,
   usePolledAuthenticatedUser,
   usePolledCheckoutIntent,
@@ -21,7 +20,6 @@ jest.mock('@/components/app/data', () => ({
   usePolledAuthenticatedUser: jest.fn(),
   usePolledCheckoutIntent: jest.fn(),
   useFirstBillableInvoice: jest.fn(),
-  useCreateBillingPortalSession: jest.fn(),
   useCheckoutIntent: jest.fn(),
   usePurchaseSummaryPricing: jest.fn(),
 }));
@@ -32,8 +30,6 @@ const mockUsePolledAuthenticatedUser = (
 );
 const mockUsePolledCheckoutIntent = usePolledCheckoutIntent as jest.MockedFunction<typeof usePolledCheckoutIntent>;
 const mockUseFirstBillableInvoice = useFirstBillableInvoice as jest.MockedFunction<typeof useFirstBillableInvoice>;
-const mockCreateBillingPortalSession = useCreateBillingPortalSession as
-  jest.MockedFunction<typeof useCreateBillingPortalSession>;
 const mockUseCheckoutIntent = useCheckoutIntent as jest.MockedFunction<typeof useCheckoutIntent>;
 
 describe('BillingDetailsSuccessContent', () => {
@@ -92,15 +88,11 @@ describe('BillingDetailsSuccessContent', () => {
       refetch: jest.fn(),
       isLoading: false,
     });
-    (mockCreateBillingPortalSession as jest.Mock).mockReturnValue({
-      data: {
-        url: 'https://billing-portal.example.com/session',
-      },
-    });
     (mockUseCheckoutIntent as jest.Mock).mockReturnValue({
       data: {
         id: 7,
         uuid: 'checkout-intent-uuid',
+        adminPortalUrl: 'https://portal.stage.edx.org/test-enterprise-customer',
       },
     });
   });

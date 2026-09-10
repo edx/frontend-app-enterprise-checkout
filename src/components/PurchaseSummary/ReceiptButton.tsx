@@ -2,20 +2,22 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { Button, Icon } from '@openedx/paragon';
 import { Launch } from '@openedx/paragon/icons';
 
-import { useCheckoutIntent, useCreateBillingPortalSession } from '@/components/app/data';
+import { useCheckoutIntent } from '@/components/app/data';
 import EVENT_NAMES from '@/constants/events';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const ReceiptButton: React.FC = () => {
-  const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
+  const adminBillingUrl = checkoutIntent?.adminPortalUrl
+    ? `${checkoutIntent.adminPortalUrl}/admin/billing`
+    : null;
 
   return (
     <Button
       className="w-100 text-primary-500 font-weight-bold"
       variant="outline-primary"
-      disabled={!billingPortalSession?.url}
-      href={billingPortalSession?.url}
+      disabled={!adminBillingUrl}
+      href={adminBillingUrl ?? undefined}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => sendEnterpriseCheckoutTrackingEvent({
@@ -23,7 +25,7 @@ const ReceiptButton: React.FC = () => {
         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.VIEW_RECEIPT_BUTTON_CLICKED,
         properties: {
-          billingPortalSessionUrl: billingPortalSession?.url,
+          adminBillingUrl,
         },
       })}
     >
