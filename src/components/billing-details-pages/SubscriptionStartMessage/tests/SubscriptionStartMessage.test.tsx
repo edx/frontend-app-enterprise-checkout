@@ -104,7 +104,7 @@ describe('SubscriptionStartMessage', () => {
     renderComponent();
     const link = screen.getByRole('link', { name: /Subscription Management/ });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', 'https://admin.example.com/test-enterprise/admin/subscriptions/manage-learners');
+    expect(link).toHaveAttribute('href', 'https://admin.example.com/test-enterprise/admin/subscriptions/manage-learners/');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 

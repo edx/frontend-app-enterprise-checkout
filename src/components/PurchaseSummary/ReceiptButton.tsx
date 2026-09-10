@@ -18,8 +18,7 @@ const ReceiptButton: React.FC = () => {
       variant="outline-primary"
       disabled={!adminBillingUrl}
       href={adminBillingUrl ?? undefined}
-      target="_blank"
-      rel="noopener noreferrer"
+      {...(adminBillingUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       onClick={() => sendEnterpriseCheckoutTrackingEvent({
         checkoutIntentId: checkoutIntent?.id ?? null,
         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
