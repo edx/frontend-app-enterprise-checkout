@@ -197,7 +197,6 @@ const makeResolvers = (
   stripePriceId: CheckoutContextPrice['id'],
   adminEmail: string | undefined = undefined,
 ) => {
-  
   const intl = createIntl({ locale: 'en', messages: {} });
 
   const planDetailsResolver = zodResolver(PlanDetailsSchema(constraints, { stripePriceId, intl }));
