@@ -174,7 +174,7 @@ describe('PurchaseSummaryCardButton', () => {
         checkoutIntentUuid: 'test-uuid-123',
         eventName: 'edx.ui.enterprise.checkout.self_service_subscription_checkout.billing_details_success.view_receipt_button.clicked',
         properties: {
-          adminBillingUrl: 'https://portal.stage.edx.org/test-enterprise-customer/admin/billing',
+          adminPortalUrl: 'https://portal.stage.edx.org/test-enterprise-customer/admin/billing',
         },
       });
     });

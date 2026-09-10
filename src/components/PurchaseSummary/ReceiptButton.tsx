@@ -25,7 +25,7 @@ const ReceiptButton: React.FC = () => {
         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.VIEW_RECEIPT_BUTTON_CLICKED,
         properties: {
-          adminBillingUrl,
+          adminPortalUrl: adminBillingUrl,
         },
       })}
     >

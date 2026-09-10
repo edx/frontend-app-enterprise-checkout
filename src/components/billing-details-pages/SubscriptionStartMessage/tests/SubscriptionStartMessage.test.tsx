@@ -113,7 +113,7 @@ describe('SubscriptionStartMessage', () => {
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
   });
 
-  it('renders plain text when billing portal URL is missing', () => {
+  it('renders plain text when admin portal URL is missing', () => {
     // Simulate admin portal URL still loading / unavailable
     (useCheckoutIntent as jest.Mock).mockReturnValue({ data: { id: 7 } });
     renderComponent();
