@@ -5,7 +5,6 @@ import userEvent from '@testing-library/user-event';
 
 import {
   useCheckoutIntent,
-  useCreateBillingPortalSession,
   useFirstBillableInvoice,
   usePurchaseSummaryPricing,
 } from '@/components/app/data';
@@ -18,7 +17,6 @@ import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 // Mock the useFirstBillableInvoice hook
 jest.mock('@/components/app/data', () => ({
   useFirstBillableInvoice: jest.fn(),
-  useCreateBillingPortalSession: jest.fn(),
   useCheckoutIntent: jest.fn(),
   usePurchaseSummaryPricing: jest.fn(),
 }));
@@ -57,14 +55,11 @@ describe('SubscriptionStartMessage', () => {
         hasStartAndEndTime: true,
       },
     });
-    (useCreateBillingPortalSession as jest.Mock).mockReturnValue({
-      data: {
-        url: 'https://stripe-billing.example.com/session',
-      },
-    });
     (useCheckoutIntent as jest.Mock).mockReturnValue({
       data: {
         id: 7,
+        uuid: 'checkout-intent-uuid',
+        adminPortalUrl: 'https://admin.example.com/test-enterprise',
       },
     });
     (usePurchaseSummaryPricing as jest.Mock).mockReturnValue({
@@ -109,7 +104,7 @@ describe('SubscriptionStartMessage', () => {
     renderComponent();
     const link = screen.getByRole('link', { name: /Subscription Management/ });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', 'https://stripe-billing.example.com/session');
+    expect(link).toHaveAttribute('href', 'https://admin.example.com/test-enterprise/admin/subscriptions/manage-learners/');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 
@@ -118,9 +113,9 @@ describe('SubscriptionStartMessage', () => {
     expect(sendEnterpriseCheckoutTrackingEvent).toHaveBeenCalled();
   });
 
-  it('renders plain text when billing portal URL is missing', () => {
-    // Simulate billing portal session still loading / unavailable
-    (useCreateBillingPortalSession as jest.Mock).mockReturnValue({ data: undefined });
+  it('renders plain text when admin portal URL is missing', () => {
+    // Simulate admin portal URL still loading / unavailable
+    (useCheckoutIntent as jest.Mock).mockReturnValue({ data: { id: 7 } });
     renderComponent();
 
     // There should be no clickable link for subscription management
@@ -128,6 +123,18 @@ describe('SubscriptionStartMessage', () => {
 
     // The text should still be present as plain text
     expect(screen.getByText(/Subscription Management/)).toBeInTheDocument();
+  });
+
+  it('does not render when invoice lacks start and end time', () => {
+    (mockUseFirstBillableInvoice as jest.Mock).mockReturnValue({
+      data: {
+        startTime: null,
+        endTime: null,
+        hasStartAndEndTime: false,
+      },
+    });
+    const { container } = renderComponent();
+    expect(container.firstChild).toBeNull();
   });
 
   it('does not render when data is missing', () => {

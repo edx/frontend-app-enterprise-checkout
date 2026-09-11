@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 
 import {
   useCheckoutIntent,
-  useCreateBillingPortalSession,
   useFirstBillableInvoice,
   usePurchaseSummaryPricing,
 } from '@/components/app/data';
@@ -31,10 +30,11 @@ export const SubscriptionStartMessage = () => {
   const intl = useIntl();
   const isEssentials = isEssentialsFlow();
   const { data: firstBillableInvoice, isLoading } = useFirstBillableInvoice();
-  // TODO: Add this endpoint to the success page loader
-  const { data: billingPortalSession } = useCreateBillingPortalSession();
   const { data: checkoutIntent } = useCheckoutIntent();
   const { yearlySubscriptionCostForQuantity } = usePurchaseSummaryPricing();
+  const subscriptionManagementUrl = checkoutIntent?.adminPortalUrl
+    ? new URL('admin/subscriptions/manage-learners/', `${checkoutIntent.adminPortalUrl.replace(/\/$/, '')}/`).toString()
+    : null;
 
   if (isLoading || !firstBillableInvoice) {
     return null;
@@ -75,16 +75,16 @@ export const SubscriptionStartMessage = () => {
             values={{
               boldDate: <span className="font-weight-bold">{dayjs(endTime).format(LONG_MONTH_DATE_FORMAT)}</span>,
               link: (
-                billingPortalSession?.url
+                subscriptionManagementUrl
                   ? (
                     <ExternalLink
-                      href={billingPortalSession.url}
+                      href={subscriptionManagementUrl}
                       onClick={() => sendEnterpriseCheckoutTrackingEvent({
                         checkoutIntentId: checkoutIntent?.id ?? null,
                         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
                         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.SUBSCRIPTION_MANAGEMENT_LINK_CLICKED,
                         properties: {
-                          billingPortalSessionUrl: billingPortalSession?.url,
+                          adminPortalUrl: subscriptionManagementUrl,
                         },
                       })}
                     >

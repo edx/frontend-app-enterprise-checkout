@@ -11,11 +11,8 @@ import PurchaseSummaryCardButton from '../PurchaseSummaryCardButton';
 
 jest.mock('@/components/app/data', () => ({
   __esModule: true,
-  useCreateBillingPortalSession: jest.fn(() => ({
-    data: { url: 'https://billing.example.com/portal' },
-  })),
   useCheckoutIntent: jest.fn(() => ({
-    data: { id: 123, uuid: 'test-uuid-123' },
+    data: { id: 123, uuid: 'test-uuid-123', adminPortalUrl: 'https://portal.stage.edx.org/test-enterprise-customer' },
   })),
 }));
 
@@ -177,7 +174,7 @@ describe('PurchaseSummaryCardButton', () => {
         checkoutIntentUuid: 'test-uuid-123',
         eventName: 'edx.ui.enterprise.checkout.self_service_subscription_checkout.billing_details_success.view_receipt_button.clicked',
         properties: {
-          billingPortalSessionUrl: 'https://billing.example.com/portal',
+          adminPortalUrl: 'https://portal.stage.edx.org/test-enterprise-customer/admin/billing',
         },
       });
     });
