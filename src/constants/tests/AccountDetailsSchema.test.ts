@@ -35,7 +35,7 @@ describe('AccountDetailsSchema', () => {
     if (!result.success) {
       const { fieldErrors } = result.error.flatten();
       expect(fieldErrors.companyName).toContain('Company name is required');
-      expect(fieldErrors.enterpriseSlug).toContain('Company Url is required');
+      expect(fieldErrors.enterpriseSlug).toContain('Company URL is required');
     }
   });
 
@@ -50,7 +50,7 @@ describe('AccountDetailsSchema', () => {
     if (!result.success) {
       const { fieldErrors } = result.error.flatten();
       expect(fieldErrors.companyName).toContain('Company name is required');
-      expect(fieldErrors.enterpriseSlug).toContain('Company Url is required');
+      expect(fieldErrors.enterpriseSlug).toContain('Company URL is required');
     }
   });
 
