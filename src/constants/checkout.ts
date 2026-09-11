@@ -404,7 +404,7 @@ const accountDetailsValidationMessages = defineMessages({
   },
   enterpriseSlugRequired: {
     id: 'checkout.validation.accountDetails.enterpriseSlug.required',
-    defaultMessage: 'Company Url is required',
+    defaultMessage: 'Company URL is required',
     description: 'Error shown when the company URL field is empty',
   },
   enterpriseSlugMaxLength: {
