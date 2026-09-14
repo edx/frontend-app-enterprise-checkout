@@ -3,7 +3,7 @@ import {
   getAuthenticatedUser,
   hydrateAuthenticatedUser,
 } from '@edx/frontend-platform/auth';
-import { FormattedMessage } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +31,7 @@ import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
+  CheckoutPageDetails,
   CheckoutPageRoute,
   CheckoutStepKey,
   DataStoreKey,
@@ -72,6 +73,8 @@ const PlanDetailsPage = () => {
     buttonMessage: stepperActionButtonMessage,
     formSchema,
   } = useCurrentPageDetails();
+  const intl = useIntl();
+  const { title } = CheckoutPageDetails.PlanDetails;
 
   const { getToken } = useRecaptchaToken('signup');
 
@@ -126,8 +129,8 @@ const PlanDetailsPage = () => {
   }, [checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname]);
 
   const planDetailsSchema = useMemo(() => (
-    formSchema(formValidationConstraints, planDetailsFormData.stripePriceId)
-  ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId]);
+    formSchema(formValidationConstraints, { stripePriceId: planDetailsFormData.stripePriceId, intl })
+  ), [formSchema, formValidationConstraints, planDetailsFormData.stripePriceId, intl]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onTouched',
@@ -362,9 +365,9 @@ const PlanDetailsPage = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title="Plan Details" />
+      <Helmet title={intl.formatMessage(title)} />
       <Stack gap={4}>
-        <Stepper.Step eventKey={eventKey} title="Plan Details" data-testid="stepper-title">
+        <Stepper.Step eventKey={eventKey} title={intl.formatMessage(title)} data-testid="stepper-title">
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>

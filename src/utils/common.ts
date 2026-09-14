@@ -1,8 +1,19 @@
 import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
+import { defineMessages } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 
 import dayjs from './dayjs';
+
+import type { IntlShape, MessageDescriptor } from 'react-intl';
+
+const commonMessages = defineMessages({
+  failedServerSideValidation: {
+    id: 'checkout.serverValidation.failed',
+    defaultMessage: 'Failed server-side validation',
+    description: 'Default error message shown when server-side validation fails without a more specific message',
+  },
+});
 
 /**
  * Given an error, returns the status code from the custom attributes (Axios error)
@@ -59,25 +70,25 @@ function getComputedStylePropertyCSSVariable(cssVariableName: string, fallback: 
  *
  * @param {string} field - The field name to read from decisions/messages.
  * @param {ValidationResponse['validationDecisions'] | null | undefined} validationDecisions
- * @param {Record<string, Record<string, string>>} messagesByField - field -> (errorCode -> message)
- * @param {string} [defaultMessage='Failed server-side validation']
+ * @param {Record<string, Record<string, MessageDescriptor>>} messagesByField - field -> (errorCode -> message)
+ * @param {IntlShape} intl - Used to translate the resolved message descriptor.
  * @returns {string}
  */
 function serverValidationError(
   field: string,
   validationDecisions: ValidationResponse['validationDecisions'] | null,
-  messagesByField: Record<string, Record<string, string>>,
-  defaultMessage: string = 'Failed server-side validation',
+  messagesByField: Record<string, Record<string, MessageDescriptor>>,
+  intl: IntlShape,
 ): string {
   if (validationDecisions) {
     const decision = (validationDecisions as any)[field] as ValidationDecision | undefined;
     const errorCode = (decision as any)?.errorCode as string | undefined;
     const fieldMessages = messagesByField?.[field];
     if (errorCode && fieldMessages?.[errorCode]) {
-      return fieldMessages[errorCode];
+      return intl.formatMessage(fieldMessages[errorCode]);
     }
   }
-  return defaultMessage;
+  return intl.formatMessage(commonMessages.failedServerSideValidation);
 }
 
 const formatPrice = (price: number, options = {}) => {

@@ -1,3 +1,4 @@
+import { createIntl } from '@edx/frontend-platform/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StripeCheckoutStatus } from '@stripe/stripe-js';
 
@@ -196,11 +197,13 @@ const makeResolvers = (
   stripePriceId: CheckoutContextPrice['id'],
   adminEmail: string | undefined = undefined,
 ) => {
-  const planDetailsResolver = zodResolver(PlanDetailsSchema(constraints, stripePriceId));
+  const intl = createIntl({ locale: 'en', messages: {} });
 
-  const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints, adminEmail));
+  const planDetailsResolver = zodResolver(PlanDetailsSchema(constraints, { stripePriceId, intl }));
 
-  const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints));
+  const accountDetailsResolver = zodResolver(AccountDetailsSchema(constraints, { adminEmail, intl }));
+
+  const billingDetailsResolver = zodResolver(BillingDetailsSchema(constraints, { intl }));
 
   return {
     planDetailsResolver,
