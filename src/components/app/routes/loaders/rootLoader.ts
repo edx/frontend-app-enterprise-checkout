@@ -15,6 +15,7 @@ import { determineExistingCheckoutIntentState,
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId, extractPriceObject, validateProductKey } from '@/utils/checkout';
+import { captureCheckoutAttribution } from '@/utils/checkoutEvents';
 
 /**
  * Factory that creates the root route loader for the Enterprise Checkout MFE.
@@ -81,6 +82,9 @@ const makeRootLoader = (
   } = getConfig();
 
   const currentPath = new URL(request.url).pathname;
+
+  // Persist UTM parameters and referrer from the landing that begins checkout for Segment attribution.
+  captureCheckoutAttribution(request.url);
 
   // Route-aware feature key
   const routeFeatureKey = getFeatureForPath(currentPath);

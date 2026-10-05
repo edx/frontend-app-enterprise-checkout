@@ -1,9 +1,11 @@
 import { AppContext } from '@edx/frontend-platform/react';
-import { render, screen } from '@testing-library/react';
+import { keepPreviousData } from '@tanstack/react-query';
+import { render, renderHook, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import useCheckoutEventProductProperties from '@/components/app/data/hooks/useCheckoutEventProductProperties';
 import usePurchaseSummaryPricing, { calculateSubscriptionCost } from '@/components/app/data/hooks/usePurchaseSummaryPricing';
 import { DataStoreKey } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
@@ -135,5 +137,94 @@ describe('usePurchaseSummaryPricing (hook)', () => {
     checkoutFormStore.getState().setProductLookupKey('essentials-lookup');
 
     expect(checkoutFormStore.getState().productLookupKey).toBe('essentials-lookup');
+  });
+});
+
+describe('useCheckoutEventProductProperties (hook)', () => {
+  const pricing = {
+    defaultByLookupKey: 'teams_yearly',
+    prices: [
+      {
+        lookupKey: 'teams_yearly', product: 'prod_teams', unitAmount: 39600, sspProductSlug: 'teams-yearly',
+      },
+      {
+        lookupKey: 'ai_academy_yearly', product: 'prod_ai', unitAmount: 14900, sspProductSlug: 'ai-academy-yearly',
+      },
+    ],
+  };
+  const appContextValue = { authenticatedUser: { userId: 12345 }, config: {} } as any;
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <AppContext.Provider value={appContextValue}>{children}</AppContext.Provider>
+  );
+  const setStore = (sspProductSlug: string, selectedProduct?: object) => {
+    checkoutFormStore.setState((s) => ({
+      ...s,
+      sspProductSlug,
+      formData: { ...s.formData, [DataStoreKey.AcademySelection]: { selectedProduct } },
+    }));
+  };
+  // Run the hook's selector against fake BFF data, as useBFFContext would.
+  const mockBFFData = (checkoutIntent: object | null = null) => {
+    mockedUseBFFContext.mockImplementation((_userId, options) => ({
+      data: options.select({ pricing, checkoutIntent }),
+    }));
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockBFFData();
+  });
+
+  it('builds Teams properties from the price matching the Teams slug', () => {
+    setStore('teams-yearly');
+    const { result } = renderHook(() => useCheckoutEventProductProperties(), { wrapper });
+
+    expect(mockedUseBFFContext).toHaveBeenCalledWith(
+      12345,
+      expect.objectContaining({ placeholderData: keepPreviousData }),
+    );
+    expect(result.current).toEqual({
+      product_id: 'prod_teams',
+      category: 'subscription',
+      name: 'teams',
+      brand: 'enterprise',
+      price: 396,
+      slug: 'teams-yearly',
+      payment_schedule: 'yearly',
+    });
+  });
+
+  it('builds Essentials properties from the price matching the academy slug, with the academy variant', () => {
+    setStore('ai-academy-yearly', { name: 'AI Academy' });
+    const { result } = renderHook(() => useCheckoutEventProductProperties(), { wrapper });
+
+    expect(result.current).toEqual({
+      product_id: 'prod_ai',
+      category: 'subscription',
+      name: 'essentials',
+      brand: 'enterprise',
+      variant: 'AI Academy',
+      price: 149,
+      slug: 'ai-academy-yearly',
+      payment_schedule: 'yearly',
+    });
+  });
+
+  it('prefers the checkout intent SSP product over the slug in the form store', () => {
+    mockBFFData({ sspProduct: 'ai-academy-yearly' });
+    setStore('teams-yearly');
+    const { result } = renderHook(() => useCheckoutEventProductProperties(), { wrapper });
+
+    expect(result.current).toEqual(expect.objectContaining({ product_id: 'prod_ai', slug: 'ai-academy-yearly' }));
+  });
+
+  it('returns only the constant properties when pricing is unavailable', () => {
+    mockedUseBFFContext.mockReturnValue({ data: null });
+    setStore('teams-yearly');
+    const { result } = renderHook(() => useCheckoutEventProductProperties(), { wrapper });
+
+    expect(result.current).toEqual({
+      category: 'subscription', name: 'teams', brand: 'enterprise', payment_schedule: 'yearly',
+    });
   });
 });

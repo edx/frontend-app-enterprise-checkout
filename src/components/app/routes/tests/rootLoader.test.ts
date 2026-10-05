@@ -9,6 +9,7 @@ import { hydrateEssentialsProduct } from '@/components/app/routes/loaders/utils'
 import { CheckoutPageRoute, EssentialsPageRoute } from '@/constants/checkout';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
 import { extractPriceId } from '@/utils/checkout';
+import { getCheckoutAttribution } from '@/utils/checkoutEvents';
 
 import { getRoutes } from '../../../../routes';
 import { getFeatureForPath } from '../loaders/rootLoader';
@@ -129,6 +130,18 @@ describe('makeRootLoader (rootLoader) tests', () => {
     const res = result as any;
     expect(res.status).toBe(302);
     expect(res.headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+  });
+
+  it('captures UTM parameters from the landing URL before redirecting', async () => {
+    (authMod.getAuthenticatedUser as jest.Mock).mockReturnValue(null);
+
+    const loader = makeRootLoader(queryClient);
+    const result = await loader({
+      request: makeRequest('/account-details?utm_source=google&utm_campaign=teams_q3'),
+    } as any);
+
+    expect((result as any).headers.get('Location')).toBe(CheckoutPageRoute.PlanDetails);
+    expect(getCheckoutAttribution()).toEqual({ utm_source: 'google', utm_campaign: 'teams_q3' });
   });
 
   it('redirects unauthenticated user on protected Essentials path to Essentials PlanDetails when essentials product_key is present', async () => {
