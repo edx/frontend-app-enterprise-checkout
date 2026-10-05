@@ -39,6 +39,39 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   CHECKOUT_REGISTRATION_SUCCESS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.registration.success`,
 };
 
+/**
+ * Normalized checkout funnel events (ENT-12328). These are emitted alongside the legacy
+ * SUBSCRIPTION_CHECKOUT events above, gated by FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2.
+ *
+ * `order_completed` and `order_cancelled` are emitted server-side (enterprise-access) and are
+ * listed here only so the full event dictionary lives in one place.
+ */
+const CHECKOUT_EVENTS = {
+  CHECKOUT_STARTED: `${PROJECT_NAME}.checkout_started`,
+  STEP_VIEWED_PLAN_DETAILS: `${PROJECT_NAME}.checkout_step_viewed.plan_details`,
+  STEP_COMPLETED_PLAN_DETAILS: `${PROJECT_NAME}.checkout_step_completed.plan_details`,
+  STEP_VIEWED_ACCOUNT_DETAILS: `${PROJECT_NAME}.checkout_step_viewed.account_details`,
+  STEP_COMPLETED_ACCOUNT_DETAILS: `${PROJECT_NAME}.checkout_step_completed.account_details`,
+  STEP_VIEWED_BILLING_DETAILS: `${PROJECT_NAME}.checkout_step_viewed.billing_details`,
+  STEP_COMPLETED_BILLING_DETAILS: `${PROJECT_NAME}.checkout_step_completed.billing_details`,
+  ORDER_COMPLETED: `${PROJECT_NAME}.order_completed`,
+  ACCOUNT_CREATED: `${PROJECT_NAME}.account_created`,
+  LOGIN_STARTED: `${PROJECT_NAME}.login_started`,
+  SIGNED_IN: `${PROJECT_NAME}.signed_in`,
+  ORDER_CANCELLED: `${PROJECT_NAME}.order_cancelled`,
+};
+
+/**
+ * The `step_name` / `step_number` pair attached to every step-scoped checkout event.
+ */
+export const CHECKOUT_EVENT_STEPS = {
+  PLAN_DETAILS: { step_name: 'Plan Details', step_number: 1 },
+  ACCOUNT_DETAILS: { step_name: 'Account Details', step_number: 2 },
+  BILLING_DETAILS: { step_name: 'Billing Details', step_number: 3 },
+} as const;
+
+export type CheckoutEventStep = typeof CHECKOUT_EVENT_STEPS[keyof typeof CHECKOUT_EVENT_STEPS];
+
 export const TRACKED_FIELDS = {
   // Plan Details step
   NUM_LICENSES: 'numLicenses',
@@ -61,6 +94,7 @@ export const PLAN_TYPE = {
 
 const EVENT_NAMES = {
   SUBSCRIPTION_CHECKOUT: SUBSCRIPTION_CHECKOUT_EVENTS,
+  CHECKOUT: CHECKOUT_EVENTS,
 };
 
 export default EVENT_NAMES;

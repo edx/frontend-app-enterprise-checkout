@@ -27,6 +27,8 @@ import {
   useRegisterMutation,
 } from '@/components/app/data/hooks';
 import useBFFContext from '@/components/app/data/hooks/useBFFContext';
+import useCheckoutEventProductProperties from '@/components/app/data/hooks/useCheckoutEventProductProperties';
+import useTrackCheckoutStepViewed from '@/components/app/data/hooks/useTrackCheckoutStepViewed';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
@@ -34,17 +36,19 @@ import {
   CheckoutPageDetails,
   CheckoutPageRoute,
   CheckoutStepKey,
+  CheckoutSubstepKey,
   DataStoreKey,
   EssentialsPageRoute,
   SubmitCallbacks,
 } from '@/constants/checkout';
-import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS, PLAN_TYPE } from '@/constants/events';
 import {
   useCheckoutFormStore,
   useCurrentPage,
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
+import { sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
@@ -85,6 +89,28 @@ const PlanDetailsPage = () => {
 
   const lastTrackedPathRef = useRef<string | null>(null);
   const { currentStepKey, currentSubstepKey } = useCurrentStep();
+
+  const checkoutEventProduct = useCheckoutEventProductProperties();
+  useTrackCheckoutStepViewed({
+    eventName: EVENT_NAMES.CHECKOUT.STEP_VIEWED_PLAN_DETAILS,
+    step: CHECKOUT_EVENT_STEPS.PLAN_DETAILS,
+    isActive: currentStepKey === CheckoutStepKey.PlanDetails && !currentSubstepKey,
+    isEntryStep: true,
+  });
+
+  // Fire login_started on every visit to the login substep of the logistration flow.
+  const lastTrackedLoginLocationKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      currentStepKey !== CheckoutStepKey.PlanDetails
+      || currentSubstepKey !== CheckoutSubstepKey.Login
+      || lastTrackedLoginLocationKeyRef.current === location.key
+    ) {
+      return;
+    }
+    lastTrackedLoginLocationKeyRef.current = location.key;
+    sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.LOGIN_STARTED, product: checkoutEventProduct });
+  }, [checkoutEventProduct, currentStepKey, currentSubstepKey, location.key]);
 
   async function invalidateCheckoutQueries(client) {
     const userId = getAuthenticatedUser()?.userId;
@@ -156,6 +182,11 @@ const PlanDetailsPage = () => {
 
   const createCheckoutIntentMutation = useCreateCheckoutIntentMutation({
     onSuccess: async () => {
+      sendCheckoutEvent({
+        eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_PLAN_DETAILS,
+        product: checkoutEventProduct,
+        step: CHECKOUT_EVENT_STEPS.PLAN_DETAILS,
+      });
       try {
         // Refresh checkout context after the intent exists so downstream loaders don't reuse stale data.
         const currentUserId = getAuthenticatedUser()?.userId;
@@ -197,6 +228,7 @@ const PlanDetailsPage = () => {
   const loginMutation = useLoginMutation({
     onSuccess: async () => {
       setIsSubmitting(false);
+      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.SIGNED_IN, product: checkoutEventProduct });
       await fetchAuthenticatedUser();
       await hydrateAuthenticatedUser();
       createCheckoutIntentMutation.mutate({
@@ -218,6 +250,7 @@ const PlanDetailsPage = () => {
   const registerMutation = useRegisterMutation({
     onSuccess: async () => {
       setIsSubmitting(false);
+      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, product: checkoutEventProduct });
       await fetchAuthenticatedUser();
       await hydrateAuthenticatedUser();
 

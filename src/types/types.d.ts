@@ -243,8 +243,12 @@ declare global {
     lookupKey: string;
     recurring: {
       internal: string;
+      /** Stripe billing interval (e.g. 'year', 'month'). */
+      interval?: string;
       intervalCount: number;
     };
+    /** Enterprise catalog query backing this product, when provided by the BFF. */
+    catalogQueryId?: number | string | null;
     /** Optional slug from BFF pricing (camelCased from ssp_product_slug). */
     sspProductSlug?: string | null;
     currency: string;
