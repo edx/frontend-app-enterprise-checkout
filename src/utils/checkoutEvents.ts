@@ -14,6 +14,8 @@ import type { CheckoutEventStep } from '@/constants/events';
 
 export const CHECKOUT_ATTRIBUTION_STORAGE_KEY = 'edx.checkout.attribution';
 export const CHECKOUT_STARTED_STORAGE_KEY = 'edx.checkout.started';
+export const CHECKOUT_PAYMENT_SUBMITTED_STORAGE_KEY = 'edx.checkout.payment_submitted';
+const getBillingCompletedStorageKey = (checkoutIntentUuid: string) => `edx.checkout.billing_completed.${checkoutIntentUuid}`;
 
 export const UTM_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
 
@@ -171,6 +173,49 @@ export const claimCheckoutStarted = (): boolean => {
     return true;
   } catch (error) {
     logError('Failed to read checkout started state', error);
+    return false;
+  }
+};
+
+/**
+ * Records that payment was submitted for a checkout intent in this tab. Stripe may redirect
+ * the page to the success route after `confirm()`, so the success route uses this marker to
+ * emit `checkout_step_completed.billing_details` for payments the in-page handler never saw.
+ */
+export const markCheckoutPaymentSubmitted = (checkoutIntentUuid?: string | null): void => {
+  if (!checkoutIntentUuid) { return; }
+  try {
+    sessionStorage.setItem(CHECKOUT_PAYMENT_SUBMITTED_STORAGE_KEY, checkoutIntentUuid);
+  } catch (error) {
+    logError('Failed to record checkout payment submission', error);
+  }
+};
+
+export const wasCheckoutPaymentSubmitted = (checkoutIntentUuid?: string | null): boolean => {
+  if (!checkoutIntentUuid) { return false; }
+  try {
+    return sessionStorage.getItem(CHECKOUT_PAYMENT_SUBMITTED_STORAGE_KEY) === checkoutIntentUuid;
+  } catch (error) {
+    logError('Failed to read checkout payment submission', error);
+    return false;
+  }
+};
+
+/**
+ * Returns true only the first time it is called for a checkout intent in this browser session,
+ * so `checkout_step_completed.billing_details` is emitted once whether it comes from the
+ * in-page payment handler or the success route after a Stripe redirect.
+ */
+export const claimBillingStepCompleted = (checkoutIntentUuid: string): boolean => {
+  const storageKey = getBillingCompletedStorageKey(checkoutIntentUuid);
+  try {
+    if (sessionStorage.getItem(storageKey) === 'true') {
+      return false;
+    }
+    sessionStorage.setItem(storageKey, 'true');
+    return true;
+  } catch (error) {
+    logError('Failed to read billing step completed state', error);
     return false;
   }
 };

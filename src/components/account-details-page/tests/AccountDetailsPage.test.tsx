@@ -8,14 +8,20 @@ import { useCheckoutIntent, useFormValidationConstraints } from '@/components/ap
 import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
 import { validateFieldDetailed } from '@/components/app/data/services/validation';
 import { CheckoutPageRoute, CheckoutStepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
-import EVENT_NAMES, { PLAN_TYPE } from '@/constants/events';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS, PLAN_TYPE } from '@/constants/events';
 import { checkoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 import { renderStepperRoute } from '@/utils/tests';
 
 jest.mock('@/utils/common', () => ({
   ...jest.requireActual('@/utils/common'),
   sendEnterpriseCheckoutTrackingEvent: jest.fn(),
+}));
+
+jest.mock('@/utils/checkoutEvents', () => ({
+  ...jest.requireActual('@/utils/checkoutEvents'),
+  sendCheckoutEvent: jest.fn(),
 }));
 
 jest.mock('@/components/app/data', () => ({
@@ -391,6 +397,34 @@ describe('AccountDetailsPage', () => {
       },
     });
     expect(setQueryDataMock.mock.results[1].value).toBe(previousWithoutCheckoutIntent);
+  });
+
+  describe('normalized checkout events', () => {
+    const sentEventNames = () => (sendCheckoutEvent as jest.Mock).mock.calls.map(([{ eventName }]) => eventName);
+
+    it('fires checkout_step_viewed.account_details on render', () => {
+      renderStepperRoute(CheckoutPageRoute.AccountDetails, { config: {}, authenticatedUser: { userId: 12345 } });
+
+      expect(sendCheckoutEvent).toHaveBeenCalledWith(expect.objectContaining({
+        eventName: EVENT_NAMES.CHECKOUT.STEP_VIEWED_ACCOUNT_DETAILS,
+        step: CHECKOUT_EVENT_STEPS.ACCOUNT_DETAILS,
+        product: expect.objectContaining({ category: 'subscription', brand: 'enterprise', name: 'teams' }),
+      }));
+      expect(sentEventNames()).not.toContain(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS);
+    });
+
+    it('fires checkout_step_completed.account_details only after the checkout session is created', () => {
+      renderStepperRoute(CheckoutPageRoute.AccountDetails, { config: {}, authenticatedUser: { userId: 12345 } });
+
+      mutationCallbacks.onError?.({ enterpriseSlug: { errorCode: 'existing_enterprise_customer' } });
+      expect(sentEventNames()).not.toContain(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS);
+
+      mutationCallbacks.onSuccess?.({ checkoutSessionClientSecret: 'client_secret' });
+      expect(sendCheckoutEvent).toHaveBeenCalledWith(expect.objectContaining({
+        eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS,
+        step: CHECKOUT_EVENT_STEPS.ACCOUNT_DETAILS,
+      }));
+    });
   });
 
   it('handles mutation onError without field errors', () => {

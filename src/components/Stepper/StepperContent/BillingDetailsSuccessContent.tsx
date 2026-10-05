@@ -4,13 +4,17 @@ import { Stack } from '@openedx/paragon';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useRef } from 'react';
 
-import { useBFFSuccess, usePolledCheckoutIntent } from '@/components/app/data';
+import { useBFFSuccess, useCheckoutEventProductProperties, usePolledCheckoutIntent } from '@/components/app/data';
 import { queryBffSuccess } from '@/components/app/data/queries/queries';
 import { BillingDetailsHeadingMessage } from '@/components/billing-details-pages/BillingDetailsHeadingMessage';
 import { ContactSupport } from '@/components/billing-details-pages/ContactSupport';
 import { OrderDetails } from '@/components/billing-details-pages/OrderDetails';
 import { SubscriptionStartMessage } from '@/components/billing-details-pages/SubscriptionStartMessage';
 import { StatefulProvisioningButton } from '@/components/StatefulButton';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS } from '@/constants/events';
+import { claimBillingStepCompleted, sendCheckoutEvent, wasCheckoutPaymentSubmitted } from '@/utils/checkoutEvents';
+
+const PAID_CHECKOUT_INTENT_STATES: CheckoutIntentState[] = ['paid', 'fulfilled'];
 
 const BillingDetailsSuccessContent = () => {
   const queryClient = useQueryClient();
@@ -20,6 +24,30 @@ const BillingDetailsSuccessContent = () => {
   const { polledCheckoutIntent } = usePolledCheckoutIntent();
   // Track when the Success BFF resyncing is occurring to avoid overlapping calls.
   const resyncSuccessBFFInProgress = useRef(false);
+  const checkoutEventProduct = useCheckoutEventProductProperties();
+
+  // Stripe can redirect to this route after confirm(), bypassing the billing page's payment
+  // handler. Emit the billing step completion here for a payment submitted in this tab; the
+  // shared per-intent claim keeps it to one event whichever path gets there first.
+  useEffect(() => {
+    if (
+      !checkoutIntent?.uuid
+      || !PAID_CHECKOUT_INTENT_STATES.includes(checkoutIntent.state)
+      || !wasCheckoutPaymentSubmitted(checkoutIntent.uuid)
+      || !claimBillingStepCompleted(checkoutIntent.uuid)
+    ) {
+      return;
+    }
+    sendCheckoutEvent({
+      eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_BILLING_DETAILS,
+      product: checkoutEventProduct,
+      step: CHECKOUT_EVENT_STEPS.BILLING_DETAILS,
+      order: {
+        order_id: checkoutIntent.stripeCheckoutSessionId ?? undefined,
+        total_quantity: checkoutIntent.quantity,
+      },
+    });
+  }, [checkoutEventProduct, checkoutIntent]);
 
   // Try to keep the polled CheckoutIntent in sync with the BFF CheckoutIntent.
   useEffect(() => {

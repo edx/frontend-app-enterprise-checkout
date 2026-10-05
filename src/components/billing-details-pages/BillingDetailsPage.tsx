@@ -6,23 +6,28 @@ import {
   Stack,
   Stepper,
 } from '@openedx/paragon';
-import { useMemo } from 'react';
+import { StripeCheckoutSession } from '@stripe/stripe-js';
+import { useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
+import useCheckoutEventProductProperties from '@/components/app/data/hooks/useCheckoutEventProductProperties';
+import useTrackCheckoutStepViewed from '@/components/app/data/hooks/useTrackCheckoutStepViewed';
 import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
   CheckoutPageDetails,
   CheckoutPageRoute,
   CheckoutStepKey,
+  CheckoutSubstepKey,
   DataStoreKey,
   EssentialsPageRoute,
 } from '@/constants/checkout';
-import EVENT_NAMES from '@/constants/events';
-import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS } from '@/constants/events';
+import { useCheckoutFormStore, useCurrentPageDetails, useCurrentStep } from '@/hooks/index';
+import { claimBillingStepCompleted, markCheckoutPaymentSubmitted, sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { isEssentialsFlow } from '../app/routes/loaders/utils';
@@ -37,6 +42,45 @@ const BillingDetailsPage: React.FC = () => {
   const StepperContent = useStepperContent();
   const { data: formValidationConstraints } = useFormValidationConstraints();
   const { data: checkoutIntent } = useCheckoutIntent();
+  const planDetailsQuantity = useCheckoutFormStore((state) => state.formData[DataStoreKey.PlanDetails]?.quantity);
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
+
+  const checkoutEventProduct = useCheckoutEventProductProperties();
+  useTrackCheckoutStepViewed({
+    eventName: EVENT_NAMES.CHECKOUT.STEP_VIEWED_BILLING_DETAILS,
+    step: CHECKOUT_EVENT_STEPS.BILLING_DETAILS,
+    isActive: currentStepKey === CheckoutStepKey.BillingDetails && currentSubstepKey !== CheckoutSubstepKey.Success,
+  });
+
+  const handlePaymentSubmit = useCallback(() => {
+    markCheckoutPaymentSubmitted(checkoutIntent?.uuid);
+  }, [checkoutIntent?.uuid]);
+
+  const handlePaymentSuccess = useCallback((session: StripeCheckoutSession | null) => {
+    // Shares idempotency with the success route, which covers Stripe redirect-based payments.
+    if (checkoutIntent?.uuid && !claimBillingStepCompleted(checkoutIntent.uuid)) {
+      return;
+    }
+    const totalAmount = session?.total?.total?.minorUnitsAmount;
+    const divisor = session?.minorUnitsAmountDivisor || 100;
+    sendCheckoutEvent({
+      eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_BILLING_DETAILS,
+      product: checkoutEventProduct,
+      step: CHECKOUT_EVENT_STEPS.BILLING_DETAILS,
+      order: {
+        order_id: session?.id ?? checkoutIntent?.stripeCheckoutSessionId ?? undefined,
+        total_quantity: checkoutIntent?.quantity ?? planDetailsQuantity,
+        // Amount actually charged, as reported by Stripe (not price x quantity).
+        revenue: totalAmount != null ? totalAmount / divisor : undefined,
+      },
+    });
+  }, [
+    checkoutEventProduct,
+    checkoutIntent?.uuid,
+    checkoutIntent?.quantity,
+    checkoutIntent?.stripeCheckoutSessionId,
+    planDetailsQuantity,
+  ]);
 
   const {
     buttonMessage: stepperActionButtonMessage,
@@ -97,7 +141,7 @@ const BillingDetailsPage: React.FC = () => {
             </Button>
 
             <Stepper.ActionRow.Spacer />
-            <StatefulSubscribeButton />
+            <StatefulSubscribeButton onPaymentSubmit={handlePaymentSubmit} onPaymentSuccess={handlePaymentSuccess} />
           </Stepper.ActionRow>
         )}
       </Stack>

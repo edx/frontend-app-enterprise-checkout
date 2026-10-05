@@ -6,10 +6,13 @@ import {
   buildCheckoutProductProperties,
   captureCheckoutAttribution,
   CHECKOUT_ATTRIBUTION_STORAGE_KEY,
+  claimBillingStepCompleted,
   claimCheckoutStarted,
   getCheckoutAttribution,
+  markCheckoutPaymentSubmitted,
   omitEmptyProperties,
   sendCheckoutEvent,
+  wasCheckoutPaymentSubmitted,
 } from '@/utils/checkoutEvents';
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
@@ -137,6 +140,22 @@ describe('checkoutEvents', () => {
     it('returns true only once per session', () => {
       expect(claimCheckoutStarted()).toBe(true);
       expect(claimCheckoutStarted()).toBe(false);
+    });
+  });
+
+  describe('billing step completion helpers', () => {
+    it('tracks the payment-submitted marker per checkout intent', () => {
+      expect(wasCheckoutPaymentSubmitted('intent-1')).toBe(false);
+      markCheckoutPaymentSubmitted('intent-1');
+      expect(wasCheckoutPaymentSubmitted('intent-1')).toBe(true);
+      expect(wasCheckoutPaymentSubmitted('intent-2')).toBe(false);
+      expect(wasCheckoutPaymentSubmitted(null)).toBe(false);
+    });
+
+    it('claims billing step completion once per checkout intent', () => {
+      expect(claimBillingStepCompleted('intent-1')).toBe(true);
+      expect(claimBillingStepCompleted('intent-1')).toBe(false);
+      expect(claimBillingStepCompleted('intent-2')).toBe(true);
     });
   });
 

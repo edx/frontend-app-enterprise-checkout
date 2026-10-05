@@ -3,7 +3,7 @@ import { logError } from '@edx/frontend-platform/logging';
 import { AppContext } from '@edx/frontend-platform/react';
 import { StatefulButton } from '@openedx/paragon';
 import { CheckoutContextValue, useCheckout } from '@stripe/react-stripe-js';
-import { StripeCheckoutStatus } from '@stripe/stripe-js';
+import { StripeCheckoutSession, StripeCheckoutStatus } from '@stripe/stripe-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -52,8 +52,16 @@ const buttonMessages = defineMessages({
   },
 });
 
-const StatefulSubscribeButton = () => {
+interface StatefulSubscribeButtonProps {
+  /** Called right before Stripe `confirm()`, which may redirect the page away. */
+  onPaymentSubmit?: () => void;
+  /** Called once when Stripe confirms a paid checkout, with the confirmed session when available. */
+  onPaymentSuccess?: (session: StripeCheckoutSession | null) => void;
+}
+
+const StatefulSubscribeButton = ({ onPaymentSubmit, onPaymentSuccess }: StatefulSubscribeButtonProps) => {
   const [statefulButtonState, setStatefulButtonState] = useState('default');
+  const confirmedSessionRef = useRef<StripeCheckoutSession | null>(null);
   const [errorMessageKey, setErrorMessageKey] = useState('errorFallback');
   const { data: checkoutIntent } = useCheckoutIntent();
   const intl = useIntl();
@@ -95,6 +103,11 @@ const StatefulSubscribeButton = () => {
           requestData: tncCheckoutUpdateRequest,
         });
       }
+      try {
+        onPaymentSubmit?.();
+      } catch (error) {
+        logError(error);
+      }
       response = await confirm({
         redirect: 'if_required',
         returnUrl: `${window.location.href}/${CheckoutSubstepKey.Success}`,
@@ -104,6 +117,9 @@ const StatefulSubscribeButton = () => {
     }
     // Set the button to the appropriate state based on the response.
     // Stripe responses map 1:1 to button states except for 'default' which is the initial state.
+    if (response.type === 'success') {
+      confirmedSessionRef.current = response.session ?? null;
+    }
     setStatefulButtonState(response.type || 'default');
     if (response.type === 'error') {
       setErrorMessageKey(response.error?.code === 'paymentFailed' ? 'errorPaymentFailed' : 'errorFallback');
@@ -137,6 +153,11 @@ const StatefulSubscribeButton = () => {
         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
       });
+      try {
+        onPaymentSuccess?.(confirmedSessionRef.current);
+      } catch (error) {
+        logError(error);
+      }
 
       // 4. Navigate ONCE
       const isEssentials = isEssentialsFlow();
@@ -161,6 +182,7 @@ const StatefulSubscribeButton = () => {
     checkoutIntent?.id,
     checkoutIntent?.uuid,
     navigate,
+    onPaymentSuccess,
   ]);
 
   const props = {

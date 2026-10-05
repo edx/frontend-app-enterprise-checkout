@@ -12,7 +12,11 @@ import {
   usePurchaseSummaryPricing,
 } from '@/components/app/data';
 import { BillingDetailsSuccessContent } from '@/components/Stepper/StepperContent';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS } from '@/constants/events';
+import { claimBillingStepCompleted, markCheckoutPaymentSubmitted, sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { queryClient } from '@/utils/tests';
+
+const mockProduct = { category: 'subscription', name: 'teams', brand: 'enterprise' };
 
 // Mock only the hooks used by child components
 jest.mock('@/components/app/data', () => ({
@@ -22,6 +26,12 @@ jest.mock('@/components/app/data', () => ({
   useFirstBillableInvoice: jest.fn(),
   useCheckoutIntent: jest.fn(),
   usePurchaseSummaryPricing: jest.fn(),
+  useCheckoutEventProductProperties: jest.fn(() => mockProduct),
+}));
+
+jest.mock('@/utils/checkoutEvents', () => ({
+  ...jest.requireActual('@/utils/checkoutEvents'),
+  sendCheckoutEvent: jest.fn(),
 }));
 
 const mockUseBFFSuccess = useBFFSuccess as jest.MockedFunction<typeof useBFFSuccess>;
@@ -183,5 +193,59 @@ describe('BillingDetailsSuccessContent', () => {
     validateText('Account Setup is Taking Longer Than Expected');
     validateText("We're experiencing a brief delay in setting up your edX Team account. We'll send you a confirmation email immediately once your account is fully operational. Thank you for your patience!");
     expect(screen.queryByText(/Welcome to edX for Team/)).not.toBeInTheDocument();
+  });
+
+  describe('checkout_step_completed.billing_details after a Stripe redirect', () => {
+    const paidCheckoutIntent = {
+      uuid: 'checkout-intent-uuid',
+      state: 'paid',
+      quantity: 5,
+      stripeCheckoutSessionId: 'cs_test_123',
+    };
+
+    beforeEach(() => {
+      (mockUseBFFSuccess as jest.Mock).mockReturnValue({
+        data: { checkoutIntent: paidCheckoutIntent },
+        refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+      });
+      (mockUsePolledCheckoutIntent as jest.Mock).mockReturnValue({ polledCheckoutIntent: { state: 'paid' } });
+    });
+
+    it('emits the event once for a payment submitted in this tab', () => {
+      markCheckoutPaymentSubmitted('checkout-intent-uuid');
+      const { unmount } = renderComponent();
+      unmount();
+      renderComponent();
+
+      expect(sendCheckoutEvent).toHaveBeenCalledTimes(1);
+      expect(sendCheckoutEvent).toHaveBeenCalledWith({
+        eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_BILLING_DETAILS,
+        product: mockProduct,
+        step: CHECKOUT_EVENT_STEPS.BILLING_DETAILS,
+        order: { order_id: 'cs_test_123', total_quantity: 5 },
+      });
+    });
+
+    it('does not emit when the billing page already emitted it', () => {
+      markCheckoutPaymentSubmitted('checkout-intent-uuid');
+      claimBillingStepCompleted('checkout-intent-uuid');
+      renderComponent();
+      expect(sendCheckoutEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not emit for a revisit without a payment submitted in this tab', () => {
+      renderComponent();
+      expect(sendCheckoutEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not emit before the checkout intent is paid', () => {
+      markCheckoutPaymentSubmitted('checkout-intent-uuid');
+      (mockUseBFFSuccess as jest.Mock).mockReturnValue({
+        data: { checkoutIntent: { ...paidCheckoutIntent, state: 'created' } },
+        refetch: jest.fn().mockImplementation(() => ({ catch: jest.fn() })),
+      });
+      renderComponent();
+      expect(sendCheckoutEvent).not.toHaveBeenCalled();
+    });
   });
 });

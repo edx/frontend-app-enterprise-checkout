@@ -71,7 +71,7 @@ const mockQueryClient = {
   invalidateQueries: mockInvalidateQueries,
 };
 
-function setup(overrides = {}) {
+function setup(overrides: Record<string, any> = {}, props: Record<string, any> = {}) {
   // Default mock configurations
   const defaultMocks = {
     useIntl: {
@@ -117,7 +117,7 @@ function setup(overrides = {}) {
     return selector(mockState);
   });
 
-  return render(<StatefulSubscribeButton />);
+  return render(<StatefulSubscribeButton {...props} />);
 }
 
 describe('StatefulSubscribeButton', () => {
@@ -390,6 +390,53 @@ describe('StatefulSubscribeButton', () => {
         });
         expect(mockNavigate).toHaveBeenCalledWith('/billing-details/success', { replace: true });
       });
+    });
+
+    it('calls onPaymentSuccess with the confirmed Stripe session once payment is complete', async () => {
+      const session = { id: 'cs_test_123', minorUnitsAmountDivisor: 100, total: { total: { minorUnitsAmount: 74500 } } };
+      const onPaymentSuccess = jest.fn();
+      mockConfirm.mockResolvedValue({ type: 'success', session });
+      setup({
+        useCheckout: {
+          canConfirm: true,
+          status: { type: 'complete', paymentStatus: 'paid' },
+          confirm: mockConfirm,
+        },
+      }, { onPaymentSuccess });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'));
+      });
+
+      await waitFor(() => {
+        expect(onPaymentSuccess).toHaveBeenCalledTimes(1);
+      });
+      expect(onPaymentSuccess).toHaveBeenCalledWith(session);
+    });
+
+    it('calls onPaymentSubmit before Stripe confirm', async () => {
+      const callOrder: string[] = [];
+      const onPaymentSubmit = jest.fn(() => { callOrder.push('submit'); });
+      mockConfirm.mockImplementation(async () => { callOrder.push('confirm'); return { type: 'success' }; });
+      setup({}, { onPaymentSubmit });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'));
+      });
+
+      expect(callOrder).toEqual(['submit', 'confirm']);
+    });
+
+    it('does not call onPaymentSuccess when confirm returns an error', async () => {
+      const onPaymentSuccess = jest.fn();
+      mockConfirm.mockResolvedValue({ type: 'error', error: { code: 'paymentFailed' } });
+      setup({}, { onPaymentSuccess });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'));
+      });
+
+      expect(onPaymentSuccess).not.toHaveBeenCalled();
     });
 
     it('does not navigate when status is not complete', async () => {
