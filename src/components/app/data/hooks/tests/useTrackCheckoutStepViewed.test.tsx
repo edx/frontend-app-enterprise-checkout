@@ -23,7 +23,8 @@ let navigateRef: ReturnType<typeof useNavigate>;
 const HookConsumer = ({
   isActive: isActiveProp = true,
   activeOnlyOn,
-}: { isActive?: boolean, activeOnlyOn?: string }) => {
+  isEntryStep = true,
+}: { isActive?: boolean, activeOnlyOn?: string, isEntryStep?: boolean }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const isActive = activeOnlyOn ? pathname === activeOnlyOn : isActiveProp;
@@ -33,7 +34,7 @@ const HookConsumer = ({
     step: CHECKOUT_EVENT_STEPS.PLAN_DETAILS,
     product: mockProduct,
     isActive,
-    isEntryStep: true,
+    ...(isEntryStep ? { isEntryStep } : {}),
   });
   return null;
 };
@@ -70,6 +71,12 @@ describe('useTrackCheckoutStepViewed', () => {
     act(() => { navigateRef('/plan-details/login'); });
     act(() => { navigateRef(-1); }); // Back restores the original history entry and its location key
     expect(sentEventNames()).toEqual([CHECKOUT_STARTED, STEP_VIEWED_PLAN_DETAILS, STEP_VIEWED_PLAN_DETAILS]);
+  });
+
+  it('does not fire checkout_started for a step that is not the entry step', () => {
+    render(<MemoryRouter initialEntries={['/plan-details']}><HookConsumer isEntryStep={false} /></MemoryRouter>);
+    expect(sentEventNames()).toEqual([STEP_VIEWED_PLAN_DETAILS]);
+    expect(sessionStorage.getItem('edx.checkout.started')).toBeNull();
   });
 
   it('does not fire while the step is inactive', () => {
