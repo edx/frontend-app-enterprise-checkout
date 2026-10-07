@@ -18,11 +18,9 @@ const useCheckoutEventProductProperties = (): CheckoutProductProperties => {
     (state) => state.formData[DataStoreKey.AcademySelection]?.selectedProduct,
   );
   const { data: price } = useBFFContext(authenticatedUser?.userId ?? null, {
-    // Keep the pre-login price while the user's context loads, so events sent right after login keep product fields.
     placeholderData: keepPreLoginPrice,
     select: (data): CheckoutContextPrice | null => {
-      // The checkout intent's SSP product is the source of truth once it exists.
-      const slug = data?.checkoutIntent?.sspProduct || sspProductSlug;
+      const slug = sspProductSlug || data?.checkoutIntent?.sspProduct;
       return data?.pricing?.prices?.find((p) => p.sspProductSlug === slug) ?? null;
     },
   });

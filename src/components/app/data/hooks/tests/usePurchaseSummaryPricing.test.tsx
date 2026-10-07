@@ -210,9 +210,17 @@ describe('useCheckoutEventProductProperties (hook)', () => {
     });
   });
 
-  it('prefers the checkout intent SSP product over the slug in the form store', () => {
+  it('prefers the current selection in the form store over a stale checkout intent SSP product', () => {
+    mockBFFData({ sspProduct: 'teams-yearly' });
+    setStore('ai-academy-yearly');
+    const { result } = renderHook(() => useCheckoutEventProductProperties(), { wrapper });
+
+    expect(result.current).toEqual(expect.objectContaining({ product_id: 'prod_ai', slug: 'ai-academy-yearly' }));
+  });
+
+  it('falls back to the checkout intent SSP product when the form store has no slug', () => {
     mockBFFData({ sspProduct: 'ai-academy-yearly' });
-    setStore('teams-yearly');
+    setStore('');
     const { result } = renderHook(() => useCheckoutEventProductProperties(), { wrapper });
 
     expect(result.current).toEqual(expect.objectContaining({ product_id: 'prod_ai', slug: 'ai-academy-yearly' }));
