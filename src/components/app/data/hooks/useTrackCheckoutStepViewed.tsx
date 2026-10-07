@@ -1,6 +1,4 @@
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-
+import useOncePerLocationKey from '@/components/app/data/hooks/useOncePerLocationKey';
 import EVENT_NAMES, { CheckoutEventStep } from '@/constants/events';
 import {
   CheckoutProductProperties,
@@ -31,25 +29,12 @@ const useTrackCheckoutStepViewed = ({
   isActive,
   isEntryStep = false,
 }: UseTrackCheckoutStepViewedArgs) => {
-  const { key: locationKey } = useLocation();
-  const lastTrackedLocationKeyRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!isActive) {
-      // Reset so browser Back to this step (which restores the same location key) counts as a view.
-      lastTrackedLocationKeyRef.current = null;
-      return;
-    }
-    if (lastTrackedLocationKeyRef.current === locationKey) {
-      return;
-    }
-    lastTrackedLocationKeyRef.current = locationKey;
-
+  useOncePerLocationKey(isActive, () => {
     if (isEntryStep && isCheckoutEventsV2Enabled() && claimCheckoutStarted()) {
       sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.CHECKOUT_STARTED, product, step });
     }
     sendCheckoutEvent({ eventName, product, step });
-  }, [eventName, isActive, isEntryStep, locationKey, product, step]);
+  });
 };
 
 export default useTrackCheckoutStepViewed;

@@ -1,5 +1,6 @@
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
+import { logError } from '@edx/frontend-platform/logging';
 
 import { CHECKOUT_EVENT_STEPS } from '@/constants/events';
 import {
@@ -91,6 +92,37 @@ describe('checkoutEvents', () => {
   it('claimCheckoutStarted returns true only once per session', () => {
     expect(claimCheckoutStarted()).toBe(true);
     expect(claimCheckoutStarted()).toBe(false);
+  });
+
+  describe('when sessionStorage is unavailable (e.g. private browsing or quota exceeded)', () => {
+    const storageError = new Error('storage blocked');
+    let storageSpies: jest.SpyInstance[];
+
+    beforeEach(() => {
+      storageSpies = [
+        jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw storageError; }),
+        jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw storageError; }),
+      ];
+    });
+
+    afterEach(() => {
+      storageSpies.forEach((spy) => spy.mockRestore());
+    });
+
+    it('captureCheckoutAttribution logs and does not throw', () => {
+      expect(() => captureCheckoutAttribution(`${LANDING}?utm_source=google`)).not.toThrow();
+      expect(logError).toHaveBeenCalledWith('Failed to capture checkout attribution', storageError);
+    });
+
+    it('getCheckoutAttribution logs and returns no attribution', () => {
+      expect(getCheckoutAttribution()).toEqual({});
+      expect(logError).toHaveBeenCalledWith('Failed to read checkout attribution', storageError);
+    });
+
+    it('claimCheckoutStarted logs and returns false', () => {
+      expect(claimCheckoutStarted()).toBe(false);
+      expect(logError).toHaveBeenCalledWith('Failed to read checkout started state', storageError);
+    });
   });
 
   describe('sendCheckoutEvent', () => {

@@ -25,6 +25,7 @@ import {
   useCheckoutEventProductProperties,
   useCreateCheckoutIntentMutation,
   useLoginMutation,
+  useOncePerLocationKey,
   useRegisterMutation,
   useTrackCheckoutStepViewed,
 } from '@/components/app/data/hooks';
@@ -100,19 +101,10 @@ const PlanDetailsPage = () => {
   });
 
   // Fire login_started on every visit to the login substep of the logistration flow.
-  const lastTrackedLoginLocationKeyRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (currentStepKey !== CheckoutStepKey.PlanDetails || currentSubstepKey !== CheckoutSubstepKey.Login) {
-      // Reset so browser Back to the login page (which restores the same location key) counts again.
-      lastTrackedLoginLocationKeyRef.current = null;
-      return;
-    }
-    if (lastTrackedLoginLocationKeyRef.current === location.key) {
-      return;
-    }
-    lastTrackedLoginLocationKeyRef.current = location.key;
-    sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.LOGIN_STARTED, product: checkoutEventProduct });
-  }, [checkoutEventProduct, currentStepKey, currentSubstepKey, location.key]);
+  useOncePerLocationKey(
+    currentStepKey === CheckoutStepKey.PlanDetails && currentSubstepKey === CheckoutSubstepKey.Login,
+    () => sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.LOGIN_STARTED, product: checkoutEventProduct }),
+  );
 
   async function invalidateCheckoutQueries(client) {
     const userId = getAuthenticatedUser()?.userId;
