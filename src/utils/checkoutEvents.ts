@@ -17,6 +17,7 @@ type CheckoutAttributionProperties = Partial<Record<typeof UTM_PARAMS[number] | 
 
 export interface CheckoutProductProperties {
   product_id?: string;
+  sku?: number;
   category: 'subscription';
   name: 'teams' | 'essentials';
   brand: 'enterprise';
@@ -84,6 +85,7 @@ export const buildCheckoutProductProperties = ({
   const slug = price?.sspProductSlug;
   return omitEmptyProperties({
     product_id: price?.product,
+    sku: price?.catalogQueryId,
     category: 'subscription',
     name: slug?.includes('academy') ? PLAN_TYPE.ESSENTIALS : PLAN_TYPE.TEAMS,
     brand: 'enterprise',

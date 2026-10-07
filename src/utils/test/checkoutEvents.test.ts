@@ -20,6 +20,7 @@ const mockPrice = {
   product: 'prod_abc',
   sspProductSlug: 'ai-academy-yearly',
   unitAmount: 14900,
+  catalogQueryId: 42,
 } as CheckoutContextPrice;
 const LANDING = 'http://localhost:1989/plan-details';
 const setReferrer = (value: string) => Object.defineProperty(document, 'referrer', { value, configurable: true });
@@ -44,6 +45,7 @@ describe('checkoutEvents', () => {
       expect(buildCheckoutProductProperties({ price: mockPrice, selectedProduct }))
         .toEqual({
           product_id: 'prod_abc',
+          sku: 42,
           category: 'subscription',
           name: 'essentials',
           brand: 'enterprise',

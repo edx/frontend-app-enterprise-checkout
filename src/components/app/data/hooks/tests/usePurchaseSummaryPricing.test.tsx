@@ -145,10 +145,18 @@ describe('useCheckoutEventProductProperties (hook)', () => {
     defaultByLookupKey: 'teams_yearly',
     prices: [
       {
-        lookupKey: 'teams_yearly', product: 'prod_teams', unitAmount: 39600, sspProductSlug: 'teams-yearly',
+        lookupKey: 'teams_yearly',
+        product: 'prod_teams',
+        unitAmount: 39600,
+        sspProductSlug: 'teams-yearly',
+        catalogQueryId: 10,
       },
       {
-        lookupKey: 'ai_academy_yearly', product: 'prod_ai', unitAmount: 14900, sspProductSlug: 'ai-academy-yearly',
+        lookupKey: 'ai_academy_yearly',
+        product: 'prod_ai',
+        unitAmount: 14900,
+        sspProductSlug: 'ai-academy-yearly',
+        catalogQueryId: 55,
       },
     ],
   };
@@ -185,6 +193,7 @@ describe('useCheckoutEventProductProperties (hook)', () => {
     );
     expect(result.current).toEqual({
       product_id: 'prod_teams',
+      sku: 10,
       category: 'subscription',
       name: 'teams',
       brand: 'enterprise',
@@ -200,6 +209,7 @@ describe('useCheckoutEventProductProperties (hook)', () => {
 
     expect(result.current).toEqual({
       product_id: 'prod_ai',
+      sku: 55,
       category: 'subscription',
       name: 'essentials',
       brand: 'enterprise',
