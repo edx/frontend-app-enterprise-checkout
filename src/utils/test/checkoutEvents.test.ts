@@ -111,19 +111,18 @@ describe('checkoutEvents', () => {
       storageSpies.forEach((spy) => spy.mockRestore());
     });
 
-    it('captureCheckoutAttribution logs and does not throw', () => {
-      expect(() => captureCheckoutAttribution(`${LANDING}?utm_source=google`)).not.toThrow();
-      expect(logError).toHaveBeenCalledWith('Failed to capture checkout attribution', storageError);
-    });
-
-    it('getCheckoutAttribution logs and returns no attribution', () => {
-      expect(getCheckoutAttribution()).toEqual({});
-      expect(logError).toHaveBeenCalledWith('Failed to read checkout attribution', storageError);
-    });
-
-    it('claimCheckoutStarted logs and returns false', () => {
-      expect(claimCheckoutStarted()).toBe(false);
-      expect(logError).toHaveBeenCalledWith('Failed to read checkout started state', storageError);
+    it.each([
+      [
+        'captureCheckoutAttribution',
+        () => captureCheckoutAttribution(`${LANDING}?utm_source=google`),
+        undefined,
+        'Failed to capture checkout attribution',
+      ],
+      ['getCheckoutAttribution', () => getCheckoutAttribution(), {}, 'Failed to read checkout attribution'],
+      ['claimCheckoutStarted', () => claimCheckoutStarted(), false, 'Failed to read checkout started state'],
+    ])('%s logs and degrades safely', (_name, fn, expected, message) => {
+      expect(fn()).toEqual(expected);
+      expect(logError).toHaveBeenCalledWith(message, storageError);
     });
   });
 

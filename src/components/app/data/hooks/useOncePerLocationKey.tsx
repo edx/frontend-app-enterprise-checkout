@@ -9,6 +9,7 @@ const useOncePerLocationKey = (isActive: boolean, onFire: () => void) => {
   const { key: locationKey } = useLocation();
   const lastFiredLocationKeyRef = useRef<string | null>(null);
 
+  // Callers pass inline closures, so this re-runs each render by design; the ref check keeps it to one fire per key.
   useEffect(() => {
     if (!isActive) {
       lastFiredLocationKeyRef.current = null;
