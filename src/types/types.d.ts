@@ -247,6 +247,7 @@ declare global {
     };
     /** Optional slug from BFF pricing (camelCased from ssp_product_slug). */
     sspProductSlug?: string | null;
+    catalogQueryId?: number | null;
     currency: string;
     unitAmount: number;
     unitAmountDecimal: string;

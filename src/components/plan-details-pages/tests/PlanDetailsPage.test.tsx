@@ -117,6 +117,32 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 const mockedUseBFFContext = useBFFContext as unknown as jest.Mock;
 
+// Turns on the checkout events v2 flag on top of the current config.
+const enableCheckoutEventsV2 = () => {
+  (getConfig as jest.Mock).mockReturnValue({ ...getConfig(), FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: 'true' });
+};
+
+// Restore the default config so the v2 flag doesn't leak into later tests.
+const defaultGetConfig = (getConfig as jest.Mock).getMockImplementation();
+afterEach(() => {
+  (getConfig as jest.Mock).mockImplementation(defaultGetConfig);
+});
+
+const countTrackEvents = async (eventName: string) => {
+  const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+  return (sendTrackEvent as jest.Mock).mock.calls.filter(([name]) => name === eventName).length;
+};
+
+// Asserts a v2 logistration event: product properties only, no step or personal data.
+const expectLogistrationEvent = async (eventName: string, personalValues: string[]) => {
+  const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+  await waitFor(() => expect(sendTrackEvent).toHaveBeenCalledWith(eventName, expect.anything()));
+  const [, payload] = (sendTrackEvent as jest.Mock).mock.calls.find(([name]) => name === eventName);
+  expect(payload).toEqual(expect.objectContaining({ category: 'subscription', name: 'teams', brand: 'enterprise' }));
+  expect(payload).not.toHaveProperty('step_name');
+  personalValues.forEach((value) => expect(JSON.stringify(payload)).not.toContain(value));
+};
+
 // Mock BFF context response data for testing
 const mockBFFContextData = camelCasedCheckoutContextResponseFactory({
   pricing: {
@@ -281,6 +307,29 @@ describe('PlanDetailsLoginPage', () => {
   it('renders a button', () => {
     renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin);
     expect(screen.getByTestId('stepper-submit-button')).toHaveTextContent('Sign in');
+  });
+});
+
+describe('PlanDetailsLoginPage – login_started event', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupBFFContextMock();
+    enableCheckoutEventsV2();
+  });
+
+  it('fires login_started once per visit with product properties only, and not again on re-render', async () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin);
+    await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.LOGIN_STARTED, []);
+
+    // Typing re-renders the page; the same visit must not emit again.
+    await userEvent.type(screen.getByLabelText(/password/i), 'Password123!');
+    expect(await countTrackEvents(EVENT_NAMES.CHECKOUT.LOGIN_STARTED)).toBe(1);
+  });
+
+  it('does not fire login_started on the main plan details page', async () => {
+    renderStepperRoute(CheckoutPageRoute.PlanDetails);
+    await screen.findByTestId('stepper-submit-button');
+    expect(await countTrackEvents(EVENT_NAMES.CHECKOUT.LOGIN_STARTED)).toBe(0);
   });
 });
 
@@ -1221,6 +1270,7 @@ describe('PlanDetailsPage – loginMutation success/error paths', () => {
   });
 
   it('calls invalidateQueries and fetchQuery after successful login and checkout intent creation', async () => {
+    enableCheckoutEventsV2();
     const useLoginMutationMock = (await import('@/components/app/data/hooks/useLoginMutation')).default as jest.Mock;
     const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
 
@@ -1266,6 +1316,13 @@ describe('PlanDetailsPage – loginMutation success/error paths', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.AccountDetails);
     });
+
+    await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.SIGNED_IN, ['user@example.com']);
+    const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+    expect(sendTrackEvent).toHaveBeenCalledWith(
+      EVENT_NAMES.CHECKOUT.STEP_COMPLETED_PLAN_DETAILS,
+      expect.objectContaining({ step_name: 'Plan Details', step_number: 1, category: 'subscription' }),
+    );
   });
 
   it('sets password field error on login failure', async () => {
@@ -1458,6 +1515,7 @@ describe('PlanDetailsPage – registerMutation tracking event', () => {
   });
 
   it('sends CHECKOUT_REGISTRATION_SUCCESS tracking event after successful registration', async () => {
+    enableCheckoutEventsV2();
     const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
 
     const useRegisterMutationMock = (await import('@/components/app/data/hooks/useRegisterMutation')).default as jest.Mock;
@@ -1492,6 +1550,8 @@ describe('PlanDetailsPage – registerMutation tracking event', () => {
         }),
       );
     });
+
+    await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, ['newuser@example.com', 'New User', 'newuser']);
   });
 
   it('catches and logs tracking event error without breaking navigation', async () => {
@@ -1571,6 +1631,7 @@ describe('PlanDetailsPage – createCheckoutIntentMutation error paths', () => {
   });
 
   it('sets quantity field error when server returns quantity errorCode', async () => {
+    enableCheckoutEventsV2();
     const useCreateCheckoutIntentMutationMock = (await import('@/components/app/data/hooks/useCreateCheckoutIntentMutation')).default as jest.Mock;
 
     useCreateCheckoutIntentMutationMock.mockImplementation(({ onError }: any) => ({
@@ -1587,6 +1648,8 @@ describe('PlanDetailsPage – createCheckoutIntentMutation error paths', () => {
     await waitFor(() => {
       expect(screen.getByText('quantity_exceeds_limit')).toBeInTheDocument();
     });
+    // A failed submission must not count as completing the step.
+    expect(await countTrackEvents(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_PLAN_DETAILS)).toBe(0);
   });
 
   it('sets root server error when checkout intent fails with a non-object error', async () => {

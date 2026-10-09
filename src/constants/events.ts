@@ -39,6 +39,30 @@ const SUBSCRIPTION_CHECKOUT_EVENTS = {
   CHECKOUT_REGISTRATION_SUCCESS: `${SUBSCRIPTION_CHECKOUT_PREFIX}.registration.success`,
 };
 
+/**
+ * Normalized checkout funnel events (ENT-12328), emitted alongside the legacy SUBSCRIPTION_CHECKOUT
+ * events above and gated by FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2.
+ */
+const CHECKOUT_EVENTS = {
+  CHECKOUT_STARTED: `${PROJECT_NAME}.checkout_started`,
+  STEP_VIEWED_PLAN_DETAILS: `${PROJECT_NAME}.checkout_step_viewed.plan_details`,
+  STEP_COMPLETED_PLAN_DETAILS: `${PROJECT_NAME}.checkout_step_completed.plan_details`,
+  ACCOUNT_CREATED: `${PROJECT_NAME}.account_created`,
+  LOGIN_STARTED: `${PROJECT_NAME}.login_started`,
+  SIGNED_IN: `${PROJECT_NAME}.signed_in`,
+};
+
+/**
+ * The `step_name` / `step_number` pair attached to every step-scoped checkout event.
+ */
+export const CHECKOUT_EVENT_STEPS = {
+  PLAN_DETAILS: { step_name: 'Plan Details', step_number: 1 },
+  ACCOUNT_DETAILS: { step_name: 'Account Details', step_number: 2 },
+  BILLING_DETAILS: { step_name: 'Billing Details', step_number: 3 },
+} as const;
+
+export type CheckoutEventStep = typeof CHECKOUT_EVENT_STEPS[keyof typeof CHECKOUT_EVENT_STEPS];
+
 export const TRACKED_FIELDS = {
   // Plan Details step
   NUM_LICENSES: 'numLicenses',
@@ -57,10 +81,12 @@ export const TRACKED_FIELDS = {
 
 export const PLAN_TYPE = {
   TEAMS: 'teams',
+  ESSENTIALS: 'essentials',
 } as const;
 
 const EVENT_NAMES = {
   SUBSCRIPTION_CHECKOUT: SUBSCRIPTION_CHECKOUT_EVENTS,
+  CHECKOUT: CHECKOUT_EVENTS,
 };
 
 export default EVENT_NAMES;
