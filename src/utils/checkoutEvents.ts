@@ -3,17 +3,16 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 
 import { PLAN_TYPE } from '@/constants/events';
+import { useCheckoutAttributionStore, useCheckoutStartedStore } from '@/hooks/checkoutSessionStorage';
 
 import type { CheckoutEventStep } from '@/constants/events';
+import type { CheckoutAttributionProperties } from '@/hooks/checkoutSessionStorage';
 
 // Helpers for the checkout Segment events (ENT-12328). Tracking must never interrupt checkout,
-// so storage and emission failures are logged and swallowed.
+// so storage and emission failures are logged and swallowed (via the persisted stores in
+// '@/hooks/checkoutSessionStorage', which wrap sessionStorage access in one shared safe adapter).
 
-export const CHECKOUT_ATTRIBUTION_STORAGE_KEY = 'edx.checkout.attribution';
-export const CHECKOUT_STARTED_STORAGE_KEY = 'edx.checkout.started';
 const UTM_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
-
-type CheckoutAttributionProperties = Partial<Record<typeof UTM_PARAMS[number] | 'referrer', string>>;
 
 export interface CheckoutProductProperties {
   product_id?: string;
@@ -48,31 +47,21 @@ export const omitEmptyProperties = <T extends Record<string, unknown>>(propertie
 
 /** Stores UTM params and referrer from the checkout landing; a later URL with UTMs replaces them. */
 export const captureCheckoutAttribution = (url: string = window.location.href): void => {
-  try {
-    const { searchParams } = new URL(url);
-    const utmProperties = omitEmptyProperties(
-      Object.fromEntries(UTM_PARAMS.map((param) => [param, searchParams.get(param)])),
-    );
-    const hasUtmParams = Object.keys(utmProperties).length > 0;
-    if (sessionStorage.getItem(CHECKOUT_ATTRIBUTION_STORAGE_KEY) !== null && !hasUtmParams) {
-      return;
-    }
-    const attribution = omitEmptyProperties({ ...utmProperties, referrer: document.referrer });
-    sessionStorage.setItem(CHECKOUT_ATTRIBUTION_STORAGE_KEY, JSON.stringify(attribution));
-  } catch (error) {
-    logError('Failed to capture checkout attribution', error);
+  const { searchParams } = new URL(url);
+  const utmProperties = omitEmptyProperties(
+    Object.fromEntries(UTM_PARAMS.map((param) => [param, searchParams.get(param)])),
+  );
+  const hasUtmParams = Object.keys(utmProperties).length > 0;
+  const { captured, setAttribution } = useCheckoutAttributionStore.getState();
+  if (captured && !hasUtmParams) {
+    return;
   }
+  setAttribution(omitEmptyProperties({ ...utmProperties, referrer: document.referrer }));
 };
 
-export const getCheckoutAttribution = (): CheckoutAttributionProperties => {
-  try {
-    const stored = sessionStorage.getItem(CHECKOUT_ATTRIBUTION_STORAGE_KEY);
-    return stored ? omitEmptyProperties(JSON.parse(stored)) : {};
-  } catch (error) {
-    logError('Failed to read checkout attribution', error);
-    return {};
-  }
-};
+export const getCheckoutAttribution = (): CheckoutAttributionProperties => (
+  useCheckoutAttributionStore.getState().attribution
+);
 
 /** Maps the selected price and SSP product to event product properties; "academy" slugs are Essentials. */
 export const buildCheckoutProductProperties = ({
@@ -122,15 +111,4 @@ export const sendCheckoutEvent = ({
 };
 
 /** True only on the first call in a browser session, so checkout_started fires once. */
-export const claimCheckoutStarted = (): boolean => {
-  try {
-    if (sessionStorage.getItem(CHECKOUT_STARTED_STORAGE_KEY) === 'true') {
-      return false;
-    }
-    sessionStorage.setItem(CHECKOUT_STARTED_STORAGE_KEY, 'true');
-    return true;
-  } catch (error) {
-    logError('Failed to read checkout started state', error);
-    return false;
-  }
-};
+export const claimCheckoutStarted = (): boolean => useCheckoutStartedStore.getState().claimStarted();

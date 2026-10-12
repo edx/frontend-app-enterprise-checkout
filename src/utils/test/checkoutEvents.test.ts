@@ -1,8 +1,8 @@
 import { sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
-import { logError } from '@edx/frontend-platform/logging';
 
 import { CHECKOUT_EVENT_STEPS } from '@/constants/events';
+import { useCheckoutAttributionStore, useCheckoutStartedStore } from '@/hooks/checkoutSessionStorage';
 import {
   buildCheckoutProductProperties,
   captureCheckoutAttribution,
@@ -29,6 +29,8 @@ describe('checkoutEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
+    useCheckoutAttributionStore.setState({ attribution: {}, captured: false });
+    useCheckoutStartedStore.setState({ started: false });
     setReferrer('');
     (getConfig as jest.Mock).mockReturnValue({ FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: 'true' });
   });
@@ -96,35 +98,10 @@ describe('checkoutEvents', () => {
     expect(claimCheckoutStarted()).toBe(false);
   });
 
-  describe('when sessionStorage is unavailable (e.g. private browsing or quota exceeded)', () => {
-    const storageError = new Error('storage blocked');
-    let storageSpies: jest.SpyInstance[];
-
-    beforeEach(() => {
-      storageSpies = [
-        jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw storageError; }),
-        jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw storageError; }),
-      ];
-    });
-
-    afterEach(() => {
-      storageSpies.forEach((spy) => spy.mockRestore());
-    });
-
-    it.each([
-      [
-        'captureCheckoutAttribution',
-        () => captureCheckoutAttribution(`${LANDING}?utm_source=google`),
-        undefined,
-        'Failed to capture checkout attribution',
-      ],
-      ['getCheckoutAttribution', () => getCheckoutAttribution(), {}, 'Failed to read checkout attribution'],
-      ['claimCheckoutStarted', () => claimCheckoutStarted(), false, 'Failed to read checkout started state'],
-    ])('%s logs and degrades safely', (_name, fn, expected, message) => {
-      expect(fn()).toEqual(expected);
-      expect(logError).toHaveBeenCalledWith(message, storageError);
-    });
-  });
+  // Storage-failure behavior (private browsing, quota exceeded) is now owned by the persisted
+  // stores themselves — see src/hooks/tests/checkoutSessionStorage.test.ts. captureCheckoutAttribution/
+  // getCheckoutAttribution/claimCheckoutStarted no longer touch sessionStorage directly, so there's
+  // nothing storage-specific left to exercise at this layer.
 
   describe('sendCheckoutEvent', () => {
     const product = buildCheckoutProductProperties({ price: mockPrice });
