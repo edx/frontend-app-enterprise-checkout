@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
+import { useCheckoutEventProductProperties, useTrackCheckoutStepViewed } from '@/components/app/data/hooks';
 import { StatefulSubscribeButton } from '@/components/StatefulButton';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
@@ -21,8 +22,9 @@ import {
   DataStoreKey,
   EssentialsPageRoute,
 } from '@/constants/checkout';
-import EVENT_NAMES from '@/constants/events';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS } from '@/constants/events';
 import { useCheckoutFormStore, useCurrentPageDetails } from '@/hooks/index';
+import useCurrentStep from '@/hooks/useCurrentStep';
 import { sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { isEssentialsFlow } from '../app/routes/loaders/utils';
@@ -44,6 +46,16 @@ const BillingDetailsPage: React.FC = () => {
   } = useCurrentPageDetails();
   const intl = useIntl();
   const { title } = CheckoutPageDetails.BillingDetails;
+
+  const { currentStepKey, currentSubstepKey } = useCurrentStep();
+  const checkoutEventProduct = useCheckoutEventProductProperties();
+  useTrackCheckoutStepViewed({
+    eventName: EVENT_NAMES.CHECKOUT.STEP_VIEWED_BILLING_DETAILS,
+    step: CHECKOUT_EVENT_STEPS.BILLING_DETAILS,
+    product: checkoutEventProduct,
+    // This page also renders the success substep, which is not a view of the billing step.
+    isActive: currentStepKey === CheckoutStepKey.BillingDetails && !currentSubstepKey,
+  });
 
   const billingDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, { intl })

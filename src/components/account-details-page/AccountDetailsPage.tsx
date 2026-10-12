@@ -20,7 +20,11 @@ import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent, useFormValidationConstraints } from '@/components/app/data';
-import { useCreateCheckoutSessionMutation } from '@/components/app/data/hooks';
+import {
+  useCheckoutEventProductProperties,
+  useCreateCheckoutSessionMutation,
+  useTrackCheckoutStepViewed,
+} from '@/components/app/data/hooks';
 import { queryBffContext, queryBffSuccess } from '@/components/app/data/queries/queries';
 import { useStepperContent } from '@/components/Stepper/Steps/hooks';
 import {
@@ -31,6 +35,7 @@ import {
   EssentialsPageRoute,
 } from '@/constants/checkout';
 import EVENT_NAMES, {
+  CHECKOUT_EVENT_STEPS,
   PLAN_TYPE,
 } from '@/constants/events';
 import {
@@ -38,6 +43,7 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
+import { sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import { isEssentialsFlow } from '../app/routes/loaders/utils';
@@ -70,6 +76,21 @@ const AccountDetailsPage: React.FC = () => {
 
   const lastTrackedPathRef = useRef<string | null>(null);
   const { currentStepKey } = useCurrentStep();
+
+  const checkoutEventProduct = useCheckoutEventProductProperties();
+  useTrackCheckoutStepViewed({
+    eventName: EVENT_NAMES.CHECKOUT.STEP_VIEWED_ACCOUNT_DETAILS,
+    step: CHECKOUT_EVENT_STEPS.ACCOUNT_DETAILS,
+    product: checkoutEventProduct,
+    isActive: currentStepKey === CheckoutStepKey.AccountDetails,
+  });
+
+  // Fired on every successful advance to Billing Details, after validation and the session request pass.
+  const sendAccountDetailsCompletedEvent = () => sendCheckoutEvent({
+    eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS,
+    product: checkoutEventProduct,
+    step: CHECKOUT_EVENT_STEPS.ACCOUNT_DETAILS,
+  });
 
   // Fire page view tracking event whenever the current step changes
   useEffect(() => {
@@ -146,6 +167,7 @@ const AccountDetailsPage: React.FC = () => {
 
       applyCheckoutSessionClientSecretToCache(responseData.checkoutSessionClientSecret);
       setCheckoutSessionClientSecret(responseData.checkoutSessionClientSecret);
+      sendAccountDetailsCompletedEvent();
 
       const isEssentials = isEssentialsFlow();
       //     Removed the invalidateQueries() call
@@ -275,6 +297,7 @@ const AccountDetailsPage: React.FC = () => {
         sspProductSlug,
       });
     } else {
+      sendAccountDetailsCompletedEvent();
       const isEssentials = isEssentialsFlow();
       navigate(
         isEssentials

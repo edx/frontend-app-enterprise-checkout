@@ -1,3 +1,5 @@
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { mergeConfig } from '@edx/frontend-platform/config';
 import { useCheckout } from '@stripe/react-stripe-js';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -29,6 +31,11 @@ jest.mock('@/components/app/data', () => ({
   usePolledCheckoutIntent: jest.fn(),
   useBFFSuccess: jest.fn(),
   useFirstBillableInvoice: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({
+  sendTrackEvent: jest.fn(),
+  sendPageEvent: jest.fn(),
 }));
 
 jest.mock('@edx/frontend-platform/logging', () => ({
@@ -264,5 +271,46 @@ describe('BillingDetailsSuccessPage', () => {
     });
     await waitFor(() => validateText((content) => content.includes('Welcome to edX for Team')));
     expect(screen.getByAltText('Celebration of subscription purchase success')).toBeInTheDocument();
+  });
+});
+
+describe('BillingDetailsPage – checkout step events', () => {
+  const stepViewedCalls = () => (sendTrackEvent as jest.Mock).mock.calls
+    .filter(([name]) => name === EVENT_NAMES.CHECKOUT.STEP_VIEWED_BILLING_DETAILS);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mergeConfig({ FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: 'true' });
+    (useCheckoutIntent as jest.Mock).mockReturnValue({ data: { id: 1, uuid: 'intent-uuid', quantity: 5 } });
+    (useCheckoutSessionClientSecret as jest.Mock).mockReturnValue('secret-123');
+    (useCheckout as jest.Mock).mockReturnValue({
+      canConfirm: true,
+      confirm: jest.fn(),
+      status: { type: 'open' },
+    });
+  });
+
+  afterEach(() => {
+    mergeConfig({ FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: null });
+  });
+
+  it('fires checkout_step_viewed.billing_details with step properties on the billing page', async () => {
+    renderStepperRoute(CheckoutPageRoute.BillingDetails);
+
+    await waitFor(() => expect(stepViewedCalls()).toHaveLength(1));
+    expect(stepViewedCalls()[0][1]).toEqual(expect.objectContaining({
+      category: 'subscription', brand: 'enterprise', step_name: 'Billing Details', step_number: 3,
+    }));
+    expect(stepViewedCalls()[0][1]).not.toHaveProperty('order_id');
+  });
+
+  it('does not fire checkout_step_viewed.billing_details on the success substep', async () => {
+    renderStepperRoute(CheckoutPageRoute.BillingDetailsSuccess, {
+      config: {},
+      authenticatedUser: { userId: 12345 },
+    });
+
+    await screen.findByTestId('stepper-title');
+    expect(stepViewedCalls()).toHaveLength(0);
   });
 });

@@ -86,6 +86,30 @@ export const buildCheckoutProductProperties = ({
   }) as CheckoutProductProperties;
 };
 
+/**
+ * Maps the paid Stripe Checkout session and checkout intent to event order properties.
+ * `revenue` is Stripe's charged total, not price × quantity. `payment_method` is omitted because
+ * Stripe Checkout doesn't expose it client-side.
+ */
+export const buildCheckoutOrderProperties = ({
+  checkoutIntent,
+  session,
+}: {
+  checkoutIntent: Pick<CheckoutContextCheckoutIntent, 'quantity'> | null | undefined;
+  session: {
+    id?: string;
+    minorUnitsAmountDivisor?: number;
+    total?: { total?: { minorUnitsAmount?: number } };
+  } | null | undefined;
+}): CheckoutOrderProperties => {
+  const chargedMinorUnits = session?.total?.total?.minorUnitsAmount;
+  return omitEmptyProperties({
+    order_id: session?.id,
+    total_quantity: checkoutIntent?.quantity,
+    revenue: chargedMinorUnits != null ? chargedMinorUnits / (session?.minorUnitsAmountDivisor || 100) : undefined,
+  });
+};
+
 /** Sends a checkout event. No-op when the flag is off; never throws. */
 export const sendCheckoutEvent = ({
   eventName,
