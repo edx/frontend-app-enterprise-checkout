@@ -4,6 +4,7 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { CHECKOUT_EVENT_STEPS } from '@/constants/events';
 import { useCheckoutAttributionStore, useCheckoutStartedStore } from '@/hooks/checkoutSessionStorage';
 import {
+  buildCheckoutOrderProperties,
   buildCheckoutProductProperties,
   captureCheckoutAttribution,
   claimCheckoutStarted,
@@ -67,6 +68,23 @@ describe('checkoutEvents', () => {
         .toEqual({
           category: 'subscription', name: 'teams', brand: 'enterprise', payment_schedule: 'yearly',
         });
+    });
+  });
+
+  describe('buildCheckoutOrderProperties', () => {
+    it('maps the Stripe session and checkout intent to order properties, with revenue from the charged total', () => {
+      expect(buildCheckoutOrderProperties({
+        checkoutIntent: { quantity: 5 },
+        session: { id: 'cs_test_123', minorUnitsAmountDivisor: 100, total: { total: { minorUnitsAmount: 74500 } } },
+      })).toEqual({ order_id: 'cs_test_123', total_quantity: 5, revenue: 745 });
+    });
+
+    it('keeps a zero revenue and omits properties that are not available', () => {
+      expect(buildCheckoutOrderProperties({
+        checkoutIntent: null,
+        session: { total: { total: { minorUnitsAmount: 0 } } },
+      })).toEqual({ revenue: 0 });
+      expect(buildCheckoutOrderProperties({ checkoutIntent: undefined, session: undefined })).toEqual({});
     });
   });
 

@@ -1,3 +1,5 @@
+import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { getConfig } from '@edx/frontend-platform/config';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { useCheckout } from '@stripe/react-stripe-js';
@@ -19,6 +21,15 @@ import StatefulSubscribeButton from '../StatefulSubscribeButton';
 jest.mock('@edx/frontend-platform/i18n', () => ({
   ...jest.requireActual('@edx/frontend-platform/i18n'),
   useIntl: jest.fn(),
+}));
+
+jest.mock('@edx/frontend-platform/analytics', () => ({ sendTrackEvent: jest.fn() }));
+jest.mock('@edx/frontend-platform/config', () => ({ getConfig: jest.fn(() => ({})) }));
+
+jest.mock('@/components/app/data/hooks', () => ({
+  useCheckoutEventProductProperties: jest.fn(() => ({
+    category: 'subscription', name: 'teams', brand: 'enterprise', payment_schedule: 'yearly',
+  })),
 }));
 
 // Mock other dependencies with simple implementations
@@ -45,7 +56,9 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@/components/app/data', () => ({
   useCheckoutIntent: jest.fn(() => ({
     data:
-      { uuid: 'test-intent-uuid', id: 1234, country: 'US', state: 'created' },
+      {
+        uuid: 'test-intent-uuid', id: 1234, country: 'US', state: 'created', quantity: 5,
+      },
   })),
 }));
 
@@ -488,6 +501,75 @@ describe('StatefulSubscribeButton', () => {
           defaultMessage: 'Success',
         }),
       );
+    });
+  });
+  describe('checkout_step_completed.billing_details event', () => {
+    const paidCheckout = {
+      canConfirm: true,
+      status: { type: 'complete', paymentStatus: 'paid' },
+      confirm: mockConfirm,
+      id: 'cs_test_123',
+      minorUnitsAmountDivisor: 100,
+      total: { total: { minorUnitsAmount: 74500, amount: '$745.00' } },
+    };
+    const billingCompletedCalls = () => jest.mocked(sendTrackEvent).mock.calls
+      .filter(([name]) => name === EVENT_NAMES.CHECKOUT.STEP_COMPLETED_BILLING_DETAILS);
+
+    beforeEach(() => {
+      (getConfig as jest.Mock).mockReturnValue({ FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: 'true' });
+    });
+
+    afterEach(() => {
+      (getConfig as jest.Mock).mockReturnValue({});
+    });
+
+    it('fires once with product, step and order properties after Stripe confirms payment', async () => {
+      mockConfirm.mockResolvedValue({ type: 'success' });
+      setup({ useCheckout: paidCheckout });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'));
+      });
+
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalled());
+      expect(billingCompletedCalls()).toEqual([[
+        EVENT_NAMES.CHECKOUT.STEP_COMPLETED_BILLING_DETAILS,
+        {
+          category: 'subscription',
+          name: 'teams',
+          brand: 'enterprise',
+          payment_schedule: 'yearly',
+          step_name: 'Billing Details',
+          step_number: 3,
+          order_id: 'cs_test_123',
+          total_quantity: 5,
+          revenue: 745,
+        },
+      ]]);
+    });
+
+    it('does not fire when the payment fails', async () => {
+      mockConfirm.mockResolvedValue({ type: 'error', error: { code: 'paymentFailed' } });
+      setup({ useCheckout: paidCheckout });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'));
+      });
+
+      await waitFor(() => expect(screen.getByRole('button')).toHaveTextContent('Error, card declined.'));
+      expect(billingCompletedCalls()).toHaveLength(0);
+    });
+
+    it('does not fire when the checkout session is not paid', async () => {
+      mockConfirm.mockResolvedValue({ type: 'success' });
+      setup({ useCheckout: { ...paidCheckout, status: { type: 'complete', paymentStatus: 'unpaid' } } });
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button'));
+      });
+
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(billingCompletedCalls()).toHaveLength(0);
     });
   });
 });

@@ -1,4 +1,5 @@
-import { sendPageEvent } from '@edx/frontend-platform/analytics';
+import { sendPageEvent, sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { mergeConfig } from '@edx/frontend-platform/config';
 import { useQueryClient } from '@tanstack/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -544,6 +545,72 @@ describe('AccountDetailsPage', () => {
 
     await waitFor(() => {
       expect(resetMock).toHaveBeenCalled();
+    });
+  });
+  describe('checkout step events', () => {
+    const stepEventCalls = (eventName: string) => (sendTrackEvent as jest.Mock).mock.calls
+      .filter(([name]) => name === eventName);
+    const renderAccountDetails = () => renderStepperRoute(CheckoutPageRoute.AccountDetails, {
+      config: {},
+      authenticatedUser: { userId: 12345 },
+    });
+
+    beforeEach(() => {
+      mergeConfig({ FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: 'true' });
+    });
+
+    afterEach(() => {
+      mergeConfig({ FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2: null });
+    });
+
+    it('fires checkout_step_viewed.account_details once per visit with step properties', async () => {
+      const user = userEvent.setup();
+      renderAccountDetails();
+
+      await waitFor(() => expect(stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_VIEWED_ACCOUNT_DETAILS)).toHaveLength(1));
+      expect(stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_VIEWED_ACCOUNT_DETAILS)[0][1]).toEqual(expect.objectContaining({
+        category: 'subscription', brand: 'enterprise', step_name: 'Account Details', step_number: 2,
+      }));
+
+      // Typing re-renders the page; the same visit must not emit again.
+      await user.type(screen.getByPlaceholderText('Enter your company name'), ' Co');
+      expect(stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_VIEWED_ACCOUNT_DETAILS)).toHaveLength(1);
+      expect(stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS)).toHaveLength(0);
+    });
+
+    it('fires checkout_step_completed.account_details without personal data once the checkout session is created', () => {
+      renderAccountDetails();
+
+      mutationCallbacks.onSuccess?.({ checkoutSessionClientSecret: 'client_secret' });
+
+      const calls = stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS);
+      expect(calls).toHaveLength(1);
+      expect(calls[0][1]).toEqual(expect.objectContaining({ step_name: 'Account Details', step_number: 2 }));
+      expect(calls[0][1]).not.toHaveProperty('order_id');
+      ['Acme Inc', 'acme-inc', 'admin@example.com'].forEach((value) => {
+        expect(JSON.stringify(calls[0][1])).not.toContain(value);
+      });
+    });
+
+    it('does not fire checkout_step_completed.account_details when the checkout session request fails', () => {
+      renderAccountDetails();
+
+      mutationCallbacks.onError?.({ enterpriseSlug: { errorCode: 'existing_enterprise_customer' } });
+
+      expect(stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS)).toHaveLength(0);
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('fires checkout_step_completed.account_details when continuing with an existing checkout session', async () => {
+      const user = userEvent.setup();
+      mutationState.isSuccess = true;
+      renderAccountDetails();
+
+      await user.click(screen.getByTestId('stepper-submit-button'));
+
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith(CheckoutPageRoute.BillingDetails));
+      expect(mutateMock).not.toHaveBeenCalled();
+      expect(stepEventCalls(EVENT_NAMES.CHECKOUT.STEP_COMPLETED_ACCOUNT_DETAILS)).toHaveLength(1);
     });
   });
 });

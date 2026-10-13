@@ -10,11 +10,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { useCheckoutIntent } from '@/components/app/data';
 import { termsAndConditions } from '@/components/app/data/constants';
+import { useCheckoutEventProductProperties } from '@/components/app/data/hooks';
 import { queryBffContext } from '@/components/app/data/queries/queries';
 import { patchCheckoutIntent } from '@/components/app/data/services/checkout-intent';
 import { CheckoutPageRoute, CheckoutSubstepKey, DataStoreKey, EssentialsPageRoute } from '@/constants/checkout';
-import EVENT_NAMES from '@/constants/events';
+import EVENT_NAMES, { CHECKOUT_EVENT_STEPS } from '@/constants/events';
 import { useCheckoutFormStore } from '@/hooks/useCheckoutFormStore';
+import { buildCheckoutOrderProperties, sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { isEssentialsFlow, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 const variants = {
@@ -65,11 +67,18 @@ const StatefulSubscribeButton = () => {
     canConfirm,
     status,
     confirm,
+    id: checkoutSessionId,
+    minorUnitsAmountDivisor,
+    total,
   }: {
     canConfirm: CheckoutContextValue['canConfirm'],
     status: StripeCheckoutStatus,
     confirm: CheckoutContextValue['confirm'],
+    id?: CheckoutContextValue['id'],
+    minorUnitsAmountDivisor?: CheckoutContextValue['minorUnitsAmountDivisor'],
+    total?: CheckoutContextValue['total'],
   } = useCheckout();
+  const checkoutEventProduct = useCheckoutEventProductProperties();
   const billingDetailsData = useCheckoutFormStore((state) => state.formData[DataStoreKey.BillingDetails]);
   const setCheckoutSessionStatus = useCheckoutFormStore((state) => state.setCheckoutSessionStatus);
 
@@ -137,6 +146,15 @@ const StatefulSubscribeButton = () => {
         checkoutIntentUuid: checkoutIntent?.uuid ?? null,
         eventName: EVENT_NAMES.SUBSCRIPTION_CHECKOUT.PAYMENT_PROCESSED_SUCCESSFULLY,
       });
+      sendCheckoutEvent({
+        eventName: EVENT_NAMES.CHECKOUT.STEP_COMPLETED_BILLING_DETAILS,
+        product: checkoutEventProduct,
+        step: CHECKOUT_EVENT_STEPS.BILLING_DETAILS,
+        order: buildCheckoutOrderProperties({
+          checkoutIntent,
+          session: { id: checkoutSessionId, minorUnitsAmountDivisor, total },
+        }),
+      });
 
       // 4. Navigate ONCE
       const isEssentials = isEssentialsFlow();
@@ -158,8 +176,11 @@ const StatefulSubscribeButton = () => {
     setCheckoutSessionStatus,
     queryClient,
     authenticatedUser?.userId,
-    checkoutIntent?.id,
-    checkoutIntent?.uuid,
+    checkoutIntent,
+    checkoutEventProduct,
+    checkoutSessionId,
+    minorUnitsAmountDivisor,
+    total,
     navigate,
   ]);
 
