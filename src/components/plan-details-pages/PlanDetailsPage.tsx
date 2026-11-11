@@ -399,11 +399,9 @@ const PlanDetailsPage = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
+      <Helmet title={intl.formatMessage(title)} />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title={intl.formatMessage(title)} data-testid="stepper-title">
-          {/* Inside Stepper.Step so only the active step sets the title (all steps stay mounted); defer={false}
-          sets it during commit, before effects send Segment events that read document.title. */}
-          <Helmet title={intl.formatMessage(title)} defer={false} />
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>

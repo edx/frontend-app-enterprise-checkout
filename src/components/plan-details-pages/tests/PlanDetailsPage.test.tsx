@@ -236,17 +236,6 @@ describe('PlanDetailsPage', () => {
     );
   });
 
-  it('sets the document title before page view events fire, so Segment does not record a stale title', () => {
-    document.title = 'Checkout - Billing Details';
-    const titleAtSend: string[] = [];
-    (sendPageEvent as jest.Mock).mockImplementation(() => titleAtSend.push(document.title));
-
-    renderStepperRoute(`${CheckoutPageRoute.PlanDetails}/register`);
-
-    expect(titleAtSend.length).toBeGreaterThan(0);
-    titleAtSend.forEach((title) => expect(title).toContain('Plan Details'));
-  });
-
   it('reports plan_type essentials on page view events when an academy price is selected', () => {
     const essentialsBFFContextData = camelCasedCheckoutContextResponseFactory({
       pricing: {

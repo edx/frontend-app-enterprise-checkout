@@ -35,8 +35,10 @@ export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
       return Promise.resolve();
     }
     return new Promise((resolve) => {
-      const { analytics } = window as any;
-      analytics.ready(() => {
+      (window as any).analytics.ready(() => {
+        // Read window.analytics here, not before: on a cold start the object above is the snippet's
+        // queue (no user()), and analytics.js replaces it with the loaded SDK before this runs.
+        const { analytics } = window as any;
         // A user id left over from a previous session belongs to someone else. Upstream turns Segment
         // off at the 2s timeout, so its ready never runs late; here it can, after an in-app login,
         // and the id is then the user who just signed in, so keep it.

@@ -83,6 +83,22 @@ describe('CheckoutSegmentAnalyticsService', () => {
     expect(analytics.track).toHaveBeenCalledWith('edx.ui.enterprise.checkout.signed_in', {});
   });
 
+  it('resets a leftover user id on the loaded SDK, not the snippet queue it replaced (cold start)', async () => {
+    // frontend-platform's snippet queue: stubbed methods only, no user().
+    const queuedReadyCallbacks: Array<() => void> = [];
+    (window as any).analytics = { ready: jest.fn((callback: () => void) => { queuedReadyCallbacks.push(callback); }) };
+    const service = createService(CheckoutSegmentAnalyticsService);
+
+    const identified = service.identifyAnonymousUser();
+    // analytics.js loads, replaces window.analytics, then runs the queued ready callbacks.
+    const loadedSdk = mockSegment({ userId: 42 });
+    queuedReadyCallbacks.forEach((callback) => callback());
+
+    await expect(identified).resolves.toBeUndefined();
+    expect(loadedSdk.reset).toHaveBeenCalled();
+    expect(service.hasIdentifyBeenCalled).toBe(true);
+  });
+
   it('keeps a user identified in-app when analytics.js finishes loading after the timeout', async () => {
     const analytics = mockSegment({ ready: false, userId: 123 });
     const service = createService(CheckoutSegmentAnalyticsService);

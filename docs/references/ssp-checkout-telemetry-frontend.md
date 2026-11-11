@@ -93,10 +93,6 @@ All tracking events include:
   skips its leftover-user `analytics.reset()` once a user has been identified in-app, because if
   analytics.js loads after the 2s timeout, its `ready` callback would otherwise reset the user who
   just signed in.
-- **Page title in events.** Segment reads `document.title` when each event is sent (`title` on page
-  events, `context.page.title` on track events). All stepper steps stay mounted, so each step's
-  `<Helmet>` lives inside its `Stepper.Step` (only the active one renders) with `defer={false}`, so
-  the title is set before the effects that send events.
 - **Registration on stage from localhost.** `RECAPTCHA_SITE_KEY_WEB` is empty locally, so
   registration sends no reCAPTCHA token. To reach the later steps, log in with an existing stage
   account instead.
