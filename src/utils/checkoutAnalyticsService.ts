@@ -22,6 +22,14 @@ export interface CheckoutSegmentAnalyticsService {
  * Remove once frontend-platform stops gating Segment on GA/GTM.
  */
 export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
+  // Set when a user is identified in-app (login/register) after start-up.
+  private hasIdentifiedAuthenticatedUser = false;
+
+  identifyAuthenticatedUser(userId: number | string, traits?: Record<string, unknown>): void {
+    super.identifyAuthenticatedUser(userId, traits);
+    this.hasIdentifiedAuthenticatedUser = true;
+  }
+
   identifyAnonymousUser(): Promise<void> {
     if (!this.segmentInitialized) {
       return Promise.resolve();
@@ -29,8 +37,10 @@ export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
     return new Promise((resolve) => {
       const { analytics } = window as any;
       analytics.ready(() => {
-        // A user id left over from a previous session belongs to someone else.
-        if (analytics.user().id()) {
+        // A user id left over from a previous session belongs to someone else. Upstream turns Segment
+        // off at the 2s timeout, so its ready never runs late; here it can, after an in-app login,
+        // and the id is then the user who just signed in, so keep it.
+        if (analytics.user().id() && !this.hasIdentifiedAuthenticatedUser) {
           analytics.reset();
         }
         // Segment assigns anonymous users an anonymousId, so no identify call is needed.

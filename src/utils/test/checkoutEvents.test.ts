@@ -162,10 +162,15 @@ describe('checkoutEvents', () => {
       expect(identifyAuthenticatedUser).toHaveBeenCalledWith(123);
     });
 
-    it('does nothing when the feature flag is disabled or there is no user', () => {
-      identifyCheckoutUser(null);
+    it('identifies the user even when the V2 flag is disabled, so legacy events carry the userId', () => {
       (getConfig as jest.Mock).mockReturnValue({});
       identifyCheckoutUser(123);
+      expect(identifyAuthenticatedUser).toHaveBeenCalledWith(123);
+    });
+
+    it('does nothing when there is no user', () => {
+      identifyCheckoutUser(null);
+      identifyCheckoutUser(undefined);
       expect(identifyAuthenticatedUser).not.toHaveBeenCalled();
     });
 

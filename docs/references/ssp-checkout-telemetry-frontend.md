@@ -74,6 +74,35 @@ All tracking events include:
 
 ---
 
+## Gotchas
+
+- **Anonymous users need `CheckoutSegmentAnalyticsService`.** For anonymous users, frontend-platform's
+  `SegmentAnalyticsService.identifyAnonymousUser` turns Segment off if `window.ga.create` or
+  `window.google_tag_manager` is missing 2s after start-up. Checkout loads neither, so every event
+  (legacy and V2) was silently dropped until the user was logged in and reloaded the page.
+  `src/utils/checkoutAnalyticsService.ts` overrides that method and is passed to `initialize()` in
+  `src/index.tsx`. Don't remove it, and don't stub `window.ga`/`google_tag_manager` instead, until
+  frontend-platform drops the check (a test in `checkoutAnalyticsService.test.ts` fails when it does).
+- **Feature flags are set at build time.** `FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2` comes from
+  edx-internal `frontends/frontend-app-enterprise-checkout/{stage,prod}_config.yml` and is inlined
+  by webpack. After changing it there, rebuild and redeploy the MFE, or the old value stays live.
+- **Identify after in-app logistration.** frontend-platform identifies the user only at app init.
+  After login/register in the plan details step, `identifyCheckoutUser` (`src/utils/checkoutEvents.ts`)
+  identifies them before `signed_in`/`account_created`, so later events carry the `userId`. It is not
+  gated on the V2 flag, because legacy events need the `userId` too. `CheckoutSegmentAnalyticsService`
+  skips its leftover-user `analytics.reset()` once a user has been identified in-app, because if
+  analytics.js loads after the 2s timeout, its `ready` callback would otherwise reset the user who
+  just signed in.
+- **Page title in events.** Segment reads `document.title` when each event is sent (`title` on page
+  events, `context.page.title` on track events). All stepper steps stay mounted, so each step's
+  `<Helmet>` lives inside its `Stepper.Step` (only the active one renders) with `defer={false}`, so
+  the title is set before the effects that send events.
+- **Registration on stage from localhost.** `RECAPTCHA_SITE_KEY_WEB` is empty locally, so
+  registration sends no reCAPTCHA token. To reach the later steps, log in with an existing stage
+  account instead.
+
+---
+
 ## Acceptance Criteria
 
 ✅ All criteria met - See PRD spec for details

@@ -83,6 +83,21 @@ describe('CheckoutSegmentAnalyticsService', () => {
     expect(analytics.track).toHaveBeenCalledWith('edx.ui.enterprise.checkout.signed_in', {});
   });
 
+  it('keeps a user identified in-app when analytics.js finishes loading after the timeout', async () => {
+    const analytics = mockSegment({ ready: false, userId: 123 });
+    const service = createService(CheckoutSegmentAnalyticsService);
+
+    const identified = service.identifyAnonymousUser();
+    jest.advanceTimersByTime(2000);
+    await identified;
+    service.identifyAuthenticatedUser(123);
+    const [[lateReadyCallback]] = analytics.ready.mock.calls;
+    lateReadyCallback();
+
+    expect(analytics.identify).toHaveBeenCalledWith(123, undefined);
+    expect(analytics.reset).not.toHaveBeenCalled();
+  });
+
   it('resolves without waiting when analytics.js fails to load (e.g. ad blocker)', async () => {
     mockSegment({ ready: false });
     const service = createService(CheckoutSegmentAnalyticsService);

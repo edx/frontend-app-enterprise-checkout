@@ -137,10 +137,11 @@ export const sendCheckoutEvent = ({
 /**
  * Identifies a user who just signed in or registered in-app. frontend-platform only identifies at
  * app init, so without this every event after logistration stays anonymous until a full page
- * reload. No-op when the flag is off or there is no user; never throws.
+ * reload. Not gated on the V2 flag: legacy events need the userId too. No-op without a user; never
+ * throws.
  */
 export const identifyCheckoutUser = (userId: number | null | undefined): void => {
-  if (!isCheckoutEventsV2Enabled() || !userId) {
+  if (!userId) {
     return;
   }
   try {
