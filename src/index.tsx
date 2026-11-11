@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import App from '@/components/app/App';
+import { CheckoutSegmentAnalyticsService } from '@/utils/checkoutAnalyticsService';
 
 import { ErrorPage } from './components/ErrorPage';
 import './index.scss';
@@ -72,6 +73,8 @@ initialize({
     },
   },
   messages,
+  // Keeps Segment on for anonymous users; see CheckoutSegmentAnalyticsService.
+  analyticsService: CheckoutSegmentAnalyticsService,
   // We don't require authenticated users so that we can perform our own auth redirect to a proxy login that depends on
   // the route, rather than the LMS like frontend-platform does.
   requireAuthenticatedUser: false,

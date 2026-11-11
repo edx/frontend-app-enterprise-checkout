@@ -1,0 +1,49 @@
+import { SegmentAnalyticsService } from '@edx/frontend-platform/analytics';
+
+// frontend-platform resolves this so the app never waits on a blocked analytics.js. Kept the same.
+const IDENTIFY_ANONYMOUS_USER_TIMEOUT_MS = 2000;
+
+// Fields set by the untyped base class's constructor. Merged as an interface so nothing is emitted.
+export interface CheckoutSegmentAnalyticsService {
+  segmentInitialized: boolean;
+  hasIdentifyBeenCalled: boolean;
+}
+
+/**
+ * Segment analytics service for checkout, passed to frontend-platform's `initialize()`.
+ *
+ * frontend-platform's `identifyAnonymousUser` turns Segment off (`segmentInitialized = false`) when
+ * `window.ga.create` or `window.google_tag_manager` is missing 2s after start-up. Checkout loads
+ * neither, so every event from an anonymous user was silently dropped, and stayed dropped after
+ * in-app login or registration until a full page reload. This override keeps the same identify
+ * flow and timeout but leaves Segment on. If analytics.js itself fails to load, the base class
+ * still turns Segment off.
+ *
+ * Remove once frontend-platform stops gating Segment on GA/GTM.
+ */
+export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
+  identifyAnonymousUser(): Promise<void> {
+    if (!this.segmentInitialized) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      const { analytics } = window as any;
+      analytics.ready(() => {
+        // A user id left over from a previous session belongs to someone else.
+        if (analytics.user().id()) {
+          analytics.reset();
+        }
+        // Segment assigns anonymous users an anonymousId, so no identify call is needed.
+        this.hasIdentifyBeenCalled = true;
+        resolve();
+      });
+      document.addEventListener('segmentFailed', () => resolve());
+      setTimeout(() => {
+        // analytics.js is still loading; the snippet queues events until it does. Without this,
+        // every event sent meanwhile logs "Identify must be called before other tracking events."
+        this.hasIdentifyBeenCalled = true;
+        resolve();
+      }, IDENTIFY_ANONYMOUS_USER_TIMEOUT_MS);
+    });
+  }
+}
