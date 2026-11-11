@@ -99,19 +99,35 @@ describe('CheckoutSegmentAnalyticsService', () => {
     expect(service.hasIdentifyBeenCalled).toBe(true);
   });
 
+  it('resets a leftover user id at the timeout when the SDK has loaded but ready is still pending', async () => {
+    const analytics = mockSegment({ ready: false, userId: 42 });
+    const service = createService(CheckoutSegmentAnalyticsService);
+
+    const identified = service.identifyAnonymousUser();
+    jest.advanceTimersByTime(2000);
+    await identified;
+
+    expect(analytics.reset).toHaveBeenCalled();
+  });
+
   it('keeps a user identified in-app when analytics.js finishes loading after the timeout', async () => {
-    const analytics = mockSegment({ ready: false, userId: 123 });
+    // analytics.js still loading at the timeout: window.analytics is the snippet's queue (no user()).
+    const queuedReadyCallbacks: Array<() => void> = [];
+    (window as any).analytics = {
+      ready: jest.fn((callback: () => void) => { queuedReadyCallbacks.push(callback); }),
+      identify: jest.fn(),
+    };
     const service = createService(CheckoutSegmentAnalyticsService);
 
     const identified = service.identifyAnonymousUser();
     jest.advanceTimersByTime(2000);
     await identified;
     service.identifyAuthenticatedUser(123);
-    const [[lateReadyCallback]] = analytics.ready.mock.calls;
-    lateReadyCallback();
+    // analytics.js loads with the signed-in user, then runs the late ready callback.
+    const loadedSdk = mockSegment({ userId: 123 });
+    queuedReadyCallbacks.forEach((callback) => callback());
 
-    expect(analytics.identify).toHaveBeenCalledWith(123, undefined);
-    expect(analytics.reset).not.toHaveBeenCalled();
+    expect(loadedSdk.reset).not.toHaveBeenCalled();
   });
 
   it('resolves without waiting when analytics.js fails to load (e.g. ad blocker)', async () => {

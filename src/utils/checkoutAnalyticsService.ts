@@ -30,6 +30,15 @@ export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
     this.hasIdentifiedAuthenticatedUser = true;
   }
 
+  // A user id left over from a previous session belongs to someone else. Upstream turns Segment off
+  // at the 2s timeout, so it never checks late; here a late check can run after an in-app login, and
+  // the id is then the user who just signed in, so keep it.
+  private resetStaleUser(analytics: any): void {
+    if (analytics.user().id() && !this.hasIdentifiedAuthenticatedUser) {
+      analytics.reset();
+    }
+  }
+
   identifyAnonymousUser(): Promise<void> {
     if (!this.segmentInitialized) {
       return Promise.resolve();
@@ -38,21 +47,22 @@ export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
       (window as any).analytics.ready(() => {
         // Read window.analytics here, not before: on a cold start the object above is the snippet's
         // queue (no user()), and analytics.js replaces it with the loaded SDK before this runs.
-        const { analytics } = window as any;
-        // A user id left over from a previous session belongs to someone else. Upstream turns Segment
-        // off at the 2s timeout, so its ready never runs late; here it can, after an in-app login,
-        // and the id is then the user who just signed in, so keep it.
-        if (analytics.user().id() && !this.hasIdentifiedAuthenticatedUser) {
-          analytics.reset();
-        }
+        this.resetStaleUser((window as any).analytics);
         // Segment assigns anonymous users an anonymousId, so no identify call is needed.
         this.hasIdentifyBeenCalled = true;
         resolve();
       });
       document.addEventListener('segmentFailed', () => resolve());
       setTimeout(() => {
-        // analytics.js is still loading; the snippet queues events until it does. Without this,
-        // every event sent meanwhile logs "Identify must be called before other tracking events."
+        // If analytics.js has loaded but ready is still pending, events are sent right away, so clear
+        // a stale user id now rather than at ready. Before it loads, window.analytics is the snippet's
+        // queue (no user()); events wait in it and ready clears the id.
+        const { analytics } = window as any;
+        if (typeof analytics.user === 'function') {
+          this.resetStaleUser(analytics);
+        }
+        // Without this, every event sent before ready logs
+        // "Identify must be called before other tracking events."
         this.hasIdentifyBeenCalled = true;
         resolve();
       }, IDENTIFY_ANONYMOUS_USER_TIMEOUT_MS);

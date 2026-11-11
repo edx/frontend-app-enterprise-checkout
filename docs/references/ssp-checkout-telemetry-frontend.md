@@ -90,9 +90,10 @@ All tracking events include:
   After login/register in the plan details step, `identifyCheckoutUser` (`src/utils/checkoutEvents.ts`)
   identifies them before `signed_in`/`account_created`, so later events carry the `userId`. It is not
   gated on the V2 flag, because legacy events need the `userId` too. `CheckoutSegmentAnalyticsService`
-  skips its leftover-user `analytics.reset()` once a user has been identified in-app, because if
-  analytics.js loads after the 2s timeout, its `ready` callback would otherwise reset the user who
-  just signed in.
+  clears a leftover user id (`analytics.reset()`) at `ready`, and also at the 2s timeout if
+  analytics.js has loaded but `ready` is still pending, so logged-out events never carry the previous
+  user's id. It skips the reset once a user has been identified in-app, because a late check would
+  otherwise reset the user who just signed in.
 - **Registration on stage from localhost.** `RECAPTCHA_SITE_KEY_WEB` is empty locally, so
   registration sends no reCAPTCHA token. To reach the later steps, log in with an existing stage
   account instead.
