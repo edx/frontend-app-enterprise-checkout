@@ -49,7 +49,7 @@ import {
   useCurrentPageDetails,
 } from '@/hooks/index';
 import useCurrentStep from '@/hooks/useCurrentStep';
-import { sendCheckoutEvent } from '@/utils/checkoutEvents';
+import { identifyCheckoutUser, sendCheckoutEvent } from '@/utils/checkoutEvents';
 import { sendEnterpriseCheckoutPageEvent, sendEnterpriseCheckoutTrackingEvent } from '@/utils/common';
 
 import PlanDetailsSubmitButton from './PlanDetailsSubmitButton';
@@ -137,7 +137,8 @@ const PlanDetailsPage = () => {
         properties: {
           step: currentStepKey,
           substep: currentSubstepKey,
-          plan_type: PLAN_TYPE.TEAMS,
+          // From the selected price's slug, so Essentials isn't reported as Teams.
+          plan_type: checkoutEventProduct.name,
           path: location.pathname,
         },
       });
@@ -146,7 +147,10 @@ const PlanDetailsPage = () => {
     } catch (error) {
       logError(`Failed to send page view tracking event for ${location.pathname}`, error);
     }
-  }, [checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname]);
+  }, [
+    checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname,
+    checkoutEventProduct.name,
+  ]);
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, { stripePriceId: planDetailsFormData.stripePriceId, intl })
@@ -223,8 +227,9 @@ const PlanDetailsPage = () => {
   const loginMutation = useLoginMutation({
     onSuccess: async () => {
       setIsSubmitting(false);
-      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.SIGNED_IN, product: checkoutEventProduct });
       await fetchAuthenticatedUser();
+      identifyCheckoutUser(getAuthenticatedUser()?.userId);
+      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.SIGNED_IN, product: checkoutEventProduct });
       await hydrateAuthenticatedUser();
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
@@ -245,8 +250,9 @@ const PlanDetailsPage = () => {
   const registerMutation = useRegisterMutation({
     onSuccess: async () => {
       setIsSubmitting(false);
-      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, product: checkoutEventProduct });
       await fetchAuthenticatedUser();
+      identifyCheckoutUser(getAuthenticatedUser()?.userId);
+      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, product: checkoutEventProduct });
       await hydrateAuthenticatedUser();
 
       createCheckoutIntentMutation.mutate({
@@ -393,9 +399,11 @@ const PlanDetailsPage = () => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <Helmet title={intl.formatMessage(title)} />
       <Stack gap={4}>
         <Stepper.Step eventKey={eventKey} title={intl.formatMessage(title)} data-testid="stepper-title">
+          {/* Inside Stepper.Step so only the active step sets the title (all steps stay mounted); defer={false}
+          sets it during commit, before effects send Segment events that read document.title. */}
+          <Helmet title={intl.formatMessage(title)} defer={false} />
           <Stack gap={4}>
             <StepperContent form={form} />
           </Stack>

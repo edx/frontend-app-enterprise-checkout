@@ -93,6 +93,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 }));
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
+  identifyAuthenticatedUser: jest.fn(),
   sendTrackEvent: jest.fn(),
   sendPageEvent: jest.fn(),
 }));
@@ -141,6 +142,15 @@ const expectLogistrationEvent = async (eventName: string, personalValues: string
   expect(payload).toEqual(expect.objectContaining({ category: 'subscription', name: 'teams', brand: 'enterprise' }));
   expect(payload).not.toHaveProperty('step_name');
   personalValues.forEach((value) => expect(JSON.stringify(payload)).not.toContain(value));
+};
+
+/** The user is identified in Segment before the logistration event, so it carries their userId. */
+const expectIdentifiedBefore = async (eventName: string) => {
+  const { identifyAuthenticatedUser, sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+  expect(identifyAuthenticatedUser).toHaveBeenCalledWith(123);
+  const eventCallIndex = (sendTrackEvent as jest.Mock).mock.calls.findIndex(([name]) => name === eventName);
+  expect((identifyAuthenticatedUser as jest.Mock).mock.invocationCallOrder[0])
+    .toBeLessThan((sendTrackEvent as jest.Mock).mock.invocationCallOrder[eventCallIndex]);
 };
 
 // Mock BFF context response data for testing
@@ -224,6 +234,42 @@ describe('PlanDetailsPage', () => {
         plan_type: PLAN_TYPE.TEAMS,
       }),
     );
+  });
+
+  it('sets the document title before page view events fire, so Segment does not record a stale title', () => {
+    document.title = 'Checkout - Billing Details';
+    const titleAtSend: string[] = [];
+    (sendPageEvent as jest.Mock).mockImplementation(() => titleAtSend.push(document.title));
+
+    renderStepperRoute(`${CheckoutPageRoute.PlanDetails}/register`);
+
+    expect(titleAtSend.length).toBeGreaterThan(0);
+    titleAtSend.forEach((title) => expect(title).toContain('Plan Details'));
+  });
+
+  it('reports plan_type essentials on page view events when an academy price is selected', () => {
+    const essentialsBFFContextData = camelCasedCheckoutContextResponseFactory({
+      pricing: {
+        prices: [{ ...mockBFFContextData.pricing.prices[0], ssp_product_slug: 'ai-academy-yearly' }],
+      },
+    });
+    mockedUseBFFContext.mockImplementation((_userId, options) => ({
+      data: options?.select ? options.select(essentialsBFFContextData) : essentialsBFFContextData,
+    }));
+    const previousSlug = checkoutFormStore.getState().sspProductSlug;
+    checkoutFormStore.setState({ sspProductSlug: 'ai-academy-yearly' });
+
+    try {
+      renderStepperRoute(CheckoutPageRoute.PlanDetails);
+
+      expect(sendPageEvent).toHaveBeenCalledWith(
+        'enterprise_checkout',
+        EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
+        expect.objectContaining({ plan_type: PLAN_TYPE.ESSENTIALS }),
+      );
+    } finally {
+      checkoutFormStore.setState({ sspProductSlug: previousSlug });
+    }
   });
 
   it('fires page view tracking event for Registration step (Register)', () => {
@@ -1318,6 +1364,7 @@ describe('PlanDetailsPage – loginMutation success/error paths', () => {
     });
 
     await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.SIGNED_IN, ['user@example.com']);
+    await expectIdentifiedBefore(EVENT_NAMES.CHECKOUT.SIGNED_IN);
     const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
     expect(sendTrackEvent).toHaveBeenCalledWith(
       EVENT_NAMES.CHECKOUT.STEP_COMPLETED_PLAN_DETAILS,
@@ -1552,6 +1599,7 @@ describe('PlanDetailsPage – registerMutation tracking event', () => {
     });
 
     await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, ['newuser@example.com', 'New User', 'newuser']);
+    await expectIdentifiedBefore(EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED);
   });
 
   it('catches and logs tracking event error without breaking navigation', async () => {

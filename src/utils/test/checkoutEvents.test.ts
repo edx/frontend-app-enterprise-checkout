@@ -1,4 +1,4 @@
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { identifyAuthenticatedUser, sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
 
 import { CHECKOUT_EVENT_STEPS } from '@/constants/events';
@@ -9,11 +9,12 @@ import {
   captureCheckoutAttribution,
   claimCheckoutStarted,
   getCheckoutAttribution,
+  identifyCheckoutUser,
   omitEmptyProperties,
   sendCheckoutEvent,
 } from '@/utils/checkoutEvents';
 
-jest.mock('@edx/frontend-platform/analytics', () => ({ sendTrackEvent: jest.fn() }));
+jest.mock('@edx/frontend-platform/analytics', () => ({ identifyAuthenticatedUser: jest.fn(), sendTrackEvent: jest.fn() }));
 jest.mock('@edx/frontend-platform/config', () => ({ getConfig: jest.fn() }));
 jest.mock('@edx/frontend-platform/logging', () => ({ logError: jest.fn() }));
 
@@ -152,6 +153,25 @@ describe('checkoutEvents', () => {
     it('never throws when Segment emission fails', () => {
       (sendTrackEvent as jest.Mock).mockImplementation(() => { throw new Error('blocked'); });
       expect(() => sendCheckoutEvent({ eventName: 'test.event', product })).not.toThrow();
+    });
+  });
+
+  describe('identifyCheckoutUser', () => {
+    it('identifies the user in Segment', () => {
+      identifyCheckoutUser(123);
+      expect(identifyAuthenticatedUser).toHaveBeenCalledWith(123);
+    });
+
+    it('does nothing when the feature flag is disabled or there is no user', () => {
+      identifyCheckoutUser(null);
+      (getConfig as jest.Mock).mockReturnValue({});
+      identifyCheckoutUser(123);
+      expect(identifyAuthenticatedUser).not.toHaveBeenCalled();
+    });
+
+    it('never throws when Segment identify fails', () => {
+      (identifyAuthenticatedUser as jest.Mock).mockImplementation(() => { throw new Error('blocked'); });
+      expect(() => identifyCheckoutUser(123)).not.toThrow();
     });
   });
 });
