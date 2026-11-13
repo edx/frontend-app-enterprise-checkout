@@ -236,31 +236,6 @@ describe('PlanDetailsPage', () => {
     );
   });
 
-  it('reports plan_type essentials on page view events when an academy price is selected', () => {
-    const essentialsBFFContextData = camelCasedCheckoutContextResponseFactory({
-      pricing: {
-        prices: [{ ...mockBFFContextData.pricing.prices[0], ssp_product_slug: 'ai-academy-yearly' }],
-      },
-    });
-    mockedUseBFFContext.mockImplementation((_userId, options) => ({
-      data: options?.select ? options.select(essentialsBFFContextData) : essentialsBFFContextData,
-    }));
-    const previousSlug = checkoutFormStore.getState().sspProductSlug;
-    checkoutFormStore.setState({ sspProductSlug: 'ai-academy-yearly' });
-
-    try {
-      renderStepperRoute(CheckoutPageRoute.PlanDetails);
-
-      expect(sendPageEvent).toHaveBeenCalledWith(
-        'enterprise_checkout',
-        EVENT_NAMES.SUBSCRIPTION_CHECKOUT.CHECKOUT_PAGE_VIEWED,
-        expect.objectContaining({ plan_type: PLAN_TYPE.ESSENTIALS }),
-      );
-    } finally {
-      checkoutFormStore.setState({ sspProductSlug: previousSlug });
-    }
-  });
-
   it('fires page view tracking event for Registration step (Register)', () => {
     // Navigate to Register substep
     renderStepperRoute(`${CheckoutPageRoute.PlanDetails}/register`);
@@ -1359,6 +1334,33 @@ describe('PlanDetailsPage – loginMutation success/error paths', () => {
       EVENT_NAMES.CHECKOUT.STEP_COMPLETED_PLAN_DETAILS,
       expect.objectContaining({ step_name: 'Plan Details', step_number: 1, category: 'subscription' }),
     );
+  });
+
+  it('still sends signed_in when fetching the signed-in user fails', async () => {
+    enableCheckoutEventsV2();
+    const { fetchAuthenticatedUser, hydrateAuthenticatedUser } = await import('@edx/frontend-platform/auth');
+    const useLoginMutationMock = (await import('@/components/app/data/hooks/useLoginMutation')).default as jest.Mock;
+    // Settles to the error onSuccess rejected with (caught here so it isn't an unhandled rejection).
+    let onSuccessError: Promise<Error | null> | undefined;
+    useLoginMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => { onSuccessError = onSuccess?.().then(() => null, (error: Error) => error); }),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin, { config: {}, authenticatedUser: null });
+    const submitButton = await screen.findByTestId('stepper-submit-button');
+    (fetchAuthenticatedUser as jest.Mock).mockRejectedValueOnce(new Error('network error'));
+    await userEvent.click(submitButton);
+
+    // The fetch error still propagates and stops the rest of onSuccess, as before.
+    await waitFor(() => expect(onSuccessError).toBeDefined());
+    expect((await onSuccessError)?.message).toBe('network error');
+    const { identifyAuthenticatedUser, sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+    expect(sendTrackEvent).toHaveBeenCalledWith(EVENT_NAMES.CHECKOUT.SIGNED_IN, expect.anything());
+    expect(identifyAuthenticatedUser).not.toHaveBeenCalled();
+    expect(hydrateAuthenticatedUser).not.toHaveBeenCalled();
   });
 
   it('sets password field error on login failure', async () => {

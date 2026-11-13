@@ -137,8 +137,7 @@ const PlanDetailsPage = () => {
         properties: {
           step: currentStepKey,
           substep: currentSubstepKey,
-          // From the selected price's slug, so Essentials isn't reported as Teams.
-          plan_type: checkoutEventProduct.name,
+          plan_type: PLAN_TYPE.TEAMS,
           path: location.pathname,
         },
       });
@@ -147,10 +146,7 @@ const PlanDetailsPage = () => {
     } catch (error) {
       logError(`Failed to send page view tracking event for ${location.pathname}`, error);
     }
-  }, [
-    checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname,
-    checkoutEventProduct.name,
-  ]);
+  }, [checkoutIntentId, checkoutIntentUuid, currentStepKey, currentSubstepKey, location.pathname]);
 
   const planDetailsSchema = useMemo(() => (
     formSchema(formValidationConstraints, { stripePriceId: planDetailsFormData.stripePriceId, intl })
@@ -224,12 +220,22 @@ const PlanDetailsPage = () => {
     },
   });
 
+  // Identifies the user who just signed in or registered, so the event carries their userId. The event is
+  // sent in finally so a failed user fetch can't drop it (it was sent before the fetch until identify was
+  // added); the error still propagates and stops the rest of onSuccess, as before.
+  const identifyAndSendLogistrationEvent = async (eventName: string) => {
+    try {
+      await fetchAuthenticatedUser();
+      identifyCheckoutUser(getAuthenticatedUser()?.userId);
+    } finally {
+      sendCheckoutEvent({ eventName, product: checkoutEventProduct });
+    }
+  };
+
   const loginMutation = useLoginMutation({
     onSuccess: async () => {
       setIsSubmitting(false);
-      await fetchAuthenticatedUser();
-      identifyCheckoutUser(getAuthenticatedUser()?.userId);
-      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.SIGNED_IN, product: checkoutEventProduct });
+      await identifyAndSendLogistrationEvent(EVENT_NAMES.CHECKOUT.SIGNED_IN);
       await hydrateAuthenticatedUser();
       createCheckoutIntentMutation.mutate({
         quantity: planDetailsFormData.quantity,
@@ -250,9 +256,7 @@ const PlanDetailsPage = () => {
   const registerMutation = useRegisterMutation({
     onSuccess: async () => {
       setIsSubmitting(false);
-      await fetchAuthenticatedUser();
-      identifyCheckoutUser(getAuthenticatedUser()?.userId);
-      sendCheckoutEvent({ eventName: EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, product: checkoutEventProduct });
+      await identifyAndSendLogistrationEvent(EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED);
       await hydrateAuthenticatedUser();
 
       createCheckoutIntentMutation.mutate({

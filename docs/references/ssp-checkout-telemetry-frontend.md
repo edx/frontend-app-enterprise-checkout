@@ -89,11 +89,14 @@ All tracking events include:
 - **Identify after in-app logistration.** frontend-platform identifies the user only at app init.
   After login/register in the plan details step, `identifyCheckoutUser` (`src/utils/checkoutEvents.ts`)
   identifies them before `signed_in`/`account_created`, so later events carry the `userId`. It is not
-  gated on the V2 flag, because legacy events need the `userId` too. `CheckoutSegmentAnalyticsService`
-  clears a leftover user id (`analytics.reset()`) at `ready`, and also at the 2s timeout if
-  analytics.js has loaded but `ready` is still pending, so logged-out events never carry the previous
-  user's id. It skips the reset once a user has been identified in-app, because a late check would
-  otherwise reset the user who just signed in.
+  gated on the V2 flag, because legacy events need the `userId` too.
+- **Calls are held while analytics.js loads.** For anonymous users, `CheckoutSegmentAnalyticsService`
+  holds `sendTrackEvent`, `sendPageEvent` and `identifyAuthenticatedUser` calls until the SDK has
+  loaded (at `ready`, or at the 2s timeout if it has loaded by then). Once it has, it clears any user
+  id left over from a previous session (`analytics.reset()`) and replays the calls in order. Don't
+  let them go to the Segment snippet's queue instead: Analytics Next replays that queue grouped by
+  method (every `track` before any `identify`), and before a reset could run, so `signed_in` /
+  `account_created` and early events would carry the wrong user. Checkout never waits on this.
 - **Registration on stage from localhost.** `RECAPTCHA_SITE_KEY_WEB` is empty locally, so
   registration sends no reCAPTCHA token. To reach the later steps, log in with an existing stage
   account instead.
