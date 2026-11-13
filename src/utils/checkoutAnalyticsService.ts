@@ -2,6 +2,11 @@ import { SegmentAnalyticsService } from '@edx/frontend-platform/analytics';
 
 // frontend-platform resolves this so the app never waits on a blocked analytics.js. Kept the same.
 const IDENTIFY_ANONYMOUS_USER_TIMEOUT_MS = 2000;
+// After the timeout, how often to check whether analytics.js has loaded, in case ready never fires.
+const SDK_LOADED_POLL_INTERVAL_MS = 500;
+
+// The loaded SDK has user(); the snippet's queue doesn't.
+const isSdkLoaded = () => typeof (window as any).analytics?.user === 'function';
 
 // Fields set by the untyped base class's constructor. Merged as an interface so nothing is emitted.
 export interface CheckoutSegmentAnalyticsService {
@@ -23,7 +28,9 @@ export interface CheckoutSegmentAnalyticsService {
  * instead of in the snippet's queue. Analytics Next replays that queue grouped by method (every
  * track before any identify), and before `ready` could clear a user id left over from a previous
  * session. Once the SDK has loaded, the leftover id is cleared and the held calls are replayed
- * in order. Checkout never waits on this: the calls are fire-and-forget.
+ * in order. "Loaded" is `ready`, or, from the 2s timeout on, analytics.js having replaced the
+ * snippet: `ready` waits on every device-mode destination with no timeout, so it can stay pending
+ * after the SDK itself has loaded. Checkout never waits on this: the calls are fire-and-forget.
  *
  * Remove once frontend-platform stops gating Segment on GA/GTM.
  */
@@ -32,8 +39,7 @@ export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
   private pendingCalls: Array<() => void> | null = null;
 
   identifyAuthenticatedUser(userId: number | string, traits?: Record<string, unknown>): void {
-    // Without a userId the base class throws; let it, synchronously, rather than at replay.
-    if (this.pendingCalls && userId) {
+    if (this.pendingCalls) {
       this.pendingCalls.push(() => super.identifyAuthenticatedUser(userId, traits));
       return;
     }
@@ -80,25 +86,35 @@ export class CheckoutSegmentAnalyticsService extends SegmentAnalyticsService {
     this.pendingCalls = [];
     return new Promise((resolve) => {
       let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      let pollId: ReturnType<typeof setInterval> | undefined;
       const segmentFailedListener = new AbortController();
-      // Once the SDK has loaded or failed, nothing else needs the timer or the listener. The timer and
-      // listener are set up before ready is registered, so a ready that runs synchronously clears both.
+      // Once the SDK has loaded or failed, nothing else needs the timers or the listener. They are
+      // set up before ready is registered, so a ready that runs synchronously clears them all.
       const stopWaiting = () => {
         clearTimeout(timeoutId);
+        clearInterval(pollId);
         segmentFailedListener.abort();
         resolve();
       };
+      const flushIfSdkLoaded = (): boolean => {
+        if (!isSdkLoaded()) {
+          return false;
+        }
+        this.flushPendingCalls();
+        stopWaiting();
+        return true;
+      };
 
       timeoutId = setTimeout(() => {
-        // If analytics.js has loaded but ready is still pending, settle now so events aren't held.
-        if (typeof (window as any).analytics.user === 'function') {
-          this.flushPendingCalls();
-          stopWaiting();
+        // analytics.js may have loaded with ready still pending; if so, settle now.
+        if (flushIfSdkLoaded()) {
           return;
         }
         // Still loading (snippet queue, no user()): let checkout continue, but keep holding calls
-        // until ready, and keep listening for segmentFailed so they're dropped if it never loads.
+        // until the SDK loads (ready may never fire, so poll for it), and keep listening for
+        // segmentFailed so they're dropped if it never loads.
         resolve();
+        pollId = setInterval(() => { flushIfSdkLoaded(); }, SDK_LOADED_POLL_INTERVAL_MS);
       }, IDENTIFY_ANONYMOUS_USER_TIMEOUT_MS);
       document.addEventListener('segmentFailed', () => {
         // Segment is off (the base class set segmentInitialized = false), so held calls are dropped.

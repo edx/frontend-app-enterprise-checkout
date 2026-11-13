@@ -92,7 +92,10 @@ All tracking events include:
   gated on the V2 flag, because legacy events need the `userId` too.
 - **Calls are held while analytics.js loads.** For anonymous users, `CheckoutSegmentAnalyticsService`
   holds `sendTrackEvent`, `sendPageEvent` and `identifyAuthenticatedUser` calls until the SDK has
-  loaded (at `ready`, or at the 2s timeout if it has loaded by then). Once it has, it clears any user
+  loaded: at `ready`, or, from the 2s timeout on, as soon as analytics.js has replaced the snippet
+  (checked every 500ms). Don't rely on `ready` alone: it waits on every device-mode destination with
+  no timeout, so one that loads but never signals ready keeps it pending forever, and held calls
+  would never be sent. Once the SDK has loaded, it clears any user
   id left over from a previous session (`analytics.reset()`) and replays the calls in order. Don't
   let them go to the Segment snippet's queue instead: Analytics Next replays that queue grouped by
   method (every `track` before any `identify`), and before a reset could run, so `signed_in` /

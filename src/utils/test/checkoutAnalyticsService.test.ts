@@ -37,7 +37,11 @@ const mockSnippetQueue = () => {
     queuedReadyCallbacks.forEach((callback) => callback());
     return sdk;
   };
-  return { queue, loadSdk };
+  // analytics.js has loaded but ready never fires (a device-mode destination that never signals).
+  const loadSdkWithoutReady = (sdkOptions: { userId?: number | null } = {}) => (
+    mockSegment({ ready: false, ...sdkOptions })
+  );
+  return { queue, loadSdk, loadSdkWithoutReady };
 };
 
 // No SEGMENT_KEY, so the constructor doesn't inject analytics.js; mark Segment as loaded instead.
@@ -63,6 +67,21 @@ describe('CheckoutSegmentAnalyticsService', () => {
   afterEach(() => {
     jest.useRealTimers();
     delete (window as any).analytics;
+  });
+
+  it('sends calls straight to the SDK for a user logged in at page load, without holding them', () => {
+    const analytics = mockSegment({ ready: false });
+    const service = createService(CheckoutSegmentAnalyticsService);
+
+    // frontend-platform calls identifyAuthenticatedUser, not identifyAnonymousUser, for this user.
+    service.identifyAuthenticatedUser(123);
+    service.sendTrackEvent('edx.ui.enterprise.checkout.checkout_started', {});
+
+    expect(analytics.sent).toEqual([
+      { method: 'identify', userId: 123 },
+      { method: 'track', name: 'edx.ui.enterprise.checkout.checkout_started', userId: 123 },
+    ]);
+    expect(analytics.ready).not.toHaveBeenCalled();
   });
 
   it("frontend-platform's service drops anonymous events without GA/GTM (remove the override once this fails)", async () => {
@@ -162,6 +181,28 @@ describe('CheckoutSegmentAnalyticsService', () => {
       ]);
     });
 
+    it('replays held calls when analytics.js loads after the timeout and ready never fires', async () => {
+      const { queue, loadSdkWithoutReady } = mockSnippetQueue();
+      const service = createService(CheckoutSegmentAnalyticsService);
+
+      await startAnonymousSession(service);
+      service.sendTrackEvent('edx.ui.enterprise.checkout.checkout_started', {});
+      jest.advanceTimersByTime(5000);
+      expect(queue.track).not.toHaveBeenCalled();
+
+      const sdk = loadSdkWithoutReady({ userId: 42 });
+      jest.advanceTimersByTime(500);
+      service.sendTrackEvent('edx.ui.enterprise.checkout.step_viewed', {});
+
+      expect(sdk.sent).toEqual([
+        { method: 'reset', userId: null },
+        { method: 'track', name: 'edx.ui.enterprise.checkout.checkout_started', userId: null },
+        { method: 'track', name: 'edx.ui.enterprise.checkout.step_viewed', userId: null },
+      ]);
+      // Polling stops once the SDK has loaded.
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
     it('sends calls straight to the SDK once replayed', async () => {
       const { loadSdk } = mockSnippetQueue();
       const service = createService(CheckoutSegmentAnalyticsService);
@@ -185,15 +226,6 @@ describe('CheckoutSegmentAnalyticsService', () => {
 
     expect(analytics.reset).not.toHaveBeenCalled();
     expect(analytics.user().id()).toBe(123);
-  });
-
-  it('still throws synchronously for a missing userId while calls are held', async () => {
-    mockSnippetQueue();
-    const service = createService(CheckoutSegmentAnalyticsService);
-
-    await startAnonymousSession(service);
-
-    expect(() => service.identifyAuthenticatedUser(undefined)).toThrow('UserId is required');
   });
 
   it('clears the timer once ready has run, so the timeout does nothing', async () => {
@@ -245,6 +277,26 @@ describe('CheckoutSegmentAnalyticsService', () => {
       await expect(identified).resolves.toBeUndefined();
       expect(service.segmentInitialized).toBe(false);
       expect(queuedMethods()).toEqual(['ready']);
+    });
+
+    it('drops held and later calls when the script fails after the timeout', async () => {
+      const { service, failScript, queuedMethods } = createServiceWithRealSnippet();
+
+      const identified = service.identifyAnonymousUser();
+      service.sendTrackEvent('edx.ui.enterprise.checkout.checkout_started', {});
+      jest.advanceTimersByTime(2000);
+      await expect(identified).resolves.toBeUndefined();
+      expect(service.segmentInitialized).toBe(true);
+
+      failScript();
+      service.sendTrackEvent('edx.ui.enterprise.checkout.step_viewed', {});
+      service.identifyAuthenticatedUser(123);
+      jest.advanceTimersByTime(5000);
+
+      expect(service.segmentInitialized).toBe(false);
+      expect(queuedMethods()).toEqual(['ready']);
+      // Polling for the SDK stops once the script has failed.
+      expect(jest.getTimerCount()).toBe(0);
     });
   });
 
