@@ -1,4 +1,4 @@
-import { sendTrackEvent } from '@edx/frontend-platform/analytics';
+import { identifyAuthenticatedUser, sendTrackEvent } from '@edx/frontend-platform/analytics';
 import { getConfig } from '@edx/frontend-platform/config';
 import { logError } from '@edx/frontend-platform/logging';
 
@@ -131,6 +131,23 @@ export const sendCheckoutEvent = ({
     }));
   } catch (error) {
     logError(`Failed to send checkout event ${eventName}`, error);
+  }
+};
+
+/**
+ * Identifies a user who just signed in or registered in-app. frontend-platform only identifies at
+ * app init, so without this every event after logistration stays anonymous until a full page
+ * reload. Not gated on the V2 flag: legacy events need the userId too. No-op without a user; never
+ * throws.
+ */
+export const identifyCheckoutUser = (userId: number | null | undefined): void => {
+  if (!userId) {
+    return;
+  }
+  try {
+    identifyAuthenticatedUser(userId);
+  } catch (error) {
+    logError('Failed to identify checkout user', error);
   }
 };
 

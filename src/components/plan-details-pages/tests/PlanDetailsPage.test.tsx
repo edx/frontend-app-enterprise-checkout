@@ -93,6 +93,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 }));
 
 jest.mock('@edx/frontend-platform/analytics', () => ({
+  identifyAuthenticatedUser: jest.fn(),
   sendTrackEvent: jest.fn(),
   sendPageEvent: jest.fn(),
 }));
@@ -141,6 +142,15 @@ const expectLogistrationEvent = async (eventName: string, personalValues: string
   expect(payload).toEqual(expect.objectContaining({ category: 'subscription', name: 'teams', brand: 'enterprise' }));
   expect(payload).not.toHaveProperty('step_name');
   personalValues.forEach((value) => expect(JSON.stringify(payload)).not.toContain(value));
+};
+
+/** The user is identified in Segment before the logistration event, so it carries their userId. */
+const expectIdentifiedBefore = async (eventName: string) => {
+  const { identifyAuthenticatedUser, sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+  expect(identifyAuthenticatedUser).toHaveBeenCalledWith(123);
+  const eventCallIndex = (sendTrackEvent as jest.Mock).mock.calls.findIndex(([name]) => name === eventName);
+  expect((identifyAuthenticatedUser as jest.Mock).mock.invocationCallOrder[0])
+    .toBeLessThan((sendTrackEvent as jest.Mock).mock.invocationCallOrder[eventCallIndex]);
 };
 
 // Mock BFF context response data for testing
@@ -1318,11 +1328,39 @@ describe('PlanDetailsPage – loginMutation success/error paths', () => {
     });
 
     await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.SIGNED_IN, ['user@example.com']);
+    await expectIdentifiedBefore(EVENT_NAMES.CHECKOUT.SIGNED_IN);
     const { sendTrackEvent } = await import('@edx/frontend-platform/analytics');
     expect(sendTrackEvent).toHaveBeenCalledWith(
       EVENT_NAMES.CHECKOUT.STEP_COMPLETED_PLAN_DETAILS,
       expect.objectContaining({ step_name: 'Plan Details', step_number: 1, category: 'subscription' }),
     );
+  });
+
+  it('still sends signed_in when fetching the signed-in user fails', async () => {
+    enableCheckoutEventsV2();
+    const { fetchAuthenticatedUser, hydrateAuthenticatedUser } = await import('@edx/frontend-platform/auth');
+    const useLoginMutationMock = (await import('@/components/app/data/hooks/useLoginMutation')).default as jest.Mock;
+    // Settles to the error onSuccess rejected with (caught here so it isn't an unhandled rejection).
+    let onSuccessError: Promise<Error | null> | undefined;
+    useLoginMutationMock.mockImplementation(({ onSuccess }: any) => ({
+      mutate: jest.fn(() => { onSuccessError = onSuccess?.().then(() => null, (error: Error) => error); }),
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+    }));
+
+    renderStepperRoute(CheckoutPageRoute.PlanDetailsLogin, { config: {}, authenticatedUser: null });
+    const submitButton = await screen.findByTestId('stepper-submit-button');
+    (fetchAuthenticatedUser as jest.Mock).mockRejectedValueOnce(new Error('network error'));
+    await userEvent.click(submitButton);
+
+    // The fetch error still propagates and stops the rest of onSuccess, as before.
+    await waitFor(() => expect(onSuccessError).toBeDefined());
+    expect((await onSuccessError)?.message).toBe('network error');
+    const { identifyAuthenticatedUser, sendTrackEvent } = await import('@edx/frontend-platform/analytics');
+    expect(sendTrackEvent).toHaveBeenCalledWith(EVENT_NAMES.CHECKOUT.SIGNED_IN, expect.anything());
+    expect(identifyAuthenticatedUser).not.toHaveBeenCalled();
+    expect(hydrateAuthenticatedUser).not.toHaveBeenCalled();
   });
 
   it('sets password field error on login failure', async () => {
@@ -1552,6 +1590,7 @@ describe('PlanDetailsPage – registerMutation tracking event', () => {
     });
 
     await expectLogistrationEvent(EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED, ['newuser@example.com', 'New User', 'newuser']);
+    await expectIdentifiedBefore(EVENT_NAMES.CHECKOUT.ACCOUNT_CREATED);
   });
 
   it('catches and logs tracking event error without breaking navigation', async () => {

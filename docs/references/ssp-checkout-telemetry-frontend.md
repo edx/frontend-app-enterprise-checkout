@@ -74,6 +74,38 @@ All tracking events include:
 
 ---
 
+## Gotchas
+
+- **Anonymous users need `CheckoutSegmentAnalyticsService`.** For anonymous users, frontend-platform's
+  `SegmentAnalyticsService.identifyAnonymousUser` turns Segment off if `window.ga.create` or
+  `window.google_tag_manager` is missing 2s after start-up. Checkout loads neither, so every event
+  (legacy and V2) was silently dropped until the user was logged in and reloaded the page.
+  `src/utils/checkoutAnalyticsService.ts` overrides that method and is passed to `initialize()` in
+  `src/index.tsx`. Don't remove it, and don't stub `window.ga`/`google_tag_manager` instead, until
+  frontend-platform drops the check (a test in `checkoutAnalyticsService.test.ts` fails when it does).
+- **Feature flags are set at build time.** `FEATURE_SSP_CHECKOUT_SEGMENT_EVENTS_V2` comes from
+  edx-internal `frontends/frontend-app-enterprise-checkout/{stage,prod}_config.yml` and is inlined
+  by webpack. After changing it there, rebuild and redeploy the MFE, or the old value stays live.
+- **Identify after in-app logistration.** frontend-platform identifies the user only at app init.
+  After login/register in the plan details step, `identifyCheckoutUser` (`src/utils/checkoutEvents.ts`)
+  identifies them before `signed_in`/`account_created`, so later events carry the `userId`. It is not
+  gated on the V2 flag, because legacy events need the `userId` too.
+- **Calls are held while analytics.js loads.** For anonymous users, `CheckoutSegmentAnalyticsService`
+  holds `sendTrackEvent`, `sendPageEvent` and `identifyAuthenticatedUser` calls until the SDK has
+  loaded: at `ready`, or, from the 2s timeout on, as soon as analytics.js has replaced the snippet
+  (checked every 500ms). Don't rely on `ready` alone: it waits on every device-mode destination with
+  no timeout, so one that loads but never signals ready keeps it pending forever, and held calls
+  would never be sent. Once the SDK has loaded, it clears any user
+  id left over from a previous session (`analytics.reset()`) and replays the calls in order. Don't
+  let them go to the Segment snippet's queue instead: Analytics Next replays that queue grouped by
+  method (every `track` before any `identify`), and before a reset could run, so `signed_in` /
+  `account_created` and early events would carry the wrong user. Checkout never waits on this.
+- **Registration on stage from localhost.** `RECAPTCHA_SITE_KEY_WEB` is empty locally, so
+  registration sends no reCAPTCHA token. To reach the later steps, log in with an existing stage
+  account instead.
+
+---
+
 ## Acceptance Criteria
 
 ✅ All criteria met - See PRD spec for details

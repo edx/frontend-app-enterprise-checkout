@@ -78,4 +78,14 @@ describe('index bootstrap config', () => {
 
     process.env = originalEnv;
   });
+
+  it('initializes with the checkout analytics service so anonymous users are tracked', async () => {
+    await import('./index');
+    const platform = await import('@edx/frontend-platform');
+    const { CheckoutSegmentAnalyticsService } = await import('@/utils/checkoutAnalyticsService');
+
+    expect(platform.initialize).toHaveBeenCalledWith(expect.objectContaining({
+      analyticsService: CheckoutSegmentAnalyticsService,
+    }));
+  });
 });
